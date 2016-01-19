@@ -12,45 +12,58 @@ libraryScripts.each {
     apply from: it
 }
 
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.model.library'
 //apply plugin: 'com.github.dcendents.android-maven'
 
 group = groupId
 
-com.android.ddmlib.DdmPreferences.setTimeOut(60000)
+// com.android.ddmlib.DdmPreferences.setTimeOut(60000)
 
-android {
-    // The following are set in the common.gradle file
-    compileSdkVersion(compileVersion)
-    buildToolsVersion(buildTools)
+model {
 
-    defaultConfig {
-        minSdkVersion(minVersion)
-        targetSdkVersion(targetVersion)
-        versionCode(releaseVersionCode)
-        versionName(versionCodeName)
+    android {
+        // The following are set in the common.gradle file
+        compileSdkVersion(compileVersion)
+        buildToolsVersion(buildTools)
+    
+        defaultConfig {
+            minSdkVersion.apiLevel minVersion 
+            targetSdkVersion.apiLevel targetVersion 
+            versionCode releaseVersionCode 
+            versionName versionCodeName 
+
+            buildConfigFields {
+                create() {
+                    type "int"
+                    name "VALUE"
+                    value "1"
+                }
+            }
+        }
+
+
     }
-
-    buildTypes {
-        release {
-            minifyEnabled(minify)
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+    
+    android.buildTypes {
+            release {
+                minifyEnabled(minify)
+                // proguardFiles.add(file(getDefaultProguardFile('proguard-android.txt'))).add(file('proguard-rules.txt'))
+            }
+            // snapshot {
+                // Build type for snapshots
+            // }
+            debug {
+                testCoverageEnabled(testCoverage) // Allows AndroidTest JaCoCo reports to be generated
+            }
         }
-        snapshot {
-            // Build type for snapshots
-        }
-        debug {
-            testCoverageEnabled(testCoverage) // Allows AndroidTest JaCoCo reports to be generated
-        }
-    }
-
-    packagingOptions { // Pick first occurrence of any files that cause conflicts, as defined in common.gradle
+    
+    android.packagingOptions { // Pick first occurrence of any files that cause conflicts, as defined in common.gradle
         packageList.each {
             pickFirst it
         }
     }
-
-    compileOptions {
+    
+    android.compileOptions {
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
     }
