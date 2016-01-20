@@ -20,7 +20,6 @@ group = groupId
 // com.android.ddmlib.DdmPreferences.setTimeOut(60000)
 
 model {
-
     android {
         // The following are set in the common.gradle file
         compileSdkVersion(compileVersion)
@@ -40,8 +39,6 @@ model {
                 }
             }
         }
-
-
     }
     
     android.buildTypes {
@@ -62,7 +59,7 @@ model {
             pickFirst it
         }
     }
-    
+
     android.compileOptions {
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
