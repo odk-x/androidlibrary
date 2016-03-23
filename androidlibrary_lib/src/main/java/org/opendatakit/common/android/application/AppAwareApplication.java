@@ -27,7 +27,7 @@ import org.opendatakit.common.android.utilities.WebLogger;
 
 /**
  * Move some of the functionality of CommonApplication up into androidlibrary
- * so that it can be shared with Core Services. License reader task is moved
+ * so that it can be shared with Services. License reader task is moved
  * out of global state and into the AboutMenuFragment static state.
  *
  * @author mitchellsundt@gmail.com

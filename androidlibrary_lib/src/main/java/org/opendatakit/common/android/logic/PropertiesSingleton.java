@@ -88,7 +88,7 @@ public class PropertiesSingleton {
         }
         if (!faked) {
           e.printStackTrace();
-          throw new IllegalStateException("ODK Core Services must be installed!");
+          throw new IllegalStateException("ODK Services must be installed!");
         }
       }
     }
@@ -235,22 +235,22 @@ public class PropertiesSingleton {
     }
   }
 
-  private static String coreStartPropertyName() {
-    return "/core_startTime";
+  private static String servicesStartPropertyName() {
+    return "/services_startTime";
   }
 
   /**
-   * Indicate that the core services APK has started
+   * Indicate that the services APK has started
    *
    * @param context
    */
-  public static void setStartCoreServices(Context context) {
+  public static void setStartServices(Context context) {
     // this needs to be stored in a protected area
     SharedPreferences sharedPreferences = getSharedPreferences(context);
     if ( sharedPreferences != null ) {
       sharedPreferences
         .edit()
-        .putString(coreStartPropertyName(),
+        .putString(servicesStartPropertyName(),
             TableConstants.nanoSecondsFromMillis(System.currentTimeMillis())).commit();
     } else {
       throw new IllegalStateException("Unable to write SharedPreferences");
@@ -281,12 +281,12 @@ public class PropertiesSingleton {
       return booleanSetting;
     }
 
-    String coreValue = sharedPreferences.getString(coreStartPropertyName(), null);
-    if (coreValue == null || coreValue.length() == 0) {
+    String servicesValue = sharedPreferences.getString(servicesStartPropertyName(), null);
+    if (servicesValue == null || servicesValue.length() == 0) {
       return booleanSetting;
     }
 
-    return value.compareTo(coreValue) <= 0;
+    return value.compareTo(servicesValue) <= 0;
   }
 
   /**
