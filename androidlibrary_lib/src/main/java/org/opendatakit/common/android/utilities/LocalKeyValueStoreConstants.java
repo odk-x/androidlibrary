@@ -72,8 +72,6 @@ public final class LocalKeyValueStoreConstants {
     public static final String COLOR_TYPE_TABLE = "Table Color Rules";
     /** The constant if we want the color rules based off of the status column. */
     public static final String COLOR_TYPE_STATUS = "Status Column Color Rules";
-    /** The constant if we want the color rules based off of a column. */
-    public static final String COLOR_TYPE_COLUMN = "Selectable Column Color Rules";
 
     // anything for detail view?
   }
