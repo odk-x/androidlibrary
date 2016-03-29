@@ -123,6 +123,9 @@ public class ODKFileUtils {
   // under data/webDb
   private static final String DATABASE_NAME = "sqlite.db";
 
+  // under data/webDb
+  private static final String DATABASE_LOCK_FILE_NAME = "db.lock";
+
   /**
    * Miscellaneous well-known file names
    */
@@ -200,6 +203,10 @@ public class ODKFileUtils {
 
   public static String getNameOfSQLiteDatabase() {
     return DATABASE_NAME;
+  }
+
+  public static String getNameOfSQLiteDatabaseLockFile() {
+    return DATABASE_LOCK_FILE_NAME;
   }
   
   public static final ObjectMapper mapper = new ObjectMapper();
