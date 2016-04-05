@@ -43,7 +43,7 @@ android {
         snapshot {
         }
 
-        uitests {
+        uitest {
         }
     }
 
