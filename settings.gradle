@@ -1,4 +1,4 @@
-gradle.ext.gradleConfigVersion = 33
+gradle.ext.gradleConfigVersion = 35
 
 if ( !gradle.ext.has('workspacePath') ) {
 	def env = System.getProperties();
@@ -31,3 +31,9 @@ settingsScripts.each {
 }
 
 include(libraryProjectChild)
+
+if(gradle.ext.odkPublishConfig) {
+    project(libraryProjectChild).name = gradle.ext.odkLibraryArchiveName
+}
+
+

@@ -13,16 +13,18 @@ libraryScripts.each {
 }
 
 apply plugin: 'com.android.library'
-//apply plugin: 'com.github.dcendents.android-maven'
 
 group = groupId
 
 com.android.ddmlib.DdmPreferences.setTimeOut(60000)
 
 android {
+    publishNonDefault(true)
+
     // The following are set in the common.gradle file
     compileSdkVersion(compileVersion)
     buildToolsVersion(buildTools)
+    defaultPublishConfig(gradle.ext.odkDefaultPublishConfig)
 
     defaultConfig {
         minSdkVersion(minVersion)
@@ -31,12 +33,27 @@ android {
         versionName(versionCodeName)
     }
 
+    productFlavors {
+        demo {
+        }
+
+        master {
+        }
+
+        snapshot {
+        }
+
+        uitests {
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled(minify)
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
         debug {
+            debuggable(true)
             testCoverageEnabled(testCoverage) // Allows AndroidTest JaCoCo reports to be generated
         }
     }
@@ -51,7 +68,19 @@ android {
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
     }
+
+    variantFilter { variant ->
+        def names = variant.flavors*.name
+        if(gradle.ext.odkPublishConfig) {
+            if (names.contains(gradle.ext.odkPublishConfigName)) {
+                variant.setIgnore(false)
+            } else {
+                variant.setIgnore(true)
+            }
+        }
+    }
 }
+
 
 configurations.all {
     resolutionStrategy {
