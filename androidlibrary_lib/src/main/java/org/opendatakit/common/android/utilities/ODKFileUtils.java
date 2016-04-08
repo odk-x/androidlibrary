@@ -275,7 +275,7 @@ public class ODKFileUtils {
   }
 
   public static void assertDirectoryStructure(String appName) {
-    if ( !appName.equals("tables") ) {
+    if ( !appName.equals(getOdkDefaultAppName()) ) {
       int i=0;
       ++i;
     }
