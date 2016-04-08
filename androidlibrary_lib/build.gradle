@@ -31,7 +31,7 @@ android {
     }
 
     // set by command line arguments
-    publishNonDefault(gradle.ext.odkPublishConfig)
+    publishNonDefault(gradle.ext.odkPublishConfig.toBoolean())
     defaultPublishConfig(gradle.ext.odkDefaultPublishConfig)
 
     productFlavors {
