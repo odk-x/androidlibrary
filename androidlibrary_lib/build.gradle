@@ -19,19 +19,20 @@ group = groupId
 com.android.ddmlib.DdmPreferences.setTimeOut(60000)
 
 android {
-    publishNonDefault(true)
 
     // The following are set in the common.gradle file
     compileSdkVersion(compileVersion)
     buildToolsVersion(buildTools)
-    defaultPublishConfig(gradle.ext.odkDefaultPublishConfig)
-
     defaultConfig {
         minSdkVersion(minVersion)
         targetSdkVersion(targetVersion)
         versionCode(releaseVersionCode)
         versionName(versionCodeName)
     }
+
+    // set by command line arguments
+    publishNonDefault(gradle.ext.odkPublishConfig)
+    defaultPublishConfig(gradle.ext.odkDefaultPublishConfig)
 
     productFlavors {
         demo {
