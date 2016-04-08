@@ -235,8 +235,8 @@ public class PropertiesSingleton {
     }
   }
 
-  private static String servicesStartPropertyName() {
-    return "/services_startTime";
+  private static String toolStartPropertyName(String toolName) {
+    return "/" + toolName + "_last_application_startTime";
   }
 
   /**
@@ -244,21 +244,21 @@ public class PropertiesSingleton {
    *
    * @param context
    */
-  public static void setStartServices(Context context) {
+  public static void setToolStartedProperty(Context context, String toolName) {
     // this needs to be stored in a protected area
     SharedPreferences sharedPreferences = getSharedPreferences(context);
     if ( sharedPreferences != null ) {
       sharedPreferences
         .edit()
-        .putString(servicesStartPropertyName(),
+        .putString(toolStartPropertyName(toolName),
             TableConstants.nanoSecondsFromMillis(System.currentTimeMillis())).commit();
     } else {
       throw new IllegalStateException("Unable to write SharedPreferences");
     }
   }
 
-  private String toolInitializationPropertyName(String toolName) {
-    return mAppName + "/" + toolName + "_shouldInitialize";
+  private static String toolInitializationPropertyName(String toolName) {
+    return "/" + toolName + "_last_initialization_startTime";
   }
 
   /**
@@ -281,12 +281,13 @@ public class PropertiesSingleton {
       return booleanSetting;
     }
 
-    String servicesValue = sharedPreferences.getString(servicesStartPropertyName(), null);
-    if (servicesValue == null || servicesValue.length() == 0) {
+    String toolStartValue = sharedPreferences.getString(toolStartPropertyName(toolName),
+        null);
+    if (toolStartValue == null || toolStartValue.length() == 0) {
       return booleanSetting;
     }
 
-    return value.compareTo(servicesValue) <= 0;
+    return value.compareTo(toolStartValue) <= 0;
   }
 
   /**
