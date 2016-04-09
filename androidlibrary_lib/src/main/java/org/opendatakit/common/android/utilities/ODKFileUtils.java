@@ -58,6 +58,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ODKFileUtils {
   private final static String t = "ODKFileUtils";
 
+  // Default app name when unspecified
+  private static final String ODK_DEFAULT_APP_NAME = "default";
+
   // base path
   private static final String ODK_FOLDER_NAME = "opendatakit";
 
@@ -251,6 +254,10 @@ public class ODKFileUtils {
     return path;
   }
 
+  public static String getOdkDefaultAppName() {
+    return ODK_DEFAULT_APP_NAME;
+  }
+
   public static File[] getAppFolders() {
     File odk = new File(getOdkFolder());
 
@@ -268,7 +275,7 @@ public class ODKFileUtils {
   }
 
   public static void assertDirectoryStructure(String appName) {
-    if ( !appName.equals("tables") ) {
+    if ( !appName.equals(getOdkDefaultAppName()) ) {
       int i=0;
       ++i;
     }
