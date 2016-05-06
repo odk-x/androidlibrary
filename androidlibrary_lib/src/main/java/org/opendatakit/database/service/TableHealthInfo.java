@@ -18,7 +18,9 @@ package org.opendatakit.database.service;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class TableHealthInfo implements Parcelable {
+import java.io.Serializable;
+
+public class TableHealthInfo implements Parcelable, Serializable {
 
   private String tableId;
   private TableHealthStatus status;

@@ -17,11 +17,14 @@ package org.opendatakit.database.service;
 
 import java.util.List;
 
+import android.os.ParcelUuid;
+
 import org.opendatakit.common.android.data.OrderedColumns;
 import org.opendatakit.common.android.data.ColumnList;
 import org.opendatakit.common.android.data.TableDefinitionEntry;
 import org.opendatakit.common.android.data.UserTable;
 import org.opendatakit.database.service.OdkDbHandle;
+import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.TableHealthInfo;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 
@@ -123,7 +126,7 @@ interface OdkDbInterface {
    * @param columns simple transport wrapper for List<Columns>
    * @return the OrderedColumns of the user columns in the table.
    */
-  OrderedColumns createOrOpenDBTableWithColumns(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk createOrOpenDBTableWithColumns(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in ColumnList columns);
 
 	/**
@@ -144,7 +147,7 @@ interface OdkDbInterface {
    *          tableId before inserting or replacing with the new ones.
    * @return the OrderedColumns of the user columns in the table.
 	 */
-  OrderedColumns createOrOpenDBTableWithColumnsAndProperties(in String appName,
+  OdkDbChunk createOrOpenDBTableWithColumnsAndProperties(in String appName,
       in OdkDbHandle dbHandleName,
       in String tableId, in ColumnList columns,
       in List<KeyValueStoreEntry> metaData, in boolean clear);
@@ -180,7 +183,7 @@ interface OdkDbInterface {
    * 
    * @return
    */
-  String[] getAdminColumns();
+  OdkDbChunk getAdminColumns();
 		
   /**
    * Return all the columns in the given table, including any metadata columns.
@@ -193,7 +196,7 @@ interface OdkDbInterface {
    * @param tableId
    * @return
    */
-  String[] getAllColumnNames(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk getAllColumnNames(in String appName, in OdkDbHandle dbHandleName,
       in String tableId);
 
   /**
@@ -203,7 +206,7 @@ interface OdkDbInterface {
    * @param dbHandleName
    * @return List<String> of tableIds
    */
-  List<String> getAllTableIds(in String appName, in OdkDbHandle dbHandleName);
+  OdkDbChunk getAllTableIds(in String appName, in OdkDbHandle dbHandleName);
   
   /**
    * @param appName
@@ -216,7 +219,7 @@ interface OdkDbInterface {
    * @return list of KeyValueStoreEntry values matching the filter criteria
    * @throws RemoteException
    */
-  List<KeyValueStoreEntry> getDBTableMetadata(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk getDBTableMetadata(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in String partition, in String aspect, in String key);
 
   /**
@@ -225,7 +228,7 @@ interface OdkDbInterface {
    * 
    * @return
    */
-  String[] getExportColumns();
+  OdkDbChunk getExportColumns();
 
   /**
    * Get the table definition entry for a tableId. This specifies the schema
@@ -237,7 +240,7 @@ interface OdkDbInterface {
    * @param tableId
    * @return
    */
-  TableDefinitionEntry getTableDefinitionEntry(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk getTableDefinitionEntry(in String appName, in OdkDbHandle dbHandleName,
       in String tableId);
 
   /**
@@ -246,9 +249,9 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    *
-   * @return the list of TableHealthInfo records for this appName
+   * @return the first chunk of the list of TableHealthInfo records for this appName
    */ 
-  List<TableHealthInfo> getTableHealthStatuses(in String appName, in OdkDbHandle dbHandleName);
+  OdkDbChunk getTableHealthStatuses(in String appName, in OdkDbHandle dbHandleName);
   
     /**
    * Retrieve the list of user-defined columns for a tableId using the metadata
@@ -260,7 +263,7 @@ interface OdkDbInterface {
    * @param tableId
    * @return
    */
-  OrderedColumns getUserDefinedColumns(in String appName, in OdkDbHandle dbHandleName, 
+  OdkDbChunk getUserDefinedColumns(in String appName, in OdkDbHandle dbHandleName,
       in String tableId);
       
   /**
@@ -305,10 +308,10 @@ interface OdkDbInterface {
    *          either "ASC" or "DESC"
    * @return
    */
-  UserTable rawSqlQuery(in String appName, in OdkDbHandle dbHandleName, 
-      in String tableId,
-      in OrderedColumns columnDefns, in String whereClause, in String[] selectionArgs,
-      in String[] groupBy, in String having, in String orderByElementKey, in String orderByDirection);
+  OdkDbChunk rawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
+        in String tableId,
+        in OrderedColumns columnDefns, in String whereClause, in String[] selectionArgs,
+        in String[] groupBy, in String having, in String orderByElementKey, in String orderByDirection);
 
   /**
    * Insert or update a single table-level metadata KVS entry.
@@ -419,7 +422,7 @@ interface OdkDbInterface {
    * @param rowId
    * @return one or more rows (depending upon sync conflict and edit checkpoint states)
    */
-  UserTable getRowsWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk getRowsWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns orderedDefns, in String rowId);
 
   /**
@@ -434,7 +437,7 @@ interface OdkDbInterface {
    * @param rowId
    * @return
    */
-  UserTable getMostRecentRowWithId(in String appName,
+  OdkDbChunk getMostRecentRowWithId(in String appName,
       in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns orderedDefns, in String rowId);
 
@@ -459,7 +462,7 @@ interface OdkDbInterface {
    *          expected to be one of ConflictType.LOCAL_DELETED_OLD_VALUES (0) or
    *          ConflictType.LOCAL_UPDATED_UPDATED_VALUES (1)
    */
-  UserTable placeRowIntoServerConflictWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk placeRowIntoServerConflictWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues,
       in String rowId, in int localRowConflictType);
 
@@ -477,7 +480,7 @@ interface OdkDbInterface {
    * @param rowId
    * @return single-row table with the content of the inserted checkpoint
    */
-  UserTable insertCheckpointRowWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk insertCheckpointRowWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
 
   /**
@@ -496,7 +499,7 @@ interface OdkDbInterface {
    * @param rowId
    * @return single-row table with the content of the inserted row
    */
-  UserTable insertRowWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk insertRowWithId(in String appName, in OdkDbHandle dbHandleName,
   	  in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
 
 
@@ -512,7 +515,7 @@ interface OdkDbInterface {
    * @param orderedColumns
    * @param rowId
    */
-  UserTable deleteAllCheckpointRowsWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk deleteAllCheckpointRowsWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns orderedColumns, in String rowId);
 
   /**
@@ -527,7 +530,7 @@ interface OdkDbInterface {
    * @param orderedColumns
    * @param rowId
    */
-  UserTable deleteLastCheckpointRowWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk deleteLastCheckpointRowWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns orderedColumns, in String rowId);
 
  /**
@@ -549,7 +552,7 @@ interface OdkDbInterface {
    * @param orderedColumns
    * @param rowId
    */
-  UserTable deleteRowWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk deleteRowWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns orderedColumns, in String rowId);
 
 
@@ -568,7 +571,7 @@ interface OdkDbInterface {
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
-  UserTable saveAsIncompleteMostRecentCheckpointRowWithId(
+  OdkDbChunk saveAsIncompleteMostRecentCheckpointRowWithId(
   	  in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns columnDefns, in ContentValues cvValues, in String rowId);
 
@@ -587,7 +590,7 @@ interface OdkDbInterface {
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
-  UserTable saveAsCompleteMostRecentCheckpointRowWithId(
+  OdkDbChunk saveAsCompleteMostRecentCheckpointRowWithId(
   	  in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns columnDefns, in ContentValues cvValues, in String rowId);
 
@@ -606,7 +609,7 @@ interface OdkDbInterface {
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
-  UserTable updateRowWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk updateRowWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId,
       in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
 
@@ -776,4 +779,12 @@ interface OdkDbInterface {
    */
   void updateManifestSyncETag(in String appName, in OdkDbHandle dbHandleName,
   	  in String verifiedUri, in String tableId, in String eTag);
+
+  /**
+   * Retrieve partitions of data from an earlier call.
+   *
+   * @param chunkID The unique id of the data parition
+   * @return The data partition, which contains a pointer to the next partition if it exists.
+   */
+  OdkDbChunk getChunk(in ParcelUuid chunkID);
 }
