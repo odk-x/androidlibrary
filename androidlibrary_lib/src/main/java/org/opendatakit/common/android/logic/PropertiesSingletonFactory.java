@@ -20,16 +20,19 @@ import android.content.Context;
 
 public abstract class PropertiesSingletonFactory {
 
-  private final TreeMap<String,String> mGeneralDefaults; 
-  private final TreeMap<String,String> mAdminDefaults;
+  private final TreeMap<String,String> mGeneralDefaults;
+  private final TreeMap<String,String> mDeviceDefaults;
+  private final TreeMap<String,String> mSecureDefaults;
 
   private String gAppName = null;
   private PropertiesSingleton gSingleton = null;
   
-  protected PropertiesSingletonFactory(TreeMap<String,String> generalDefaults, TreeMap<String,String> adminDefaults) {
+  protected PropertiesSingletonFactory(TreeMap<String,String> generalDefaults, TreeMap<String,
+      String> deviceDefaults, TreeMap<String,String> secureDefaults) {
     
     mGeneralDefaults = generalDefaults;
-    mAdminDefaults = adminDefaults;
+    mDeviceDefaults = deviceDefaults;
+    mSecureDefaults = secureDefaults;
   }
 
   /**
@@ -39,16 +42,16 @@ public abstract class PropertiesSingletonFactory {
    * 
    * @param context
    * @param appName
-   * @param toolName
    * @return
-   */
+    */
   public synchronized PropertiesSingleton getSingleton(Context context, String appName) {
     if (appName == null || appName.length() == 0) {
       throw new IllegalArgumentException("Unexpectedly null or empty appName");
     }
 
     if ( gSingleton == null || gAppName == null || !gAppName.equals(appName) ) {
-      gSingleton = new PropertiesSingleton(context, appName, mGeneralDefaults, mAdminDefaults);
+      gSingleton = new PropertiesSingleton(context, appName, mGeneralDefaults, mDeviceDefaults,
+          mSecureDefaults);
       gAppName = appName;
     }
     gSingleton.setCurrentContext(context);
