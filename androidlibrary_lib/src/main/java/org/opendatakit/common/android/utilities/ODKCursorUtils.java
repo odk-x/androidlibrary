@@ -119,6 +119,7 @@ public class ODKCursorUtils {
    * @param i
    * @return
    */
+  @SuppressWarnings("unchecked")
   public static final <T> T getIndexAsType(Cursor c, Class<T> clazz, int i) {
     // If you add additional return types here be sure to modify the javadoc.
     try {

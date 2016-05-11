@@ -29,6 +29,7 @@ public class ODKDataUtils {
     return "uuid:" + UUID.randomUUID().toString();
   }
 
+  @SuppressWarnings("unchecked")
   public static String getLocalizedDisplayName(String displayName) {
     Locale locale = Locale.getDefault();
     String full_locale = locale.toString();

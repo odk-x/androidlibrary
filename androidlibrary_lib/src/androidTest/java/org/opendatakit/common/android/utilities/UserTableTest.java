@@ -247,6 +247,7 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(vtas, vtbs);
   }
 
+  @SuppressWarnings("unchecked")
   public void testUserTableParcelation() throws IOException {
 
     List<String> geopointCells = new ArrayList<String>();
