@@ -57,6 +57,8 @@ public class IntentConsts {
     public static final String APPLICATION_NAME = "org.opendatakit.services";
     public static final String ACTIVITY_NAME =
         "org.opendatakit.sync.activities.SyncActivity";
+    public static final String SERVICE_NAME =
+        "org.opendatakit.sync.service.OdkSyncService";
   }
 
   /**
