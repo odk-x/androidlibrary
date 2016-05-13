@@ -35,7 +35,7 @@ public class OdkSyncServiceProxy implements ServiceConnection {
 
   private final static String LOGTAG = OdkSyncServiceProxy.class.getSimpleName();
 
-  private OdkSyncServiceInterface sensorSvcProxy;
+  private OdkSyncServiceInterface syncSvcProxy;
 
   protected Context componentContext;
   protected final AtomicBoolean isBoundToService = new AtomicBoolean(false);
@@ -48,7 +48,7 @@ public class OdkSyncServiceProxy implements ServiceConnection {
   }
 
   public void shutdown() {
-    Log.d(LOGTAG, "Application shutdown - unbinding from Syncervice");
+    Log.d(LOGTAG, "Application shutdown - unbinding from SyncService");
     if (isBoundToService.get()) {
       try {
         componentContext.unbindService(this);
@@ -64,7 +64,7 @@ public class OdkSyncServiceProxy implements ServiceConnection {
   @Override
   public void onServiceConnected(ComponentName className, IBinder service) {
     Log.d(LOGTAG, "Bound to service");
-    sensorSvcProxy = OdkSyncServiceInterface.Stub.asInterface(service);
+    syncSvcProxy = OdkSyncServiceInterface.Stub.asInterface(service);
     isBoundToService.set(true);
   }
 
@@ -78,32 +78,32 @@ public class OdkSyncServiceProxy implements ServiceConnection {
     if (appName == null)
       throw new IllegalArgumentException("App Name cannot be null");
     try {
-      return sensorSvcProxy.getSyncStatus(appName);
+      return syncSvcProxy.getSyncStatus(appName);
     } catch (RemoteException rex) {
       WebLogger.getLogger(appName).printStackTrace(rex);
       throw rex;
     }
   }
 
-  public boolean pushToServer(String appName) throws RemoteException {
+  public boolean resetServer(String appName, SyncAttachmentState attachmentState) throws RemoteException {
     if (appName == null)
       throw new IllegalArgumentException("App Name cannot be null");
 
     try {
-      return sensorSvcProxy.push(appName);
+      return syncSvcProxy.resetServer(appName, attachmentState);
     } catch (RemoteException rex) {
       WebLogger.getLogger(appName).printStackTrace(rex);
       throw rex;
     }
   }
 
-  public boolean synchronizeFromServer(String appName, SyncAttachmentState attachmentState) throws
+  public boolean synchronizeWithServer(String appName, SyncAttachmentState attachmentState) throws
       RemoteException {
     if (appName == null)
       throw new IllegalArgumentException("App Name cannot be null");
 
     try {
-      return sensorSvcProxy.synchronize(appName, attachmentState);
+      return syncSvcProxy.synchronizeWithServer(appName, attachmentState);
     } catch (RemoteException rex) {
       WebLogger.getLogger(appName).printStackTrace(rex);
       throw rex;
@@ -119,7 +119,7 @@ public class OdkSyncServiceProxy implements ServiceConnection {
       throw new IllegalArgumentException("App Name cannot be null");
 
     try {
-      return sensorSvcProxy.getSyncProgress(appName);
+      return syncSvcProxy.getSyncProgress(appName);
     } catch (RemoteException rex) {
       WebLogger.getLogger(appName).printStackTrace(rex);
       throw rex;
@@ -131,7 +131,7 @@ public class OdkSyncServiceProxy implements ServiceConnection {
       throw new IllegalArgumentException("App Name cannot be null");
 
     try {
-      return sensorSvcProxy.getSyncUpdateMessage(appName);
+      return syncSvcProxy.getSyncUpdateMessage(appName);
     } catch (RemoteException rex) {
       WebLogger.getLogger(appName).printStackTrace(rex);
       throw rex;

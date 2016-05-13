@@ -23,9 +23,9 @@ interface OdkSyncServiceInterface {
 
 	SyncStatus getSyncStatus(in String appName);
 	
-	boolean synchronize(in String appName, in SyncAttachmentState syncAttachments);
+	boolean synchronizeWithServer(in String appName, in SyncAttachmentState syncAttachments);
 	
-	boolean push(in String appName);
+	boolean resetServer(in String appName, in SyncAttachmentState syncAttachments);
 	
 	SyncProgressState getSyncProgress(in String appName);
 	

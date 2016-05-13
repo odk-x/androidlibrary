@@ -197,6 +197,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
    * @param columns
    * @return
    */
+  @SuppressWarnings("unchecked")
   static final ArrayList<ColumnDefinition> buildColumnDefinitions(String appName, String tableId, List<Column> columns) {
 
      if ( appName == null || appName.length() == 0 ) {

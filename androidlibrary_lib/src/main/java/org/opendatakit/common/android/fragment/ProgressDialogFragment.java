@@ -32,12 +32,9 @@ public class ProgressDialogFragment extends DialogFragment {
     public void cancelProgressDialog();
   }
 
-  ;
-
-  public static ProgressDialogFragment newInstance(int fragmentId, String title, String message) {
+  public static ProgressDialogFragment newInstance(String title, String message) {
     ProgressDialogFragment frag = new ProgressDialogFragment();
     Bundle args = new Bundle();
-    args.putInt("fragmentId", fragmentId);
     args.putString("title", title);
     args.putString("message", message);
     frag.setArguments(args);
@@ -53,15 +50,10 @@ public class ProgressDialogFragment extends DialogFragment {
     String title = getArguments().getString("title");
     String message = getArguments().getString("message");
 
-    final Integer fragmentId = getArguments().getInt("fragmentId");
-    FragmentManager mgr = getFragmentManager();
-    Fragment f = mgr.findFragmentById(fragmentId);
-
     DialogInterface.OnClickListener loadingButtonListener = new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialog, int which) {
-        FragmentManager mgr = getFragmentManager();
-        Fragment f = mgr.findFragmentById(fragmentId);
+        Fragment f = ProgressDialogFragment.this;
 
         if (f != null && f instanceof CancelProgressDialog) {
           // user code should dismiss the dialog
@@ -74,8 +66,7 @@ public class ProgressDialogFragment extends DialogFragment {
     DialogInterface.OnShowListener showButtonListener = new DialogInterface.OnShowListener() {
       @Override
       public void onShow(DialogInterface dialog) {
-        FragmentManager mgr = getFragmentManager();
-        Fragment f = mgr.findFragmentById(fragmentId);
+        Fragment f = ProgressDialogFragment.this;
 
         if (f != null && f instanceof CancelProgressDialog) {
           ((ProgressDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
