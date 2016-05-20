@@ -15,4 +15,4 @@
  */
 package org.opendatakit.sync.service;
 
-parcelable SyncResult;
+parcelable SyncOverallResult;

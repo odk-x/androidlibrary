@@ -30,16 +30,16 @@ import java.util.*;
  * @author sudar.sam@gmail.com
  *
  */
-public class SyncResult implements Parcelable {
+public class SyncOverallResult implements Parcelable {
 
   private SyncOutcome appLevelSyncOutcome = SyncOutcome.WORKING;
 
   private TreeMap<String, TableLevelResult> mResults = new TreeMap<String, TableLevelResult>();
 
-  public SyncResult() {
+  public SyncOverallResult() {
   }
 
-  protected SyncResult(Parcel in) {
+  protected SyncOverallResult(Parcel in) {
     appLevelSyncOutcome = in.readParcelable(SyncOutcome.class.getClassLoader());
     int count = in.readInt();
     for ( int i = 0 ; i < count ; ++i ) {
@@ -63,13 +63,13 @@ public class SyncResult implements Parcelable {
     return 0;
   }
 
-  public static final Creator<SyncResult> CREATOR = new Creator<SyncResult>() {
-    @Override public SyncResult createFromParcel(Parcel in) {
-      return new SyncResult(in);
+  public static final Creator<SyncOverallResult> CREATOR = new Creator<SyncOverallResult>() {
+    @Override public SyncOverallResult createFromParcel(Parcel in) {
+      return new SyncOverallResult(in);
     }
 
-    @Override public SyncResult[] newArray(int size) {
-      return new SyncResult[size];
+    @Override public SyncOverallResult[] newArray(int size) {
+      return new SyncOverallResult[size];
     }
   };
 

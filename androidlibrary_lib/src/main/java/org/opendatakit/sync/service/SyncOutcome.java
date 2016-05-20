@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * SyncOutcome code used at app and table levels when returning SyncResult
+ * SyncOutcome code used at app and table levels when returning SyncOverallResult
  *
  * WORKING should never be returned (the initial value)
  */
