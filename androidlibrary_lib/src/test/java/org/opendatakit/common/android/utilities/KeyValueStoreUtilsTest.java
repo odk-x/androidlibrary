@@ -14,35 +14,18 @@
 
 package org.opendatakit.common.android.utilities;
 
-import java.io.IOException;
-import java.lang.IllegalArgumentException;
-import java.lang.String;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.TreeMap;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dalvik.annotation.TestTarget;
-import org.junit.*;
-import static org.junit.Assert.*;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
-import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.common.android.data.ColumnDefinition;
-import org.opendatakit.common.android.data.OrderedColumns;
-import org.opendatakit.common.android.utilities.*;
-import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.common.android.utilities.RowPathColumnUtil;
-import org.opendatakit.common.android.utilities.StaticStateManipulator;
-import org.opendatakit.common.android.utilities.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 import org.opendatakit.database.service.KeyValueStoreEntry;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static org.junit.Assert.assertEquals;
 
 public class KeyValueStoreUtilsTest {
 

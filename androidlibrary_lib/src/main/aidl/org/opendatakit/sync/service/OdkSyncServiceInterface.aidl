@@ -16,18 +16,26 @@
 package org.opendatakit.sync.service;
 
 import org.opendatakit.sync.service.SyncStatus;
-import org.opendatakit.sync.service.SyncProgressState;
 import org.opendatakit.sync.service.SyncAttachmentState;
+import org.opendatakit.sync.service.SyncProgressState;
+import org.opendatakit.sync.service.SyncOverallResult;
 
 interface OdkSyncServiceInterface {
 
 	SyncStatus getSyncStatus(in String appName);
 	
-	boolean synchronize(in String appName, in SyncAttachmentState syncAttachments);
+	boolean synchronizeWithServer(in String appName, in SyncAttachmentState syncAttachments);
 	
-	boolean push(in String appName);
+	boolean resetServer(in String appName, in SyncAttachmentState syncAttachments);
 	
 	SyncProgressState getSyncProgress(in String appName);
 	
 	String getSyncUpdateMessage(in String appName);
+
+  /**
+   * Only valid if the SyncStatus is a neither INIT nor SYNCING
+   */
+	SyncOverallResult getSyncResult(in String appName);
+
+	boolean clearAppSynchronizer(String appName);
 }

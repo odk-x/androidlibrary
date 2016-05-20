@@ -325,6 +325,36 @@ public class ODKFileUtils {
     }
   }
 
+  /**
+   * This routine clears all the marker files used by the various tools to
+   * avoid re-running the initialization task.
+   *
+   * @param appName
+    */
+  public static void clearConfiguredToolFiles(String appName) {
+    File dataDir = new File(ODKFileUtils.getDataFolder(appName));
+    File[] filesToDelete = dataDir.listFiles(new FileFilter() {
+      @Override public boolean accept(File pathname) {
+        if ( pathname.isDirectory()) {
+          return false;
+        }
+        String name = pathname.getName();
+        int idx = name.lastIndexOf('.');
+        if ( idx == -1 ) {
+          return false;
+        }
+        String type = name.substring(idx+1);
+        if ( type.equals("version") ) {
+          return true;
+        }
+        return false;
+      }
+    });
+    for ( File f : filesToDelete ) {
+      f.delete();
+    }
+  }
+
   public static void assertConfiguredSurveyApp(String appName, String apkVersion) {
     assertConfiguredOdkApp(appName, "survey.version", apkVersion);
   }
