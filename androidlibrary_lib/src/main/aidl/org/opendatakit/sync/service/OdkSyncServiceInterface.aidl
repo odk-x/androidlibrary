@@ -30,4 +30,6 @@ interface OdkSyncServiceInterface {
 	SyncProgressState getSyncProgress(in String appName);
 	
 	String getSyncUpdateMessage(in String appName);
+
+	boolean clearAppSynchronizer(String appName);
 }
