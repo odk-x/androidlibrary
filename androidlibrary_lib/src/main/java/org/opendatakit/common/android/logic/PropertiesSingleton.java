@@ -18,15 +18,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import org.apache.commons.lang3.CharEncoding;
+import org.opendatakit.IntentConsts;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
 import org.opendatakit.common.android.utilities.WebLogger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -83,10 +82,13 @@ public class PropertiesSingleton {
   void setCurrentContext(Context context) {
     try {
       mBaseContext = context;
-      if (isModified()) {
-        readProperties();
+      // if we are re-using the existing one, pick up any changes by other apps
+      // including, e.g., the reset of the configuration by ODK Services.
+      if ( isModified() ) {
+        init();
       }
     } catch (Exception e) {
+      // TODO: remove the mocking logic? it looks like garbage...
       if (isMocked) {
         mBaseContext = context;
       } else {
@@ -120,11 +122,21 @@ public class PropertiesSingleton {
           throw new IllegalStateException("ODK Services must be installed!");
         }
       }
+      init();
     }
   }
 
+  /**
+   * SharedPreferences are ONLY available from within ODK Services.
+   *
+   * @param context
+   * @return
+    */
   private static SharedPreferences getSharedPreferences(Context context) {
     try {
+      if ( !context.getPackageName().equals(IntentConsts.AppProperties.APPLICATION_NAME) ) {
+        return null;
+      }
       return context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE
             | Context.MODE_MULTI_PROCESS);
     } catch ( Exception e ) {
@@ -274,32 +286,6 @@ public class PropertiesSingleton {
     }
   }
 
-  private static String toolStartPropertyName(String toolName) {
-    return "/" + toolName + "_last_application_startTime";
-  }
-
-  /**
-   * Indicate that the services APK has started
-   *
-   * @param context
-   */
-  public static void setToolStartedProperty(Context context, String toolName) {
-    // this needs to be stored in a protected area
-    SharedPreferences sharedPreferences = getSharedPreferences(context);
-    if ( sharedPreferences != null ) {
-      sharedPreferences
-        .edit()
-        .putString(toolStartPropertyName(toolName),
-            TableConstants.nanoSecondsFromMillis(System.currentTimeMillis())).commit();
-    } else {
-      throw new IllegalStateException("Unable to write SharedPreferences");
-    }
-  }
-
-  private static String toolInitializationPropertyName(String toolName) {
-    return "/" + toolName + "_last_initialization_startTime";
-  }
-
   /**
    * Determine whether or not the initialization task for the given toolName
    * should be run.
@@ -308,25 +294,17 @@ public class PropertiesSingleton {
    *          (e.g., survey, tables, scan, etc.)
    */
   public boolean shouldRunInitializationTask(String toolName) {
-    Boolean booleanSetting = Boolean.TRUE;
-    // this needs to be stored in a protected area
-    SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-    if ( sharedPreferences == null ) {
-      throw new IllegalStateException("Unable to access SharedPreferences");
+    // this is stored in the device properties
+    if (isModified()) {
+      readProperties();
     }
-    
-    String value = sharedPreferences.getString(toolInitializationPropertyName(toolName), null);
+
+    String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
     if (value == null || value.length() == 0) {
-      return booleanSetting;
+      return Boolean.TRUE;
     }
 
-    String toolStartValue = sharedPreferences.getString(toolStartPropertyName(toolName),
-        null);
-    if (toolStartValue == null || toolStartValue.length() == 0) {
-      return booleanSetting;
-    }
-
-    return value.compareTo(toolStartValue) <= 0;
+    return Boolean.FALSE;
   }
 
   /**
@@ -335,16 +313,14 @@ public class PropertiesSingleton {
    * @param toolName
    */
   public void clearRunInitializationTask(String toolName) {
-    // this needs to be stored in a protected area
-    SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-    if ( sharedPreferences != null ) {
-      sharedPreferences
-        .edit()
-        .putString(toolInitializationPropertyName(toolName),
-            TableConstants.nanoSecondsFromMillis(System.currentTimeMillis())).commit();
-    } else {
-      throw new IllegalStateException("Unable to write SharedPreferences");
+    // this is stored in the device properties
+    if (isModified()) {
+      readProperties();
     }
+
+    mDeviceProps.setProperty(toolInitializationPropertyName(toolName),
+            TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()));
+    writeProperties();
   }
 
   /**
@@ -354,15 +330,19 @@ public class PropertiesSingleton {
    * @param toolName
    */
   public void setRunInitializationTask(String toolName) {
-    // this needs to be stored in a protected area
-    SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-    if ( sharedPreferences != null ) {
-      sharedPreferences.edit().remove(toolInitializationPropertyName(toolName)).commit();
-    } else {
-      throw new IllegalStateException("Unable to remove SharedPreferences");
+    // this is stored in the device properties
+    if (isModified()) {
+      readProperties();
     }
+
+    mDeviceProps.remove(toolInitializationPropertyName(toolName));
+    writeProperties();
   }
 
+
+  private static String toolInitializationPropertyName(String toolName) {
+    return toolName + ".tool_last_initialization_start_time";
+  }
 
   public static String toolVersionPropertyName(String toolName) {
     return toolName + ".tool_version_code";
@@ -383,11 +363,22 @@ public class PropertiesSingleton {
     mGeneralProps = new Properties();
     mDeviceProps = new Properties();
 
+    // set our context
+    // this will automatically call init();
+    setCurrentContext(mBaseContext);
+  }
+
+  void init() {
+    // (re)set values to defaults
+
+    lastGeneralModified = 0L;
+    lastDeviceModified = 0L;
+
+    mGeneralProps.clear();
+    mDeviceProps.clear();
+
     // populate the caches from disk...
     readProperties();
-
-    // set our context
-    setCurrentContext(context);
 
     boolean dirtyProps = false;
 
@@ -426,25 +417,19 @@ public class PropertiesSingleton {
       }
     }
 
-    // Now, scan through the shared preferences.
-    // Initialize any missing properties from the revised secure defaults array.
-    // but don't overwrite them if they are already there.
-    //
-    // Note that secure properties are per-tool. In general, these should
-    // be restricted to only ODK Services.
+    // Now, scan through the shared preferences.  These will only be available
+    // from within ODK Services. If we try to access them outside of that
+    // application, this will be a no-op.
     SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
     if ( sharedPreferences != null ) {
       for (TreeMap.Entry<String, String> entry : mSecureDefaults.entrySet()) {
-        // NOTE: can't use the static methods because this object is not
-        // yet fully created
+        // NOTE: can't use the methods because this object is not yet fully created
         if ( !sharedPreferences.contains(mAppName + "_" + entry.getKey()) ) {
           sharedPreferences.edit()
               .putString(mAppName + "_" + entry.getKey(), entry.getValue())
               .commit();
         }
       }
-    } else {
-      throw new IllegalStateException("Unable to access SharedPreferences");
     }
 
     if (dirtyProps) {
@@ -471,6 +456,9 @@ public class PropertiesSingleton {
       if (lastGeneralModified != configFile.lastModified()) {
         return true;
       }
+    } else {
+      // doesn't exist -- ergo, it has changed.
+      return true;
     }
 
     configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
@@ -479,6 +467,9 @@ public class PropertiesSingleton {
       if (lastDeviceModified != configFile.lastModified()) {
         return true;
       }
+    } else {
+      // doesn't exist -- ergo, it has changed.
+      return true;
     }
 
     return false;
@@ -579,6 +570,31 @@ public class PropertiesSingleton {
 
     } catch (Exception e) {
       WebLogger.getLogger(mAppName).printStackTrace(e);
+    }
+  }
+
+  public void clearSettings() {
+    try {
+      File f;
+      f = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
+      if (f.exists()) {
+        f.delete();
+      }
+
+      // and now go through the shared preferences and delete any that pertain to this appName
+      SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
+      if (sharedPreferences != null) {
+        Map<String, ?> allPreferences = sharedPreferences.getAll();
+        for (String key : allPreferences.keySet()) {
+          if (key.startsWith(mAppName + "_")) {
+            sharedPreferences.edit().remove(key).commit();
+          }
+        }
+      } else {
+        throw new IllegalStateException("Clearing settings should only be done within ODK Services");
+      }
+    } finally {
+      init();
     }
   }
 }
