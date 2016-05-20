@@ -16,8 +16,9 @@
 package org.opendatakit.sync.service;
 
 import org.opendatakit.sync.service.SyncStatus;
-import org.opendatakit.sync.service.SyncProgressState;
 import org.opendatakit.sync.service.SyncAttachmentState;
+import org.opendatakit.sync.service.SyncProgressState;
+import org.opendatakit.sync.service.SyncResult;
 
 interface OdkSyncServiceInterface {
 
@@ -30,6 +31,11 @@ interface OdkSyncServiceInterface {
 	SyncProgressState getSyncProgress(in String appName);
 	
 	String getSyncUpdateMessage(in String appName);
+
+  /**
+   * Only valid if the SyncStatus is a neither INIT nor SYNCING
+   */
+	SyncResult getSyncResult(in String appName);
 
 	boolean clearAppSynchronizer(String appName);
 }
