@@ -26,4 +26,14 @@
 	<string name="read_license_success">Read license file successfully</string>
 	<string name="read_license_fail">Failed to read license file</string>
 
+	<string name="font_size_extra_large">Extra Large</string>
+	<string name="font_size_large">Large</string>
+	<string name="font_size_medium">Medium</string>
+	<string name="font_size_small">Small</string>
+	<string name="font_size_extra_small">Extra Small</string>
+
+	<string name="credential_none">None (anonymous access)</string>
+	<string name="credential_username_password">Username</string>
+	<string name="credential_google_account">Google Account</string>
+
 </resources>

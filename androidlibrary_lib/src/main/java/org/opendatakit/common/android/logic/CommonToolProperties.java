@@ -43,7 +43,7 @@ public class CommonToolProperties {
 
   public static final String GROUPING_TOOL_SCAN_CATEGORY = "group.common.scan";
 
-  public static final String GROUPING_TOOL_SENSORS_CATEGORY = "group.common.scan";
+  public static final String GROUPING_TOOL_SENSORS_CATEGORY = "group.common.sensors";
 
   /*******************
    * General Settings
