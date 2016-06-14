@@ -37,7 +37,7 @@ public class OdkDbChunkUtil {
    * @param prevChunk  The previous chunk in the payload. Needed for adding linked list pointers
    * @return The chunk
    */
-  private static OdkDbChunk createChunk(byte[] sourceData, int dataIndex, int chunkSize,
+  private static final OdkDbChunk createChunk(byte[] sourceData, int dataIndex, int chunkSize,
       OdkDbChunk prevChunk) {
 
     UUID chunkID = UUID.randomUUID();
@@ -60,7 +60,7 @@ public class OdkDbChunkUtil {
    * @param chunkSize  The size of the chunks
    * @return Ordered list of serialized chunks
    */
-  public static List<OdkDbChunk> convertToChunks(Parcelable parcelable, int chunkSize) {
+  public static final List<OdkDbChunk> convertToChunks(Parcelable parcelable, int chunkSize) {
 
     if (parcelable == null || chunkSize <= 0) {
       Log.w(TAG, "convertToChunks: Invalid input. Empty chunk list returned");
@@ -83,7 +83,7 @@ public class OdkDbChunkUtil {
    * @param chunkSize    The size of the chunks
    * @return Ordered list of serialized chunks
    */
-  public static List<OdkDbChunk> convertToChunks(Serializable serializable, int chunkSize)
+  public static final List<OdkDbChunk> convertToChunks(Serializable serializable, int chunkSize)
       throws IOException {
 
     if (serializable == null || chunkSize <= 0) {
@@ -93,9 +93,7 @@ public class OdkDbChunkUtil {
 
     // Convert to bytes
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutput out = null;
-
-    out = new ObjectOutputStream(bos);
+    ObjectOutput out = new ObjectOutputStream(bos);
     out.writeObject(serializable);
     byte[] bytes = bos.toByteArray();
     out.close();
@@ -110,7 +108,7 @@ public class OdkDbChunkUtil {
    * @param chunkSize
    * @return
    */
-  private static List<OdkDbChunk> createChunkList(byte[] bytes, int chunkSize) {
+  private static final List<OdkDbChunk> createChunkList(byte[] bytes, int chunkSize) {
     // Partition bytes into chunks, inserting them into the list along the way
     int dataIndex = 0;
     OdkDbChunk currChunk = null;
@@ -138,7 +136,8 @@ public class OdkDbChunkUtil {
    * @param <T>     The type of the parcelable object to rebuild
    * @return The original object
    */
-  public static <T> T rebuildFromChunks(List<OdkDbChunk> chunks, Parcelable.Creator<T> creator) {
+  public static final <T> T rebuildFromChunks(List<OdkDbChunk> chunks,
+      Parcelable.Creator<T> creator) {
 
     if (chunks == null || chunks.size() == 0 || creator == null) {
       Log.w(TAG, "rebuildFromChunks: Invalid input. Null returned");
@@ -163,7 +162,7 @@ public class OdkDbChunkUtil {
    * @param <T>          The type of the parcelable object to rebuild
    * @return The original object
    */
-  public static <T> T rebuildFromChunks(List<OdkDbChunk> chunks, Class<T> serializable)
+  public static final <T> T rebuildFromChunks(List<OdkDbChunk> chunks, Class<T> serializable)
       throws Exception {
 
     if (chunks == null || chunks.size() == 0 || serializable == null) {
@@ -188,7 +187,7 @@ public class OdkDbChunkUtil {
    * @param chunks
    * @return
    */
-  private static byte[] getData(List<OdkDbChunk> chunks) {
+  private static final byte[] getData(List<OdkDbChunk> chunks) {
     // Find the size of data
     int dataSize = 0;
     Iterator<OdkDbChunk> iterator = chunks.iterator();
