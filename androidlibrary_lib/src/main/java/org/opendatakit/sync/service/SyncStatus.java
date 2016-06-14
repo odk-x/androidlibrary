@@ -41,6 +41,8 @@ public enum SyncStatus implements Parcelable {
   SERVER_INTERNAL_ERROR,
   /** earlier sync ended with a 400 error that wasn't Authorization denied */
   REQUEST_OR_PROTOCOL_ERROR,
+  /** server URL does not appear to be correct or server is non-conformant */
+  SERVER_IS_NOT_ODK_SERVER,
   /** error accessing or updating database */
   DEVICE_ERROR,
   /** the server is not configured for this appName -- Site Admin / Preferences */
