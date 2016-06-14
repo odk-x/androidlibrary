@@ -96,7 +96,7 @@ public class PropertiesSingleton {
       } else {
         boolean faked = false;
         Context app = context.getApplicationContext();
-        Class classObj = app.getClass();
+        Class<?> classObj = app.getClass();
         String appName = classObj.getSimpleName();
         while (!appName.equals("CommonApplication")) {
           classObj = classObj.getSuperclass();
