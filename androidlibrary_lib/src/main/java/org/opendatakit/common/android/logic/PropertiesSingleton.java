@@ -20,11 +20,13 @@ import android.util.Log;
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.IntentConsts;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
+import org.opendatakit.androidlibrary.R;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
 import org.opendatakit.common.android.utilities.WebLogger;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -94,7 +96,7 @@ public class PropertiesSingleton {
       } else {
         boolean faked = false;
         Context app = context.getApplicationContext();
-        Class classObj = app.getClass();
+        Class<?> classObj = app.getClass();
         String appName = classObj.getSimpleName();
         while (!appName.equals("CommonApplication")) {
           classObj = classObj.getSuperclass();
@@ -339,6 +341,36 @@ public class PropertiesSingleton {
     writeProperties();
   }
 
+  public String getActiveUser() {
+    final String CREDENTIAL_TYPE_NONE = mBaseContext.getString(R.string.credential_type_none);
+    final String CREDENTIAL_TYPE_USERNAME_PASSWORD = mBaseContext.getString(R.string.credential_type_username_password);
+    final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT = mBaseContext.getString(R.string.credential_type_google_account);
+
+    String authType = getProperty(CommonToolProperties.KEY_AUTHENTICATION_TYPE);
+    if (authType.equals(CREDENTIAL_TYPE_NONE)) {
+      return "anonymous";
+    } else if (authType.equals(CREDENTIAL_TYPE_USERNAME_PASSWORD)) {
+      String name = getProperty(CommonToolProperties.KEY_USERNAME);
+      if (name != null) {
+        return "username:" + name;
+      } else {
+        return "anonymous";
+      }
+    } else if (authType.equals(CREDENTIAL_TYPE_GOOGLE_ACCOUNT)) {
+      String name = getProperty(CommonToolProperties.KEY_ACCOUNT);
+      if (name != null) {
+        return "mailto:" + name;
+      } else {
+        return "anonymous";
+      }
+    } else {
+      throw new IllegalStateException("unexpected authentication type!");
+    }
+  }
+
+  public String getLocale() {
+    return Locale.getDefault().toString();
+  }
 
   private static String toolInitializationPropertyName(String toolName) {
     return toolName + ".tool_last_initialization_start_time";

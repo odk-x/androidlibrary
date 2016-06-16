@@ -18,7 +18,6 @@ import android.app.*;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import org.opendatakit.androidlibrary.R;
 
 /**
@@ -79,10 +78,10 @@ public class ProgressDialogFragment extends DialogFragment {
       }
     };
 
-    ProgressDialog mProgressDialog = new ProgressDialog(getActivity());
+    ProgressDialog mProgressDialog = new ProgressDialog(getActivity(), getTheme());
     mProgressDialog.setTitle(title);
     mProgressDialog.setMessage(message);
-    mProgressDialog.setIcon(android.R.drawable.ic_dialog_info);
+    mProgressDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
     mProgressDialog.setIndeterminate(true);
     mProgressDialog.setCancelable(false);
     mProgressDialog.setCanceledOnTouchOutside(false);
