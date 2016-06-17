@@ -17,6 +17,10 @@ package org.opendatakit.sync.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import org.opendatakit.common.android.utilities.WebLogger;
+
+import java.io.IOException;
 
 /**
  * The mapping of a table to the SyncOutcome of its synchronization.
@@ -26,6 +30,7 @@ import android.os.Parcelable;
  *
  */
 public class TableLevelResult implements Parcelable {
+  private static final String TAG = "TableLevelResult";
 
   private final String mTableId;
   private String mDisplayName;
@@ -285,16 +290,17 @@ public class TableLevelResult implements Parcelable {
    * 
    * @param newSyncOutcome
    * @throws UnsupportedOperationException
-   *           if the satus has been set to {@link SyncOutcome#EXCEPTION} and the
-   *           newSyncOutcome is something other than {@link SyncOutcome#EXCEPTION}.
+   *           if the status is not currently {@link SyncOutcome#WORKING}.
    */
   public void setSyncOutcome(SyncOutcome newSyncOutcome) {
-    if (this.mSyncOutcome == SyncOutcome.EXCEPTION && newSyncOutcome
-        != SyncOutcome.EXCEPTION) {
-      throw new UnsupportedOperationException("Tried to set TableLevelResult " + "status"
-          + " to something other than exception when it had alread been set" + " to exception.");
+    if (this.mSyncOutcome != SyncOutcome.WORKING ) {
+      throw new UnsupportedOperationException("Tried to set TableLevelResult status to " +
+          newSyncOutcome.name() + " when it had already been set to " + mSyncOutcome.name());
     }
     this.mSyncOutcome = newSyncOutcome;
   }
 
+  public void resetSyncOutcome() {
+    this.mSyncOutcome = SyncOutcome.WORKING;
+  }
 }

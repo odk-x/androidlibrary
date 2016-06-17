@@ -18,8 +18,24 @@ package org.opendatakit.sync.service;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Tracks the progress of an active sync operation.
+ *
+ * After a sync is FINISHED, the SyncOverallResult object will be available.
+ */
 public enum SyncProgressState implements Parcelable {
-  INIT, STARTING, APP_FILES, TABLE_FILES, ROWS, COMPLETE, ERROR;
+  /** sync is not started */
+  INACTIVE,
+  /** sync has been started */
+  STARTING,
+  /** sync is working on the app-level config files (config/assets/...) */
+  APP_FILES,
+  /** sync is working on the table-level config files (config/tables/...) */
+  TABLE_FILES,
+  /** sync is working on the data rows and row-level attachment files */
+  ROWS,
+  /** sync has completed */
+  FINISHED;
 
   @Override
   public int describeContents() {
