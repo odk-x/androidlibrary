@@ -18,7 +18,6 @@ package org.opendatakit.common.android.utilities;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import org.opendatakit.common.android.data.UserTable;
 import org.opendatakit.database.service.OdkDbChunk;
 
 import java.io.*;

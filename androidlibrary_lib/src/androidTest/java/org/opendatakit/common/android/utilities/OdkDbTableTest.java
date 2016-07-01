@@ -68,30 +68,35 @@ public class OdkDbTableTest extends AndroidTestCase {
     /*
      * Create test data
      */
-    HashMap<String, Integer> elementKeyToIndex = new HashMap<>();
+    String[] elementKeyForIndex = new String[TABLE_WIDTH];
     String[] rowValues1 = new String[TABLE_WIDTH];
     String[] rowValues2 = new String[TABLE_WIDTH];
 
     int i = 0;
+    elementKeyForIndex[i] = COLUMN1;
     rowValues1[i] = ROW1COL1;
     rowValues2[i] = ROW2COL1;
-    elementKeyToIndex.put(COLUMN1, i++);
+    i++;
 
+    elementKeyForIndex[i] = COLUMN2;
     rowValues1[i] = ROW1COL2;
     rowValues2[i] = ROW2COL2;
-    elementKeyToIndex.put(COLUMN2, i++);
+    i++;
 
+    elementKeyForIndex[i] = COLUMN3;
     rowValues1[i] = ROW1COL3;
     rowValues2[i] = ROW2COL3;
-    elementKeyToIndex.put(COLUMN3, i++);
+    i++;
 
+    elementKeyForIndex[i] = COLUMN4;
     rowValues1[i] = ROW1COL4;
     rowValues2[i] = ROW2COL4;
-    elementKeyToIndex.put(COLUMN4, i++);
+    i++;
 
+    elementKeyForIndex[i] = COLUMN5;
     rowValues1[i] = ROW1COL5;
     rowValues2[i] = ROW2COL5;
-    elementKeyToIndex.put(COLUMN5, i++);
+    i++;
 
     String sqlCmd = SQLCMD;
     String[] bindArgs = BINDARGS;
@@ -100,7 +105,7 @@ public class OdkDbTableTest extends AndroidTestCase {
     String[] primaryKey = PRIMARY_KEY;
 
     OdkDbTable table = new OdkDbTable(sqlCmd, bindArgs, orderByDirections, orderByArgs,
-        primaryKey, elementKeyToIndex, NUM_ROWS);
+        primaryKey, elementKeyForIndex, NUM_ROWS);
 
     OdkDbRow row1 = new OdkDbRow(rowValues1, table);
     table.addRow(row1);
@@ -185,15 +190,14 @@ public class OdkDbTableTest extends AndroidTestCase {
     assertEquals(NUM_ROWS, table.getNumberOfRows());
     assertEquals(NUM_ROWS, t.getNumberOfRows());
 
-    OdkDbRow rat1 = table.getRow(ROW1_PK);
-    OdkDbRow rat2 = t.getRow(ROW1_PK);
-    OdkDbRow rbt1 = table.getRow(ROW2_PK);
-    OdkDbRow rbt2 = t.getRow(ROW2_PK);
+    OdkDbRow rat1 = table.getRowAtIndex(0);
+    OdkDbRow rat2 = t.getRowAtIndex(0);
+    OdkDbRow rbt1 = table.getRowAtIndex(1);
+    OdkDbRow rbt2 = t.getRowAtIndex(1);
 
-    Set<String> cols = table.getCols();
-    for (String col: cols) {
-      assertEquals(rat2.getData(col), rat1.getData(col));
-      assertEquals(rbt2.getData(col), rbt1.getData(col));
+    for (int j = 0; j < TABLE_WIDTH; j++) {
+      assertEquals(rat1.getDataByIndex(j), rat2.getDataByIndex(j));
+      assertEquals(rbt2.getDataByIndex(j), rbt1.getDataByIndex(j));
     }
   }
 

@@ -21,11 +21,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import org.opendatakit.common.android.data.*;
 import org.opendatakit.common.android.utilities.OdkDbChunkUtil;
-import org.opendatakit.database.service.KeyValueStoreEntry;
-import org.opendatakit.database.service.OdkDbChunk;
-import org.opendatakit.database.service.OdkDbHandle;
-import org.opendatakit.database.service.OdkDbInterface;
-import org.opendatakit.database.service.TableHealthInfo;
+import org.opendatakit.database.service.*;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -400,7 +396,7 @@ public class OdkDbSerializedInterface {
     * @param orderByElementKey elementKey to order the results by
     * @param orderByDirection  either "ASC" or "DESC"
     * @return An {@link OdkDbChunk} containing the first partition of the {@link UserTable}. Use
-    * {@link OdkDbInterface#getChunk(ParcelUuid)} to retrieve the rest of the chunks.
+    * {@link getChunk} to retrieve the rest of the chunks.
     */
    public UserTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns columnDefns, String whereClause, String[] selectionArgs, String[] groupBy,
@@ -412,7 +408,7 @@ public class OdkDbSerializedInterface {
    }
 
    /**
-    * Get a {@link RawUserTable} for the result set of an arbitrary sql query
+    * Get a {@link OdkDbTable} for the result set of an arbitrary sql query
     * and bind parameters. If the result set has an _id column, it is used as
     * the RowId of the RawRow. Otherwise, an ordinal number is generated and used.
     * <p/>
@@ -423,15 +419,15 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param sqlCommand
     * @param sqlBindArgs
-    * @return An {@link OdkDbChunk} containing the first partition of the {@link RawUserTable}. Use
-    * {@link OdkDbInterface#getChunk(ParcelUuid)} to retrieve the rest of the chunks.
+    * @return An {@link OdkDbChunk} containing the first partition of the {@link OdkDbTable}. Use
+    * {@link getChunk} to retrieve the rest of the chunks.
     */
-   public RawUserTable arbitraryQuery(String appName, OdkDbHandle dbHandleName, String sqlCommand,
+   public OdkDbTable arbitraryQuery(String appName, OdkDbHandle dbHandleName, String sqlCommand,
        String[] sqlBindArgs) throws RemoteException {
 
       return fetchAndRebuildChunks(
           dbInterface.arbitraryQuery(appName, dbHandleName, sqlCommand, sqlBindArgs),
-          RawUserTable.CREATOR);
+          OdkDbTable.CREATOR);
    }
 
    /**

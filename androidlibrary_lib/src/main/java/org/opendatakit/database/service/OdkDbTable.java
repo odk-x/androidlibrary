@@ -29,63 +29,72 @@ import java.util.Set;
  */
 public class OdkDbTable implements Parcelable {
 
+  // TODO: Handle possible null values? Or make sure defaults are set up
+  // TODO: Remove any APIs we aren't using
+  // TODO: Make sure removal of mElementKeyToIndex was completed and the alternative is used
+  // correctly
+
   static final String TAG = OdkDbTable.class.getSimpleName();
 
   /**
    * The table data
    */
-  private final ArrayList<OdkDbRow> mRows;
+  protected final ArrayList<OdkDbRow> mRows;
 
   /**
    * The SQL command used to retrieve the data
    */
-  private final String mSqlCmd;
+  protected final String mSqlCommand;
 
   /**
    * The SELECT arguments for the SQL command
    */
-  private final String[] mBindArgs;
+  protected final String[] mSqlBindArgs;
 
   /**
    * The ORDER BY arguments
    */
-  private final String[] mOrderByElementKey;
+  protected final String[] mOrderByElementKey;
 
   /**
    * The direction of each ORDER BY argument
    */
-  private final String[] mOrderByDirection;
+  protected final String[] mOrderByDirection;
 
   /**
    * The fields that make up the primary key
    */
-  private final String[] mPrimaryKey;
+  protected final String[] mPrimaryKey;
 
   /**
-   * Map column names to indices in rowData
+   * Map indices to column names
    */
-  private final Map<String, Integer> mElementKeyToIndex;
+  protected final String[] mElementKeyForIndex;
 
   /**
    * Construct the table
    *
-   * @param sqlCmd the SQL command use to retrieve the data
-   * @param bindArgs the SELECT arguments for the SQL command
+   * @param sqlCommand the SQL command use to retrieve the data
+   * @param sqlBindArgs the SELECT arguments for the SQL command
    * @param orderByDirection the ORDER BY arguments
    * @param orderByElementKey the direction of each ORDER BY argument
    * @param primaryKey the fields that make up the primary key
-   * @param elementKeyToIndex map column names to indices in row data
+   * @param elementKeyForIndex map indices to column names in row data
    * @param rowCount the capacity of the table
    */
-  public OdkDbTable(String sqlCmd, String[] bindArgs, String[] orderByDirection,
-      String[] orderByElementKey, String[] primaryKey, Map<String, Integer> elementKeyToIndex,
+  public OdkDbTable(String sqlCommand, String[] sqlBindArgs, String[] orderByDirection,
+      String[] orderByElementKey, String[] primaryKey, String[] elementKeyForIndex,
       Integer rowCount) {
-    this.mSqlCmd = sqlCmd;
-    this.mBindArgs = bindArgs;
+    this.mSqlCommand = sqlCommand;
+    this.mSqlBindArgs = sqlBindArgs;
     this.mOrderByDirection = orderByDirection;
     this.mOrderByElementKey = orderByElementKey;
     this.mPrimaryKey = primaryKey;
-    this.mElementKeyToIndex = elementKeyToIndex;
+
+    if (elementKeyForIndex == null) {
+      throw new IllegalStateException("elementKeyForIndex cannot be null");
+    }
+    this.mElementKeyForIndex = elementKeyForIndex;
 
     int numRows = 0;
     if (rowCount != null) {
@@ -94,29 +103,27 @@ public class OdkDbTable implements Parcelable {
     this.mRows = new ArrayList<OdkDbRow>(numRows);
   }
 
+  public OdkDbTable(String sqlCommand, String[] sqlBindArgs, String[] elementkeyForIndex,
+      Integer rowCount) {
+    this(sqlCommand, sqlBindArgs, null, null, null, elementkeyForIndex, rowCount);
+  }
+
   public OdkDbTable(Parcel in) {
     int dataCount = 0;
 
-    mSqlCmd = in.readString();
+    mSqlCommand = in.readString();
 
-    mBindArgs = unmarshallStringArray(in);
+    mSqlBindArgs = unmarshallStringArray(in);
     mOrderByDirection = unmarshallStringArray(in);
     mOrderByElementKey = unmarshallStringArray(in);
     mPrimaryKey = unmarshallStringArray(in);
+    mElementKeyForIndex = unmarshallStringArray(in);
 
     dataCount = in.readInt();
     mRows = new ArrayList<>(dataCount);
     for(; dataCount > 0; dataCount--) {
       OdkDbRow r = new OdkDbRow(in, this);
       mRows.add(r);
-    }
-
-    dataCount = in.readInt();
-    this.mElementKeyToIndex = new HashMap<String, Integer>();
-    for (int i = 0; i < dataCount; i++) {
-      String key = in.readString();
-      Integer value = in.readInt();
-      mElementKeyToIndex.put(key, value);
     }
   }
 
@@ -128,19 +135,19 @@ public class OdkDbTable implements Parcelable {
     return this.mRows.get(index);
   }
 
-  public Integer getColumnIndexOfElementKey(String elementKey) {
-    return this.mElementKeyToIndex.get(elementKey);
+  public String getElementKey(int colNum) {
+    return mElementKeyForIndex[colNum];
   }
 
   public String getSqlCommand() {
-    return mSqlCmd;
+    return mSqlCommand;
   }
 
   public String[] getSqlBindArgs() {
-    if (mBindArgs == null ) {
+    if (mSqlBindArgs == null ) {
       return null;
     }
-    return mBindArgs.clone();
+    return mSqlBindArgs.clone();
   }
 
   public String[] getOrderByElementKey() {
@@ -164,53 +171,31 @@ public class OdkDbTable implements Parcelable {
     return mPrimaryKey.clone();
   }
 
+  public String[] getElementKeyForIndex() {
+    return mElementKeyForIndex.clone();
+  }
+
   public int getWidth() {
-    return mElementKeyToIndex.size();
+    return mElementKeyForIndex.length;
   }
 
   public int getNumberOfRows() {
     return this.mRows.size();
   }
 
-  public OdkDbRow getRow(String[] primaryKeyVals) {
-    for (OdkDbRow row: mRows) {
-      if (row.matchPrimaryKey(primaryKeyVals)) {
-        return row;
-      }
-    }
-
-    return null;
-  }
-
-  public Set<String> getCols() {
-    return mElementKeyToIndex.keySet();
-  }
-
   @Override
   public void writeToParcel(Parcel out, int flags) {
-    String[] emptyString = {};
+    out.writeString(mSqlCommand);
 
-    out.writeString(mSqlCmd);
-
-    marshallStringArray(out, mBindArgs);
+    marshallStringArray(out, mSqlBindArgs);
     marshallStringArray(out, mOrderByDirection);
     marshallStringArray(out, mOrderByElementKey);
     marshallStringArray(out, mPrimaryKey);
+    marshallStringArray(out, mElementKeyForIndex);
 
     out.writeInt(mRows.size());
     for (OdkDbRow r : mRows) {
       r.writeToParcel(out, flags);
-    }
-
-    if (mElementKeyToIndex == null) {
-      out.writeInt(0);
-    } else {
-      out.writeInt(mElementKeyToIndex.size());
-
-      for (Map.Entry<String, Integer> entry : mElementKeyToIndex.entrySet()) {
-        out.writeString(entry.getKey());
-        out.writeInt(entry.getValue());
-      }
     }
   }
 
