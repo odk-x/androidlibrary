@@ -28,7 +28,6 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
 
@@ -53,6 +52,7 @@ public class PropertiesSingleton {
   private static final String t = "PropertiesSingleton";
 
   private static final String GENERAL_PROPERTIES_FILENAME = "app.properties";
+  private static final String DEFAULT_DEVICE_PROPERTIES_FILENAME = "default.device.properties";
   private static final String DEVICE_PROPERTIES_FILENAME = "device.properties";
 
   private static boolean isMocked = false;
@@ -66,6 +66,7 @@ public class PropertiesSingleton {
   private final TreeMap<String, String> mSecureDefaults;
 
   private Properties mGeneralProps;
+  private Properties mGlobalDeviceProps;
   private Properties mDeviceProps;
   private Context mBaseContext;
 
@@ -277,7 +278,7 @@ public class PropertiesSingleton {
       }
     } else {
       if (isModified()) {
-        readProperties();
+        readProperties(false);
       }
       if (isDeviceProperty(propertyName) ) {
         mDeviceProps.setProperty(propertyName, value);
@@ -298,7 +299,7 @@ public class PropertiesSingleton {
   public boolean shouldRunInitializationTask(String toolName) {
     // this is stored in the device properties
     if (isModified()) {
-      readProperties();
+      readProperties(false);
     }
 
     String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
@@ -317,7 +318,7 @@ public class PropertiesSingleton {
   public void clearRunInitializationTask(String toolName) {
     // this is stored in the device properties
     if (isModified()) {
-      readProperties();
+      readProperties(false);
     }
 
     mDeviceProps.setProperty(toolInitializationPropertyName(toolName),
@@ -334,7 +335,7 @@ public class PropertiesSingleton {
   public void setRunInitializationTask(String toolName) {
     // this is stored in the device properties
     if (isModified()) {
-      readProperties();
+      readProperties(false);
     }
 
     mDeviceProps.remove(toolInitializationPropertyName(toolName));
@@ -407,10 +408,11 @@ public class PropertiesSingleton {
     lastDeviceModified = 0L;
 
     mGeneralProps.clear();
+    mGlobalDeviceProps.clear();
     mDeviceProps.clear();
 
     // populate the caches from disk...
-    readProperties();
+    readProperties(true);
 
     boolean dirtyProps = false;
 
@@ -423,16 +425,16 @@ public class PropertiesSingleton {
       }
     }
 
-    // scan for device properties in the (syncable) app properties file.
+    // scan for device properties in the (syncable) default device properties file.
     // update the provided mDeviceDefaults with these new default values.
     for (TreeMap.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
-      if (mGeneralProps.containsKey(entry.getKey())) {
-        entry.setValue(mGeneralProps.getProperty(entry.getKey()));
+      if (mGlobalDeviceProps.containsKey(entry.getKey())) {
+        entry.setValue(mGlobalDeviceProps.getProperty(entry.getKey()));
       }
     }
 
     // see if there are missing values in the device props
-    // and update them from the mGeneralDefaults map.
+    // and update them from the mDeviceDefaults map.
     for (TreeMap.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
       if (mDeviceProps.containsKey(entry.getKey()) == false) {
         mDeviceProps.setProperty(entry.getKey(), entry.getValue());
@@ -507,7 +509,7 @@ public class PropertiesSingleton {
     return false;
   }
 
-  public void readProperties() {
+  public void readProperties(boolean includingGlobalDeviceProps) {
     verifyDirectories();
 
     FileInputStream configFileInputStream = null;
@@ -529,6 +531,31 @@ public class PropertiesSingleton {
         } catch (IOException e) {
           // ignore
           WebLogger.getLogger(mAppName).printStackTrace(e);
+        }
+      }
+    }
+
+    // read-only values
+    if ( includingGlobalDeviceProps ) {
+      configFileInputStream = null;
+      try {
+        File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), DEFAULT_DEVICE_PROPERTIES_FILENAME);
+
+        if (configFile.exists()) {
+          configFileInputStream = new FileInputStream(configFile);
+
+          mGlobalDeviceProps.loadFromXML(configFileInputStream);
+        }
+      } catch (Exception e) {
+        WebLogger.getLogger(mAppName).printStackTrace(e);
+      } finally {
+        if (configFileInputStream != null) {
+          try {
+            configFileInputStream.close();
+          } catch (IOException e) {
+            // ignore
+            WebLogger.getLogger(mAppName).printStackTrace(e);
+          }
         }
       }
     }

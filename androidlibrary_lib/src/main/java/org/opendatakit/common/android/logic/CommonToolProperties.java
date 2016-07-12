@@ -100,6 +100,8 @@ public class CommonToolProperties {
   public static final String KEY_AUTH = "common.auth";
   /** ODK Aggregate password */
   public static final String KEY_PASSWORD = "common.password";
+  /** Roles that the user is known to have. JSON encoded list of strings */
+  public static final String KEY_ROLES_LIST = "common.roles";
   /** Admin Settings password */
   public static final String KEY_ADMIN_PW = "common.admin_pw";
   
@@ -154,6 +156,7 @@ public class CommonToolProperties {
     //
     secureProperties.put(KEY_AUTH, "");
     secureProperties.put(KEY_PASSWORD, "");
+    secureProperties.put(KEY_ROLES_LIST, "");
     secureProperties.put(KEY_ADMIN_PW, "");
   }
 
