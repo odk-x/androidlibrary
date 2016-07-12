@@ -17,6 +17,7 @@ package org.opendatakit.common.android.logic;
 import java.util.TreeMap;
 
 import org.opendatakit.androidlibrary.R;
+import org.opendatakit.common.android.utilities.StaticStateManipulator;
 
 import android.content.Context;
 
@@ -169,7 +170,18 @@ public class CommonToolProperties {
   }
   
   private static CommonPropertiesSingletonFactory factory = null;
-  
+  static {
+    // register a state-reset manipulator for 'connectionFactory' field.
+    StaticStateManipulator.get().register(50, new StaticStateManipulator.IStaticFieldManipulator() {
+
+      @Override
+      public void reset() {
+        factory = null;
+      }
+
+    });
+  }
+
   public static synchronized PropertiesSingleton get(Context context, String appName) {
     if ( factory == null ) {
       TreeMap<String,String> generalProperties = new TreeMap<String,String>();

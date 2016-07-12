@@ -55,8 +55,6 @@ public class PropertiesSingleton {
   private static final String DEFAULT_DEVICE_PROPERTIES_FILENAME = "default.device.properties";
   private static final String DEVICE_PROPERTIES_FILENAME = "device.properties";
 
-  private static boolean isMocked = false;
-
   private final String mAppName;
   private long lastGeneralModified = 0L;
   private long lastDeviceModified = 0L;
@@ -91,41 +89,8 @@ public class PropertiesSingleton {
         init();
       }
     } catch (Exception e) {
-      // TODO: remove the mocking logic? it looks like garbage...
-      if (isMocked) {
-        mBaseContext = context;
-      } else {
-        boolean faked = false;
-        Context app = context.getApplicationContext();
-        Class<?> classObj = app.getClass();
-        String appName = classObj.getSimpleName();
-        while (!appName.equals("CommonApplication")) {
-          classObj = classObj.getSuperclass();
-          if (classObj == null)
-            break;
-          appName = classObj.getSimpleName();
-        }
-
-        if (classObj != null) {
-          try {
-            Class<?>[] argClassList = new Class[] {};
-            Method m = classObj.getDeclaredMethod("isMocked", argClassList);
-            Object[] argList = new Object[] {};
-            Object o = m.invoke(null, argList);
-            if (((Boolean) o).booleanValue()) {
-              mBaseContext = context;
-              isMocked = true;
-              faked = true;
-            }
-          } catch (Exception e1) {
-          }
-        }
-        if (!faked) {
-          e.printStackTrace();
-          throw new IllegalStateException("ODK Services must be installed!");
-        }
-      }
-      init();
+      e.printStackTrace();
+      throw new IllegalStateException("ODK Services must be installed!");
     }
   }
 
