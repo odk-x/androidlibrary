@@ -394,6 +394,7 @@ public class PropertiesSingleton {
 
     // initialize the cache of properties read from the sdcard
     mGeneralProps = new Properties();
+    mGlobalDeviceProps = new Properties();
     mDeviceProps = new Properties();
 
     // set our context
@@ -495,7 +496,7 @@ public class PropertiesSingleton {
       return true;
     }
 
-    configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
+    configFile = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
 
     if (configFile.exists()) {
       if (lastDeviceModified != configFile.lastModified()) {
