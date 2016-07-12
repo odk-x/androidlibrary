@@ -398,7 +398,7 @@ public class PropertiesSingleton {
 
     // set our context
     // this will automatically call init();
-    setCurrentContext(mBaseContext);
+    setCurrentContext(context);
   }
 
   void init() {
@@ -425,7 +425,7 @@ public class PropertiesSingleton {
       }
     }
 
-    // scan for device properties in the (syncable) default device properties file.
+    // scan for device properties in the (syncable) device properties file.
     // update the provided mDeviceDefaults with these new default values.
     for (TreeMap.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
       if (mGlobalDeviceProps.containsKey(entry.getKey())) {
