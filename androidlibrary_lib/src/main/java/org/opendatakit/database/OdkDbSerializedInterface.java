@@ -276,6 +276,7 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @return List<String> of tableIds
     */
+   @SuppressWarnings("unchecked")
    public List<String> getAllTableIds(String appName, OdkDbHandle dbHandleName)
        throws RemoteException {
       Serializable result = fetchAndRebuildChunks(dbInterface.getAllTableIds(appName, dbHandleName),
@@ -293,6 +294,7 @@ public class OdkDbSerializedInterface {
     * @return list of KeyValueStoreEntry values matching the filter criteria
     * @throws RemoteException
     */
+   @SuppressWarnings("unchecked")
    public List<KeyValueStoreEntry> getDBTableMetadata(String appName, OdkDbHandle dbHandleName,
        String tableId, String partition, String aspect, String key) throws RemoteException {
       Serializable result = fetchAndRebuildChunks(
@@ -335,6 +337,7 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @return the list of TableHealthInfo records for this appName
     */
+   @SuppressWarnings("unchecked")
    public List<TableHealthInfo> getTableHealthStatuses(String appName, OdkDbHandle dbHandleName)
        throws RemoteException {
       Serializable results = fetchAndRebuildChunks(

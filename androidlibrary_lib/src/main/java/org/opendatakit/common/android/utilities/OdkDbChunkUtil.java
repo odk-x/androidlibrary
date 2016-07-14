@@ -23,9 +23,13 @@ import org.opendatakit.database.service.OdkDbChunk;
 import java.io.*;
 import java.util.*;
 
-public class OdkDbChunkUtil {
+public final class OdkDbChunkUtil {
 
   private static final String TAG = OdkDbChunkUtil.class.getSimpleName();
+
+  private OdkDbChunkUtil() {
+    // This class should never be instantiated
+  }
 
   /**
    * Construct an OdkDbChunk from a serialized parcel.
@@ -161,8 +165,9 @@ public class OdkDbChunkUtil {
    * @param <T>          The type of the parcelable object to rebuild
    * @return The original object
    */
+  @SuppressWarnings("unchecked")
   public static final <T> T rebuildFromChunks(List<OdkDbChunk> chunks, Class<T> serializable)
-      throws Exception {
+      throws IOException, ClassNotFoundException {
 
     if (chunks == null || chunks.size() == 0 || serializable == null) {
       Log.w(TAG, "rebuildFromChunks: Invalid input. Null returned");
