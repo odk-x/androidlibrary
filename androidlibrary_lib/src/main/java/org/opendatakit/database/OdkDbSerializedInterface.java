@@ -60,6 +60,20 @@ public class OdkDbSerializedInterface {
    }
 
    /**
+    * Return the roles of a verified username or google account.
+    * If the username or google account have not been verified,
+    * or if the server settings specify to use an anonymous user,
+    * then return an empty string.
+    *
+    * @param appName
+    *
+    * @return empty string or JSON serialization of an array of ROLES. See RoleConsts for possible values.
+    */
+   public String getRolesList(String appName) throws RemoteException {
+      return dbInterface.getRolesList(appName);
+   }
+
+   /**
     * Obtain a databaseHandleName
     *
     * @param appName
@@ -81,6 +95,8 @@ public class OdkDbSerializedInterface {
    }
 
    /**
+    * SYNC Only. ADMIN Privileges
+    *
     * Call this when the schemaETag for the given tableId has changed on the server.
     * <p/>
     * This is a combination of:
@@ -119,9 +135,9 @@ public class OdkDbSerializedInterface {
     * deleteAllSyncETagsUnderServer(sc.getAppName(), db, tableInstanceFilesUri);
     * }
     */
-   public void serverTableSchemaETagChanged(String appName, OdkDbHandle dbHandleName,
+   public void privilegedServerTableSchemaETagChanged(String appName, OdkDbHandle dbHandleName,
        String tableId, String schemaETag, String tableInstanceFilesUri) throws RemoteException {
-      dbInterface.serverTableSchemaETagChanged(appName, dbHandleName, tableId, schemaETag,
+      dbInterface.privilegedServerTableSchemaETagChanged(appName, dbHandleName, tableId, schemaETag,
           tableInstanceFilesUri);
    }
 
@@ -384,7 +400,7 @@ public class OdkDbSerializedInterface {
     * @param orderByElementKey elementKey to order the results by
     * @param orderByDirection  either "ASC" or "DESC"
     * @return An {@link OdkDbChunk} containing the first partition of the {@link UserTable}. Use
-    * {@link getChunk} to retrieve the rest of the chunks.
+    * {@link OdkDbInterface#getChunk(ParcelUuid)} to retrieve the rest of the chunks.
     */
    public UserTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns columnDefns, String whereClause, String[] selectionArgs, String[] groupBy,
@@ -408,7 +424,7 @@ public class OdkDbSerializedInterface {
     * @param sqlCommand
     * @param sqlBindArgs
     * @return An {@link OdkDbChunk} containing the first partition of the {@link RawUserTable}. Use
-    * {@link getChunk} to retrieve the rest of the chunks.
+    * {@link OdkDbInterface#getChunk(ParcelUuid)} to retrieve the rest of the chunks.
     */
    public RawUserTable arbitraryQuery(String appName, OdkDbHandle dbHandleName, String sqlCommand,
        String[] sqlBindArgs) throws RemoteException {
@@ -439,10 +455,11 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     * @param tableId
-    * @param metadata     a List<KeyValueStoreEntry>
+    * @param entries      List<KeyValueStoreEntry>
     * @param clear        if true then delete the existing set of values for this tableId
     *                     before inserting the new ones.
-    */
+    * @throws RemoteException
+     */
    public void replaceDBTableMetadataList(String appName, OdkDbHandle dbHandleName, String tableId,
        List<KeyValueStoreEntry> entries, boolean clear) throws RemoteException {
 
@@ -458,7 +475,8 @@ public class OdkDbSerializedInterface {
     * @param tableId
     * @param partition
     * @param aspect
-    * @param metadata     a List<KeyValueStoreEntry>
+    * @param entries     List<KeyValueStoreEntry>
+    * @throws RemoteException
     */
    public void replaceDBTableMetadataSubList(String appName, OdkDbHandle dbHandleName,
        String tableId, String partition, String aspect, List<KeyValueStoreEntry> entries)
@@ -469,6 +487,8 @@ public class OdkDbSerializedInterface {
    }
 
    /**
+    * SYNC Only. ADMIN Privileges
+    *
     * Update the schema and data-modification ETags of a given tableId.
     *
     * @param appName
@@ -477,13 +497,17 @@ public class OdkDbSerializedInterface {
     * @param schemaETag
     * @param lastDataETag
     */
-   public void updateDBTableETags(String appName, OdkDbHandle dbHandleName, String tableId,
+   public void privilegedUpdateDBTableETags(String appName, OdkDbHandle dbHandleName, String
+       tableId,
        String schemaETag, String lastDataETag) throws RemoteException {
 
-      dbInterface.updateDBTableETags(appName, dbHandleName, tableId, schemaETag, lastDataETag);
+      dbInterface.privilegedUpdateDBTableETags(appName, dbHandleName, tableId, schemaETag,
+          lastDataETag);
    }
 
    /**
+    * SYNC Only. ADMIN Privileges
+    *
     * Update the timestamp of the last entirely-successful synchronization
     * attempt of this table.
     *
@@ -491,10 +515,11 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param tableId
     */
-   public void updateDBTableLastSyncTime(String appName, OdkDbHandle dbHandleName, String tableId)
+   public void privilegedUpdateDBTableLastSyncTime(String appName, OdkDbHandle dbHandleName,
+       String tableId)
        throws RemoteException {
 
-      dbInterface.updateDBTableLastSyncTime(appName, dbHandleName, tableId);
+      dbInterface.privilegedUpdateDBTableLastSyncTime(appName, dbHandleName, tableId);
    }
 
    /**
@@ -502,7 +527,7 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param tableId
     * @param rowId
-    * @return the sync state of the row (use {@link SyncState.valueOf()} to reconstruct), or null if the
+    * @return the sync state of the row (use SyncState.valueOf() to reconstruct), or null if the
     * row does not exist.
     */
    public String getSyncState(String appName, OdkDbHandle dbHandleName, String tableId,
@@ -512,6 +537,8 @@ public class OdkDbSerializedInterface {
    }
 
    /**
+    * SYNC Only. ADMIN Privileges!
+    *
     * Update the ETag and SyncState of a given rowId. There should be exactly one
     * record for this rowId in thed database (i.e., no conflicts or checkpoints).
     *
@@ -522,11 +549,13 @@ public class OdkDbSerializedInterface {
     * @param rowETag
     * @param syncState    - the SyncState.name()
     */
-   public void updateRowETagAndSyncState(String appName, OdkDbHandle dbHandleName, String tableId,
+   public void privilegedUpdateRowETagAndSyncState(String appName, OdkDbHandle dbHandleName,
+       String tableId,
        String rowId, String rowETag, String syncState) throws RemoteException {
 
       dbInterface
-          .updateRowETagAndSyncState(appName, dbHandleName, tableId, rowId, rowETag, syncState);
+          .privilegedUpdateRowETagAndSyncState(appName, dbHandleName, tableId, rowId, rowETag,
+              syncState);
    }
 
    /**
@@ -570,6 +599,8 @@ public class OdkDbSerializedInterface {
    }
 
    /**
+    * SYNC ONLY
+    *
     * A combination of:
     * <p/>
     * deleteServerConflictRowWithId(appName, db, tableId, rowId)
@@ -584,18 +615,42 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param tableId
     * @param orderedColumns
-    * @param cvValues
+    * @param cvValues   the field values on the server
     * @param rowId
     * @param localRowConflictType expected to be one of ConflictType.LOCAL_DELETED_OLD_VALUES (0) or
     *                             ConflictType.LOCAL_UPDATED_UPDATED_VALUES (1)
     */
-   public UserTable placeRowIntoServerConflictWithId(String appName, OdkDbHandle dbHandleName,
+   public UserTable privilegedPlaceRowIntoConflictWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId,
        int localRowConflictType) throws RemoteException {
 
       return fetchAndRebuildChunks(dbInterface
-          .placeRowIntoServerConflictWithId(appName, dbHandleName, tableId, orderedColumns,
+          .privilegedPlaceRowIntoConflictWithId(appName, dbHandleName, tableId, orderedColumns,
               cvValues, rowId, localRowConflictType), UserTable.CREATOR);
+   }
+
+   /**
+    * SYNC, CSV Import ONLY
+    *
+    * Insert the given rowId with the values in the cvValues. This is data from
+    * the server. All metadata values must be specified in the cvValues (even null values).
+    *
+    * If a row with this rowId is present, then an exception is thrown.
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param orderedColumns
+    * @param cvValues
+    * @param rowId
+    * @return single-row table with the content of the inserted row
+    */
+   public UserTable privilegedInsertRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
+                                    OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
+
+      return fetchAndRebuildChunks(dbInterface
+                      .privilegedInsertRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
+              UserTable.CREATOR);
    }
 
    /**
@@ -654,8 +709,10 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     * @param tableId
-    * @param orderedColumns
+    * @param orderedDefns
     * @param rowId
+    * @return table with the content for this rowId. May be empty.
+    * @throws RemoteException
     */
    public UserTable deleteAllCheckpointRowsWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedDefns, String rowId) throws RemoteException {
@@ -674,14 +731,39 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     * @param tableId
-    * @param orderedColumns
+    * @param orderedDefns
     * @param rowId
+    * @return table with the content for this rowId. May be empty.
+    * @throws RemoteException
     */
    public UserTable deleteLastCheckpointRowWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedDefns, String rowId) throws RemoteException {
 
       return fetchAndRebuildChunks(dbInterface
               .deleteLastCheckpointRowWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
+          UserTable.CREATOR);
+   }
+
+   /**
+    * SYNC, Conflict Resolution ONLY
+    *
+    * Delete the specified rowId in this tableId. This is enforcing the server
+    * state on the device. I.e., the sync interaction instructed us to delete
+    * this row.
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param orderedDefns
+    * @param rowId
+    * @return table with the content for this rowId. May be empty. May be marked as deleted and awaiting sync
+    * @throws RemoteException
+    */
+   public UserTable privilegedDeleteRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
+       OrderedColumns orderedDefns, String rowId) throws RemoteException {
+
+      return fetchAndRebuildChunks(
+          dbInterface.privilegedDeleteRowWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
           UserTable.CREATOR);
    }
 
@@ -701,15 +783,17 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     * @param tableId
-    * @param orderedColumns
+    * @param orderedDefns
     * @param rowId
+    * @return table with the content for this rowId. May be empty. May be marked as deleted and awaiting sync
+    * @throws RemoteException
     */
    public UserTable deleteRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-       OrderedColumns orderedDefns, String rowId) throws RemoteException {
+                                    OrderedColumns orderedDefns, String rowId) throws RemoteException {
 
       return fetchAndRebuildChunks(
-          dbInterface.deleteRowWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
-          UserTable.CREATOR);
+              dbInterface.deleteRowWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
+              UserTable.CREATOR);
    }
 
    /**
@@ -722,10 +806,11 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     * @param tableId
-    * @param columnDefns
+    * @param orderedColumns
     * @param cvValues
     * @param rowId
-    * @return single-row table with the content of the saved-as-incomplete row
+    * @return single-row table with the content of the row as specified
+    * @throws RemoteException
     */
    public UserTable saveAsIncompleteMostRecentCheckpointRowWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, OrderedColumns orderedColumns,
@@ -746,10 +831,11 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     * @param tableId
-    * @param columnDefns
+    * @param orderedColumns
     * @param cvValues
     * @param rowId
     * @return single-row table with the content of the saved-as-incomplete row
+    * @throws RemoteException
     */
    public UserTable saveAsCompleteMostRecentCheckpointRowWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, OrderedColumns orderedColumns,
@@ -781,6 +867,31 @@ public class OdkDbSerializedInterface {
       return fetchAndRebuildChunks(dbInterface
               .updateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
           UserTable.CREATOR);
+   }
+
+   /**
+    * SYNC, CSV Import ONLY
+    *
+    * Update the given rowId with the values in the cvValues. All field
+    * values are specified in the cvValues. This is a server-induced update
+    * of the row to match all fields from the server. An error is thrown if
+    * there isn't a row matching this rowId or if there are checkpoint or
+    * conflict entries for this rowId.
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param orderedColumns
+    * @param cvValues
+    * @param rowId
+    * @return single-row table with the content of the saved-as-incomplete row
+    */
+   public UserTable privilegedUpdateRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
+                                    OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
+
+      return fetchAndRebuildChunks(dbInterface
+                      .privilegedUpdateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
+              UserTable.CREATOR);
    }
 
    /**

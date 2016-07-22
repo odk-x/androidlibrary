@@ -29,8 +29,28 @@ import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.TableHealthInfo;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 
+/**
+* any interface that begins privileged.... will run with elevated privileges.
+* I.e., it has no user-permissions restrictions imposed upon it. For the most
+* part, these should be called only by:
+* (1) SYNC
+* (2) InitializationTask
+* (3) CSV Import
+*/
 interface OdkDbInterface {
-    
+
+  /**
+   * Return the roles of a verified username or google account.
+   * If the username or google account have not been verified,
+   * or if the server settings specify to use an anonymous user,
+   * then return an empty string.
+   *
+   * @param appName
+   *
+   * @return empty string or JSON serialization of an array of ROLES. See RoleConsts for possible values.
+   */
+  String getRolesList(in String appName);
+
   /**
    * Obtain a databaseHandleName
    *
@@ -50,6 +70,8 @@ interface OdkDbInterface {
    void closeDatabase(in String appName, in OdkDbHandle dbHandleName); 
 
   /**
+   * SYNC Only. ADMIN Privileges
+   *
    * Call this when the schemaETag for the given tableId has changed on the server.
    *
    * This is a combination of:
@@ -88,7 +110,7 @@ interface OdkDbInterface {
    *   deleteAllSyncETagsUnderServer(sc.getAppName(), db, tableInstanceFilesUri);
    * }
    */
-  void serverTableSchemaETagChanged(in String appName, in OdkDbHandle dbHandleName,
+  void privilegedServerTableSchemaETagChanged(in String appName, in OdkDbHandle dbHandleName,
     in String tableId, in String schemaETag, in String tableInstanceFilesUri);
 
   /**
@@ -374,7 +396,9 @@ interface OdkDbInterface {
       in String tableId, in String partition, in String aspect,
       in List<KeyValueStoreEntry> metaData);
 
-    /**
+  /**
+   * SYNC Only. ADMIN Privileges
+   *
    * Update the schema and data-modification ETags of a given tableId.
    *
    * @param appName
@@ -383,11 +407,13 @@ interface OdkDbInterface {
    * @param schemaETag
    * @param lastDataETag
    */
-  void updateDBTableETags(in String appName, in OdkDbHandle dbHandleName,
+  void privilegedUpdateDBTableETags(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in String schemaETag,
       in String lastDataETag);
 
   /**
+   * SYNC Only. ADMIN Privileges
+   *
    * Update the timestamp of the last entirely-successful synchronization
    * attempt of this table.
    *
@@ -395,7 +421,8 @@ interface OdkDbInterface {
    * @param dbHandleName
    * @param tableId
    */
-  void updateDBTableLastSyncTime(in String appName, in OdkDbHandle dbHandleName, in String tableId);
+  void privilegedUpdateDBTableLastSyncTime(in String appName, in OdkDbHandle dbHandleName, in
+  String tableId);
 
   /////////////////////////////////////////////////////////////////////////////////////
   // Row level changes
@@ -414,6 +441,8 @@ interface OdkDbInterface {
       in String tableId, in String rowId);
 
   /**
+   * SYNC Only. ADMIN Privileges
+   *
    * Update the ETag and SyncState of a given rowId. There should be exactly one
    * record for this rowId in thed database (i.e., no conflicts or checkpoints).
    *
@@ -424,7 +453,7 @@ interface OdkDbInterface {
    * @param rowETag
    * @param syncState - the SyncState.name()
    */
-  void updateRowETagAndSyncState(in String appName, in OdkDbHandle dbHandleName,
+  void privilegedUpdateRowETagAndSyncState(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in String rowId, in String rowETag, in String syncState);
 
   /**
@@ -459,6 +488,8 @@ interface OdkDbInterface {
       in String tableId, in OrderedColumns orderedDefns, in String rowId);
 
   /**
+   * SYNC ONLY
+   *
    * A combination of:
    *
    * deleteServerConflictRowWithId(appName, db, tableId, rowId)
@@ -473,15 +504,35 @@ interface OdkDbInterface {
    * @param dbHandleName
    * @param tableId
    * @param orderedColumns
-   * @param cvValues
+   * @param cvValues  server's field values for this row
    * @param rowId
    * @param localRowConflictType
    *          expected to be one of ConflictType.LOCAL_DELETED_OLD_VALUES (0) or
    *          ConflictType.LOCAL_UPDATED_UPDATED_VALUES (1)
    */
-  OdkDbChunk placeRowIntoServerConflictWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk privilegedPlaceRowIntoConflictWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues,
       in String rowId, in int localRowConflictType);
+
+  /**
+   * SYNC, CSV Import ONLY
+   *
+   * Insert the given rowId with the values in the cvValues. This is data from
+   * the server. All metadata values must be specified in the cvValues (even null values).
+   *
+   * If a row with this rowId is present, then an exception is thrown.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param orderedColumns
+   * @param cvValues
+   * @param rowId
+   * @return single-row table with the content of the inserted row
+   */
+  OdkDbChunk privilegedInsertRowWithId(in String appName, in OdkDbHandle dbHandleName,
+  	  in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+
 
   /**
    * Inserts a checkpoint row for the given rowId in the tableId. Checkpoint
@@ -574,6 +625,23 @@ interface OdkDbInterface {
 
 
   /**
+   * SYNC, conflict resolution ONLY
+   *
+   * Delete the specified rowId in this tableId. This is enforcing the server
+   * state on the device. I.e., the sync interaction instructed us to delete
+   * this row.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param orderedColumns
+   * @param rowId
+   */
+  OdkDbChunk privilegedDeleteRowWithId(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId, in OrderedColumns orderedColumns, in String rowId);
+
+
+  /**
    * Update all rows for the given rowId to SavepointType 'INCOMPLETE' and
    * remove all but the most recent row. When used with a rowId that has
    * checkpoints, this updates to the most recent checkpoint and removes any
@@ -627,6 +695,27 @@ interface OdkDbInterface {
    * @return single-row table with the content of the saved-as-incomplete row
    */
   OdkDbChunk updateRowWithId(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId,
+      in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+
+  /**
+   * SYNC, CSV Import ONLY
+   *
+   * Update the given rowId with the values in the cvValues. All field
+   * values are specified in the cvValues. This is a server-induced update
+   * of the row to match all fields from the server. An error is thrown if
+   * there isn't a row matching this rowId or if there are checkpoint or
+   * conflict entries for this rowId.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param orderedColumns
+   * @param cvValues
+   * @param rowId
+   * @return single-row table with the content of the saved-as-incomplete row
+   */
+  OdkDbChunk privilegedUpdateRowWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId,
       in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
 

@@ -14,13 +14,8 @@
 
 package org.opendatakit.common.android.provider;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 
 import android.provider.BaseColumns;
 
@@ -71,8 +66,8 @@ public class DataTableColumns implements BaseColumns {
   // there is nothing included. This has been a problem when downloading a
   // table from the server.
   public static final String DEFAULT_ROW_ETAG = null;
-  public static final String DEFAULT_FILTER_TYPE = Scope.EMPTY_SCOPE.getType().name();
-  public static final String DEFAULT_FILTER_VALUE = Scope.EMPTY_SCOPE.getValue();
+  public static final String DEFAULT_FILTER_TYPE = RowFilterScope.EMPTY_ROW_FILTER.getType().name();
+  public static final String DEFAULT_FILTER_VALUE = RowFilterScope.EMPTY_ROW_FILTER.getValue();
   // the default _savepoint_creator is: PropertiesSingleton.getActiveUser()
   // the default _locale is: PropertiesSingleton.getLocale()
 

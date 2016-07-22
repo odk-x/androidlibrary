@@ -14,6 +14,11 @@
 
 package org.opendatakit;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.opendatakit.common.android.utilities.ODKFileUtils;
+
+import java.util.ArrayList;
+
 /**
  * @author mitchellsundt@gmail.com
  */
@@ -49,4 +54,25 @@ public class RoleConsts {
      * Commonly, these users have ROLE_SITE_ACCESS_ADMIN
      */
     public static final String ROLE_ADMINISTRATOR = "ROLE_ADMINISTER_TABLES";
+
+   /**
+    * List of the roles the highest privileged user would have.
+    */
+   public static final String ADMIN_ROLES_LIST;
+
+    static {
+        ArrayList<String> adminRoleList = new ArrayList<>();
+        adminRoleList.add(RoleConsts.ROLE_USER);
+        adminRoleList.add(RoleConsts.ROLE_SUPER_USER);
+        adminRoleList.add(RoleConsts.ROLE_ADMINISTRATOR);
+
+        String value = null;
+        try {
+            value = ODKFileUtils.mapper.writeValueAsString(adminRoleList);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        ADMIN_ROLES_LIST = value;
+    }
+
 }
