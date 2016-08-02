@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.common.android.utilities;
+package org.opendatakit.database.utilities;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,6 +29,7 @@ public final class OdkDbChunkUtil {
 
   private OdkDbChunkUtil() {
     // This class should never be instantiated
+    throw new IllegalStateException("Never Instantiate this static class");
   }
 
   /**

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.common.android.utilities;
+package org.opendatakit.database.utilities;
 
 import org.opendatakit.common.android.provider.DataTableColumns;
 
@@ -23,6 +23,7 @@ public class OdkDbQueryUtil {
 
    private OdkDbQueryUtil() {
       // This class should never be instantiated
+      throw new IllegalStateException("Never Instantiate this static class");
    }
 
    public static final String buildSqlStatement(String tableId, String whereClause,

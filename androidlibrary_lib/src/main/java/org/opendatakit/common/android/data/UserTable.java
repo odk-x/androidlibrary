@@ -16,7 +16,6 @@
 package org.opendatakit.common.android.data;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +28,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import org.opendatakit.common.android.utilities.DataUtil;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.common.android.utilities.OdkDbQueryUtil;
+import org.opendatakit.database.utilities.OdkDbQueryUtil;
 import org.opendatakit.common.android.utilities.WebLogger;
 import org.opendatakit.database.service.OdkDbRow;
 import org.opendatakit.database.service.OdkDbTable;
 import org.opendatakit.database.service.ParentTable;
+import org.opendatakit.database.utilities.OdkMarshalUtil;
 
 /**
  * This class represents a table. This can be conceptualized as a list of rows.
@@ -355,19 +355,19 @@ public class UserTable implements Parcelable, ParentTable{
   @Override
   public void writeToParcel(Parcel out, int flags) {
     out.writeString(mSqlWhereClause);
-    DataUtil.marshallStringArray(out, mSqlGroupByArgs);
+    OdkMarshalUtil.marshallStringArray(out, mSqlGroupByArgs);
     out.writeString(mSqlHavingClause);
     this.mColumnDefns.writeToParcel(out, flags);
-    DataUtil.marshallStringArray(out, mAdminColumnOrder);
+    OdkMarshalUtil.marshallStringArray(out, mAdminColumnOrder);
     this.mBaseTable.writeToParcel(out, flags);
   }
 
   public UserTable(Parcel in) {
     this.mSqlWhereClause = in.readString();
-    this.mSqlGroupByArgs = DataUtil.unmarshallStringArray(in);
+    this.mSqlGroupByArgs = OdkMarshalUtil.unmarshallStringArray(in);
     this.mSqlHavingClause = in.readString();
     this.mColumnDefns = new OrderedColumns(in);
-    this.mAdminColumnOrder = DataUtil.unmarshallStringArray(in);
+    this.mAdminColumnOrder = OdkMarshalUtil.unmarshallStringArray(in);
     this.mBaseTable = new OdkDbTable(in);
     this.mBaseTable.registerParentTable(this);
     this.mElementKeyToIndex = mBaseTable.generateElementKeyToIndex();
