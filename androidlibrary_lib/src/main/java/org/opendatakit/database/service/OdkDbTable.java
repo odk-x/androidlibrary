@@ -128,11 +128,17 @@ public class OdkDbTable implements Parcelable {
 
     mSqlCommand = in.readString();
 
-    mSqlSelectionArgs = OdkMarshalUtil.unmarshallStringArray(in);
-    mOrderByDirections = OdkMarshalUtil.unmarshallStringArray(in);
-    mOrderByElementKeys = OdkMarshalUtil.unmarshallStringArray(in);
-    mPrimaryKey = OdkMarshalUtil.unmarshallStringArray(in);
-    mElementKeyForIndex = OdkMarshalUtil.unmarshallStringArray(in);
+    try {
+      mSqlSelectionArgs = OdkMarshalUtil.unmarshallStringArray(in);
+      mOrderByDirections = OdkMarshalUtil.unmarshallStringArray(in);
+      mOrderByElementKeys = OdkMarshalUtil.unmarshallStringArray(in);
+      mPrimaryKey = OdkMarshalUtil.unmarshallStringArray(in);
+      mElementKeyForIndex = OdkMarshalUtil.unmarshallStringArray(in);
+    } catch (Throwable t) {
+      Log.e(TAG, t.getMessage());
+      Log.e(TAG, Log.getStackTraceString(t));
+      throw t;
+    }
 
     dataCount = in.readInt();
     mRows = new ArrayList<>(dataCount);
@@ -232,6 +238,7 @@ public class OdkDbTable implements Parcelable {
     } catch (Throwable t) {
       Log.e(TAG, t.getMessage());
       Log.e(TAG, Log.getStackTraceString(t));
+      throw t;
     }
 
     out.writeInt(mRows.size());
