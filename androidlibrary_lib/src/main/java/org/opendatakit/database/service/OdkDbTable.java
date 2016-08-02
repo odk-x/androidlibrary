@@ -18,7 +18,7 @@ package org.opendatakit.database.service;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import org.opendatakit.common.android.utilities.DataUtil;
+
 import org.opendatakit.database.utilities.OdkMarshalUtil;
 
 import java.util.ArrayList;
@@ -132,11 +132,17 @@ public class OdkDbTable implements Parcelable {
 
     mSqlCommand = in.readString();
 
-    mSqlSelectionArgs = DataUtil.unmarshallStringArray(in);
-    mOrderByDirections = DataUtil.unmarshallStringArray(in);
-    mOrderByElementKeys = DataUtil.unmarshallStringArray(in);
-    mPrimaryKey = DataUtil.unmarshallStringArray(in);
-    mElementKeyForIndex = DataUtil.unmarshallStringArray(in);
+    try {
+      mSqlSelectionArgs = OdkMarshalUtil.unmarshallStringArray(in);
+      mOrderByDirections = OdkMarshalUtil.unmarshallStringArray(in);
+      mOrderByElementKeys = OdkMarshalUtil.unmarshallStringArray(in);
+      mPrimaryKey = OdkMarshalUtil.unmarshallStringArray(in);
+      mElementKeyForIndex = OdkMarshalUtil.unmarshallStringArray(in);
+    } catch (Throwable t) {
+      Log.e(TAG, t.getMessage());
+      Log.e(TAG, Log.getStackTraceString(t));
+      throw t;
+    }
 
     dataCount = in.readInt();
     mRows = new ArrayList<>(dataCount);
@@ -228,13 +234,15 @@ public class OdkDbTable implements Parcelable {
     out.writeString(mSqlCommand);
 
     try {
-      DataUtil.marshallStringArray(out, mSqlSelectionArgs);
-      DataUtil.marshallStringArray(out, mOrderByDirections);
-      DataUtil.marshallStringArray(out, mOrderByElementKeys);
-      DataUtil.marshallStringArray(out, mPrimaryKey);
-      DataUtil.marshallStringArray(out, mElementKeyForIndex);
+      OdkMarshalUtil.marshallStringArray(out, mSqlSelectionArgs);
+      OdkMarshalUtil.marshallStringArray(out, mOrderByDirections);
+      OdkMarshalUtil.marshallStringArray(out, mOrderByElementKeys);
+      OdkMarshalUtil.marshallStringArray(out, mPrimaryKey);
+      OdkMarshalUtil.marshallStringArray(out, mElementKeyForIndex);
     } catch (Throwable t) {
-      t.toString();
+      Log.e(TAG, t.getMessage());
+      Log.e(TAG, Log.getStackTraceString(t));
+      throw t;
     }
 
     out.writeInt(mRows.size());

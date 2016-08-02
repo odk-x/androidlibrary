@@ -24,14 +24,14 @@ import org.opendatakit.common.android.data.ColumnList;
 import org.opendatakit.common.android.data.OrderedColumns;
 import org.opendatakit.common.android.data.TableDefinitionEntry;
 import org.opendatakit.common.android.data.UserTable;
-import org.opendatakit.common.android.utilities.OdkDbChunkUtil;
-import org.opendatakit.common.android.utilities.OdkDbQueryUtil;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.OdkDbHandle;
 import org.opendatakit.database.service.OdkDbInterface;
 import org.opendatakit.database.service.OdkDbTable;
 import org.opendatakit.database.service.TableHealthInfo;
+import org.opendatakit.database.utilities.OdkDbChunkUtil;
+import org.opendatakit.database.utilities.OdkDbQueryUtil;
 
 import java.io.Serializable;
 import java.util.LinkedList;
