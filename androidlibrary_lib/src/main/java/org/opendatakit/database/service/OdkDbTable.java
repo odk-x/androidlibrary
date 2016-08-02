@@ -17,6 +17,7 @@ package org.opendatakit.database.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import org.opendatakit.common.android.utilities.DataUtil;
 
 import java.util.*;
@@ -228,7 +229,8 @@ public class OdkDbTable implements Parcelable {
       DataUtil.marshallStringArray(out, mPrimaryKey);
       DataUtil.marshallStringArray(out, mElementKeyForIndex);
     } catch (Throwable t) {
-      t.toString();
+      Log.e(TAG, t.getMessage());
+      Log.e(TAG, Log.getStackTraceString(t));
     }
 
     out.writeInt(mRows.size());
