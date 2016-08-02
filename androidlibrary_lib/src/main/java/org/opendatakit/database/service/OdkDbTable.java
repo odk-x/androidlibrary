@@ -17,8 +17,9 @@ package org.opendatakit.database.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
+import android.util.Log;
 import org.opendatakit.common.android.utilities.DataUtil;
+import org.opendatakit.database.utilities.OdkMarshalUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;

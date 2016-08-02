@@ -20,6 +20,7 @@ import android.test.AndroidTestCase;
 
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 import org.opendatakit.database.service.OdkDbChunk;
+import org.opendatakit.database.utilities.OdkDbChunkUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;

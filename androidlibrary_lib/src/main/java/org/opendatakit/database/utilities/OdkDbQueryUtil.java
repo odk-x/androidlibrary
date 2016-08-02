@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.common.android.utilities;
+package org.opendatakit.database.utilities;
 
 import org.opendatakit.common.android.provider.DataTableColumns;
 
@@ -23,6 +23,7 @@ public class OdkDbQueryUtil {
 
    private OdkDbQueryUtil() {
       // This class should never be instantiated
+      throw new IllegalStateException("Never Instantiate this static class");
    }
 
    public static final String buildSqlStatement(String tableId, String whereClause,
@@ -53,16 +54,21 @@ public class OdkDbQueryUtil {
           (orderByDirection != null && orderByElementKey != null) && (orderByDirection.length
               == orderByElementKey.length);
       if (orderByElementKey != null && orderByElementKey.length != 0) {
-         s.append(" ORDER BY ");
          boolean first = true;
          for (int i = 0; i < orderByElementKey.length; i++) {
-            if (!first) {
+            if (orderByElementKey == null || orderByElementKey.length == 0) {
+               continue;
+            }
+
+            if (first) {
+               s.append(" ORDER BY ");
+            } else {
                s.append(", ");
                first = false;
             }
             s.append(orderByElementKey[i]);
 
-            if (directionSpecified) {
+            if (directionSpecified && orderByDirection[i] != null && orderByDirection.length > 0) {
                s.append(" " + orderByDirection[i]);
             } else {
                s.append(" ASC");

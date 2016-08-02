@@ -21,13 +21,17 @@ import android.os.Parcelable;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.common.android.provider.DataTableColumns;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 import org.opendatakit.common.android.utilities.DataUtil;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.common.android.utilities.OdkDbQueryUtil;
+import org.opendatakit.database.utilities.OdkDbQueryUtil;
 import org.opendatakit.common.android.utilities.WebLogger;
 import org.opendatakit.database.service.OdkDbRow;
 import org.opendatakit.database.service.OdkDbTable;
 import org.opendatakit.database.service.ParentTable;
+import org.opendatakit.database.utilities.OdkMarshalUtil;
 
 import java.io.File;
 import java.util.HashMap;
