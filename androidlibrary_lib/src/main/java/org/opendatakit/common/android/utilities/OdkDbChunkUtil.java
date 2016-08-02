@@ -18,10 +18,21 @@ package org.opendatakit.common.android.utilities;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+
 import org.opendatakit.database.service.OdkDbChunk;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 public final class OdkDbChunkUtil {
 
@@ -40,7 +51,7 @@ public final class OdkDbChunkUtil {
    * @param prevChunk  The previous chunk in the payload. Needed for adding linked list pointers
    * @return The chunk
    */
-  private static final OdkDbChunk createChunk(byte[] sourceData, int dataIndex, int chunkSize,
+  private static OdkDbChunk createChunk(byte[] sourceData, int dataIndex, int chunkSize,
       OdkDbChunk prevChunk) {
 
     UUID chunkID = UUID.randomUUID();
@@ -111,7 +122,7 @@ public final class OdkDbChunkUtil {
    * @param chunkSize
    * @return
    */
-  private static final List<OdkDbChunk> createChunkList(byte[] bytes, int chunkSize) {
+  private static List<OdkDbChunk> createChunkList(byte[] bytes, int chunkSize) {
     // Partition bytes into chunks, inserting them into the list along the way
     int dataIndex = 0;
     OdkDbChunk currChunk = null;
@@ -191,7 +202,7 @@ public final class OdkDbChunkUtil {
    * @param chunks
    * @return
    */
-  private static final byte[] getData(List<OdkDbChunk> chunks) {
+  private static byte[] getData(List<OdkDbChunk> chunks) {
     // Find the size of data
     int dataSize = 0;
     Iterator<OdkDbChunk> iterator = chunks.iterator();

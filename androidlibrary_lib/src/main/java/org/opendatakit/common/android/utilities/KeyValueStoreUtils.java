@@ -14,10 +14,10 @@
 
 package org.opendatakit.common.android.utilities;
 
-import android.os.RemoteException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.type.CollectionType;
+
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 

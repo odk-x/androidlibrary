@@ -17,9 +17,14 @@ package org.opendatakit.database.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import org.opendatakit.common.android.utilities.DataUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This is the generic parent table used inside the service. All other table objects should

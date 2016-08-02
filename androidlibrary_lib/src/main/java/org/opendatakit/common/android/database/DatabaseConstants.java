@@ -14,8 +14,6 @@
 
 package org.opendatakit.common.android.database;
 
-import org.opendatakit.common.android.provider.DataTableColumns;
-
 public class DatabaseConstants {
 
   /**

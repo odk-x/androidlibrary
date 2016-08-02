@@ -15,25 +15,27 @@
 package org.opendatakit.database;
 
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
-import org.opendatakit.common.android.data.*;
-import org.opendatakit.common.android.provider.DataTableColumns;
-import org.opendatakit.common.android.utilities.ODKCursorUtils;
+
+import org.opendatakit.common.android.data.ColumnList;
+import org.opendatakit.common.android.data.OrderedColumns;
+import org.opendatakit.common.android.data.TableDefinitionEntry;
+import org.opendatakit.common.android.data.UserTable;
 import org.opendatakit.common.android.utilities.OdkDbChunkUtil;
 import org.opendatakit.common.android.utilities.OdkDbQueryUtil;
-import org.opendatakit.database.service.*;
+import org.opendatakit.database.service.KeyValueStoreEntry;
+import org.opendatakit.database.service.OdkDbChunk;
+import org.opendatakit.database.service.OdkDbHandle;
+import org.opendatakit.database.service.OdkDbInterface;
+import org.opendatakit.database.service.OdkDbTable;
+import org.opendatakit.database.service.TableHealthInfo;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 public class OdkDbSerializedInterface {
 

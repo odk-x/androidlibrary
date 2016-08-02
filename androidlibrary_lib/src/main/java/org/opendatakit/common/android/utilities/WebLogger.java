@@ -14,10 +14,10 @@
 
 package org.opendatakit.common.android.utilities;
 
+import org.opendatakit.common.android.utilities.StaticStateManipulator.IStaticFieldManipulator;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.opendatakit.common.android.utilities.StaticStateManipulator.IStaticFieldManipulator;
 
 /**
  * Logger that emits logs to the LOGGING_PATH and recycles them as needed.

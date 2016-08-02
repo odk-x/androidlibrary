@@ -14,11 +14,11 @@
 
 package org.opendatakit.common.android.logic;
 
-import java.io.File;
-import java.io.FileFilter;
-
 import org.opendatakit.common.android.logic.PropertyManager.DynamicPropertiesInterface;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
+
+import java.io.File;
+import java.io.FileFilter;
 
 /**
  * Implements property access methods that return dynamic values

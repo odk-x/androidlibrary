@@ -14,12 +14,12 @@
 
 package org.opendatakit.common.android.logic;
 
-import java.util.TreeMap;
+import android.content.Context;
 
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.common.android.utilities.StaticStateManipulator;
 
-import android.content.Context;
+import java.util.TreeMap;
 
 public class CommonToolProperties {
 

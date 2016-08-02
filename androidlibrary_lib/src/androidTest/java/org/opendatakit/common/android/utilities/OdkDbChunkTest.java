@@ -17,11 +17,16 @@ package org.opendatakit.common.android.utilities;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
+
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 import org.opendatakit.database.service.OdkDbChunk;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.UUID;
 
 public class OdkDbChunkTest extends AndroidTestCase {
 

@@ -15,6 +15,7 @@
 package org.opendatakit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.opendatakit.common.android.utilities.ODKFileUtils;
 
 import java.util.ArrayList;

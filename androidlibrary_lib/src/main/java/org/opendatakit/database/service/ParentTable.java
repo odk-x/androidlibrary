@@ -17,6 +17,5 @@ package org.opendatakit.database.service;
 
 
 public interface ParentTable {
-
-  public ParentTable getParentTable();
+  ParentTable getParentTable();
 }

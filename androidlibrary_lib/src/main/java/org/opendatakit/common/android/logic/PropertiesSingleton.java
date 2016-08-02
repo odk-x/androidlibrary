@@ -17,6 +17,7 @@ package org.opendatakit.common.android.logic;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.IntentConsts;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
@@ -24,8 +25,10 @@ import org.opendatakit.androidlibrary.R;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
 import org.opendatakit.common.android.utilities.WebLogger;
 
-import java.io.*;
-import java.lang.reflect.Method;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -385,7 +388,7 @@ public class PropertiesSingleton {
     // see if there are missing values in the general props
     // and update them from the mGeneralDefaults map.
     for (TreeMap.Entry<String, String> entry : mGeneralDefaults.entrySet()) {
-      if (mGeneralProps.containsKey(entry.getKey()) == false) {
+      if (!mGeneralProps.containsKey(entry.getKey())) {
         mGeneralProps.setProperty(entry.getKey(), entry.getValue());
         dirtyProps = true;
       }
@@ -402,7 +405,7 @@ public class PropertiesSingleton {
     // see if there are missing values in the device props
     // and update them from the mDeviceDefaults map.
     for (TreeMap.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
-      if (mDeviceProps.containsKey(entry.getKey()) == false) {
+      if (!mDeviceProps.containsKey(entry.getKey())) {
         mDeviceProps.setProperty(entry.getKey(), entry.getValue());
         dirtyProps = true;
       }

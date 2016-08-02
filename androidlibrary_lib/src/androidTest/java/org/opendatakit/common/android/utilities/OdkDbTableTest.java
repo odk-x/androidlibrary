@@ -16,12 +16,12 @@ package org.opendatakit.common.android.utilities;
 
 import android.os.Parcel;
 import android.test.AndroidTestCase;
+
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 import org.opendatakit.database.service.OdkDbRow;
 import org.opendatakit.database.service.OdkDbTable;
 
 import java.io.IOException;
-import java.util.*;
 
 public class OdkDbTableTest extends AndroidTestCase {
 
@@ -72,31 +72,31 @@ public class OdkDbTableTest extends AndroidTestCase {
     String[] rowValues1 = new String[TABLE_WIDTH];
     String[] rowValues2 = new String[TABLE_WIDTH];
 
-    int i = 0;
-    elementKeyForIndex[i] = COLUMN1;
-    rowValues1[i] = ROW1COL1;
-    rowValues2[i] = ROW2COL1;
-    i++;
+    int index = 0;
+    elementKeyForIndex[index] = COLUMN1;
+    rowValues1[index] = ROW1COL1;
+    rowValues2[index] = ROW2COL1;
+    index++;
 
-    elementKeyForIndex[i] = COLUMN2;
-    rowValues1[i] = ROW1COL2;
-    rowValues2[i] = ROW2COL2;
-    i++;
+    elementKeyForIndex[index] = COLUMN2;
+    rowValues1[index] = ROW1COL2;
+    rowValues2[index] = ROW2COL2;
+    index++;
 
-    elementKeyForIndex[i] = COLUMN3;
-    rowValues1[i] = ROW1COL3;
-    rowValues2[i] = ROW2COL3;
-    i++;
+    elementKeyForIndex[index] = COLUMN3;
+    rowValues1[index] = ROW1COL3;
+    rowValues2[index] = ROW2COL3;
+    index++;
 
-    elementKeyForIndex[i] = COLUMN4;
-    rowValues1[i] = ROW1COL4;
-    rowValues2[i] = ROW2COL4;
-    i++;
+    elementKeyForIndex[index] = COLUMN4;
+    rowValues1[index] = ROW1COL4;
+    rowValues2[index] = ROW2COL4;
+    index++;
 
-    elementKeyForIndex[i] = COLUMN5;
-    rowValues1[i] = ROW1COL5;
-    rowValues2[i] = ROW2COL5;
-    i++;
+    elementKeyForIndex[index] = COLUMN5;
+    rowValues1[index] = ROW1COL5;
+    rowValues2[index] = ROW2COL5;
+    index++;
 
     String sqlCmd = SQLCMD;
     String[] bindArgs = BINDARGS;
@@ -139,7 +139,7 @@ public class OdkDbTableTest extends AndroidTestCase {
     String[] sb = t.getSqlSelectionArgs();
     if ( sa != null && sb != null ) {
       assertEquals(sa.length, sb.length);
-      for ( i = 0 ; i < sa.length ; ++i ) {
+      for ( int i = 0 ; i < sa.length ; ++i ) {
         assertEquals(sa[i], sb[i]);
       }
     } else {
@@ -152,8 +152,8 @@ public class OdkDbTableTest extends AndroidTestCase {
     String[] eb = t.getOrderByElementKeys();
     if ( ea != null && eb != null ) {
       assertEquals(ea.length, eb.length);
-      for ( i = 0 ; i < ea.length ; ++i ) {
-        assertEquals(ea[i], eb[i]);
+      for ( index = 0 ; index < ea.length ; ++index ) {
+        assertEquals(ea[index], eb[index]);
       }
     } else {
       assertNull(ea);
@@ -165,8 +165,8 @@ public class OdkDbTableTest extends AndroidTestCase {
     String[] db = t.getOrderByDirections();
     if ( da != null && db != null ) {
       assertEquals(da.length, db.length);
-      for ( i = 0 ; i < da.length ; ++i ) {
-        assertEquals(da[i], db[i]);
+      for ( index = 0 ; index < da.length ; ++index ) {
+        assertEquals(da[index], db[index]);
       }
     } else {
       assertNull(da);
@@ -178,8 +178,8 @@ public class OdkDbTableTest extends AndroidTestCase {
     String[] pb = t.getPrimaryKey();
     if ( pa != null && pb != null ) {
       assertEquals(pa.length, pb.length);
-      for ( i = 0 ; i < pa.length ; ++i ) {
-        assertEquals(pa[i], pb[i]);
+      for ( index = 0 ; index < pa.length ; ++index ) {
+        assertEquals(pa[index], pb[index]);
       }
     } else {
       assertNull(pa);

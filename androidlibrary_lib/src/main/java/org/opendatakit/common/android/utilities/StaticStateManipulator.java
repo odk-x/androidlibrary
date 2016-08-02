@@ -66,7 +66,7 @@ public class StaticStateManipulator {
      * Implementers are expected to perform this 
      * resetting action (however they see fit).
      */
-    public void reset();
+    void reset();
   }
 
   private final ArrayList<IStaticFieldManipulator> mStaticManipulators = new ArrayList<IStaticFieldManipulator>();

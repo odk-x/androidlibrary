@@ -14,12 +14,13 @@
 
 package org.opendatakit.common.desktop;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import android.annotation.SuppressLint;
+
 import org.opendatakit.common.android.utilities.WebLoggerFactoryIf;
 import org.opendatakit.common.android.utilities.WebLoggerIf;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Replacement implementation for desktop deoployments (e.g., app-designer) and

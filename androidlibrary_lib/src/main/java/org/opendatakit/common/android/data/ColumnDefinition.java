@@ -15,6 +15,17 @@
  */
 package org.opendatakit.common.android.data;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import org.opendatakit.aggregate.odktables.rest.ElementDataType;
+import org.opendatakit.aggregate.odktables.rest.ElementType;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.common.android.provider.DataTableColumns;
+import org.opendatakit.common.android.utilities.NameUtil;
+import org.opendatakit.common.android.utilities.ODKFileUtils;
+import org.opendatakit.common.android.utilities.WebLogger;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,18 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.opendatakit.aggregate.odktables.rest.ElementDataType;
-import org.opendatakit.aggregate.odktables.rest.ElementType;
-import org.opendatakit.aggregate.odktables.rest.SyncState;
-import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.common.android.provider.DataTableColumns;
-import org.opendatakit.common.android.utilities.NameUtil;
-import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.common.android.utilities.WebLogger;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class ColumnDefinition implements Comparable<ColumnDefinition> {
   private static final String TAG = "ColumnDefinition";
@@ -186,7 +185,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
   private static class ColumnContainer {
     public ColumnDefinition defn = null;
     public ArrayList<String> children = null;
-  };
+  }
 
   /**
    * Construct the rich ColumnDefinition objects for a table from the underlying

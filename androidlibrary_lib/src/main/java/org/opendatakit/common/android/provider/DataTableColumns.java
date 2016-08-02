@@ -14,10 +14,10 @@
 
 package org.opendatakit.common.android.provider;
 
+import android.provider.BaseColumns;
+
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
-
-import android.provider.BaseColumns;
 
 /**
  * Metadata Columns added to the user-defined data tables.

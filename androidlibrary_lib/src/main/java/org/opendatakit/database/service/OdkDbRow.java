@@ -17,14 +17,18 @@ package org.opendatakit.database.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
 import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.common.android.utilities.WebLogger;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * This represents a single row of data in a table.
@@ -168,18 +172,19 @@ public final class OdkDbRow implements Parcelable {
       }
       if (clazz == Long.class) {
         Long l = Long.parseLong(value);
-        return (T) (Long) l;
+        return (T) l;
       } else if (clazz == Integer.class) {
         Integer l = Integer.parseInt(value);
-        return (T) (Integer) l;
+        return (T) l;
       } else if (clazz == Double.class) {
         Double d = Double.parseDouble(value);
-        return (T) (Double) d;
+        return (T) d;
       } else if (clazz == String.class) {
-        return (T) (String) value;
+        return (T) value;
       } else if (clazz == Boolean.class) {
         // booleans are stored as integer 1 or 0 in user tables.
-        return (T) (Boolean) Boolean.valueOf(!value.equals("0"));
+        Boolean b = Boolean.valueOf(!value.equals("0"));
+        return (T) b;
       } else if (clazz == ArrayList.class) {
         // json deserialization of an array
         return (T) ODKFileUtils.mapper.readValue(value, ArrayList.class);

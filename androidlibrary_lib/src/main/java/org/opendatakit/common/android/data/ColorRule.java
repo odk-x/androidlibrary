@@ -15,14 +15,13 @@
  */
 package org.opendatakit.common.android.data;
 
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.opendatakit.database.service.OdkDbRow;
+
+import java.util.TreeMap;
+import java.util.UUID;
 
 /**
  * This is a single rule specifying a color for a given datum.
@@ -34,7 +33,7 @@ public class ColorRule {
 
   public static final String TAG = "ColColorRule";
 
-  public static enum RuleType {
+  public enum RuleType {
 
     LESS_THAN("<"), 
     LESS_THAN_OR_EQUAL("<="), 

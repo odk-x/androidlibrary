@@ -15,6 +15,7 @@
 package org.opendatakit.common.android.utilities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
@@ -124,9 +125,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(MY_KEY, e.key);
       assertEquals(ElementDataType.bool, ElementDataType.valueOf(e.type));
       assertEquals("1", e.value);
-
-      Boolean value = Boolean.TRUE;
-      assertEquals(value, KeyValueStoreUtils.getBoolean(APP_NAME, e));
+      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(APP_NAME, e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -141,9 +140,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(MY_KEY, e.key);
       assertEquals(ElementDataType.array, ElementDataType.valueOf(e.type));
       assertEquals("1", e.value);
-
-      Boolean value = Boolean.TRUE;
-      assertEquals(value, KeyValueStoreUtils.getBoolean(APP_NAME, e));
+      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(APP_NAME, e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -158,9 +155,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(MY_KEY, e.key);
       assertEquals(ElementDataType.bool, ElementDataType.valueOf(e.type));
       assertEquals(VALUE, e.value);
-
-      Boolean value = Boolean.TRUE;
-      assertEquals(value, KeyValueStoreUtils.getBoolean(APP_NAME, e));
+      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(APP_NAME, e));
    }
 
    @Test

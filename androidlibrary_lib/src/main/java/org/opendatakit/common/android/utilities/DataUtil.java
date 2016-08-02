@@ -15,13 +15,8 @@
  */
 package org.opendatakit.common.android.utilities;
 
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import android.os.Parcel;
+
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -30,6 +25,12 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
+
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * TODO: consolidate dateTime handling with DateTimeUtils
@@ -116,7 +117,6 @@ public class DataUtil {
     private static final String USER_LONG_FORMAT = "M/d/yyyy h:mm:ssa";
 
     private final Locale locale;
-    private final DateTimeZone tz;
     private final DateTimeFormatter userFullParser;
     private final DateTimeFormatter[] userPartialParsers;
     private final DateTimeFormatter userShortFormatter;
@@ -124,14 +124,14 @@ public class DataUtil {
 
     public DataUtil(Locale locale, TimeZone tz) {
         this.locale = locale;
-        this.tz = DateTimeZone.forTimeZone(tz);
+        DateTimeZone timeZone = DateTimeZone.forTimeZone(tz);
         DateTimeFormatterBuilder fpBuilder = new DateTimeFormatterBuilder();
         for (String pattern : USER_FULL_DATETIME_PATTERNS) {
             DateTimeFormatter f = DateTimeFormat.forPattern(pattern);
             fpBuilder.appendOptional(f.getParser());
         }
         userFullParser = fpBuilder.toFormatter()
-                .withLocale(locale).withZone(this.tz);
+                .withLocale(locale).withZone(timeZone);
         userPartialParsers =
             new DateTimeFormatter[USER_PARTIAL_DATETIME_PATTERNS.length];
         for (int i = 0; i < USER_PARTIAL_DATETIME_PATTERNS.length; i++) {
@@ -141,7 +141,7 @@ public class DataUtil {
                 dtfb.appendOptional(f.getParser());
             }
             userPartialParsers[i] = dtfb.toFormatter()
-                    .withLocale(locale).withZone(this.tz);
+                    .withLocale(locale).withZone(timeZone);
         }
         userShortFormatter = DateTimeFormat.forPattern(USER_SHORT_FORMAT);
         userLongFormatter = DateTimeFormat.forPattern(USER_LONG_FORMAT);
