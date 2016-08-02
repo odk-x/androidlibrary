@@ -21,6 +21,7 @@ import android.util.Log;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
+import org.opendatakit.common.android.utilities.WebLogger;
 
 import java.io.IOException;
 import java.util.*;
@@ -88,12 +89,59 @@ public final class OdkDbRow implements Parcelable {
    *         returned as null. Note that boolean values are reported as "1" or "0"
    */
   public String getDataByIndex(int cellIndex) {
-    String result;
-    result = this.mRowData[cellIndex];
-    if (result == null) {
+    return this.mRowData[cellIndex];
+  }
+
+   /**
+    * Return the String representing the contents of the cell in the "key" column. Note that this
+    * operation is expensive if there are many columns to search through.
+    * <p>
+    * Null values are returned as nulls.
+    *
+    * @param key
+    *         The name of the column holding the desired data
+    * @return String representation of contents of column. Null values are
+    *         returned as null. Note that boolean values are reported as "1" or "0"
+    */
+  public String getDataByKey(String key) {
+    int cellIndex = getCellIndexByKey(key);
+    if (cellIndex < 0) {
       return null;
     }
-    return result;
+    return mRowData[cellIndex];
+  }
+
+  /**
+   * Return the index of the "key" column. Note that this
+   * operation is expensive if there are many columns to search through.
+   * <p>
+   * Null values are returned as nulls.
+   *
+   * @param key
+   *         The name of the column
+   * @return int index of the column
+   */
+  public int getCellIndexByKey(String key) {
+    List<String> columns = Arrays.asList(mOwnerTable.getElementKeyForIndex());
+    return columns.indexOf(key);
+  }
+
+  /**
+   * Return a pointer to the table this row belongs to
+   *
+   * @return the owner table
+   */
+  public String[] getElementKeyForIndexMap() {
+    return mOwnerTable.getElementKeyForIndex();
+  }
+
+  /**
+   * Return a pointer to the table this row belongs to
+   *
+   * @return the owner table
+   */
+  public OdkDbTable getOwnerTable() {
+    return mOwnerTable;
   }
 
   /**
@@ -161,6 +209,10 @@ public final class OdkDbRow implements Parcelable {
       throw new IllegalStateException("Unexpected data type conversion failure " + e.toString()
           + " on SQLite table");
     }
+  }
+
+  public final <T> T getDataType(String elementKey, Class<T> clazz) {
+    return getDataType(getCellIndexByKey(elementKey), clazz);
   }
 
   @Override

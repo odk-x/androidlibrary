@@ -15,16 +15,22 @@
 package org.opendatakit.database;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import org.opendatakit.common.android.data.*;
+import org.opendatakit.common.android.provider.DataTableColumns;
+import org.opendatakit.common.android.utilities.ODKCursorUtils;
 import org.opendatakit.common.android.utilities.OdkDbChunkUtil;
+import org.opendatakit.common.android.utilities.OdkDbQueryUtil;
 import org.opendatakit.database.service.*;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -399,15 +405,19 @@ public class OdkDbSerializedInterface {
     * @param orderByElementKey elementKey to order the results by
     * @param orderByDirection  either "ASC" or "DESC"
     * @return An {@link OdkDbChunk} containing the first partition of the {@link UserTable}. Use
-    * {@link getChunk} to retrieve the rest of the chunks.
+    * {@link OdkDbInterface#getChunk} to retrieve the rest of the chunks.
     */
    public UserTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns columnDefns, String whereClause, String[] selectionArgs, String[] groupBy,
-       String having, String orderByElementKey, String orderByDirection) throws RemoteException {
+       String having, String[] orderByElementKey, String[] orderByDirection)
+       throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
-          .rawSqlQuery(appName, dbHandleName, tableId, columnDefns, whereClause, selectionArgs,
-              groupBy, having, orderByElementKey, orderByDirection), UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
+          OdkDbQueryUtil.buildSqlStatement(tableId, whereClause, groupBy, having, orderByElementKey,
+              orderByDirection), selectionArgs), OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, columnDefns, whereClause, groupBy, having, getAdminColumns(),
+          null);
    }
 
    /**
@@ -423,13 +433,13 @@ public class OdkDbSerializedInterface {
     * @param sqlCommand
     * @param sqlBindArgs
     * @return An {@link OdkDbChunk} containing the first partition of the {@link OdkDbTable}. Use
-    * {@link getChunk} to retrieve the rest of the chunks.
+    * {@link OdkDbInterface#getChunk} to retrieve the rest of the chunks.
     */
-   public OdkDbTable arbitraryQuery(String appName, OdkDbHandle dbHandleName, String sqlCommand,
+   public OdkDbTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String sqlCommand,
        String[] sqlBindArgs) throws RemoteException {
 
       return fetchAndRebuildChunks(
-          dbInterface.arbitraryQuery(appName, dbHandleName, sqlCommand, sqlBindArgs),
+          dbInterface.rawSqlQuery(appName, dbHandleName, sqlCommand, sqlBindArgs),
           OdkDbTable.CREATOR);
    }
 
@@ -558,23 +568,29 @@ public class OdkDbSerializedInterface {
    }
 
    /**
-    * Return the row(s) for the given tableId and rowId. If the row has
-    * checkpoints or conflicts, the returned UserTable will have more than one
-    * Row returned. Otherwise, it will contain a single row.
+    * Return the row with the most recent changes for the given tableId and rowId.
+    * If the row has conflicts, it throws an exception. Otherwise, it returns the
+    * most recent checkpoint or non-checkpoint value; it will contain a single row.
     *
     * @param appName
     * @param dbHandleName
     * @param tableId
     * @param orderedDefns
     * @param rowId
-    * @return one or more rows (depending upon sync conflict and edit checkpoint states)
+    * @return
     */
    public UserTable getRowsWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedDefns, String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(
-          dbInterface.getRowsWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
-          UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(
+          dbInterface.getRowsWithId(appName, dbHandleName, tableId, rowId),
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil
+          .GET_ROWS_WITH_ID_WHERE, OdkDbQueryUtil
+          .GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil
+          .GET_ROWS_WITH_ID_HAVING, getAdminColumns(), null);
+
    }
 
    /**
@@ -592,9 +608,15 @@ public class OdkDbSerializedInterface {
    public UserTable getMostRecentRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedDefns, String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(
-          dbInterface.getMostRecentRowWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
-          UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(
+          dbInterface.getMostRecentRowWithId(appName, dbHandleName, tableId, rowId),
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil
+          .GET_ROWS_WITH_ID_WHERE, OdkDbQueryUtil
+          .GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil
+          .GET_ROWS_WITH_ID_HAVING, getAdminColumns(), null);
+
    }
 
    /**
@@ -623,9 +645,13 @@ public class OdkDbSerializedInterface {
        String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId,
        int localRowConflictType) throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedPlaceRowIntoConflictWithId(appName, dbHandleName, tableId, orderedColumns,
-              cvValues, rowId, localRowConflictType), UserTable.CREATOR);
+              cvValues, rowId, localRowConflictType), OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**
@@ -647,9 +673,13 @@ public class OdkDbSerializedInterface {
    public UserTable privilegedInsertRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
                                     OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
-                      .privilegedInsertRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
-              UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+          .privilegedInsertRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
+              rowId), OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**
@@ -670,9 +700,13 @@ public class OdkDbSerializedInterface {
        String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
        throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .insertCheckpointRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
-              rowId), UserTable.CREATOR);
+              rowId), OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**
@@ -694,9 +728,13 @@ public class OdkDbSerializedInterface {
    public UserTable insertRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .insertRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
-          UserTable.CREATOR);
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**
@@ -708,7 +746,6 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     * @param tableId
-    * @param orderedDefns
     * @param rowId
     * @return table with the content for this rowId. May be empty.
     * @throws RemoteException
@@ -716,9 +753,14 @@ public class OdkDbSerializedInterface {
    public UserTable deleteAllCheckpointRowsWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedDefns, String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
-              .deleteAllCheckpointRowsWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
-          UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(
+          dbInterface.deleteAllCheckpointRowsWithId(appName, dbHandleName, tableId, rowId),
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
+
    }
 
    /**
@@ -738,9 +780,14 @@ public class OdkDbSerializedInterface {
    public UserTable deleteLastCheckpointRowWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedDefns, String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
-              .deleteLastCheckpointRowWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
-          UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(
+          dbInterface.deleteLastCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
+
    }
 
    /**
@@ -758,12 +805,16 @@ public class OdkDbSerializedInterface {
     * @return table with the content for this rowId. May be empty. May be marked as deleted and awaiting sync
     * @throws RemoteException
     */
-   public UserTable privilegedDeleteRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-       OrderedColumns orderedDefns, String rowId) throws RemoteException {
+   public UserTable privilegedDeleteRowWithId(String appName, OdkDbHandle dbHandleName,
+       String tableId, OrderedColumns orderedDefns, String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(
-          dbInterface.privilegedDeleteRowWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
-          UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(
+          dbInterface.privilegedDeleteRowWithId(appName, dbHandleName, tableId, rowId),
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**
@@ -788,11 +839,14 @@ public class OdkDbSerializedInterface {
     * @throws RemoteException
     */
    public UserTable deleteRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-                                    OrderedColumns orderedDefns, String rowId) throws RemoteException {
+       OrderedColumns orderedDefns, String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(
-              dbInterface.deleteRowWithId(appName, dbHandleName, tableId, orderedDefns, rowId),
-              UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(
+          dbInterface.deleteRowWithId(appName, dbHandleName, tableId, rowId), OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**
@@ -806,18 +860,21 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param tableId
     * @param orderedColumns
-    * @param cvValues
     * @param rowId
     * @return single-row table with the content of the row as specified
     * @throws RemoteException
     */
    public UserTable saveAsIncompleteMostRecentCheckpointRowWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, OrderedColumns orderedColumns,
-       ContentValues cvValues, String rowId) throws RemoteException {
+       String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
-          .saveAsIncompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId,
-              orderedColumns, cvValues, rowId), UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+              .saveAsIncompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**
@@ -831,18 +888,21 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param tableId
     * @param orderedColumns
-    * @param cvValues
     * @param rowId
     * @return single-row table with the content of the saved-as-incomplete row
     * @throws RemoteException
     */
    public UserTable saveAsCompleteMostRecentCheckpointRowWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, OrderedColumns orderedColumns,
-       ContentValues cvValues, String rowId) throws RemoteException {
+       String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
-          .saveAsCompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId,
-              orderedColumns, cvValues, rowId), UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+              .saveAsCompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**
@@ -863,9 +923,13 @@ public class OdkDbSerializedInterface {
    public UserTable updateRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .updateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
-          UserTable.CREATOR);
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**
@@ -885,12 +949,17 @@ public class OdkDbSerializedInterface {
     * @param rowId
     * @return single-row table with the content of the saved-as-incomplete row
     */
-   public UserTable privilegedUpdateRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-                                    OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
+   public UserTable privilegedUpdateRowWithId(String appName, OdkDbHandle dbHandleName,
+       String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
+       throws RemoteException {
 
-      return fetchAndRebuildChunks(dbInterface
-                      .privilegedUpdateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
-              UserTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+          .privilegedUpdateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
+              rowId), OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns(), null);
    }
 
    /**

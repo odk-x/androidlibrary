@@ -17,11 +17,9 @@ package org.opendatakit.database.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import org.opendatakit.common.android.utilities.DataUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This is the generic parent table used inside the service. All other table objects should
@@ -29,10 +27,6 @@ import java.util.Set;
  */
 public class OdkDbTable implements Parcelable {
 
-  // TODO: Handle possible null values? Or make sure defaults are set up
-  // TODO: Remove any APIs we aren't using
-  // TODO: Make sure removal of mElementKeyToIndex was completed and the alternative is used
-  // correctly
 
   static final String TAG = OdkDbTable.class.getSimpleName();
 
@@ -42,6 +36,11 @@ public class OdkDbTable implements Parcelable {
   protected final ArrayList<OdkDbRow> mRows;
 
   /**
+   * The parent/container table
+   */
+  protected ParentTable parent;
+
+  /**
    * The SQL command used to retrieve the data
    */
   protected final String mSqlCommand;
@@ -49,17 +48,17 @@ public class OdkDbTable implements Parcelable {
   /**
    * The SELECT arguments for the SQL command
    */
-  protected final String[] mSqlBindArgs;
+  protected final String[] mSqlSelectionArgs;
 
   /**
    * The ORDER BY arguments
    */
-  protected final String[] mOrderByElementKey;
+  protected final String[] mOrderByElementKeys;
 
   /**
    * The direction of each ORDER BY argument
    */
-  protected final String[] mOrderByDirection;
+  protected final String[] mOrderByDirections;
 
   /**
    * The fields that make up the primary key
@@ -75,21 +74,24 @@ public class OdkDbTable implements Parcelable {
    * Construct the table
    *
    * @param sqlCommand the SQL command use to retrieve the data
-   * @param sqlBindArgs the SELECT arguments for the SQL command
-   * @param orderByDirection the ORDER BY arguments
-   * @param orderByElementKey the direction of each ORDER BY argument
+   * @param sqlSelectionArgs the SELECT arguments for the SQL command
+   * @param orderByElementKeys the direction of each ORDER BY argument
+   * @param orderByDirections the ORDER BY arguments
    * @param primaryKey the fields that make up the primary key
    * @param elementKeyForIndex map indices to column names in row data
    * @param rowCount the capacity of the table
    */
-  public OdkDbTable(String sqlCommand, String[] sqlBindArgs, String[] orderByDirection,
-      String[] orderByElementKey, String[] primaryKey, String[] elementKeyForIndex,
+  public OdkDbTable(String sqlCommand, String[] sqlSelectionArgs, String[] orderByElementKeys,
+      String[] orderByDirections, String[] primaryKey, String[] elementKeyForIndex,
       Integer rowCount) {
+
     this.mSqlCommand = sqlCommand;
-    this.mSqlBindArgs = sqlBindArgs;
-    this.mOrderByDirection = orderByDirection;
-    this.mOrderByElementKey = orderByElementKey;
+    this.mSqlSelectionArgs = sqlSelectionArgs;
+    this.mOrderByDirections = orderByDirections;
+    this.mOrderByElementKeys = orderByElementKeys;
     this.mPrimaryKey = primaryKey;
+
+    this.parent = null;
 
     if (elementKeyForIndex == null) {
       throw new IllegalStateException("elementKeyForIndex cannot be null");
@@ -103,21 +105,32 @@ public class OdkDbTable implements Parcelable {
     this.mRows = new ArrayList<OdkDbRow>(numRows);
   }
 
-  public OdkDbTable(String sqlCommand, String[] sqlBindArgs, String[] elementkeyForIndex,
-      Integer rowCount) {
-    this(sqlCommand, sqlBindArgs, null, null, null, elementkeyForIndex, rowCount);
+  public OdkDbTable(OdkDbTable table, List<Integer> indexes) {
+    mRows = new ArrayList<OdkDbRow>(indexes.size());
+    for (int i = 0; i < indexes.size(); ++i) {
+      OdkDbRow r = table.getRowAtIndex(indexes.get(i));
+      mRows.add(r);
+    }
+    this.mSqlCommand = table.mSqlCommand;
+    this.mSqlSelectionArgs = table.mSqlSelectionArgs;
+    this.mOrderByDirections = table.mOrderByDirections;
+    this.mOrderByElementKeys = table.mOrderByDirections;
+    this.mPrimaryKey = table.mPrimaryKey;
+    this.mElementKeyForIndex = table.mElementKeyForIndex;
+    this.parent = null; // Set this with register
   }
 
+
   public OdkDbTable(Parcel in) {
-    int dataCount = 0;
+    int dataCount;
 
     mSqlCommand = in.readString();
 
-    mSqlBindArgs = unmarshallStringArray(in);
-    mOrderByDirection = unmarshallStringArray(in);
-    mOrderByElementKey = unmarshallStringArray(in);
-    mPrimaryKey = unmarshallStringArray(in);
-    mElementKeyForIndex = unmarshallStringArray(in);
+    mSqlSelectionArgs = DataUtil.unmarshallStringArray(in);
+    mOrderByDirections = DataUtil.unmarshallStringArray(in);
+    mOrderByElementKeys = DataUtil.unmarshallStringArray(in);
+    mPrimaryKey = DataUtil.unmarshallStringArray(in);
+    mElementKeyForIndex = DataUtil.unmarshallStringArray(in);
 
     dataCount = in.readInt();
     mRows = new ArrayList<>(dataCount);
@@ -125,6 +138,8 @@ public class OdkDbTable implements Parcelable {
       OdkDbRow r = new OdkDbRow(in, this);
       mRows.add(r);
     }
+
+    this.parent = null; // Set this with register
   }
 
   public void addRow(OdkDbRow row) {
@@ -135,6 +150,10 @@ public class OdkDbTable implements Parcelable {
     return this.mRows.get(index);
   }
 
+  public List<OdkDbRow> getRows() {
+    return Collections.unmodifiableList(mRows);
+  }
+
   public String getElementKey(int colNum) {
     return mElementKeyForIndex[colNum];
   }
@@ -143,25 +162,25 @@ public class OdkDbTable implements Parcelable {
     return mSqlCommand;
   }
 
-  public String[] getSqlBindArgs() {
-    if (mSqlBindArgs == null ) {
+  public String[] getSqlSelectionArgs() {
+    if (mSqlSelectionArgs == null ) {
       return null;
     }
-    return mSqlBindArgs.clone();
+    return mSqlSelectionArgs.clone();
   }
 
-  public String[] getOrderByElementKey() {
-    if (mOrderByElementKey == null ) {
+  public String[] getOrderByElementKeys() {
+    if (mOrderByElementKeys == null ) {
       return null;
     }
-    return mOrderByElementKey.clone();
+    return mOrderByElementKeys.clone();
   }
 
-  public String[] getOrderByDirection() {
-    if (mOrderByDirection == null ) {
+  public String[] getOrderByDirections() {
+    if (mOrderByDirections == null ) {
       return null;
     }
-    return mOrderByDirection.clone();
+    return mOrderByDirections.clone();
   }
 
   public String[] getPrimaryKey() {
@@ -175,6 +194,15 @@ public class OdkDbTable implements Parcelable {
     return mElementKeyForIndex.clone();
   }
 
+  public Map<String, Integer> generateElementKeyToIndex() {
+    Map<String, Integer> elementKeyToIndex = new HashMap<>();
+
+    for (int i = 0; i < mElementKeyForIndex.length; i++) {
+      elementKeyToIndex.put(mElementKeyForIndex[i], i);
+    }
+    return elementKeyToIndex;
+  }
+
   public int getWidth() {
     return mElementKeyForIndex.length;
   }
@@ -183,43 +211,26 @@ public class OdkDbTable implements Parcelable {
     return this.mRows.size();
   }
 
+  public void registerParentTable(ParentTable table) {
+    this.parent = table;
+  }
+
   @Override
   public void writeToParcel(Parcel out, int flags) {
+    // Do not marshall the parent table reference. The parent table will reregister itself when
+    // it unmarshalls.
     out.writeString(mSqlCommand);
 
-    marshallStringArray(out, mSqlBindArgs);
-    marshallStringArray(out, mOrderByDirection);
-    marshallStringArray(out, mOrderByElementKey);
-    marshallStringArray(out, mPrimaryKey);
-    marshallStringArray(out, mElementKeyForIndex);
+    DataUtil.marshallStringArray(out, mSqlSelectionArgs);
+    DataUtil.marshallStringArray(out, mOrderByDirections);
+    DataUtil.marshallStringArray(out, mOrderByElementKeys);
+    DataUtil.marshallStringArray(out, mPrimaryKey);
+    DataUtil.marshallStringArray(out, mElementKeyForIndex);
 
     out.writeInt(mRows.size());
     for (OdkDbRow r : mRows) {
       r.writeToParcel(out, flags);
     }
-  }
-
-  private void marshallStringArray(Parcel out, String[] toMarshall) {
-    if (toMarshall == null) {
-      out.writeInt(-1);
-    } else {
-      out.writeInt(toMarshall.length);
-      out.writeStringArray(toMarshall);
-    }
-  }
-
-  private String[] unmarshallStringArray(Parcel in) {
-    String[] result = null;
-
-    int dataCount = in.readInt();
-    if (dataCount < 0) {
-      return null;
-    } else {
-      result = new String[dataCount];
-      in.readStringArray(result);
-    }
-
-    return result;
   }
 
   @Override

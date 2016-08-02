@@ -21,6 +21,7 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.os.Parcel;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -401,4 +402,27 @@ public class DataUtil {
         return new double[] {Double.parseDouble(split[0]),
                 Double.parseDouble(split[1])};
     }
+
+  public static final void marshallStringArray(Parcel out, String[] toMarshall) {
+    if (toMarshall == null) {
+      out.writeInt(-1);
+    } else {
+      out.writeInt(toMarshall.length);
+      out.writeStringArray(toMarshall);
+    }
+  }
+
+  public static final String[] unmarshallStringArray(Parcel in) {
+    String[] result = null;
+
+    int dataCount = in.readInt();
+    if (dataCount < 0) {
+      return null;
+    } else {
+      result = new String[dataCount];
+      in.readStringArray(result);
+    }
+
+    return result;
+  }
 }

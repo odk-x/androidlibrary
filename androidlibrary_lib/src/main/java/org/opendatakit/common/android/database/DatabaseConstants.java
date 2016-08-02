@@ -14,6 +14,8 @@
 
 package org.opendatakit.common.android.database;
 
+import org.opendatakit.common.android.provider.DataTableColumns;
+
 public class DatabaseConstants {
 
   /**
@@ -73,4 +75,5 @@ public class DatabaseConstants {
    * Maintains the (choiceListId, choiceListJSON) mapping.
    */
   public static final String CHOICE_LIST_TABLE_NAME = "_choice_lists";
+
 }

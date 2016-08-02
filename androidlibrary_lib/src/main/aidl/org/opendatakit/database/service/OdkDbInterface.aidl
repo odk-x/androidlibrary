@@ -22,8 +22,6 @@ import android.os.ParcelUuid;
 import org.opendatakit.common.android.data.OrderedColumns;
 import org.opendatakit.common.android.data.ColumnList;
 import org.opendatakit.common.android.data.TableDefinitionEntry;
-import org.opendatakit.common.android.data.UserTable;
-import org.opendatakit.common.android.data.RawUserTable;
 import org.opendatakit.database.service.OdkDbHandle;
 import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.TableHealthInfo;
@@ -303,43 +301,8 @@ interface OdkDbInterface {
   /* rawQuery */
 
   /**
-   * Get a {@link UserTable} for this table based on the given where clause. All
-   * columns from the table are returned.
-   * <p>
-   * SELECT * FROM table WHERE whereClause GROUP BY groupBy[]s HAVING
-   * havingClause ORDER BY orderbyElement orderByDirection
-   * <p>
-   * If any of the clause parts are omitted (null), then the appropriate
-   * simplified SQL statement is constructed.
-   * 
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param columnDefns
-   * @param whereClause
-   *          the whereClause for the selection, beginning with "WHERE". Must
-   *          include "?" instead of actual values, which are instead passed in
-   *          the selectionArgs.
-   * @param selectionArgs
-   *          an array of string values for bind parameters
-   * @param groupBy
-   *          an array of elementKeys
-   * @param having
-   * @param orderByElementKey
-   *          elementKey to order the results by
-   * @param orderByDirection
-   *          either "ASC" or "DESC"
-   * @return
-   */
-  OdkDbChunk rawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
-        in String tableId,
-        in OrderedColumns columnDefns, in String whereClause, in String[] selectionArgs,
-        in String[] groupBy, in String having, in String orderByElementKey, in String orderByDirection);
-
-  /**
-   * Get a {@link RawUserTable} for the result set of an arbitrary sql query
-   * and bind parameters. If the result set has an _id column, it is used as
-   * the RowId of the RawRow. Otherwise, an ordinal number is generated and used.
+   * Get a {@link OdkDbTable} for the result set of an arbitrary sql query
+   * and bind parameters.
    *
    * The sql query can be arbitrarily complex and can include joins, unions, etc.
    * The data are returned as string values.
@@ -350,7 +313,7 @@ interface OdkDbInterface {
    * @param sqlBindArgs
    * @return
    */
-  OdkDbChunk arbitraryQuery(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk rawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
       in String sqlCommand, in String[] sqlBindArgs);
   /**
    * Insert or update a single table-level metadata KVS entry.
@@ -456,6 +419,7 @@ interface OdkDbInterface {
   void privilegedUpdateRowETagAndSyncState(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in String rowId, in String rowETag, in String syncState);
 
+
   /**
    * Return the row(s) for the given tableId and rowId. If the row has
    * checkpoints or conflicts, the returned UserTable will have more than one
@@ -464,12 +428,11 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedDefns
    * @param rowId
    * @return one or more rows (depending upon sync conflict and edit checkpoint states)
    */
   OdkDbChunk getRowsWithId(in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedDefns, in String rowId);
+      in String tableId, in String rowId);
 
   /**
    * Return the row with the most recent changes for the given tableId and rowId.
@@ -479,13 +442,11 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedDefns
    * @param rowId
    * @return
    */
-  OdkDbChunk getMostRecentRowWithId(in String appName,
-      in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedDefns, in String rowId);
+  OdkDbChunk getMostRecentRowWithId(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId, in String rowId);
 
   /**
    * SYNC ONLY
@@ -584,7 +545,7 @@ interface OdkDbInterface {
    * @param rowId
    */
   OdkDbChunk deleteAllCheckpointRowsWithId(in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in String rowId);
+      in String tableId, in String rowId);
 
   /**
    * Delete any checkpoint rows for the given rowId in the tableId. Checkpoint
@@ -595,11 +556,10 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    */
   OdkDbChunk deleteLastCheckpointRowWithId(in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in String rowId);
+      in String tableId, in String rowId);
 
  /**
    * Delete the specified rowId in this tableId. Deletion respects sync
@@ -617,11 +577,10 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    */
   OdkDbChunk deleteRowWithId(in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in String rowId);
+      in String tableId, in String rowId);
 
 
   /**
@@ -634,11 +593,10 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    */
   OdkDbChunk privilegedDeleteRowWithId(in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in String rowId);
+      in String tableId, in String rowId);
 
 
   /**
@@ -651,14 +609,12 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param columnDefns
-   * @param cvValues
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
   OdkDbChunk saveAsIncompleteMostRecentCheckpointRowWithId(
   	  in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns columnDefns, in ContentValues cvValues, in String rowId);
+      in String tableId, in String rowId);
 
  /**
    * Update all rows for the given rowId to SavepointType 'INCOMPLETE' and
@@ -670,14 +626,12 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param columnDefns
-   * @param cvValues
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
   OdkDbChunk saveAsCompleteMostRecentCheckpointRowWithId(
   	  in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns columnDefns, in ContentValues cvValues, in String rowId);
+      in String tableId, in String rowId);
 
   /**
    * Update the given rowId with the values in the cvValues. If certain metadata
