@@ -221,11 +221,15 @@ public class OdkDbTable implements Parcelable {
     // it unmarshalls.
     out.writeString(mSqlCommand);
 
-    DataUtil.marshallStringArray(out, mSqlSelectionArgs);
-    DataUtil.marshallStringArray(out, mOrderByDirections);
-    DataUtil.marshallStringArray(out, mOrderByElementKeys);
-    DataUtil.marshallStringArray(out, mPrimaryKey);
-    DataUtil.marshallStringArray(out, mElementKeyForIndex);
+    try {
+      DataUtil.marshallStringArray(out, mSqlSelectionArgs);
+      DataUtil.marshallStringArray(out, mOrderByDirections);
+      DataUtil.marshallStringArray(out, mOrderByElementKeys);
+      DataUtil.marshallStringArray(out, mPrimaryKey);
+      DataUtil.marshallStringArray(out, mElementKeyForIndex);
+    } catch (Throwable t) {
+      t.toString();
+    }
 
     out.writeInt(mRows.size());
     for (OdkDbRow r : mRows) {
