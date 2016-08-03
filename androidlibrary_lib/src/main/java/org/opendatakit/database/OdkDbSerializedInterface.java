@@ -670,14 +670,15 @@ public class OdkDbSerializedInterface {
     * @param orderedColumns
     * @param cvValues
     * @param rowId
+    * @param asCsvRequestedChange
     * @return single-row table with the content of the inserted row
     */
    public UserTable privilegedInsertRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-                                    OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
+                                              OrderedColumns orderedColumns, ContentValues cvValues, String rowId, boolean asCsvRequestedChange) throws RemoteException {
 
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedInsertRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
-              rowId), OdkDbTable.CREATOR);
+              rowId, asCsvRequestedChange), OdkDbTable.CREATOR);
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
@@ -949,15 +950,16 @@ public class OdkDbSerializedInterface {
     * @param orderedColumns
     * @param cvValues
     * @param rowId
+    * @param asCsvRequestedChange
     * @return single-row table with the content of the saved-as-incomplete row
     */
    public UserTable privilegedUpdateRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
+                                              String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId, boolean asCsvRequestedChange)
        throws RemoteException {
 
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedUpdateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
-              rowId), OdkDbTable.CREATOR);
+              rowId, asCsvRequestedChange), OdkDbTable.CREATOR);
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,

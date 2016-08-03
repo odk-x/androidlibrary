@@ -492,7 +492,8 @@ interface OdkDbInterface {
    * @return single-row table with the content of the inserted row
    */
   OdkDbChunk privilegedInsertRowWithId(in String appName, in OdkDbHandle dbHandleName,
-  	  in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+  	  in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId,
+  	  boolean asCsvRequestedChange);
 
 
   /**
@@ -671,7 +672,8 @@ interface OdkDbInterface {
    */
   OdkDbChunk privilegedUpdateRowWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId,
-      in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+      in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId,
+      boolean asCsvRequestedChange);
 
   /**
    * Delete the local and server conflict records to resolve a server conflict
