@@ -394,10 +394,9 @@ public class UserTableTest extends AndroidTestCase {
 
     String[] adminColumnOrder = ADMIN_COLUMNS.toArray(new String[ADMIN_COLUMNS.size()]);
 
-    UserTable table = new UserTable(orderedColumns, MY_COL + "=?",
-        new String[] { "5", "9" }, new String[] { GROUP_COL }, YOUR_COL + "=?",
-        new String[] { THEIR_COL }, new String[] { "ASC" }, adminColumnOrder, elementKeyToIndex,
-        elementKeyForIndex, null);
+    UserTable table = new UserTable(orderedColumns, MY_COL + "=?", new String[] { "5", "9" },
+        new String[] { GROUP_COL }, YOUR_COL + "=?", new String[] { THEIR_COL },
+        new String[] { "ASC" }, adminColumnOrder, elementKeyToIndex, elementKeyForIndex, null);
 
     OdkDbRow row;
 
@@ -544,7 +543,6 @@ public class UserTableTest extends AndroidTestCase {
         assertEquals(table.getDisplayTextOfData(1, table.getColumnDefinitions().find(elementKey)
             .getType(), elementKey), t.getDisplayTextOfData(1, t.getColumnDefinitions().find
             (elementKey).getType(), elementKey));
-
       } catch ( Exception e) {
         // ignore...
       }
@@ -730,6 +728,7 @@ public class UserTableTest extends AndroidTestCase {
     }
     // having clause
     assertEquals(table.getHavingClause(), t.getHavingClause());
+    // order by elementKey
     sa = table.getOrderByElementKeys();
     sb = t.getOrderByElementKeys();
     if ( sa != null && sb != null ) {

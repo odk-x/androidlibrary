@@ -105,7 +105,7 @@ public class OdkDbTableTest extends AndroidTestCase {
     String[] primaryKey = PRIMARY_KEY;
 
     OdkDbTable table = new OdkDbTable(sqlCmd, bindArgs, orderByArgs, orderByDirections,
-        primaryKey, elementKeyForIndex, NUM_ROWS);
+        primaryKey, elementKeyForIndex, null, NUM_ROWS);
 
     OdkDbRow row1 = new OdkDbRow(rowValues1, table);
     table.addRow(row1);

@@ -18,8 +18,7 @@ package org.opendatakit.database.service;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-
-import org.opendatakit.database.utilities.OdkMarshalUtil;
+import org.opendatakit.database.utilities.OdkMarshallUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,6 +76,11 @@ public class OdkDbTable implements Parcelable {
   protected final String[] mElementKeyForIndex;
 
   /**
+   * Map column names to indices
+   */
+  protected final Map<String, Integer> mElementKeyToIndex;
+
+  /**
    * Construct the table
    *
    * @param sqlCommand the SQL command use to retrieve the data
@@ -89,7 +93,7 @@ public class OdkDbTable implements Parcelable {
    */
   public OdkDbTable(String sqlCommand, String[] sqlSelectionArgs, String[] orderByElementKeys,
       String[] orderByDirections, String[] primaryKey, String[] elementKeyForIndex,
-      Integer rowCount) {
+      Map<String, Integer> elementKeyToIndex, Integer rowCount) {
 
     this.mSqlCommand = sqlCommand;
     this.mSqlSelectionArgs = sqlSelectionArgs;
@@ -103,6 +107,12 @@ public class OdkDbTable implements Parcelable {
       throw new IllegalStateException("elementKeyForIndex cannot be null");
     }
     this.mElementKeyForIndex = elementKeyForIndex;
+
+    if (elementKeyToIndex == null) {
+      this.mElementKeyToIndex = generateElementKeyToIndex();
+    } else {
+      this.mElementKeyToIndex = elementKeyToIndex;
+    }
 
     int numRows = 0;
     if (rowCount != null) {
@@ -123,6 +133,7 @@ public class OdkDbTable implements Parcelable {
     this.mOrderByElementKeys = table.mOrderByDirections;
     this.mPrimaryKey = table.mPrimaryKey;
     this.mElementKeyForIndex = table.mElementKeyForIndex;
+    this.mElementKeyToIndex = table.generateElementKeyToIndex();
     this.parent = null; // Set this with register
   }
 
@@ -133,11 +144,12 @@ public class OdkDbTable implements Parcelable {
     mSqlCommand = in.readString();
 
     try {
-      mSqlSelectionArgs = OdkMarshalUtil.unmarshallStringArray(in);
-      mOrderByDirections = OdkMarshalUtil.unmarshallStringArray(in);
-      mOrderByElementKeys = OdkMarshalUtil.unmarshallStringArray(in);
-      mPrimaryKey = OdkMarshalUtil.unmarshallStringArray(in);
-      mElementKeyForIndex = OdkMarshalUtil.unmarshallStringArray(in);
+      mSqlSelectionArgs = OdkMarshallUtil.unmarshallStringArray(in);
+      mOrderByDirections = OdkMarshallUtil.unmarshallStringArray(in);
+      mOrderByElementKeys = OdkMarshallUtil.unmarshallStringArray(in);
+      mPrimaryKey = OdkMarshallUtil.unmarshallStringArray(in);
+      mElementKeyForIndex = OdkMarshallUtil.unmarshallStringArray(in);
+      mElementKeyToIndex = generateElementKeyToIndex();
     } catch (Throwable t) {
       Log.e(TAG, t.getMessage());
       Log.e(TAG, Log.getStackTraceString(t));
@@ -168,6 +180,10 @@ public class OdkDbTable implements Parcelable {
 
   public String getElementKey(int colNum) {
     return mElementKeyForIndex[colNum];
+  }
+
+  public Integer getColumnIndexOfElementKey(String elementKey) {
+    return mElementKeyToIndex.get(elementKey);
   }
 
   public String getSqlCommand() {
@@ -206,7 +222,17 @@ public class OdkDbTable implements Parcelable {
     return mElementKeyForIndex.clone();
   }
 
-  public Map<String, Integer> generateElementKeyToIndex() {
+  /**
+   * This is EXPENSIVE!!!  Used only for JS return value
+   * Do not use for anything else!!!!
+   *
+   * @return copy of the map. Used for JS return value
+   */
+  public Map<String, Integer> getElementKeyToIndex() {
+    return new HashMap<>(this.mElementKeyToIndex);
+  }
+
+  private Map<String, Integer> generateElementKeyToIndex() {
     Map<String, Integer> elementKeyToIndex = new HashMap<>();
 
     for (int i = 0; i < mElementKeyForIndex.length; i++) {
@@ -229,16 +255,17 @@ public class OdkDbTable implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel out, int flags) {
-    // Do not marshall the parent table reference. The parent table will reregister itself when
-    // it unmarshalls.
+    // Do not marshal the parent table reference. The parent table will reregister itself when
+    // it unmarshals.
+    // Do not marshall mElementKeyToIndex; just rebuilt it from the mElementKeyForIndex
     out.writeString(mSqlCommand);
 
     try {
-      OdkMarshalUtil.marshallStringArray(out, mSqlSelectionArgs);
-      OdkMarshalUtil.marshallStringArray(out, mOrderByDirections);
-      OdkMarshalUtil.marshallStringArray(out, mOrderByElementKeys);
-      OdkMarshalUtil.marshallStringArray(out, mPrimaryKey);
-      OdkMarshalUtil.marshallStringArray(out, mElementKeyForIndex);
+      OdkMarshallUtil.marshallStringArray(out, mSqlSelectionArgs);
+      OdkMarshallUtil.marshallStringArray(out, mOrderByDirections);
+      OdkMarshallUtil.marshallStringArray(out, mOrderByElementKeys);
+      OdkMarshallUtil.marshallStringArray(out, mPrimaryKey);
+      OdkMarshallUtil.marshallStringArray(out, mElementKeyForIndex);
     } catch (Throwable t) {
       Log.e(TAG, t.getMessage());
       Log.e(TAG, Log.getStackTraceString(t));

@@ -21,16 +21,15 @@ import android.os.Parcelable;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.common.android.provider.DataTableColumns;
+
 import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.common.android.utilities.WebLogger;
+import org.opendatakit.database.utilities.OdkDbQueryUtil;
 import org.opendatakit.database.service.OdkDbRow;
 import org.opendatakit.database.service.OdkDbTable;
 import org.opendatakit.database.service.ParentTable;
-import org.opendatakit.database.utilities.OdkDbQueryUtil;
-import org.opendatakit.database.utilities.OdkMarshalUtil;
+import org.opendatakit.database.utilities.OdkMarshallUtil;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,8 +60,6 @@ public class UserTable implements Parcelable, ParentTable{
 
   private final String[] mAdminColumnOrder;
 
-  private final Map<String, Integer> mElementKeyToIndex;
-
   public UserTable(UserTable table, List<Integer> indexes) {
     this.mBaseTable = new OdkDbTable(table.mBaseTable, indexes);
     this.mColumnDefns = table.mColumnDefns;
@@ -70,12 +67,10 @@ public class UserTable implements Parcelable, ParentTable{
     this.mSqlGroupByArgs = table.mSqlGroupByArgs;
     this.mSqlHavingClause = table.mSqlHavingClause;
     this.mAdminColumnOrder = table.mAdminColumnOrder;
-    this.mElementKeyToIndex = table.mElementKeyToIndex;
   }
 
   public UserTable(OdkDbTable baseTable, OrderedColumns columnDefns, String sqlWhereClause,
-      String[] sqlGroupByArgs, String sqlHavingClause, String[] adminColumnOrder, Map<String,
-      Integer> elementKeyToIndex) {
+      String[] sqlGroupByArgs, String sqlHavingClause, String[] adminColumnOrder) {
     this.mBaseTable = baseTable;
     baseTable.registerParentTable(this);
 
@@ -84,38 +79,26 @@ public class UserTable implements Parcelable, ParentTable{
     this.mSqlGroupByArgs = sqlGroupByArgs;
     this.mSqlHavingClause = sqlHavingClause;
     this.mAdminColumnOrder = adminColumnOrder;
-
-    if (elementKeyToIndex == null) {
-      this.mElementKeyToIndex = mBaseTable.generateElementKeyToIndex();
-    } else {
-      this.mElementKeyToIndex = elementKeyToIndex;
-    }
   }
 
-  public UserTable(OrderedColumns columnDefns, String sqlWhereClause,
-      String[] sqlSelectionArgs, String[] sqlGroupByArgs, String sqlHavingClause,
-      String[] sqlOrderByElementKeys, String[] sqlOrderByDirections, String[] adminColumnOrder,
+  public UserTable(OrderedColumns columnDefns, String sqlWhereClause, String[] sqlSelectionArgs,
+      String[] sqlGroupByArgs, String sqlHavingClause, String[] sqlOrderByElementKeys,
+      String[] sqlOrderByDirections, String[] adminColumnOrder,
       Map<String, Integer> elementKeyToIndex, String[] elementKeyForIndex, Integer rowCount) {
 
     this.mBaseTable = new OdkDbTable(OdkDbQueryUtil
         .buildSqlStatement(columnDefns.getTableId(), sqlWhereClause, sqlGroupByArgs, sqlHavingClause,
             sqlOrderByElementKeys, sqlOrderByDirections), sqlSelectionArgs, sqlOrderByElementKeys,
-        sqlOrderByDirections, primaryKey, elementKeyForIndex, rowCount);
+        sqlOrderByDirections, primaryKey, elementKeyForIndex, elementKeyToIndex, rowCount);
 
     this.mColumnDefns = columnDefns;
     this.mSqlWhereClause = sqlWhereClause;
     this.mSqlGroupByArgs = sqlGroupByArgs;
     this.mSqlHavingClause = sqlHavingClause;
     this.mAdminColumnOrder = adminColumnOrder;
-
-    if (elementKeyToIndex == null) {
-      this.mElementKeyToIndex = mBaseTable.generateElementKeyToIndex();
-    } else {
-      this.mElementKeyToIndex = elementKeyToIndex;
-    }
-
   }
 
+  /*** Methods that pass straight down to OdkDbTable ***/
   public OdkDbTable getBaseTable() {
     return mBaseTable;
   }
@@ -124,67 +107,20 @@ public class UserTable implements Parcelable, ParentTable{
     mBaseTable.addRow(row);
   }
 
-  public String getAppName() {
-    return mColumnDefns.getAppName();
-  }
-
-  public String getTableId() {
-    return mColumnDefns.getTableId();
-  }
-
-  public OrderedColumns getColumnDefinitions() {
-    return mColumnDefns;
-  }
-
   public OdkDbRow getRowAtIndex(int index) {
     return mBaseTable.getRowAtIndex(index);
-  }
-
-  public Integer getColumnIndexOfElementKey(String elementKey) {
-    return this.mElementKeyToIndex.get(elementKey);
-  }
-
-  /**
-   * This is EXPENSIVE!!!  Used only for JS return value
-   * Do not use for anything else!!!!
-   *
-   * @return copy of the map. Used for JS return value
-   */
-  public Map<String, Integer> getElementKeyMap() {
-    HashMap<String, Integer> copyMap = new HashMap<String, Integer>(this.mElementKeyToIndex);
-    return copyMap;
   }
 
   public String getElementKey(int colNum) {
     return mBaseTable.getElementKey(colNum);
   }
 
-  public String getWhereClause() {
-    return mSqlWhereClause;
+  public Integer getColumnIndexOfElementKey(String elementKey) {
+    return mBaseTable.getColumnIndexOfElementKey(elementKey);
   }
 
   public String[] getSelectionArgs() {
     return mBaseTable.getSqlSelectionArgs();
-  }
-
-  /**
-   * True if the table has a group-by clause in its query
-   *
-   * @return
-   */
-  public boolean isGroupedBy() {
-    return mSqlGroupByArgs != null && mSqlGroupByArgs.length != 0;
-  }
-
-  public String[] getGroupByArgs() {
-    if (mSqlGroupByArgs == null) {
-      return null;
-    }
-    return mSqlGroupByArgs.clone();
-  }
-
-  public String getHavingClause() {
-    return mSqlHavingClause;
   }
 
   public String[] getOrderByElementKeys() {
@@ -203,44 +139,54 @@ public class UserTable implements Parcelable, ParentTable{
     return mBaseTable.getNumberOfRows();
   }
 
-  /**
-   * Return the String representing the contents of the column represented by
-   * the passed in elementKey. This can be either the element key of a
-   * user-defined column or a ODKTables-specified metadata column.
-   * <p>
-   * Null values are returned as nulls.
-   *
-   * @param rowIndex
-   *          index of the relevant row
-   * @param elementKey
-   *          elementKey of data or metadata column
-   * @return String representation of contents of column. Null values are
-   *         returned as null. Note that boolean values are reported as "1" or "0"
-   */
-  public String getRawDataOrMetadataByElementKey(int rowIndex, String elementKey) {
-    String result;
-    OdkDbRow row = mBaseTable.getRowAtIndex(rowIndex);
-    Integer cell = getColumnIndexOfElementKey(elementKey);
-    if (cell == null) {
-      WebLogger.getLogger(mColumnDefns.getAppName()).e(UserTable.TAG,
-          "elementKey [" + elementKey + "] was not found in table");
-      return null;
-    }
-    result = row.getDataByIndex(cell);
-    if (result == null) {
-      return null;
-    }
-    return result;
+  public Map<String, Integer> getElementKeyToIndex() {
+    return mBaseTable.getElementKeyToIndex();
   }
+
+
+  /*** Unique methods to UserTable ***/
+  public String getAppName() {
+    return mColumnDefns.getAppName();
+  }
+
+  public String getTableId() {
+    return mColumnDefns.getTableId();
+  }
+
+  public OrderedColumns getColumnDefinitions() {
+    return mColumnDefns;
+  }
+
+  public String getWhereClause() {
+    return mSqlWhereClause;
+  }
+
+  public boolean isGroupedBy() {
+    return mSqlGroupByArgs != null && mSqlGroupByArgs.length != 0;
+  }
+
+  public String[] getGroupByArgs() {
+    if (mSqlGroupByArgs == null) {
+      return null;
+    }
+    return mSqlGroupByArgs.clone();
+  }
+
+  public String getHavingClause() {
+    return mSqlHavingClause;
+  }
+
 
   public String getRowId(int rowIndex) {
-    return getRawDataOrMetadataByElementKey(rowIndex, DataTableColumns.ID);
+    return getRowAtIndex(rowIndex).getDataByKey(DataTableColumns.ID);
   }
 
-  public String getDisplayTextOfData(int rowIndex, ElementType type, String elementKey) {
+  public String getDisplayTextOfData(int rowIndex, ElementType type, String
+      elementKey) {
     // TODO: share processing with CollectUtil.writeRowDataToBeEdited(...)
-    String raw = getRawDataOrMetadataByElementKey(rowIndex, elementKey);
-    String rowId = getRawDataOrMetadataByElementKey(rowIndex, DataTableColumns.ID);
+    OdkDbRow row = getRowAtIndex(rowIndex);
+    String raw = row.getDataByKey(elementKey);
+    String rowId = row.getDataByKey(DataTableColumns.ID);
 
     if (raw == null) {
       return null;
@@ -276,17 +222,9 @@ public class UserTable implements Parcelable, ParentTable{
   }
 
   public boolean hasCheckpointRows() {
-    Integer cell = getColumnIndexOfElementKey(DataTableColumns.SAVEPOINT_TYPE);
-    if (cell == null) {
-      WebLogger.getLogger(mColumnDefns.getAppName()).e(UserTable.TAG,
-          "elementKey [" + DataTableColumns.SAVEPOINT_TYPE + "] was not found in table");
-      return false;
-    }
-
     List<OdkDbRow> rows = mBaseTable.getRows();
-    for (int i = 0; i < rows.size(); i++) {
-      OdkDbRow row = rows.get(i);
-      String type = row.getDataByIndex(cell);
+    for (OdkDbRow row : rows) {
+      String type = row.getDataByKey(DataTableColumns.SAVEPOINT_TYPE);
       if (type == null || type.length() == 0) {
         return true;
       }
@@ -295,17 +233,9 @@ public class UserTable implements Parcelable, ParentTable{
   }
 
   public boolean hasConflictRows() {
-    Integer cell = getColumnIndexOfElementKey(DataTableColumns.CONFLICT_TYPE);
-    if (cell == null) {
-      WebLogger.getLogger(mColumnDefns.getAppName()).e(UserTable.TAG,
-          "elementKey [" + DataTableColumns.CONFLICT_TYPE + "] was not found in table");
-      return false;
-    }
-
     List<OdkDbRow> rows = mBaseTable.getRows();
-    for (int i = 0; i < rows.size(); i++) {
-      OdkDbRow row = rows.get(i);
-      String conflictType = row.getDataByIndex(cell);
+    for (OdkDbRow row : rows) {
+      String conflictType = row.getDataByKey(DataTableColumns.CONFLICT_TYPE);
       if (conflictType != null && conflictType.length() != 0) {
         return true;
       }
@@ -324,18 +254,8 @@ public class UserTable implements Parcelable, ParentTable{
    * @return
    */
   public int getRowNumFromId(String rowId) {
-    Integer cell = getColumnIndexOfElementKey(DataTableColumns.ID);
-    if (cell == null) {
-      WebLogger.getLogger(mColumnDefns.getAppName()).e(UserTable.TAG,
-          "elementKey [" + DataTableColumns.ID + "] was not found in table");
-      return -1;
-    }
-
-    List<OdkDbRow> rows = mBaseTable.getRows();
-    for (int i = 0; i < rows.size(); i++) {
-      OdkDbRow row = rows.get(i);
-      String readRowId = row.getDataByIndex(cell);
-      if (readRowId.equals(rowId)) {
+    for (int i = 0; i < mBaseTable.getNumberOfRows(); i++) {
+      if (getRowId(i).equals(rowId)) {
         return i;
       }
     }
@@ -354,22 +274,21 @@ public class UserTable implements Parcelable, ParentTable{
   @Override
   public void writeToParcel(Parcel out, int flags) {
     out.writeString(mSqlWhereClause);
-    OdkMarshalUtil.marshallStringArray(out, mSqlGroupByArgs);
+    OdkMarshallUtil.marshallStringArray(out, mSqlGroupByArgs);
     out.writeString(mSqlHavingClause);
     this.mColumnDefns.writeToParcel(out, flags);
-    OdkMarshalUtil.marshallStringArray(out, mAdminColumnOrder);
+    OdkMarshallUtil.marshallStringArray(out, mAdminColumnOrder);
     this.mBaseTable.writeToParcel(out, flags);
   }
 
   public UserTable(Parcel in) {
     this.mSqlWhereClause = in.readString();
-    this.mSqlGroupByArgs = OdkMarshalUtil.unmarshallStringArray(in);
+    this.mSqlGroupByArgs = OdkMarshallUtil.unmarshallStringArray(in);
     this.mSqlHavingClause = in.readString();
     this.mColumnDefns = new OrderedColumns(in);
-    this.mAdminColumnOrder = OdkMarshalUtil.unmarshallStringArray(in);
+    this.mAdminColumnOrder = OdkMarshallUtil.unmarshallStringArray(in);
     this.mBaseTable = new OdkDbTable(in);
     this.mBaseTable.registerParentTable(this);
-    this.mElementKeyToIndex = mBaseTable.generateElementKeyToIndex();
   }
 
   public static final Parcelable.Creator<UserTable> CREATOR = new Parcelable.Creator<UserTable>() {

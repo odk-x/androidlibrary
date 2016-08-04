@@ -54,6 +54,9 @@ public final class OdkDbRow implements Parcelable {
    * @param ownerTable the table that the row belongs to
    */
   public OdkDbRow(String[] rowData, OdkDbTable ownerTable) {
+    if (ownerTable== null || rowData == null) {
+      throw new IllegalArgumentException("Null arguments are not permitted");
+    }
     this.mRowData = rowData;
     this.mOwnerTable = ownerTable;
   }
@@ -65,6 +68,9 @@ public final class OdkDbRow implements Parcelable {
    * @param ownerTable the table that the row belongs to
    */
   public OdkDbRow(Parcel in, OdkDbTable ownerTable) {
+    if (ownerTable== null) {
+      throw new IllegalArgumentException("Null arguments are not permitted");
+    }
     this.mOwnerTable = ownerTable;
 
     int dataCount = in.readInt();
@@ -97,8 +103,7 @@ public final class OdkDbRow implements Parcelable {
   }
 
    /**
-    * Return the String representing the contents of the cell in the "key" column. Note that this
-    * operation is expensive if there are many columns to search through.
+    * Return the String representing the contents of the cell in the "key" column.
     * <p>
     * Null values are returned as nulls.
     *
@@ -108,16 +113,17 @@ public final class OdkDbRow implements Parcelable {
     *         returned as null. Note that boolean values are reported as "1" or "0"
     */
   public String getDataByKey(String key) {
-    int cellIndex = getCellIndexByKey(key);
-    if (cellIndex < 0) {
+    String result;
+    Integer cell = getCellIndexByKey(key);
+    if (cell == null) {
       return null;
     }
-    return mRowData[cellIndex];
+    result = getDataByIndex(cell);
+    return result;
   }
 
   /**
-   * Return the index of the "key" column. Note that this
-   * operation is expensive if there are many columns to search through.
+   * Return the index of the "key" column.
    * <p>
    * Null values are returned as nulls.
    *
@@ -126,8 +132,7 @@ public final class OdkDbRow implements Parcelable {
    * @return int index of the column
    */
   public int getCellIndexByKey(String key) {
-    List<String> columns = Arrays.asList(mOwnerTable.getElementKeyForIndex());
-    return columns.indexOf(key);
+    return mOwnerTable.getColumnIndexOfElementKey(key);
   }
 
   /**
@@ -215,6 +220,7 @@ public final class OdkDbRow implements Parcelable {
           + " on SQLite table");
     }
   }
+
 
   public final <T> T getDataType(String elementKey, Class<T> clazz) {
     return getDataType(getCellIndexByKey(elementKey), clazz);

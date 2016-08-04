@@ -27,8 +27,8 @@ import org.opendatakit.common.android.data.UserTable;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.OdkDbHandle;
-import org.opendatakit.database.service.OdkDbInterface;
 import org.opendatakit.database.service.OdkDbTable;
+import org.opendatakit.database.service.OdkDbInterface;
 import org.opendatakit.database.service.TableHealthInfo;
 import org.opendatakit.database.utilities.OdkDbChunkUtil;
 import org.opendatakit.database.utilities.OdkDbQueryUtil;
@@ -418,8 +418,7 @@ public class OdkDbSerializedInterface {
           OdkDbQueryUtil.buildSqlStatement(tableId, whereClause, groupBy, having, orderByElementKey,
               orderByDirection), selectionArgs), OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, columnDefns, whereClause, groupBy, having, getAdminColumns(),
-          null);
+      return new UserTable(baseTable, columnDefns, whereClause, groupBy, having, getAdminColumns());
    }
 
    /**
@@ -591,7 +590,7 @@ public class OdkDbSerializedInterface {
       return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil
           .GET_ROWS_WITH_ID_WHERE, OdkDbQueryUtil
           .GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil
-          .GET_ROWS_WITH_ID_HAVING, getAdminColumns(), null);
+          .GET_ROWS_WITH_ID_HAVING, getAdminColumns());
 
    }
 
@@ -617,7 +616,7 @@ public class OdkDbSerializedInterface {
       return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil
           .GET_ROWS_WITH_ID_WHERE, OdkDbQueryUtil
           .GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil
-          .GET_ROWS_WITH_ID_HAVING, getAdminColumns(), null);
+          .GET_ROWS_WITH_ID_HAVING, getAdminColumns());
 
    }
 
@@ -653,7 +652,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**
@@ -682,7 +681,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**
@@ -709,7 +708,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**
@@ -737,7 +736,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**
@@ -762,7 +761,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
 
    }
 
@@ -789,7 +788,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
 
    }
 
@@ -817,7 +816,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**
@@ -849,7 +848,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedDefns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**
@@ -877,7 +876,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**
@@ -905,7 +904,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**
@@ -932,7 +931,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**
@@ -963,7 +962,7 @@ public class OdkDbSerializedInterface {
 
       return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
           OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
-          getAdminColumns(), null);
+          getAdminColumns());
    }
 
    /**

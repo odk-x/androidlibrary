@@ -17,11 +17,11 @@ package org.opendatakit.database.utilities;
 
 import android.os.Parcel;
 
-public class OdkMarshalUtil {
+public class OdkMarshallUtil {
 
-  private static final String TAG = OdkMarshalUtil.class.getSimpleName();
+  private static final String TAG = OdkMarshallUtil.class.getSimpleName();
 
-  private OdkMarshalUtil() {
+  private OdkMarshallUtil() {
     // This class should never be instantiated
     throw new IllegalStateException("Never Instantiate this static class");
   }
