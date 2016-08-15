@@ -288,7 +288,8 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
         }
         if (!child.getElementKey().equals(defn.getElementKey() + "_" + child.getElementName())) {
           throw new IllegalArgumentException(
-              "Children are expected to have elementKey equal to parent's elementKey-underscore-childElementName");
+              "Children are expected to have elementKey equal to parent's "
+                  + "elementKey-underscore-childElementName: " + child.getElementKey());
         }
       }
     }
@@ -323,7 +324,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
         ArrayList<ColumnDefinition> descendantsOfArray = new ArrayList<ColumnDefinition>(
             colDefn.getChildren());
         ArrayList<ColumnDefinition> scratchArray = new ArrayList<ColumnDefinition>();
-        while (!descendantsOfArray.isEmpty()) {
+        for (;;) {
           for (ColumnDefinition subDefn : descendantsOfArray) {
             if (!subDefn.isUnitOfRetention()) {
               // this has already been processed
@@ -332,7 +333,13 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
             subDefn.setNotUnitOfRetention();
             scratchArray.addAll(subDefn.getChildren());
           }
-          descendantsOfArray = scratchArray;
+
+          descendantsOfArray.clear();
+          descendantsOfArray.addAll(scratchArray);
+          scratchArray.clear();
+          if ( descendantsOfArray.isEmpty()) {
+            break;
+          }
         }
       }
     }
