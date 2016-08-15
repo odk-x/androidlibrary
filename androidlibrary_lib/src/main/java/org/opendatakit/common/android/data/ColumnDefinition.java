@@ -318,7 +318,8 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
         // this has already been processed
         continue;
       }
-      if (ElementDataType.array.name().equals(colDefn.getElementType())) {
+      ElementType type = colDefn.getType();
+      if (ElementDataType.array == type.getDataType()) {
         ArrayList<ColumnDefinition> descendantsOfArray = new ArrayList<ColumnDefinition>(
             colDefn.getChildren());
         ArrayList<ColumnDefinition> scratchArray = new ArrayList<ColumnDefinition>();
@@ -342,7 +343,8 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
         // this has already been processed
         continue;
       }
-      if (!ElementDataType.array.name().equals(colDefn.getElementType())) {
+      ElementType type = colDefn.getType();
+      if (ElementDataType.array != type.getDataType()) {
         if (!colDefn.getChildren().isEmpty()) {
           colDefn.setNotUnitOfRetention();
         }
