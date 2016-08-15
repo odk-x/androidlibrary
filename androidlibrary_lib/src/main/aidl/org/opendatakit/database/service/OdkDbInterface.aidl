@@ -50,6 +50,20 @@ interface OdkDbInterface {
   String getRolesList(in String appName);
 
   /**
+   * Return the users configured on the server if the current
+   * user is verified to have Tables Super-user, Administer Tables or
+   * Site Administrator roles. Otherwise, returns information about
+   * the current user. If the user is syncing anonymously with the
+   * server, this returns an empty string.
+   *
+   * @param appName
+   *
+   * @return empty string or JSON serialization of an array of objects
+   * structured as { "user_id": "...", "full_name": "...", "roles": ["...",...] }
+   */
+  String getUsersList(in String appName);
+
+  /**
    * Obtain a databaseHandleName
    *
    * @param appName

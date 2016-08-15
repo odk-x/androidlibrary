@@ -20,10 +20,12 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.common.android.data.ColumnList;
 import org.opendatakit.common.android.data.OrderedColumns;
 import org.opendatakit.common.android.data.TableDefinitionEntry;
 import org.opendatakit.common.android.data.UserTable;
+import org.opendatakit.common.android.provider.DataTableColumns;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.OdkDbHandle;
@@ -75,6 +77,22 @@ public class OdkDbSerializedInterface {
     */
    public String getRolesList(String appName) throws RemoteException {
       return dbInterface.getRolesList(appName);
+   }
+
+   /**
+    * Return the users configured on the server if the current
+    * user is verified to have Tables Super-user, Administer Tables or
+    * Site Administrator roles. Otherwise, returns information about
+    * the current user. If the user is syncing anonymously with the
+    * server, this returns an empty string.
+    *
+    * @param appName
+    *
+    * @return empty string or JSON serialization of an array of objects
+    * structured as { "user_id": "...", "full_name": "...", "roles": ["...",...] }
+    */
+   public String getUsersList(String appName) throws RemoteException {
+      return dbInterface.getUsersList(appName);
    }
 
    /**
@@ -924,6 +942,48 @@ public class OdkDbSerializedInterface {
     */
    public UserTable updateRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
+
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+              .updateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
+          OdkDbTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, OdkDbQueryUtil.GET_ROWS_WITH_ID_WHERE,
+          OdkDbQueryUtil.GET_ROWS_WITH_ID_GROUP_BY, OdkDbQueryUtil.GET_ROWS_WITH_ID_HAVING,
+          getAdminColumns());
+   }
+
+  /**
+   * Client-side wrapper to make changing the row filter easier.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param orderedColumns
+   * @param filterType
+   * @param filterValue
+   * @param rowId
+   * @return
+   * @throws RemoteException
+   * @throws IllegalArgumentException
+   */
+   public UserTable changeRowFilterWithId(String appName, OdkDbHandle dbHandleName, String tableId,
+       OrderedColumns orderedColumns, String filterType, String filterValue,
+       String rowId) throws
+       RemoteException, IllegalArgumentException {
+
+      if ( filterType == null ) {
+         throw new IllegalArgumentException("filterType is null");
+      }
+      // verify that filterType is a known type
+      RowFilterScope.Type.valueOf(filterType);
+
+      ContentValues cvValues = new ContentValues();
+      cvValues.put(DataTableColumns.FILTER_TYPE, filterType);
+      if ( filterValue == null ) {
+         cvValues.putNull(DataTableColumns.FILTER_VALUE);
+      } else {
+         cvValues.put(DataTableColumns.FILTER_VALUE, filterValue);
+      }
 
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .updateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),

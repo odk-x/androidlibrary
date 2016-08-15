@@ -103,6 +103,9 @@ public class CommonToolProperties {
   public static final String KEY_PASSWORD = "common.password";
   /** Roles that the user is known to have. JSON encoded list of strings */
   public static final String KEY_ROLES_LIST = "common.roles";
+  /** List of all users and their roles on the server.
+   * JSON encoded list of { "user_id": "...", "full_name": "...", "roles": ["...","...",...]} */
+  public static final String KEY_USERS_LIST = "common.users";
   /** Admin Settings password */
   public static final String KEY_ADMIN_PW = "common.admin_pw";
   
@@ -158,6 +161,7 @@ public class CommonToolProperties {
     secureProperties.put(KEY_AUTH, "");
     secureProperties.put(KEY_PASSWORD, "");
     secureProperties.put(KEY_ROLES_LIST, "");
+    secureProperties.put(KEY_USERS_LIST, "");
     secureProperties.put(KEY_ADMIN_PW, "");
   }
 
