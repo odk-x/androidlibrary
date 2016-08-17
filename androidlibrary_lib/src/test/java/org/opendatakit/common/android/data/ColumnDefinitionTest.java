@@ -15,15 +15,18 @@
 package org.opendatakit.common.android.data;
 
 import android.graphics.Color;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.common.android.provider.DataTableColumns;
+import org.opendatakit.common.android.utilities.ODKFileUtils;
 import org.opendatakit.common.android.utilities.StaticStateManipulator;
 import org.opendatakit.common.android.utilities.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -648,7 +651,7 @@ public class ColumnDefinitionTest {
       columns.add(new Column("col12", "col12", "array", "[\"col12_items\"]"));
       columns.add(new Column("col12_items", "items", "integer", "[]"));
       // array with 500 varchars allocated to it
-      columns.add(new Column("col14", "col14", "array(500)", "[\"col14_items\"]"));
+      columns.add(new Column("col14", "col14", "array(400)", "[\"col14_items\"]"));
       columns.add(new Column("col14_items", "items", "string", "[]"));
 
       columns.add(new Column("col1a", "col1a", "geolist:array(500)", "[\"col1a_items\"]"));
@@ -663,11 +666,541 @@ public class ColumnDefinitionTest {
       ArrayList<ColumnDefinition> colDefs = ColumnDefinition.buildColumnDefinitions("appName",
           "testTable", columns);
 
+      String equivalentXLSXConverterDataTableModel =
+          "{" +
+              "\"col0\": {" +
+              "\"type\": \"integer\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 2," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementType\": \"myothertype:integer\"," +
+              "\"elementKey\": \"col0\"," +
+              "\"elementName\": \"col0\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col0\"" +
+              "}," +
+              "\"col1\": {" +
+              "\"type\": \"boolean\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 3," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementKey\": \"col1\"," +
+              "\"elementName\": \"col1\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1\"" +
+              "}," +
+              "\"col2\": {" +
+              "\"type\": \"integer\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 4," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementKey\": \"col2\"," +
+              "\"elementName\": \"col2\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col2\"" +
+              "}," +
+              "\"col3\": {" +
+              "\"type\": \"number\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 5," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementKey\": \"col3\"," +
+              "\"elementName\": \"col3\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col3\"" +
+              "}," +
+              "\"col4\": {" +
+              "\"type\": \"string\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 6," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementKey\": \"col4\"," +
+              "\"elementName\": \"col4\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col4\"" +
+              "}," +
+              "\"col5\": {" +
+              "\"type\": \"string\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 7," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementType\": \"string(500)\"," +
+              "\"elementKey\": \"col5\"," +
+              "\"elementName\": \"col5\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col5\"" +
+              "}," +
+              "\"col6\": {" +
+              "\"type\": \"string\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 8," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementType\": \"configpath\"," +
+              "\"elementKey\": \"col6\"," +
+              "\"elementName\": \"col6\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col6\"" +
+              "}," +
+              "\"col7\": {" +
+              "\"type\": \"string\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 9," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementType\": \"rowpath\"," +
+              "\"elementKey\": \"col7\"," +
+              "\"elementName\": \"col7\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col7\"" +
+              "}," +
+              "\"col8\": {" +
+              "\"type\": \"object\"," +
+              "\"elementType\": \"geopoint\"," +
+              "\"properties\": {" +
+              "\"latitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementKey\": \"col8_latitude\"," +
+              "\"elementName\": \"latitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col8.latitude\"" +
+              "}," +
+              "\"longitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementKey\": \"col8_longitude\"," +
+              "\"elementName\": \"longitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col8.longitude\"" +
+              "}," +
+              "\"altitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementKey\": \"col8_altitude\"," +
+              "\"elementName\": \"altitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col8.altitude\"" +
+              "}," +
+              "\"accuracy\": {" +
+              "\"type\": \"number\"," +
+              "\"elementKey\": \"col8_accuracy\"," +
+              "\"elementName\": \"accuracy\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col8.accuracy\"" +
+              "}" +
+              "}," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 10," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementKey\": \"col8\"," +
+              "\"elementName\": \"col8\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col8\"," +
+              "\"listChildElementKeys\": [" +
+              "\"col8_accuracy\"," +
+              "\"col8_altitude\"," +
+              "\"col8_latitude\"," +
+              "\"col8_longitude\"" +
+              "]," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"col9\": {" +
+              "\"type\": \"string\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 11," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementType\": \"mytype\"," +
+              "\"elementKey\": \"col9\"," +
+              "\"elementName\": \"col9\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col9\"" +
+              "}," +
+              "\"col12\": {" +
+              "\"type\": \"array\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 12," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"items\": {" +
+              "\"type\": \"integer\"," +
+              "\"elementKey\": \"col12_items\"," +
+              "\"elementName\": \"items\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col12.items\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"elementKey\": \"col12\"," +
+              "\"elementName\": \"col12\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col12\"," +
+              "\"listChildElementKeys\": [" +
+              "\"col12_items\"" +
+              "]" +
+              "}," +
+              "\"col14\": {" +
+              "\"type\": \"array\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 13," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementType\": \"array(400)\"," +
+              "\"items\": {" +
+              "\"type\": \"string\"," +
+              "\"elementKey\": \"col14_items\"," +
+              "\"elementName\": \"items\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col14.items\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"elementKey\": \"col14\"," +
+              "\"elementName\": \"col14\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col14\"," +
+              "\"listChildElementKeys\": [" +
+              "\"col14_items\"" +
+              "]" +
+              "}," +
+              "\"col1a\": {" +
+              "\"type\": \"array\"," +
+              "\"_defn\": [" +
+              "{" +
+              "\"_row_num\": 14," +
+              "\"section_name\": \"model\"" +
+              "}" +
+              "]," +
+              "\"elementType\": \"geolist:array(500)\"," +
+              "\"items\": {" +
+              "\"type\": \"object\"," +
+              "\"elementType\": \"geopoint\"," +
+              "\"properties\": {" +
+              "\"latitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"latitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.latitude\"," +
+              "\"elementKey\": \"col1a_items_latitude\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"longitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"longitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.longitude\"," +
+              "\"elementKey\": \"col1a_items_longitude\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"altitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"altitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.altitude\"," +
+              "\"elementKey\": \"col1a_items_altitude\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"accuracy\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"accuracy\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.accuracy\"," +
+              "\"elementKey\": \"col1a_items_accuracy\"," +
+              "\"notUnitOfRetention\": true" +
+              "}" +
+              "}," +
+              "\"elementKey\": \"col1a_items\"," +
+              "\"elementName\": \"items\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items\"," +
+              "\"listChildElementKeys\": [" +
+              "\"col1a_items_accuracy\"," +
+              "\"col1a_items_altitude\"," +
+              "\"col1a_items_latitude\"," +
+              "\"col1a_items_longitude\"" +
+              "]," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"elementKey\": \"col1a\"," +
+              "\"elementName\": \"col1a\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a\"," +
+              "\"listChildElementKeys\": [" +
+              "\"col1a_items\"" +
+              "]" +
+              "}," +
+              "\"col8_latitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementKey\": \"col8_latitude\"," +
+              "\"elementName\": \"latitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col8.latitude\"" +
+              "}," +
+              "\"col8_longitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementKey\": \"col8_longitude\"," +
+              "\"elementName\": \"longitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col8.longitude\"" +
+              "}," +
+              "\"col8_altitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementKey\": \"col8_altitude\"," +
+              "\"elementName\": \"altitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col8.altitude\"" +
+              "}," +
+              "\"col8_accuracy\": {" +
+              "\"type\": \"number\"," +
+              "\"elementKey\": \"col8_accuracy\"," +
+              "\"elementName\": \"accuracy\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col8.accuracy\"" +
+              "}," +
+              "\"col12_items\": {" +
+              "\"type\": \"integer\"," +
+              "\"elementKey\": \"col12_items\"," +
+              "\"elementName\": \"items\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col12.items\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"col14_items\": {" +
+              "\"type\": \"string\"," +
+              "\"elementKey\": \"col14_items\"," +
+              "\"elementName\": \"items\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col14.items\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"col1a_items\": {" +
+              "\"type\": \"object\"," +
+              "\"elementType\": \"geopoint\"," +
+              "\"properties\": {" +
+              "\"latitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"latitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.latitude\"," +
+              "\"elementKey\": \"col1a_items_latitude\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"longitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"longitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.longitude\"," +
+              "\"elementKey\": \"col1a_items_longitude\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"altitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"altitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.altitude\"," +
+              "\"elementKey\": \"col1a_items_altitude\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"accuracy\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"accuracy\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.accuracy\"," +
+              "\"elementKey\": \"col1a_items_accuracy\"," +
+              "\"notUnitOfRetention\": true" +
+              "}" +
+              "}," +
+              "\"elementKey\": \"col1a_items\"," +
+              "\"elementName\": \"items\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items\"," +
+              "\"listChildElementKeys\": [" +
+              "\"col1a_items_accuracy\"," +
+              "\"col1a_items_altitude\"," +
+              "\"col1a_items_latitude\"," +
+              "\"col1a_items_longitude\"" +
+              "]," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"col1a_items_latitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"latitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.latitude\"," +
+              "\"elementKey\": \"col1a_items_latitude\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"col1a_items_longitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"longitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.longitude\"," +
+              "\"elementKey\": \"col1a_items_longitude\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"col1a_items_altitude\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"altitude\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.altitude\"," +
+              "\"elementKey\": \"col1a_items_altitude\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"col1a_items_accuracy\": {" +
+              "\"type\": \"number\"," +
+              "\"elementName\": \"accuracy\"," +
+              "\"elementSet\": \"data\"," +
+              "\"elementPath\": \"col1a.items.accuracy\"," +
+              "\"elementKey\": \"col1a_items_accuracy\"," +
+              "\"notUnitOfRetention\": true" +
+              "}," +
+              "\"_id\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": true," +
+              "\"elementKey\": \"_id\"," +
+              "\"elementName\": \"_id\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_id\"" +
+              "}," +
+              "\"_row_etag\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_row_etag\"," +
+              "\"elementName\": \"_row_etag\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_row_etag\"" +
+              "}," +
+              "\"_sync_state\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": true," +
+              "\"elementKey\": \"_sync_state\"," +
+              "\"elementName\": \"_sync_state\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_sync_state\"" +
+              "}," +
+              "\"_conflict_type\": {" +
+              "\"type\": \"integer\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_conflict_type\"," +
+              "\"elementName\": \"_conflict_type\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_conflict_type\"" +
+              "}," +
+              "\"_filter_type\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_filter_type\"," +
+              "\"elementName\": \"_filter_type\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_filter_type\"" +
+              "}," +
+              "\"_filter_value\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_filter_value\"," +
+              "\"elementName\": \"_filter_value\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_filter_value\"" +
+              "}," +
+              "\"_form_id\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_form_id\"," +
+              "\"elementName\": \"_form_id\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_form_id\"" +
+              "}," +
+              "\"_locale\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_locale\"," +
+              "\"elementName\": \"_locale\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_locale\"" +
+              "}," +
+              "\"_savepoint_type\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_savepoint_type\"," +
+              "\"elementName\": \"_savepoint_type\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_savepoint_type\"" +
+              "}," +
+              "\"_savepoint_timestamp\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": true," +
+              "\"elementKey\": \"_savepoint_timestamp\"," +
+              "\"elementName\": \"_savepoint_timestamp\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_savepoint_timestamp\"" +
+              "}," +
+              "\"_savepoint_creator\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_savepoint_creator\"," +
+              "\"elementName\": \"_savepoint_creator\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_savepoint_creator\"" +
+              "}" +
+              "}";
       int metaCount = 0;
       TreeMap<String, Object> model = ColumnDefinition.getExtendedDataModel(colDefs);
-      for ( Map.Entry<String,Object> entry : model.entrySet()) {
-         String elementKey = entry.getKey();
-         TreeMap<String,Object> value = (TreeMap<String, Object>) entry.getValue();
+      TypeReference<TreeMap<String,Object>> refType = new TypeReference<TreeMap<String,Object>>(){};
+      TreeMap<String, Object> xlsxModel;
+      try {
+         xlsxModel = ODKFileUtils.mapper.readValue
+             (equivalentXLSXConverterDataTableModel, refType);
+      } catch (IOException e) {
+         assertFalse("failed to parse XLSXConverter version", true);
+         return;
+      }
+
+      for (String elementKey : model.keySet()) {
+         TreeMap<String,Object> value = (TreeMap<String, Object>) model.get(elementKey);
+         assert(xlsxModel.containsKey(elementKey));
+         Map<String,Object> xlsxValue = (Map<String,Object>) xlsxModel.get(elementKey);
+         List<String> ignoredKeys = new ArrayList<String>();
+         for ( String key : xlsxValue.keySet() ) {
+            if ( key.startsWith("_") ) {
+               ignoredKeys.add(key);
+            }
+            if ( key.equals("prompt_type_name") ) {
+               ignoredKeys.add(key);
+            }
+         }
+         for ( String key : ignoredKeys ) {
+            xlsxValue.remove(key);
+         }
+         assertEquals("Investigating: " + elementKey, value.size(), xlsxValue.size());
+         recursiveMatch(elementKey, value, xlsxValue);
+
          ColumnDefinition def = null;
          try {
             def = ColumnDefinition.find(colDefs, elementKey);
@@ -688,7 +1221,7 @@ public class ColumnDefinitionTest {
             } else if ( elementKey.equals(TableConstants.ROW_ETAG)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
-               assertEquals(value.containsKey("isNotNullable"), false);
+               assertEquals(value.get("isNotNullable"), false);
             } else if ( elementKey.equals(TableConstants.SYNC_STATE)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
@@ -696,35 +1229,35 @@ public class ColumnDefinitionTest {
             } else if ( elementKey.equals(TableConstants.CONFLICT_TYPE)) {
                metaCount++;
                assertEquals(value.get("type"), "integer");
-               assertEquals(value.containsKey("isNotNullable"), false);
+               assertEquals(value.get("isNotNullable"), false);
             } else if ( elementKey.equals(TableConstants.FILTER_TYPE)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
-               assertEquals(value.containsKey("isNotNullable"), false);
+               assertEquals(value.get("isNotNullable"), false);
             } else if ( elementKey.equals(TableConstants.FILTER_VALUE)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
-               assertEquals(value.containsKey("isNotNullable"), false);
+               assertEquals(value.get("isNotNullable"), false);
             } else if ( elementKey.equals(TableConstants.SAVEPOINT_TIMESTAMP)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
-               assertEquals(value.containsKey("isNotNullable"), false);
+               assertEquals(value.get("isNotNullable"), true);
             } else if ( elementKey.equals(TableConstants.SAVEPOINT_TYPE)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
-               assertEquals(value.containsKey("isNotNullable"), false);
+               assertEquals(value.get("isNotNullable"), false);
             } else if ( elementKey.equals(TableConstants.SAVEPOINT_CREATOR)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
-               assertEquals(value.containsKey("isNotNullable"), false);
+               assertEquals(value.get("isNotNullable"), false);
             } else if ( elementKey.equals(TableConstants.FORM_ID)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
-               assertEquals(value.containsKey("isNotNullable"), false);
+               assertEquals(value.get("isNotNullable"), false);
             } else if ( elementKey.equals(TableConstants.LOCALE)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
-               assertEquals(value.containsKey("isNotNullable"), false);
+               assertEquals(value.get("isNotNullable"), false);
             } else {
                throw new IllegalStateException("Unexpected non-user column");
             }
@@ -733,7 +1266,7 @@ public class ColumnDefinitionTest {
             assertEquals(value.get("elementSet"), "data");
             assertEquals(value.get("elementName"), def.getElementName());
             assertEquals(value.get("elementKey"), def.getElementKey());
-            if (!def.getElementKey().equals(def.getElementName()) && !def.isUnitOfRetention()) {
+            if (!def.isUnitOfRetention()) {
                assertEquals(value.get("notUnitOfRetention"), true);
             }
             // TODO: there are a lot more paths to verify here...
@@ -741,5 +1274,35 @@ public class ColumnDefinitionTest {
          }
       }
       assertEquals(metaCount, 11);
+   }
+
+   private void recursiveMatch(String parent, TreeMap<String,Object> value, Map<String,Object>
+       xlsxValue) {
+      for ( String key : value.keySet() ) {
+         assertTrue("Investigating " + parent + "." + key, xlsxValue.containsKey(key));
+         Object ov = value.get(key);
+         Object oxlsxv = xlsxValue.get(key);
+         if ( ov instanceof Map ) {
+            TreeMap<String,Object> rv = (TreeMap<String,Object>) ov;
+            Map<String,Object> xlsrv = (Map<String,Object>) oxlsxv;
+            List<String> ignoredKeys = new ArrayList<String>();
+            for ( String rvkey : xlsrv.keySet() ) {
+               if ( rvkey.startsWith("_") ) {
+                  ignoredKeys.add(rvkey);
+               }
+               if ( rvkey.equals("prompt_type_name") ) {
+                  ignoredKeys.add(rvkey);
+               }
+            }
+            for ( String rvkey : ignoredKeys ) {
+               xlsrv.remove(rvkey);
+            }
+            assertEquals("Investigating " + parent + "." + key, rv.size(), xlsrv.size());
+            recursiveMatch(parent + "." + key, rv, xlsrv);
+
+         } else {
+            assertEquals("Investigating " + parent + "." + key, ov, oxlsxv);
+         }
+      }
    }
 }

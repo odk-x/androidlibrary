@@ -49,6 +49,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
   // the Javascript name for this element within a Javascript path (e.g., latitude) (rightmost term)
   private static final String JSON_SCHEMA_ELEMENT_NAME = "elementName";
   private static final String JSON_SCHEMA_ELEMENT_TYPE = "elementType";
+  private static final String JSON_SCHEMA_LIST_CHILD_ELEMENT_KEYS = "listChildElementKeys";
   private static final String JSON_SCHEMA_PROPERTIES = "properties";
   private static final String JSON_SCHEMA_ITEMS = "items";
   private static final String JSON_SCHEMA_TYPE = "type";
@@ -401,6 +402,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     model.put(DataTableColumns.ROW_ETAG, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.ROW_ETAG);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.ROW_ETAG);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.ROW_ETAG);
@@ -419,6 +421,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     model.put(DataTableColumns.CONFLICT_TYPE, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.integer.name());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.CONFLICT_TYPE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.CONFLICT_TYPE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.CONFLICT_TYPE);
@@ -427,6 +430,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     model.put(DataTableColumns.FILTER_TYPE, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.FILTER_TYPE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.FILTER_TYPE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.FILTER_TYPE);
@@ -434,6 +438,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema = new TreeMap<String, Object>();
     model.put(DataTableColumns.FILTER_VALUE, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.FILTER_VALUE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.FILTER_VALUE);
@@ -442,6 +447,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema = new TreeMap<String, Object>();
     model.put(DataTableColumns.FORM_ID, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.FORM_ID);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.FORM_ID);
@@ -450,6 +456,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema = new TreeMap<String, Object>();
     model.put(DataTableColumns.LOCALE, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.LOCALE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.LOCALE);
@@ -458,6 +465,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema = new TreeMap<String, Object>();
     model.put(DataTableColumns.SAVEPOINT_TYPE, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.SAVEPOINT_TYPE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.SAVEPOINT_TYPE);
@@ -466,6 +474,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema = new TreeMap<String, Object>();
     model.put(DataTableColumns.SAVEPOINT_TIMESTAMP, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.TRUE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.SAVEPOINT_TIMESTAMP);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.SAVEPOINT_TIMESTAMP);
@@ -474,6 +483,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema = new TreeMap<String, Object>();
     model.put(DataTableColumns.SAVEPOINT_CREATOR, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.SAVEPOINT_CREATOR);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.SAVEPOINT_CREATOR);
@@ -499,6 +509,9 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
         model.put(c.getElementName(), jsonSchema);
         jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, c.getElementName());
         getDataModelHelper(jsonSchema, c, false);
+        if ( !c.isUnitOfRetention() ) {
+          jsonSchema.put(JSON_SCHEMA_NOT_UNIT_OF_RETENTION, Boolean.TRUE);
+        }
       }
     }
     return model;
@@ -531,6 +544,10 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
       // if it isn't already nested within a unit of retention,
       // an array is always itself a unit of retention
       getDataModelHelper(itemSchema, ch, true); // recursion...
+
+      ArrayList<String> keys = new ArrayList<String>();
+      keys.add(ch.getElementKey());
+      jsonSchema.put(JSON_SCHEMA_LIST_CHILD_ELEMENT_KEYS, keys);
     } else if (dataType == ElementDataType.bool) {
       jsonSchema.put(JSON_SCHEMA_TYPE, dataType.name());
       if (!c.getElementType().equals(dataType.name())) {
@@ -556,6 +573,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
       }
       TreeMap<String, Object> propertiesSchema = new TreeMap<String, Object>();
       jsonSchema.put(JSON_SCHEMA_PROPERTIES, propertiesSchema);
+      ArrayList<String> keys = new ArrayList<String>();
       for (ColumnDefinition ch : c.getChildren()) {
         TreeMap<String, Object> itemSchema = new TreeMap<String, Object>();
         propertiesSchema.put(ch.getElementName(), itemSchema);
@@ -563,7 +581,9 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
             ((String) jsonSchema.get(JSON_SCHEMA_ELEMENT_PATH)) + '.' + ch.getElementName());
         // objects are not units of retention -- propagate retention status.
         getDataModelHelper(itemSchema, ch, nestedInsideUnitOfRetention); // recursion...
+        keys.add(ch.getElementKey());
       }
+      jsonSchema.put(JSON_SCHEMA_LIST_CHILD_ELEMENT_KEYS, keys);
     } else if (dataType == ElementDataType.rowpath) {
       jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
       jsonSchema.put(JSON_SCHEMA_ELEMENT_TYPE, ElementDataType.rowpath.name());
