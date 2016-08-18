@@ -56,12 +56,28 @@ public class RoleConsts {
      */
     public static final String ROLE_ADMINISTRATOR = "ROLE_ADMINISTER_TABLES";
 
+    /**
+     * List of the roles the lowest privileged user would have.
+     */
+    public static final String ANONYMOUS_ROLES_LIST = "";
+
+    /**
+     * List of the roles the lowest privileged user would have.
+     */
+    public static final String USER_ROLES_LIST;
+
+    /**
+     * List of the roles the super-user privileged user would have.
+     */
+    public static final String SUPER_USER_ROLES_LIST;
+
    /**
     * List of the roles the highest privileged user would have.
     */
    public static final String ADMIN_ROLES_LIST;
 
     static {
+        // admin roles
         ArrayList<String> adminRoleList = new ArrayList<>();
         adminRoleList.add(RoleConsts.ROLE_USER);
         adminRoleList.add(RoleConsts.ROLE_SUPER_USER);
@@ -74,6 +90,30 @@ public class RoleConsts {
             e.printStackTrace();
         }
         ADMIN_ROLES_LIST = value;
+
+        // super-user roles
+        adminRoleList.clear();
+        adminRoleList.add(RoleConsts.ROLE_USER);
+        adminRoleList.add(RoleConsts.ROLE_SUPER_USER);
+
+        value = null;
+        try {
+            value = ODKFileUtils.mapper.writeValueAsString(adminRoleList);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        SUPER_USER_ROLES_LIST = value;
+
+        adminRoleList.clear();
+        adminRoleList.add(RoleConsts.ROLE_USER);
+
+        value = null;
+        try {
+            value = ODKFileUtils.mapper.writeValueAsString(adminRoleList);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        USER_ROLES_LIST = value;
     }
 
 }
