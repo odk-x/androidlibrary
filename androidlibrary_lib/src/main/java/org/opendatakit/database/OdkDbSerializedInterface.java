@@ -433,10 +433,11 @@ public class OdkDbSerializedInterface {
        OrderedColumns columnDefns, String whereClause, Object[] selectionArgs, String[] groupBy,
        String having, String[] orderByElementKey, String[] orderByDirection)
        throws RemoteException {
+      // TODO: Add sqlLimit parameter
 
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
           OdkDbQueryUtil.buildSqlStatement(tableId, whereClause, groupBy, having, orderByElementKey,
-              orderByDirection), new BindArgs(selectionArgs)), OdkDbTable.CREATOR);
+              orderByDirection), new BindArgs(selectionArgs), 0), OdkDbTable.CREATOR);
 
       return new UserTable(baseTable, columnDefns, whereClause, groupBy, having, getAdminColumns());
    }
@@ -458,9 +459,10 @@ public class OdkDbSerializedInterface {
     */
    public OdkDbTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String sqlCommand,
        Object[] sqlBindArgs) throws RemoteException {
+      // TODO: Add sqlLimit parameter
 
       return fetchAndRebuildChunks(
-          dbInterface.rawSqlQuery(appName, dbHandleName, sqlCommand, new BindArgs(sqlBindArgs)),
+          dbInterface.rawSqlQuery(appName, dbHandleName, sqlCommand, new BindArgs(sqlBindArgs), 0),
           OdkDbTable.CREATOR);
    }
 
