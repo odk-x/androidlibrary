@@ -328,7 +328,7 @@ interface OdkDbInterface {
    * @return
    */
   OdkDbChunk rawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
-      in String sqlCommand, in String[] sqlBindArgs);
+      in String sqlCommand, in String[] sqlBindArgs, in int sqlLimit);
   /**
    * Insert or update a single table-level metadata KVS entry.
    * 
