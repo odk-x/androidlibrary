@@ -53,7 +53,7 @@ public class OdkDbTable implements Parcelable {
   /**
    * The SELECT arguments for the SQL command
    */
-  protected final String[] mSqlSelectionArgs;
+  protected final Object[] mSqlSelectionArgs;
 
   /**
    * The ORDER BY arguments
@@ -91,7 +91,7 @@ public class OdkDbTable implements Parcelable {
    * @param elementKeyForIndex map indices to column names in row data
    * @param rowCount the capacity of the table
    */
-  public OdkDbTable(String sqlCommand, String[] sqlSelectionArgs, String[] orderByElementKeys,
+  public OdkDbTable(String sqlCommand, Object[] sqlSelectionArgs, String[] orderByElementKeys,
       String[] orderByDirections, String[] primaryKey, String[] elementKeyForIndex,
       Map<String, Integer> elementKeyToIndex, Integer rowCount) {
 
@@ -144,7 +144,8 @@ public class OdkDbTable implements Parcelable {
     mSqlCommand = in.readString();
 
     try {
-      mSqlSelectionArgs = OdkMarshallUtil.unmarshallStringArray(in);
+      BindArgs args = BindArgs.CREATOR.createFromParcel(in);
+      mSqlSelectionArgs = args.bindArgs;
       mOrderByDirections = OdkMarshallUtil.unmarshallStringArray(in);
       mOrderByElementKeys = OdkMarshallUtil.unmarshallStringArray(in);
       mPrimaryKey = OdkMarshallUtil.unmarshallStringArray(in);
@@ -190,7 +191,7 @@ public class OdkDbTable implements Parcelable {
     return mSqlCommand;
   }
 
-  public String[] getSqlSelectionArgs() {
+  public Object[] getSqlSelectionArgs() {
     if (mSqlSelectionArgs == null ) {
       return null;
     }
@@ -261,7 +262,8 @@ public class OdkDbTable implements Parcelable {
     out.writeString(mSqlCommand);
 
     try {
-      OdkMarshallUtil.marshallStringArray(out, mSqlSelectionArgs);
+      BindArgs args = new BindArgs(mSqlSelectionArgs);
+      args.writeToParcel(out, flags);
       OdkMarshallUtil.marshallStringArray(out, mOrderByDirections);
       OdkMarshallUtil.marshallStringArray(out, mOrderByElementKeys);
       OdkMarshallUtil.marshallStringArray(out, mPrimaryKey);

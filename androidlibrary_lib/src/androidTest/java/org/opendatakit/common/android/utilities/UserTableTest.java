@@ -394,7 +394,8 @@ public class UserTableTest extends AndroidTestCase {
 
     String[] adminColumnOrder = ADMIN_COLUMNS.toArray(new String[ADMIN_COLUMNS.size()]);
 
-    UserTable table = new UserTable(orderedColumns, MY_COL + "=?", new String[] { "5", "9" },
+    UserTable table = new UserTable(orderedColumns, MY_COL + "=?",
+        new Object[] { "test", 5, 9.8, false },
         new String[] { GROUP_COL }, YOUR_COL + "=?", new String[] { THEIR_COL },
         new String[] { "ASC" }, adminColumnOrder, elementKeyToIndex, elementKeyForIndex, null);
 
@@ -423,8 +424,8 @@ public class UserTableTest extends AndroidTestCase {
     // whereClause
     assertEquals(table.getWhereClause(), t.getWhereClause());
     // selectionArgs
-    String[] sa = table.getSelectionArgs();
-    String[] sb = t.getSelectionArgs();
+    Object[] sa = table.getSelectionArgs();
+    Object[] sb = t.getSelectionArgs();
     if ( sa != null && sb != null ) {
       assertEquals(sa.length, sb.length);
       for ( i = 0 ; i < sa.length ; ++i ) {
@@ -702,8 +703,8 @@ public class UserTableTest extends AndroidTestCase {
     // whereClause
     assertEquals(table.getWhereClause(), t.getWhereClause());
     // selectionArgs
-    String[] sa = table.getSelectionArgs();
-    String[] sb = t.getSelectionArgs();
+    Object[] sa = table.getSelectionArgs();
+    Object[] sb = t.getSelectionArgs();
     if ( sa != null && sb != null ) {
       assertEquals(sa.length, sb.length);
       for ( i = 0 ; i < sa.length ; ++i ) {
@@ -929,8 +930,8 @@ public class UserTableTest extends AndroidTestCase {
     // whereClause
     assertEquals(table.getWhereClause(), t.getWhereClause());
     // selectionArgs
-    String[] sa = table.getSelectionArgs();
-    String[] sb = t.getSelectionArgs();
+    Object[] sa = table.getSelectionArgs();
+    Object[] sb = t.getSelectionArgs();
     if ( sa != null && sb != null ) {
       assertEquals(sa.length, sb.length);
       for ( i = 0 ; i < sa.length ; ++i ) {

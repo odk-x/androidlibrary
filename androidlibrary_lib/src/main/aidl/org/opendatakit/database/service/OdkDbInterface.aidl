@@ -22,6 +22,7 @@ import android.os.ParcelUuid;
 import org.opendatakit.common.android.data.OrderedColumns;
 import org.opendatakit.common.android.data.ColumnList;
 import org.opendatakit.common.android.data.TableDefinitionEntry;
+import org.opendatakit.database.service.BindArgs;
 import org.opendatakit.database.service.OdkDbHandle;
 import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.TableHealthInfo;
@@ -328,7 +329,8 @@ interface OdkDbInterface {
    * @return
    */
   OdkDbChunk rawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
-      in String sqlCommand, in String[] sqlBindArgs);
+      in String sqlCommand, in BindArgs sqlBindArgs);
+
   /**
    * Insert or update a single table-level metadata KVS entry.
    * 

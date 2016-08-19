@@ -52,7 +52,7 @@ public class OdkDbTableTest extends AndroidTestCase {
   private static final String[] ROW2_PK = {ROW2COL1, ROW2COL3};
 
   private static final String SQLCMD = "";
-  private static final String[] BINDARGS = {"test", "text"};
+  private static final Object[] BINDARGS = new Object[] {"test", 1, 1.1, 1.1f, false, true, 2452L };
   private static final String[] ORDERBYELEM = null;
   private static final String[] ORDERBYDIR = null;
 
@@ -99,7 +99,7 @@ public class OdkDbTableTest extends AndroidTestCase {
     index++;
 
     String sqlCmd = SQLCMD;
-    String[] bindArgs = BINDARGS;
+    Object[] bindArgs = BINDARGS;
     String[] orderByArgs = ORDERBYELEM;
     String[] orderByDirections = ORDERBYDIR;
     String[] primaryKey = PRIMARY_KEY;
@@ -135,8 +135,8 @@ public class OdkDbTableTest extends AndroidTestCase {
     assertEquals(table.getSqlCommand(), t.getSqlCommand());
 
     // selectionArgs
-    String[] sa = table.getSqlSelectionArgs();
-    String[] sb = t.getSqlSelectionArgs();
+    Object[] sa = table.getSqlSelectionArgs();
+    Object[] sb = t.getSqlSelectionArgs();
     if ( sa != null && sb != null ) {
       assertEquals(sa.length, sb.length);
       for ( int i = 0 ; i < sa.length ; ++i ) {

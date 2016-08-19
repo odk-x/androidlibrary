@@ -81,7 +81,7 @@ public class UserTable implements Parcelable, ParentTable{
     this.mAdminColumnOrder = adminColumnOrder;
   }
 
-  public UserTable(OrderedColumns columnDefns, String sqlWhereClause, String[] sqlSelectionArgs,
+  public UserTable(OrderedColumns columnDefns, String sqlWhereClause, Object[] sqlSelectionArgs,
       String[] sqlGroupByArgs, String sqlHavingClause, String[] sqlOrderByElementKeys,
       String[] sqlOrderByDirections, String[] adminColumnOrder,
       Map<String, Integer> elementKeyToIndex, String[] elementKeyForIndex, Integer rowCount) {
@@ -119,7 +119,7 @@ public class UserTable implements Parcelable, ParentTable{
     return mBaseTable.getColumnIndexOfElementKey(elementKey);
   }
 
-  public String[] getSelectionArgs() {
+  public final Object[] getSelectionArgs() {
     return mBaseTable.getSqlSelectionArgs();
   }
 

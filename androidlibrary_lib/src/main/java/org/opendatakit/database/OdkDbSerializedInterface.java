@@ -26,6 +26,7 @@ import org.opendatakit.common.android.data.OrderedColumns;
 import org.opendatakit.common.android.data.TableDefinitionEntry;
 import org.opendatakit.common.android.data.UserTable;
 import org.opendatakit.common.android.provider.DataTableColumns;
+import org.opendatakit.database.service.BindArgs;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.OdkDbHandle;
@@ -419,7 +420,8 @@ public class OdkDbSerializedInterface {
     * @param whereClause       the whereClause for the selection, beginning with "WHERE". Must
     *                          include "?" instead of actual values, which are instead passed in
     *                          the selectionArgs.
-    * @param selectionArgs     an array of string values for bind parameters
+    * @param selectionArgs     an array of primitive values (String, Boolean, int, double) for bind
+    *                          parameters
     * @param groupBy           an array of elementKeys
     * @param having
     * @param orderByElementKey elementKey to order the results by
@@ -428,13 +430,13 @@ public class OdkDbSerializedInterface {
     * {@link OdkDbInterface#getChunk} to retrieve the rest of the chunks.
     */
    public UserTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
-       OrderedColumns columnDefns, String whereClause, String[] selectionArgs, String[] groupBy,
+       OrderedColumns columnDefns, String whereClause, Object[] selectionArgs, String[] groupBy,
        String having, String[] orderByElementKey, String[] orderByDirection)
        throws RemoteException {
 
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
           OdkDbQueryUtil.buildSqlStatement(tableId, whereClause, groupBy, having, orderByElementKey,
-              orderByDirection), selectionArgs), OdkDbTable.CREATOR);
+              orderByDirection), new BindArgs(selectionArgs)), OdkDbTable.CREATOR);
 
       return new UserTable(baseTable, columnDefns, whereClause, groupBy, having, getAdminColumns());
    }
@@ -455,10 +457,10 @@ public class OdkDbSerializedInterface {
     * {@link OdkDbInterface#getChunk} to retrieve the rest of the chunks.
     */
    public OdkDbTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String sqlCommand,
-       String[] sqlBindArgs) throws RemoteException {
+       Object[] sqlBindArgs) throws RemoteException {
 
       return fetchAndRebuildChunks(
-          dbInterface.rawSqlQuery(appName, dbHandleName, sqlCommand, sqlBindArgs),
+          dbInterface.rawSqlQuery(appName, dbHandleName, sqlCommand, new BindArgs(sqlBindArgs)),
           OdkDbTable.CREATOR);
    }
 
