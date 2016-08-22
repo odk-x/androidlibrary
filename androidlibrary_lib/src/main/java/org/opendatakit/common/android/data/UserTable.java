@@ -23,7 +23,9 @@ import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.common.android.provider.DataTableColumns;
 
 import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.database.utilities.OdkDbQueryUtil;
+import org.opendatakit.database.service.BindArgs;
+import org.opendatakit.database.service.queries.OdkDbResumableQuery;
+import org.opendatakit.database.service.queries.OdkDbSimpleQuery;
 import org.opendatakit.database.service.OdkDbRow;
 import org.opendatakit.database.service.OdkDbTable;
 import org.opendatakit.database.service.ParentTable;
@@ -54,51 +56,41 @@ public class UserTable implements Parcelable, ParentTable{
 
   private final OrderedColumns mColumnDefns;
 
-  private final String mSqlWhereClause;
-  private final String[] mSqlGroupByArgs;
-  private final String mSqlHavingClause;
-
   private final String[] mAdminColumnOrder;
 
   public UserTable(UserTable table, List<Integer> indexes) {
     this.mBaseTable = new OdkDbTable(table.mBaseTable, indexes);
     this.mColumnDefns = table.mColumnDefns;
-    this.mSqlWhereClause = table.mSqlWhereClause;
-    this.mSqlGroupByArgs = table.mSqlGroupByArgs;
-    this.mSqlHavingClause = table.mSqlHavingClause;
     this.mAdminColumnOrder = table.mAdminColumnOrder;
   }
 
-  public UserTable(OdkDbTable baseTable, OrderedColumns columnDefns, String sqlWhereClause,
-      String[] sqlGroupByArgs, String sqlHavingClause, String[] adminColumnOrder) {
+  public UserTable(OdkDbTable baseTable, OrderedColumns columnDefns, String[] adminColumnOrder) {
     this.mBaseTable = baseTable;
     baseTable.registerParentTable(this);
 
     this.mColumnDefns = columnDefns;
-    this.mSqlWhereClause = sqlWhereClause;
-    this.mSqlGroupByArgs = sqlGroupByArgs;
-    this.mSqlHavingClause = sqlHavingClause;
     this.mAdminColumnOrder = adminColumnOrder;
   }
 
-  public UserTable(OrderedColumns columnDefns, String sqlWhereClause, Object[] sqlSelectionArgs,
+  public UserTable(OrderedColumns columnDefns, String sqlWhereClause, Object[] sqlBindArgs,
       String[] sqlGroupByArgs, String sqlHavingClause, String[] sqlOrderByElementKeys,
       String[] sqlOrderByDirections, String[] adminColumnOrder,
       Map<String, Integer> elementKeyToIndex, String[] elementKeyForIndex, Integer rowCount) {
 
-    this.mBaseTable = new OdkDbTable(OdkDbQueryUtil
-        .buildSqlStatement(columnDefns.getTableId(), sqlWhereClause, sqlGroupByArgs, sqlHavingClause,
-            sqlOrderByElementKeys, sqlOrderByDirections), sqlSelectionArgs, sqlOrderByElementKeys,
-        sqlOrderByDirections, primaryKey, elementKeyForIndex, elementKeyToIndex, rowCount);
+    OdkDbResumableQuery query = new OdkDbSimpleQuery(columnDefns.getTableId(),
+        new BindArgs(sqlBindArgs), sqlWhereClause, sqlGroupByArgs, sqlHavingClause,
+        sqlOrderByElementKeys, sqlOrderByDirections, null);
+
+    this.mBaseTable = new OdkDbTable(query, elementKeyForIndex, elementKeyToIndex, primaryKey,
+        rowCount);
 
     this.mColumnDefns = columnDefns;
-    this.mSqlWhereClause = sqlWhereClause;
-    this.mSqlGroupByArgs = sqlGroupByArgs;
-    this.mSqlHavingClause = sqlHavingClause;
     this.mAdminColumnOrder = adminColumnOrder;
   }
 
-  /*** Methods that pass straight down to OdkDbTable ***/
+  /***
+   * Methods that pass straight down to OdkDbTable
+   ***/
   public OdkDbTable getBaseTable() {
     return mBaseTable;
   }
@@ -119,16 +111,8 @@ public class UserTable implements Parcelable, ParentTable{
     return mBaseTable.getColumnIndexOfElementKey(elementKey);
   }
 
-  public final Object[] getSelectionArgs() {
-    return mBaseTable.getSqlSelectionArgs();
-  }
-
-  public String[] getOrderByElementKeys() {
-    return mBaseTable.getOrderByElementKeys();
-  }
-
-  public String[] getOrderByDirections() {
-    return mBaseTable.getOrderByDirections();
+  public BindArgs getSelectionArgs() {
+    return mBaseTable.getSqlBindArgs();
   }
 
   public int getWidth() {
@@ -141,6 +125,10 @@ public class UserTable implements Parcelable, ParentTable{
 
   public Map<String, Integer> getElementKeyToIndex() {
     return mBaseTable.getElementKeyToIndex();
+  }
+
+  public OdkDbResumableQuery getQuery() {
+    return mBaseTable.getQuery();
   }
 
 
@@ -156,26 +144,6 @@ public class UserTable implements Parcelable, ParentTable{
   public OrderedColumns getColumnDefinitions() {
     return mColumnDefns;
   }
-
-  public String getWhereClause() {
-    return mSqlWhereClause;
-  }
-
-  public boolean isGroupedBy() {
-    return mSqlGroupByArgs != null && mSqlGroupByArgs.length != 0;
-  }
-
-  public String[] getGroupByArgs() {
-    if (mSqlGroupByArgs == null) {
-      return null;
-    }
-    return mSqlGroupByArgs.clone();
-  }
-
-  public String getHavingClause() {
-    return mSqlHavingClause;
-  }
-
 
   public String getRowId(int rowIndex) {
     return getRowAtIndex(rowIndex).getDataByKey(DataTableColumns.ID);
@@ -273,18 +241,12 @@ public class UserTable implements Parcelable, ParentTable{
 
   @Override
   public void writeToParcel(Parcel out, int flags) {
-    out.writeString(mSqlWhereClause);
-    OdkMarshallUtil.marshallStringArray(out, mSqlGroupByArgs);
-    out.writeString(mSqlHavingClause);
     this.mColumnDefns.writeToParcel(out, flags);
     OdkMarshallUtil.marshallStringArray(out, mAdminColumnOrder);
     this.mBaseTable.writeToParcel(out, flags);
   }
 
   public UserTable(Parcel in) {
-    this.mSqlWhereClause = in.readString();
-    this.mSqlGroupByArgs = OdkMarshallUtil.unmarshallStringArray(in);
-    this.mSqlHavingClause = in.readString();
     this.mColumnDefns = new OrderedColumns(in);
     this.mAdminColumnOrder = OdkMarshallUtil.unmarshallStringArray(in);
     this.mBaseTable = new OdkDbTable(in);

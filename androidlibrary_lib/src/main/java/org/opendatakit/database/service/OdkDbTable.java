@@ -18,6 +18,10 @@ package org.opendatakit.database.service;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import org.opendatakit.database.service.queries.OdkDbQuery;
+import org.opendatakit.database.service.queries.OdkDbResumableQuery;
+import org.opendatakit.database.service.queries.OdkDbSimpleQuery;
+import org.opendatakit.database.service.queries.QueryBounds;
 import org.opendatakit.database.utilities.OdkMarshallUtil;
 
 import java.util.ArrayList;
@@ -43,27 +47,12 @@ public class OdkDbTable implements Parcelable {
   /**
    * The parent/container table
    */
-  protected ParentTable parent;
+  protected ParentTable mParent;
 
   /**
-   * The SQL command used to retrieve the data
+   * The query performed
    */
-  protected final String mSqlCommand;
-
-  /**
-   * The SELECT arguments for the SQL command
-   */
-  protected final Object[] mSqlSelectionArgs;
-
-  /**
-   * The ORDER BY arguments
-   */
-  protected final String[] mOrderByElementKeys;
-
-  /**
-   * The direction of each ORDER BY argument
-   */
-  protected final String[] mOrderByDirections;
+  protected OdkDbResumableQuery mQuery;
 
   /**
    * The fields that make up the primary key
@@ -83,25 +72,16 @@ public class OdkDbTable implements Parcelable {
   /**
    * Construct the table
    *
-   * @param sqlCommand the SQL command use to retrieve the data
-   * @param sqlSelectionArgs the SELECT arguments for the SQL command
-   * @param orderByElementKeys the direction of each ORDER BY argument
-   * @param orderByDirections the ORDER BY arguments
-   * @param primaryKey the fields that make up the primary key
+   * @param query the query that produced the results
    * @param elementKeyForIndex map indices to column names in row data
+   * @param elementKeyToIndex map column names to indices in row data
    * @param rowCount the capacity of the table
    */
-  public OdkDbTable(String sqlCommand, Object[] sqlSelectionArgs, String[] orderByElementKeys,
-      String[] orderByDirections, String[] primaryKey, String[] elementKeyForIndex,
-      Map<String, Integer> elementKeyToIndex, Integer rowCount) {
+  public OdkDbTable(OdkDbResumableQuery query, String[] elementKeyForIndex,
+      Map<String, Integer> elementKeyToIndex, String[] primaryKey, Integer rowCount) {
+    this.mParent = null;
 
-    this.mSqlCommand = sqlCommand;
-    this.mSqlSelectionArgs = sqlSelectionArgs;
-    this.mOrderByDirections = orderByDirections;
-    this.mOrderByElementKeys = orderByElementKeys;
-    this.mPrimaryKey = primaryKey;
-
-    this.parent = null;
+    this.mQuery = query;
 
     if (elementKeyForIndex == null) {
       throw new IllegalStateException("elementKeyForIndex cannot be null");
@@ -114,40 +94,45 @@ public class OdkDbTable implements Parcelable {
       this.mElementKeyToIndex = elementKeyToIndex;
     }
 
+    this.mPrimaryKey = primaryKey;
+
     int numRows = 0;
     if (rowCount != null) {
       numRows = rowCount.intValue();
     }
-    this.mRows = new ArrayList<OdkDbRow>(numRows);
+    this.mRows = new ArrayList<>(numRows);
+  }
+
+  /**
+   * Construct the table
+   *
+   * @param elementKeyForIndex map indices to column names in row data
+   * @param elementKeyToIndex map column names to indices in row data
+   * @param rowCount the capacity of the table
+   */
+  public OdkDbTable(String[] primaryKey, String[] elementKeyForIndex, Map<String, Integer> elementKeyToIndex,
+     Integer rowCount) {
+    this(null, elementKeyForIndex, elementKeyToIndex, primaryKey, rowCount);
   }
 
   public OdkDbTable(OdkDbTable table, List<Integer> indexes) {
-    mRows = new ArrayList<OdkDbRow>(indexes.size());
+    mRows = new ArrayList<>(indexes.size());
     for (int i = 0; i < indexes.size(); ++i) {
       OdkDbRow r = table.getRowAtIndex(indexes.get(i));
       mRows.add(r);
     }
-    this.mSqlCommand = table.mSqlCommand;
-    this.mSqlSelectionArgs = table.mSqlSelectionArgs;
-    this.mOrderByDirections = table.mOrderByDirections;
-    this.mOrderByElementKeys = table.mOrderByDirections;
+    this.mQuery = table.mQuery;
     this.mPrimaryKey = table.mPrimaryKey;
     this.mElementKeyForIndex = table.mElementKeyForIndex;
     this.mElementKeyToIndex = table.generateElementKeyToIndex();
-    this.parent = null; // Set this with register
+    this.mParent = null; // Set this with register
   }
 
 
   public OdkDbTable(Parcel in) {
     int dataCount;
 
-    mSqlCommand = in.readString();
-
     try {
-      BindArgs args = BindArgs.CREATOR.createFromParcel(in);
-      mSqlSelectionArgs = args.bindArgs;
-      mOrderByDirections = OdkMarshallUtil.unmarshallStringArray(in);
-      mOrderByElementKeys = OdkMarshallUtil.unmarshallStringArray(in);
       mPrimaryKey = OdkMarshallUtil.unmarshallStringArray(in);
       mElementKeyForIndex = OdkMarshallUtil.unmarshallStringArray(in);
       mElementKeyToIndex = generateElementKeyToIndex();
@@ -164,7 +149,96 @@ public class OdkDbTable implements Parcelable {
       mRows.add(r);
     }
 
-    this.parent = null; // Set this with register
+    // The parent and the query are not parceled
+    this.mParent = null;
+    this.mQuery = null;
+  }
+
+  public void setQuery(OdkDbResumableQuery query) {
+    this.mQuery = query;
+  }
+
+  public OdkDbResumableQuery getQuery() {
+    return mQuery;
+  }
+
+  public int getStartIndex() {
+    if (mQuery == null || mQuery.getSqlQueryBounds() == null) {
+      return 0;
+    }
+
+    QueryBounds bounds = mQuery.getSqlQueryBounds();
+
+    if (bounds.mOffset < 0) {
+      return 0;
+    }
+
+    return bounds.mOffset;
+  }
+
+  public int getEndIndex() {
+    return getStartIndex() + getNumberOfRows();
+  }
+
+   /**
+    * Return a resumable query that will perform the same query but adjust the query bounds. The
+    * bounds will be moved forward through the row indeces as determined by the ORDER BY row
+    * ordering.
+    *
+    * @param limit the maximum number of rows to retrieve
+    * @return
+    */
+   public OdkDbResumableQuery resumeQueryForward(int limit) {
+     if (mQuery == null || !mQuery.isResumable()) {
+       return null;
+     }
+
+     int numCurrentRows = getNumberOfRows();
+     if (numCurrentRows == 0 || numCurrentRows <= mQuery.getSqlLimit()) {
+       // We have reached the end of the query results
+       return null;
+     }
+
+     mQuery.setSqlLimit(limit);
+     mQuery.setSqlOffset(getEndIndex() + 1);
+
+    return mQuery;
+  }
+
+
+  /**
+   * Return a resumable query that will perform the same query but adjust the query bounds. The
+   * bounds will be moved backward through the row indeces as determined by the ORDER BY row
+   * ordering.
+   *
+   * The results are earlier in the ordering, but they are still conform to the ORDER BY
+   * arguments (they are not reversed).
+   *
+   * @param limit the maximum number of rows to retrieve
+   * @return
+   */
+  public OdkDbResumableQuery resumeQueryBackward(int limit) {
+    if (mQuery == null || !mQuery.isResumable()) {
+      return null;
+    }
+
+    int startIndex = getStartIndex();
+    if (startIndex == 0) {
+      // We are at the beginning of the results; we cannot go back farther
+      return null;
+    }
+
+    // If we are asked to retrieve more rows than exist when counting back to the beginning,
+    // shrink the bounds accordingly
+    if (limit > startIndex) {
+      limit = startIndex;
+      startIndex = 0;
+    }
+
+    mQuery.setSqlLimit(limit);
+    mQuery.setSqlOffset(startIndex);
+
+    return mQuery;
   }
 
   public void addRow(OdkDbRow row) {
@@ -188,28 +262,11 @@ public class OdkDbTable implements Parcelable {
   }
 
   public String getSqlCommand() {
-    return mSqlCommand;
+    return (mQuery != null ? mQuery.getSqlCommand() : null);
   }
 
-  public Object[] getSqlSelectionArgs() {
-    if (mSqlSelectionArgs == null ) {
-      return null;
-    }
-    return mSqlSelectionArgs.clone();
-  }
-
-  public String[] getOrderByElementKeys() {
-    if (mOrderByElementKeys == null ) {
-      return null;
-    }
-    return mOrderByElementKeys.clone();
-  }
-
-  public String[] getOrderByDirections() {
-    if (mOrderByDirections == null ) {
-      return null;
-    }
-    return mOrderByDirections.clone();
+  public BindArgs getSqlBindArgs() {
+    return (mQuery != null ? mQuery.getSqlBindArgs() : null);
   }
 
   public String[] getPrimaryKey() {
@@ -251,21 +308,19 @@ public class OdkDbTable implements Parcelable {
   }
 
   public void registerParentTable(ParentTable table) {
-    this.parent = table;
+    this.mParent = table;
   }
 
   @Override
   public void writeToParcel(Parcel out, int flags) {
     // Do not marshal the parent table reference. The parent table will reregister itself when
     // it unmarshals.
+
+    // Do not marshall the query, it will be reregistered on the other side
+
     // Do not marshall mElementKeyToIndex; just rebuilt it from the mElementKeyForIndex
-    out.writeString(mSqlCommand);
 
     try {
-      BindArgs args = new BindArgs(mSqlSelectionArgs);
-      args.writeToParcel(out, flags);
-      OdkMarshallUtil.marshallStringArray(out, mOrderByDirections);
-      OdkMarshallUtil.marshallStringArray(out, mOrderByElementKeys);
       OdkMarshallUtil.marshallStringArray(out, mPrimaryKey);
       OdkMarshallUtil.marshallStringArray(out, mElementKeyForIndex);
     } catch (Throwable t) {

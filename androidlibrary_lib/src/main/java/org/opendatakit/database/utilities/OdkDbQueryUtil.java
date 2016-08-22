@@ -16,6 +16,7 @@
 package org.opendatakit.database.utilities;
 
 import org.opendatakit.common.android.provider.DataTableColumns;
+import org.opendatakit.database.service.queries.OdkDbResumableQuery;
 
 public class OdkDbQueryUtil {
 
@@ -56,7 +57,7 @@ public class OdkDbQueryUtil {
       if (orderByElementKey != null && orderByElementKey.length != 0) {
          boolean first = true;
          for (int i = 0; i < orderByElementKey.length; i++) {
-            if (orderByElementKey == null || orderByElementKey.length == 0) {
+            if (orderByElementKey[i] == null || orderByElementKey[i].length() == 0) {
                continue;
             }
 
@@ -79,6 +80,51 @@ public class OdkDbQueryUtil {
       return s.toString();
    }
 
+   public static final String wrapOrderBy(String sqlCommand, String[] orderByElementKeys,
+       String[] orderByDirections) {
+
+      if (sqlCommand == null || sqlCommand.length() == 0 || orderByElementKeys == null ||
+          orderByElementKeys.length == 0) {
+         return null;
+      }
+
+      StringBuilder s = new StringBuilder();
+
+      // Ensure ORDER BY directions are set, even if a null is passed in
+      String[] adjustedOrderByDirections;
+      if (orderByDirections != null && orderByDirections.length == orderByElementKeys.length) {
+         adjustedOrderByDirections = orderByDirections;
+      } else {
+         adjustedOrderByDirections = new String[orderByElementKeys.length];
+         for (int i = 0; i < adjustedOrderByDirections.length; i++) {
+            adjustedOrderByDirections[i] = "ASC";
+         }
+      }
+
+      // Wrap the original SQL command
+      s.append("SELECT * FROM (").append(sqlCommand).append(") ");
+
+      // Append the ORDER BY clause
+      boolean first = true;
+      for (int i = 0; i < orderByElementKeys.length; i++) {
+         if (orderByElementKeys[i] == null || orderByElementKeys[i].length() == 0) {
+            continue;
+         }
+
+         if (first) {
+            s.append(" ORDER BY ");
+         } else {
+            s.append(", ");
+            first = false;
+         }
+
+         s.append(orderByElementKeys[i] + " " + adjustedOrderByDirections[i]);
+      }
+
+
+      return s.toString();
+   }
+
    /* Standard Queries we commonly use */
    public static final String GET_ROWS_WITH_ID_WHERE = DataTableColumns.ID + "=?";
    public static final String[] GET_ROWS_WITH_ID_GROUP_BY = null;
@@ -87,3 +133,4 @@ public class OdkDbQueryUtil {
        DataTableColumns.SAVEPOINT_TIMESTAMP };
    public static final String[] GET_ROWS_WITH_ID_ORDER_BY_DIR = { "DESC" };
 }
+

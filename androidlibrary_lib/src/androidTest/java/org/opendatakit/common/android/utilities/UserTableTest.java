@@ -421,59 +421,6 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(table.getAppName(), t.getAppName());
     // tableId
     assertEquals(table.getTableId(), t.getTableId());
-    // whereClause
-    assertEquals(table.getWhereClause(), t.getWhereClause());
-    // selectionArgs
-    Object[] sa = table.getSelectionArgs();
-    Object[] sb = t.getSelectionArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for ( i = 0 ; i < sa.length ; ++i ) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // groupBy columns
-    assertEquals(table.isGroupedBy(), t.isGroupedBy());
-    sa = table.getGroupByArgs();
-    sb = t.getGroupByArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // having clause
-    assertEquals(table.getHavingClause(), t.getHavingClause());
-    // order by elementKey
-    sa = table.getOrderByElementKeys();
-    sb = t.getOrderByElementKeys();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // order by direction
-    sa = table.getOrderByDirections();
-    sb = t.getOrderByDirections();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
 
     OrderedColumns ta = table.getColumnDefinitions();
     OrderedColumns tb = table.getColumnDefinitions();
@@ -700,59 +647,6 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(table.getAppName(), t.getAppName());
     // tableId
     assertEquals(table.getTableId(), t.getTableId());
-    // whereClause
-    assertEquals(table.getWhereClause(), t.getWhereClause());
-    // selectionArgs
-    Object[] sa = table.getSelectionArgs();
-    Object[] sb = t.getSelectionArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for ( i = 0 ; i < sa.length ; ++i ) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // groupBy columns
-    assertEquals(table.isGroupedBy(), t.isGroupedBy());
-    sa = table.getGroupByArgs();
-    sb = t.getGroupByArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // having clause
-    assertEquals(table.getHavingClause(), t.getHavingClause());
-    // order by elementKey
-    sa = table.getOrderByElementKeys();
-    sb = t.getOrderByElementKeys();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // order by direction
-    sa = table.getOrderByDirections();
-    sb = t.getOrderByDirections();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
 
     OrderedColumns ta = table.getColumnDefinitions();
     OrderedColumns tb = table.getColumnDefinitions();
@@ -927,59 +821,6 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(table.getAppName(), t.getAppName());
     // tableId
     assertEquals(table.getTableId(), t.getTableId());
-    // whereClause
-    assertEquals(table.getWhereClause(), t.getWhereClause());
-    // selectionArgs
-    Object[] sa = table.getSelectionArgs();
-    Object[] sb = t.getSelectionArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for ( i = 0 ; i < sa.length ; ++i ) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // groupBy columns
-    assertEquals(table.isGroupedBy(), t.isGroupedBy());
-    sa = table.getGroupByArgs();
-    sb = t.getGroupByArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // having clause
-    assertEquals(table.getHavingClause(), t.getHavingClause());
-    // order by elementKey
-    sa = table.getOrderByElementKeys();
-    sb = t.getOrderByElementKeys();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // order by direction
-    sa = table.getOrderByDirections();
-    sb = t.getOrderByDirections();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
 
     OrderedColumns ta = table.getColumnDefinitions();
     OrderedColumns tb = table.getColumnDefinitions();

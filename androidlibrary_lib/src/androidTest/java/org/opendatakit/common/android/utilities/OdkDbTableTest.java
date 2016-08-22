@@ -104,8 +104,7 @@ public class OdkDbTableTest extends AndroidTestCase {
     String[] orderByDirections = ORDERBYDIR;
     String[] primaryKey = PRIMARY_KEY;
 
-    OdkDbTable table = new OdkDbTable(sqlCmd, bindArgs, orderByArgs, orderByDirections,
-        primaryKey, elementKeyForIndex, null, NUM_ROWS);
+    OdkDbTable table = new OdkDbTable(primaryKey, elementKeyForIndex, null, NUM_ROWS);
 
     OdkDbRow row1 = new OdkDbRow(rowValues1, table);
     table.addRow(row1);
@@ -133,45 +132,6 @@ public class OdkDbTableTest extends AndroidTestCase {
 
     // sql command
     assertEquals(table.getSqlCommand(), t.getSqlCommand());
-
-    // selectionArgs
-    Object[] sa = table.getSqlSelectionArgs();
-    Object[] sb = t.getSqlSelectionArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for ( int i = 0 ; i < sa.length ; ++i ) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-
-    // order by elementKey
-    String[] ea = table.getOrderByElementKeys();
-    String[] eb = t.getOrderByElementKeys();
-    if ( ea != null && eb != null ) {
-      assertEquals(ea.length, eb.length);
-      for ( index = 0 ; index < ea.length ; ++index ) {
-        assertEquals(ea[index], eb[index]);
-      }
-    } else {
-      assertNull(ea);
-      assertNull(eb);
-    }
-
-    // order by direction
-    String[] da = table.getOrderByDirections();
-    String[] db = t.getOrderByDirections();
-    if ( da != null && db != null ) {
-      assertEquals(da.length, db.length);
-      for ( index = 0 ; index < da.length ; ++index ) {
-        assertEquals(da[index], db[index]);
-      }
-    } else {
-      assertNull(da);
-      assertNull(db);
-    }
 
     // primary key
     String[] pa = table.getPrimaryKey();
