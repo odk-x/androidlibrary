@@ -81,7 +81,68 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    */
-   void closeDatabase(in String appName, in OdkDbHandle dbHandleName); 
+   void closeDatabase(in String appName, in OdkDbHandle dbHandleName);
+
+  /**
+   * Create a local only table and prepend the given id with an "L_"
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param columns
+   * @return
+   */
+  OdkDbChunk createLocalOnlyDbTableWithColumns(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId, in ColumnList columns);
+
+  /**
+    * Drop the given local only table
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    */
+  void deleteLocalOnlyDBTable(in String appName, in OdkDbHandle dbHandleName,
+     in String tableId);
+
+  /**
+   * Insert a row into a local only table
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param rowValues
+   * @throws ActionNotAuthorizedException
+   */
+  void insertLocalOnlyRow(in String appName, in OdkDbHandle dbHandleName, in String tableId,
+     in ContentValues rowValues);
+
+  /**
+   * Update a row in a local only table
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param rowValues
+   * @param whereClause
+   * @param whereArgs
+   * @throws ActionNotAuthorizedException
+   */
+  void updateLocalOnlyRow(in String appName, in OdkDbHandle dbHandleName, in String tableId,
+        in ContentValues rowValues, in String whereClause, in String[] whereArgs);
+
+  /**
+   * Delete a row in a local only table
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param whereClause
+   * @param whereArgs
+   * @throws ActionNotAuthorizedException
+   */
+  void deleteLocalOnlyRow(in String appName, in OdkDbHandle dbHandleName, in String tableId,
+        in String whereClause, in String[] whereArgs);
 
   /**
    * SYNC Only. ADMIN Privileges

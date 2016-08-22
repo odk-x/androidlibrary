@@ -122,6 +122,83 @@ public class OdkDbSerializedInterface {
    }
 
    /**
+    * Create a local only table and prepend the given id with an "L_"
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param columns
+    * @return
+    * @throws RemoteException
+    */
+   public OrderedColumns createLocalOnlyDbTableWithColumns(String appName, OdkDbHandle dbHandleName,
+       String tableId, ColumnList columns) throws RemoteException {
+
+      return fetchAndRebuildChunks(
+          dbInterface.createLocalOnlyDbTableWithColumns(appName, dbHandleName, tableId, columns),
+          OrderedColumns.CREATOR);
+   }
+
+   /**
+    * Drop the given local only table
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @throws RemoteException
+    */
+   public void deleteLocalOnlyDBTable(String appName, OdkDbHandle dbHandleName, String tableId)
+       throws RemoteException {
+      dbInterface.deleteLocalOnlyDBTable(appName, dbHandleName, tableId);
+   }
+
+   /**
+    * Insert a row into a local only table
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param rowValues
+    * @throws RemoteException
+    */
+   public void insertLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
+       ContentValues rowValues) throws RemoteException {
+      dbInterface.insertLocalOnlyRow(appName, dbHandleName, tableId, rowValues);
+   }
+
+   /**
+    * Update a row in a local only table
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param rowValues
+    * @param whereClause
+    * @param whereArgs
+    * @throws RemoteException
+    */
+   public void updateLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
+       ContentValues rowValues, String whereClause, String[] whereArgs) throws RemoteException {
+      dbInterface
+          .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause, whereArgs);
+   }
+
+   /**
+    * Delete a row in a local only table
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param whereClause
+    * @param whereArgs
+    * @throws RemoteException
+    */
+   public void deleteLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
+       String whereClause, String[] whereArgs) throws RemoteException {
+      dbInterface.deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, whereArgs);
+   }
+
+   /**
     * SYNC Only. ADMIN Privileges
     *
     * Call this when the schemaETag for the given tableId has changed on the server.
