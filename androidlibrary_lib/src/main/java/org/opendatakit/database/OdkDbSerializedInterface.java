@@ -134,6 +134,10 @@ public class OdkDbSerializedInterface {
    public OrderedColumns createLocalOnlyDbTableWithColumns(String appName, OdkDbHandle dbHandleName,
        String tableId, ColumnList columns) throws RemoteException {
 
+      if (!tableId.startsWith("L_")) {
+         tableId = "L_" + tableId;
+      }
+
       return fetchAndRebuildChunks(
           dbInterface.createLocalOnlyDbTableWithColumns(appName, dbHandleName, tableId, columns),
           OrderedColumns.CREATOR);
@@ -149,6 +153,11 @@ public class OdkDbSerializedInterface {
     */
    public void deleteLocalOnlyDBTable(String appName, OdkDbHandle dbHandleName, String tableId)
        throws RemoteException {
+
+      if (!tableId.startsWith("L_")) {
+         tableId = "L_" + tableId;
+      }
+
       dbInterface.deleteLocalOnlyDBTable(appName, dbHandleName, tableId);
    }
 
@@ -163,6 +172,11 @@ public class OdkDbSerializedInterface {
     */
    public void insertLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
        ContentValues rowValues) throws RemoteException {
+
+      if (!tableId.startsWith("L_")) {
+         tableId = "L_" + tableId;
+      }
+
       dbInterface.insertLocalOnlyRow(appName, dbHandleName, tableId, rowValues);
    }
 
@@ -179,6 +193,11 @@ public class OdkDbSerializedInterface {
     */
    public void updateLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
        ContentValues rowValues, String whereClause, String[] whereArgs) throws RemoteException {
+      if (!tableId.startsWith("L_")) {
+         tableId = "L_" + tableId;
+      }
+
+
       dbInterface
           .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause, whereArgs);
    }
@@ -195,7 +214,95 @@ public class OdkDbSerializedInterface {
     */
    public void deleteLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
        String whereClause, String[] whereArgs) throws RemoteException {
+
+      if (!tableId.startsWith("L_")) {
+         tableId = "L_" + tableId;
+      }
+
       dbInterface.deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, whereArgs);
+   }
+
+   /**
+    * Get a {@link OdkDbTable} for this local only table based on the given SQL command. All
+    * columns from the table are returned.
+    *
+    * If any of the clause parts are omitted (null), then the appropriate
+    * simplified SQL statement is constructed.
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param whereClause       the whereClause for the selection, beginning with "WHERE". Must
+    *                          include "?" instead of actual values, which are instead passed in
+    *                          the selectionArgs.
+    * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
+    *                          bind parameters
+    * @param groupBy           an array of elementKeys
+    * @param having
+    * @param orderByColNames   array of columns to order the results by
+    * @param orderByDirections either "ASC" or "DESC", corresponding to each column name
+    * @param limit             the maximum number of rows to return
+    * @param offset            the index to start counting the limit from
+    * @return A {@link UserTable} containing the results of the query
+    */
+   public OdkDbTable rawSqlQueryLocalOnlyTables(String appName, OdkDbHandle dbHandleName,
+       String tableId, String whereClause, Object[] bindArgs, String[] groupBy, String having,
+       String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset)
+       throws RemoteException {
+
+      if (!tableId.startsWith("L_")) {
+         tableId = "L_" + tableId;
+      }
+
+      return rawSqlQuery(appName, dbHandleName, tableId, whereClause, bindArgs, groupBy, having,
+          orderByColNames, orderByDirections, limit, offset);
+   }
+
+   /**
+    * Get a {@link OdkDbTable} for the result set of an arbitrary sql query
+    * and bind parameters on this local only table.
+    *
+    * The sql query can be arbitrarily complex and can include joins, unions, etc.
+    * The data are returned as string values.
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param sqlCommand
+    * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
+    *                          bind parameters
+    * @param orderByColNames   array of columns to order the results by (optional)
+    * @param orderByDirections  either "ASC" or "DESC" (optional)
+    * @param limit             the maximum number of rows to return (optional)
+    * @param offset            the index to start counting the limit from (optional)
+    * @return An  {@link OdkDbTable}. Containing the results of the query
+    */
+   public OdkDbTable arbitrarySqlQueryLocalOnlyTables(String appName, OdkDbHandle dbHandleName,
+       String tableId, String sqlCommand, Object[] bindArgs, String[] orderByColNames,
+       String[] orderByDirections, Integer limit, Integer offset) throws RemoteException {
+
+      if (!tableId.startsWith("L_")) {
+         tableId = "L_" + tableId;
+      }
+
+      return arbitrarySqlQuery(appName, dbHandleName, tableId, sqlCommand, bindArgs,
+          orderByColNames, orderByDirections, limit, offset);
+   }
+
+   /**
+    * Get a {@link OdkDbTable} that holds the results from the continued query. Note that this is
+    * just a wrapper of resumeRawSqlQuery, which could successfully be used instead.
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param query The original query with the bounds adjusted
+    * @return
+    * @throws RemoteException
+    */
+   public OdkDbTable resumeRawSqlQueryLocalOnlyTables(String appName, OdkDbHandle dbHandleName,
+       OdkDbResumableQuery query) throws RemoteException {
+
+      return resumeRawSqlQuery(appName, dbHandleName, query);
    }
 
    /**
