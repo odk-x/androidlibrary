@@ -27,6 +27,7 @@ import org.opendatakit.common.android.data.OrderedColumns;
 import org.opendatakit.common.android.data.TableDefinitionEntry;
 import org.opendatakit.common.android.data.UserTable;
 import org.opendatakit.common.android.exception.ActionNotAuthorizedException;
+import org.opendatakit.common.android.exception.ServicesAvailabilityException;
 import org.opendatakit.common.android.provider.DataTableColumns;
 import org.opendatakit.database.service.BindArgs;
 import org.opendatakit.database.service.KeyValueStoreEntry;
@@ -72,7 +73,8 @@ public class OdkDbSerializedInterface {
    }
 
    private void rethrowNotAuthorizedRemoteException(Exception e)
-       throws ActionNotAuthorizedException {
+       throws IllegalArgumentException, IllegalStateException,
+       ActionNotAuthorizedException, ServicesAvailabilityException {
       if ( !(e instanceof RemoteException) ) {
          throw new IllegalStateException("not RemoteException on OdkDbInterface: " +
              e.getClass().getName() + ": " + e.toString());
@@ -81,12 +83,12 @@ public class OdkDbSerializedInterface {
       String msg = e.getMessage();
       int idx = msg.indexOf(':');
       if ( idx == -1 ) {
-         throw new IllegalStateException(prefix + msg);
+         throw new ServicesAvailabilityException(prefix + msg);
       }
       String exceptionName = msg.substring(0,idx);
       String message = msg.substring(idx+2);
       if ( !exceptionName.startsWith("org.opendatakit|") ) {
-         throw new IllegalStateException(prefix + msg);
+         throw new ServicesAvailabilityException(prefix + msg);
       }
       exceptionName = exceptionName.substring(exceptionName.indexOf('|')+1);
       if ( exceptionName.equals("ActionNotAuthorizedException")) {
@@ -104,7 +106,9 @@ public class OdkDbSerializedInterface {
    }
 
 
-   private void rethrowAlwaysAllowedRemoteException(Exception e) {
+   private void rethrowAlwaysAllowedRemoteException(Exception e)
+       throws IllegalArgumentException, IllegalStateException,
+       ServicesAvailabilityException {
       if ( !(e instanceof RemoteException) ) {
          throw new IllegalStateException("not RemoteException on OdkDbInterface: " +
              e.getClass().getName() + ": " + e.toString());
@@ -113,12 +117,12 @@ public class OdkDbSerializedInterface {
       String msg = e.getMessage();
       int idx = msg.indexOf(':');
       if ( idx == -1 ) {
-         throw new IllegalStateException(prefix + msg);
+         throw new ServicesAvailabilityException(prefix + msg);
       }
       String exceptionName = msg.substring(0,idx);
       String message = msg.substring(idx+2);
       if ( !exceptionName.startsWith("org.opendatakit|") ) {
-         throw new IllegalStateException(prefix + msg);
+         throw new ServicesAvailabilityException(prefix + msg);
       }
       exceptionName = exceptionName.substring(exceptionName.indexOf('|')+1);
       if ( exceptionName.equals(IllegalArgumentException.class.getName())) {
@@ -142,7 +146,7 @@ public class OdkDbSerializedInterface {
     *
     * @return empty string or JSON serialization of an array of ROLES. See RoleConsts for possible values.
     */
-   public String getRolesList(String appName) {
+   public String getRolesList(String appName) throws ServicesAvailabilityException {
       try {
          return dbInterface.getRolesList(appName);
       } catch ( Exception e ) {
@@ -163,7 +167,7 @@ public class OdkDbSerializedInterface {
     * @return empty string or JSON serialization of an array of objects
     * structured as { "user_id": "...", "full_name": "...", "roles": ["...",...] }
     */
-   public String getUsersList(String appName) {
+   public String getUsersList(String appName) throws ServicesAvailabilityException {
       try {
          return dbInterface.getUsersList(appName);
       } catch ( Exception e ) {
@@ -178,7 +182,7 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @return dbHandleName
     */
-   public OdkDbHandle openDatabase(String appName) {
+   public OdkDbHandle openDatabase(String appName) throws ServicesAvailabilityException {
       try {
          return dbInterface.openDatabase(appName);
       } catch ( Exception e ) {
@@ -194,7 +198,7 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     */
-   public void closeDatabase(String appName, OdkDbHandle dbHandleName) {
+   public void closeDatabase(String appName, OdkDbHandle dbHandleName) throws ServicesAvailabilityException {
      try {
        dbInterface.closeDatabase(appName, dbHandleName);
      } catch ( Exception e ) {
@@ -213,7 +217,7 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public OrderedColumns createLocalOnlyDbTableWithColumns(String appName, OdkDbHandle dbHandleName,
-       String tableId, ColumnList columns) {
+       String tableId, ColumnList columns) throws ServicesAvailabilityException {
      try {
       return fetchAndRebuildChunks(
           dbInterface.createLocalOnlyDbTableWithColumns(appName, dbHandleName, tableId, columns),
@@ -231,7 +235,7 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param tableId
     */
-   public void deleteLocalOnlyDBTable(String appName, OdkDbHandle dbHandleName, String tableId) {
+   public void deleteLocalOnlyDBTable(String appName, OdkDbHandle dbHandleName, String tableId) throws ServicesAvailabilityException {
      try {
        dbInterface.deleteLocalOnlyDBTable(appName, dbHandleName, tableId);
      } catch ( Exception e ) {
@@ -249,7 +253,7 @@ public class OdkDbSerializedInterface {
     * @param rowValues
     */
    public void insertLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
-       ContentValues rowValues) {
+       ContentValues rowValues) throws ServicesAvailabilityException {
      try {
        dbInterface.insertLocalOnlyRow(appName, dbHandleName, tableId, rowValues);
      } catch ( Exception e ) {
@@ -269,7 +273,7 @@ public class OdkDbSerializedInterface {
     * @param whereArgs
     */
    public void updateLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
-       ContentValues rowValues, String whereClause, String[] whereArgs) {
+       ContentValues rowValues, String whereClause, String[] whereArgs) throws ServicesAvailabilityException {
      try {
        dbInterface
            .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause, whereArgs);
@@ -289,7 +293,7 @@ public class OdkDbSerializedInterface {
       * @param whereArgs
       */
    public void deleteLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
-       String whereClause, String[] whereArgs) {
+       String whereClause, String[] whereArgs) throws ServicesAvailabilityException {
      try {
       dbInterface.deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, whereArgs);
      } catch ( Exception e ) {
@@ -340,7 +344,7 @@ public class OdkDbSerializedInterface {
     * }
     */
    public void privilegedServerTableSchemaETagChanged(String appName, OdkDbHandle dbHandleName,
-       String tableId, String schemaETag, String tableInstanceFilesUri) {
+       String tableId, String schemaETag, String tableInstanceFilesUri) throws ServicesAvailabilityException {
      try {
        dbInterface.privilegedServerTableSchemaETagChanged(appName, dbHandleName, tableId,
            schemaETag,
@@ -361,7 +365,7 @@ public class OdkDbSerializedInterface {
     * @param choiceListJSON -- the actual JSON choice list text.
     * @return choiceListId -- the unique code mapping to the choiceListJSON
     */
-   public String setChoiceList(String appName, OdkDbHandle dbHandleName, String choiceListJSON) {
+   public String setChoiceList(String appName, OdkDbHandle dbHandleName, String choiceListJSON) throws ServicesAvailabilityException {
      try {
        return dbInterface.setChoiceList(appName, dbHandleName, choiceListJSON);
      } catch ( Exception e ) {
@@ -378,7 +382,7 @@ public class OdkDbSerializedInterface {
     * @param choiceListId -- the md5 hash of the choiceListJSON
     * @return choiceListJSON -- the actual JSON choice list text.
     */
-   public String getChoiceList(String appName, OdkDbHandle dbHandleName, String choiceListId) {
+   public String getChoiceList(String appName, OdkDbHandle dbHandleName, String choiceListId) throws ServicesAvailabilityException {
      try {
        return dbInterface.getChoiceList(appName, dbHandleName, choiceListId);
      } catch ( Exception e ) {
@@ -401,7 +405,7 @@ public class OdkDbSerializedInterface {
     * @return the OrderedColumns of the user columns in the table.
     */
    public OrderedColumns createOrOpenDBTableWithColumns(String appName, OdkDbHandle dbHandleName,
-       String tableId, ColumnList columns) {
+       String tableId, ColumnList columns) throws ServicesAvailabilityException {
      try {
       return fetchAndRebuildChunks(
           dbInterface.createOrOpenDBTableWithColumns(appName, dbHandleName, tableId, columns),
@@ -432,7 +436,7 @@ public class OdkDbSerializedInterface {
     */
    public OrderedColumns createOrOpenDBTableWithColumnsAndProperties(String appName,
        OdkDbHandle dbHandleName, String tableId, ColumnList columns,
-       List<KeyValueStoreEntry> metaData, boolean clear) {
+       List<KeyValueStoreEntry> metaData, boolean clear) throws ServicesAvailabilityException {
       try {
         return fetchAndRebuildChunks(dbInterface
           .createOrOpenDBTableWithColumnsAndProperties(appName, dbHandleName, tableId, columns,
@@ -451,7 +455,7 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param tableId
     */
-   public void deleteDBTableAndAllData(String appName, OdkDbHandle dbHandleName, String tableId) {
+   public void deleteDBTableAndAllData(String appName, OdkDbHandle dbHandleName, String tableId) throws ServicesAvailabilityException {
      try {
         dbInterface.deleteDBTableAndAllData(appName, dbHandleName, tableId);
      } catch ( Exception e ) {
@@ -472,7 +476,7 @@ public class OdkDbSerializedInterface {
     * @param key
     */
    public void deleteDBTableMetadata(String appName, OdkDbHandle dbHandleName, String tableId,
-       String partition, String aspect, String key) {
+       String partition, String aspect, String key) throws ServicesAvailabilityException {
      try {
        dbInterface.deleteDBTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
      } catch ( Exception e ) {
@@ -487,7 +491,7 @@ public class OdkDbSerializedInterface {
     *
     * @return
     */
-   public String[] getAdminColumns() {
+   public String[] getAdminColumns() throws ServicesAvailabilityException {
      try {
        return fetchAndRebuildChunks(dbInterface.getAdminColumns(), String[].class);
      } catch ( Exception e ) {
@@ -507,7 +511,7 @@ public class OdkDbSerializedInterface {
     * @param tableId
     * @return
     */
-   public String[] getAllColumnNames(String appName, OdkDbHandle dbHandleName, String tableId) {
+   public String[] getAllColumnNames(String appName, OdkDbHandle dbHandleName, String tableId) throws ServicesAvailabilityException {
      try {
        return fetchAndRebuildChunks(dbInterface.getAllColumnNames(appName, dbHandleName, tableId),
           String[].class);
@@ -525,7 +529,7 @@ public class OdkDbSerializedInterface {
     * @return List<String> of tableIds
     */
    @SuppressWarnings("unchecked")
-   public List<String> getAllTableIds(String appName, OdkDbHandle dbHandleName) {
+   public List<String> getAllTableIds(String appName, OdkDbHandle dbHandleName) throws ServicesAvailabilityException {
      try {
        Serializable result = fetchAndRebuildChunks(dbInterface.getAllTableIds(appName,
            dbHandleName),
@@ -548,7 +552,7 @@ public class OdkDbSerializedInterface {
     */
    @SuppressWarnings("unchecked")
    public List<KeyValueStoreEntry> getDBTableMetadata(String appName, OdkDbHandle dbHandleName,
-       String tableId, String partition, String aspect, String key) {
+       String tableId, String partition, String aspect, String key) throws ServicesAvailabilityException {
      try {
        Serializable result = fetchAndRebuildChunks(
           dbInterface.getDBTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
@@ -567,7 +571,7 @@ public class OdkDbSerializedInterface {
     *
     * @return
     */
-   public String[] getExportColumns() {
+   public String[] getExportColumns() throws ServicesAvailabilityException {
      try {
        return fetchAndRebuildChunks(dbInterface.getExportColumns(), String[].class);
      } catch ( Exception e ) {
@@ -587,7 +591,7 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public TableDefinitionEntry getTableDefinitionEntry(String appName, OdkDbHandle dbHandleName,
-       String tableId) {
+       String tableId) throws ServicesAvailabilityException {
      try {
        return fetchAndRebuildChunks(
            dbInterface.getTableDefinitionEntry(appName, dbHandleName, tableId), TableDefinitionEntry.CREATOR);
@@ -605,7 +609,7 @@ public class OdkDbSerializedInterface {
     * @return the list of TableHealthInfo records for this appName
     */
    @SuppressWarnings("unchecked")
-   public List<TableHealthInfo> getTableHealthStatuses(String appName, OdkDbHandle dbHandleName) {
+   public List<TableHealthInfo> getTableHealthStatuses(String appName, OdkDbHandle dbHandleName) throws ServicesAvailabilityException {
      try {
        Serializable results = fetchAndRebuildChunks(
           dbInterface.getTableHealthStatuses(appName, dbHandleName), Serializable.class);
@@ -628,7 +632,7 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public OrderedColumns getUserDefinedColumns(String appName, OdkDbHandle dbHandleName,
-       String tableId) {
+       String tableId) throws ServicesAvailabilityException {
      try {
        return fetchAndRebuildChunks(dbInterface.getUserDefinedColumns(appName, dbHandleName, tableId),
            OrderedColumns.CREATOR);
@@ -646,7 +650,7 @@ public class OdkDbSerializedInterface {
     * @param tableId
     * @return true if table is listed in table definitions.
     */
-   public boolean hasTableId(String appName, OdkDbHandle dbHandleName, String tableId) {
+   public boolean hasTableId(String appName, OdkDbHandle dbHandleName, String tableId) throws ServicesAvailabilityException {
      try {
       return dbInterface.hasTableId(appName, dbHandleName, tableId);
      } catch ( Exception e ) {
@@ -682,7 +686,7 @@ public class OdkDbSerializedInterface {
     */
    public OdkDbTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        String whereClause, Object[] bindArgs, String[] groupBy, String having,
-       String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset) {
+       String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset) throws ServicesAvailabilityException {
 
      try {
        OdkDbSimpleQuery query = new OdkDbSimpleQuery(tableId, new BindArgs(bindArgs), whereClause,
@@ -734,7 +738,7 @@ public class OdkDbSerializedInterface {
    */
   public OdkDbTable privilegedRawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
       String whereClause, Object[] bindArgs, String[] groupBy, String having,
-      String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset) {
+      String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset) throws ServicesAvailabilityException {
 
     try {
       OdkDbSimpleQuery query = new OdkDbSimpleQuery(tableId, new BindArgs(bindArgs), whereClause,
@@ -778,7 +782,7 @@ public class OdkDbSerializedInterface {
     */
    public OdkDbTable arbitrarySqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        String sqlCommand, Object[] bindArgs, String[] orderByColNames,
-       String[] orderByDirections, Integer limit, Integer offset) {
+       String[] orderByDirections, Integer limit, Integer offset) throws ServicesAvailabilityException {
      try {
        OdkDbAbstractQuery query = new OdkDbAbstractQuery(tableId, new BindArgs(bindArgs),
           sqlCommand, orderByColNames, orderByDirections, limit, offset);
@@ -805,7 +809,7 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public OdkDbTable resumeRawSqlQuery(String appName, OdkDbHandle dbHandleName,
-       OdkDbResumableQuery query) {
+       OdkDbResumableQuery query) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
           query.getPaginatedSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
@@ -832,7 +836,7 @@ public class OdkDbSerializedInterface {
    * @return
    */
   public OdkDbTable resumePrivilegedRawSqlQuery(String appName, OdkDbHandle dbHandleName,
-      OdkDbResumableQuery query) {
+      OdkDbResumableQuery query) throws ServicesAvailabilityException {
     try {
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.privilegedRawSqlQuery(appName,
           dbHandleName,
@@ -877,7 +881,7 @@ public class OdkDbSerializedInterface {
    public UserTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns columnDefns, String whereClause, Object[] bindArgs, String[] groupBy,
        String having, String[] orderByColNames, String[] orderByDirections, Integer limit,
-       Integer offset) {
+       Integer offset) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = rawSqlQuery(appName, dbHandleName, tableId, whereClause, bindArgs,
            groupBy, having, orderByColNames, orderByDirections, limit, offset);
@@ -919,7 +923,7 @@ public class OdkDbSerializedInterface {
   public UserTable privilegedRawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
       OrderedColumns columnDefns, String whereClause, Object[] bindArgs, String[] groupBy,
       String having, String[] orderByColNames, String[] orderByDirections, Integer limit,
-      Integer offset) {
+      Integer offset) throws ServicesAvailabilityException {
     try {
       OdkDbTable baseTable = privilegedRawSqlQuery(appName, dbHandleName, tableId, whereClause,
           bindArgs,
@@ -954,7 +958,7 @@ public class OdkDbSerializedInterface {
    public UserTable arbitrarySqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns columnDefns,
        String sqlCommand, Object[] bindArgs, String[] orderByColNames,
-       String[] orderByDirections, Integer limit, Integer offset) {
+       String[] orderByDirections, Integer limit, Integer offset) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = arbitrarySqlQuery(appName, dbHandleName, tableId, sqlCommand, bindArgs,
            orderByColNames, orderByDirections, limit, offset);
@@ -977,7 +981,7 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public UserTable resumeRawSqlQuery(String appName, OdkDbHandle dbHandleName, OrderedColumns
-       columnDefns, OdkDbResumableQuery query) {
+       columnDefns, OdkDbResumableQuery query) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = resumeRawSqlQuery(appName, dbHandleName, query);
 
@@ -1004,7 +1008,7 @@ public class OdkDbSerializedInterface {
    */
   public UserTable resumePrivilegedRawSqlQuery(String appName, OdkDbHandle dbHandleName,
       OrderedColumns
-      columnDefns, OdkDbResumableQuery query) {
+      columnDefns, OdkDbResumableQuery query) throws ServicesAvailabilityException {
     try {
       OdkDbTable baseTable = resumePrivilegedRawSqlQuery(appName, dbHandleName, query);
 
@@ -1026,7 +1030,7 @@ public class OdkDbSerializedInterface {
     * @param entry
     */
    public void replaceDBTableMetadata(String appName, OdkDbHandle dbHandleName,
-       KeyValueStoreEntry entry) {
+       KeyValueStoreEntry entry) throws ServicesAvailabilityException {
      try {
        dbInterface.replaceDBTableMetadata(appName, dbHandleName, entry);
      } catch ( Exception e ) {
@@ -1048,7 +1052,7 @@ public class OdkDbSerializedInterface {
     *                     before inserting the new ones.
     */
    public void replaceDBTableMetadataList(String appName, OdkDbHandle dbHandleName, String tableId,
-       List<KeyValueStoreEntry> entries, boolean clear) {
+       List<KeyValueStoreEntry> entries, boolean clear) throws ServicesAvailabilityException {
      try {
        dbInterface.replaceDBTableMetadataList(appName, dbHandleName, tableId, entries, clear);
      } catch ( Exception e ) {
@@ -1069,7 +1073,7 @@ public class OdkDbSerializedInterface {
     * @param entries     List<KeyValueStoreEntry>
     */
    public void replaceDBTableMetadataSubList(String appName, OdkDbHandle dbHandleName,
-       String tableId, String partition, String aspect, List<KeyValueStoreEntry> entries) {
+       String tableId, String partition, String aspect, List<KeyValueStoreEntry> entries) throws ServicesAvailabilityException {
      try {
        dbInterface.replaceDBTableMetadataSubList(appName, dbHandleName, tableId, partition, aspect,
            entries);
@@ -1091,7 +1095,7 @@ public class OdkDbSerializedInterface {
     * @param lastDataETag
     */
    public void privilegedUpdateDBTableETags(String appName, OdkDbHandle dbHandleName, String
-       tableId, String schemaETag, String lastDataETag) {
+       tableId, String schemaETag, String lastDataETag) throws ServicesAvailabilityException {
      try {
        dbInterface
            .privilegedUpdateDBTableETags(appName, dbHandleName, tableId, schemaETag, lastDataETag);
@@ -1112,7 +1116,7 @@ public class OdkDbSerializedInterface {
     * @param tableId
     */
    public void privilegedUpdateDBTableLastSyncTime(String appName, OdkDbHandle dbHandleName,
-       String tableId) {
+       String tableId) throws ServicesAvailabilityException {
      try {
        dbInterface.privilegedUpdateDBTableLastSyncTime(appName, dbHandleName, tableId);
      } catch ( Exception e ) {
@@ -1130,7 +1134,7 @@ public class OdkDbSerializedInterface {
     * row does not exist.
     */
    public String getSyncState(String appName, OdkDbHandle dbHandleName, String tableId,
-       String rowId) {
+       String rowId) throws ServicesAvailabilityException {
      try {
        return dbInterface.getSyncState(appName, dbHandleName, tableId, rowId);
      } catch ( Exception e ) {
@@ -1153,7 +1157,7 @@ public class OdkDbSerializedInterface {
     * @param syncState    - the SyncState.name()
     */
    public void privilegedUpdateRowETagAndSyncState(String appName, OdkDbHandle dbHandleName,
-       String tableId, String rowId, String rowETag, String syncState) {
+       String tableId, String rowId, String rowETag, String syncState) throws ServicesAvailabilityException {
      try {
        dbInterface
           .privilegedUpdateRowETagAndSyncState(appName, dbHandleName, tableId, rowId, rowETag,
@@ -1177,7 +1181,7 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public UserTable getRowsWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-       OrderedColumns orderedColumns, String rowId) {
+       OrderedColumns orderedColumns, String rowId) throws ServicesAvailabilityException {
      try {
       OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.getRowsWithId(appName, dbHandleName, tableId, rowId),
@@ -1203,7 +1207,7 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public UserTable privilegedGetRowsWithId(String appName, OdkDbHandle dbHandleName, String
-       tableId, OrderedColumns orderedColumns, String rowId) {
+       tableId, OrderedColumns orderedColumns, String rowId) throws ServicesAvailabilityException {
       try {
          OdkDbTable baseTable = fetchAndRebuildChunks(
              dbInterface.privilegedGetRowsWithId(appName, dbHandleName, tableId, rowId),
@@ -1230,7 +1234,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable getMostRecentRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, String rowId)
-       throws ActionNotAuthorizedException {
+       throws ActionNotAuthorizedException, ServicesAvailabilityException  {
      try {
       OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.getMostRecentRowWithId(appName, dbHandleName, tableId, rowId),
@@ -1267,7 +1271,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable privilegedPlaceRowIntoConflictWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId,
-       int localRowConflictType) {
+       int localRowConflictType) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedPlaceRowIntoConflictWithId(appName, dbHandleName, tableId, orderedColumns,
@@ -1298,7 +1302,8 @@ public class OdkDbSerializedInterface {
     * @return single-row table with the content of the inserted row
     */
    public UserTable privilegedInsertRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-                                              OrderedColumns orderedColumns, ContentValues cvValues, String rowId, boolean asCsvRequestedChange) {
+                                              OrderedColumns orderedColumns, ContentValues cvValues,
+       String rowId, boolean asCsvRequestedChange) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedInsertRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
@@ -1327,7 +1332,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable insertCheckpointRowWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
-       throws ActionNotAuthorizedException {
+       throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
                 .insertCheckpointRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
@@ -1358,7 +1363,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable insertRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
-       throws ActionNotAuthorizedException {
+       throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .insertRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
@@ -1385,7 +1390,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable deleteAllCheckpointRowsWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedColumns, String rowId)
-       throws ActionNotAuthorizedException {
+       throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.deleteAllCheckpointRowsWithId(appName, dbHandleName, tableId, rowId),
@@ -1413,7 +1418,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable deleteLastCheckpointRowWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedColumns, String rowId)
-       throws ActionNotAuthorizedException {
+       throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.deleteLastCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
@@ -1441,7 +1446,7 @@ public class OdkDbSerializedInterface {
     * @return table with the content for this rowId. May be empty. May be marked as deleted and awaiting sync
     */
    public UserTable privilegedDeleteRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, OrderedColumns orderedColumns, String rowId) {
+       String tableId, OrderedColumns orderedColumns, String rowId) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.privilegedDeleteRowWithId(appName, dbHandleName, tableId, rowId),
@@ -1476,7 +1481,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable deleteRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, String rowId)
-       throws ActionNotAuthorizedException {
+       throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.deleteRowWithId(appName, dbHandleName, tableId, rowId), OdkDbTable.CREATOR);
@@ -1504,7 +1509,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable saveAsIncompleteMostRecentCheckpointRowWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, OrderedColumns orderedColumns,
-       String rowId) throws ActionNotAuthorizedException {
+       String rowId) throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .saveAsIncompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
@@ -1533,7 +1538,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable saveAsCompleteMostRecentCheckpointRowWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, OrderedColumns orderedColumns,
-       String rowId) throws ActionNotAuthorizedException {
+       String rowId) throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .saveAsCompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
@@ -1563,7 +1568,7 @@ public class OdkDbSerializedInterface {
     */
    public UserTable updateRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
-       throws ActionNotAuthorizedException {
+       throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .updateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
@@ -1591,7 +1596,7 @@ public class OdkDbSerializedInterface {
    public UserTable changeRowFilterWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, String filterType, String filterValue,
        String rowId) throws IllegalArgumentException,
-       ActionNotAuthorizedException {
+       ActionNotAuthorizedException, ServicesAvailabilityException {
 
       if ( filterType == null ) {
          throw new IllegalArgumentException("filterType is null");
@@ -1638,8 +1643,8 @@ public class OdkDbSerializedInterface {
     * @return single-row table with the content of the saved-as-incomplete row
     */
    public UserTable privilegedUpdateRowWithId(String appName, OdkDbHandle dbHandleName,
-          String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId, boolean asCsvRequestedChange)
-       {
+          String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId,
+       boolean asCsvRequestedChange) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedUpdateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
@@ -1673,7 +1678,7 @@ public class OdkDbSerializedInterface {
     * @param rowId
     */
    public void resolveServerConflictWithDeleteRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, String rowId) throws ActionNotAuthorizedException {
+       String tableId, String rowId) throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
        dbInterface.resolveServerConflictWithDeleteRowWithId(appName, dbHandleName, tableId, rowId);
      } catch ( Exception e ) {
@@ -1693,7 +1698,7 @@ public class OdkDbSerializedInterface {
     * @param rowId
     */
    public void resolveServerConflictTakeLocalRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, String rowId) throws ActionNotAuthorizedException {
+       String tableId, String rowId) throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
       dbInterface.resolveServerConflictTakeLocalRowWithId(appName, dbHandleName, tableId, rowId);
      } catch ( Exception e ) {
@@ -1717,7 +1722,7 @@ public class OdkDbSerializedInterface {
     */
    public void resolveServerConflictTakeLocalRowPlusServerDeltasWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, ContentValues cvValues, String rowId)
-       throws ActionNotAuthorizedException {
+       throws ActionNotAuthorizedException, ServicesAvailabilityException {
      try {
       dbInterface
           .resolveServerConflictTakeLocalRowPlusServerDeltasWithId(appName, dbHandleName, tableId,
@@ -1737,7 +1742,7 @@ public class OdkDbSerializedInterface {
     * @param rowId
     */
    public void resolveServerConflictTakeServerRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, String rowId) {
+       String tableId, String rowId) throws ServicesAvailabilityException {
      try {
        dbInterface.resolveServerConflictTakeServerRowWithId(appName, dbHandleName, tableId, rowId);
      } catch ( Exception e ) {
@@ -1755,7 +1760,7 @@ public class OdkDbSerializedInterface {
     * @param tableId
     */
    public void deleteAllSyncETagsForTableId(String appName, OdkDbHandle dbHandleName,
-       String tableId) {
+       String tableId) throws ServicesAvailabilityException {
      try {
        dbInterface.deleteAllSyncETagsForTableId(appName, dbHandleName, tableId);
      } catch ( Exception e ) {
@@ -1773,7 +1778,7 @@ public class OdkDbSerializedInterface {
     * @param verifiedUri  (e.g., https://opendatakit-tablesdemo.appspot.com)
     */
    public void deleteAllSyncETagsExceptForServer(String appName, OdkDbHandle dbHandleName,
-       String verifiedUri) {
+       String verifiedUri) throws ServicesAvailabilityException {
      try {
        dbInterface.deleteAllSyncETagsExceptForServer(appName, dbHandleName, verifiedUri);
      } catch ( Exception e ) {
@@ -1790,7 +1795,7 @@ public class OdkDbSerializedInterface {
     * @param verifiedUri  (e.g., https://opendatakit-tablesdemo.appspot.com)
     */
    public void deleteAllSyncETagsUnderServer(String appName, OdkDbHandle dbHandleName,
-       String verifiedUri) {
+       String verifiedUri) throws ServicesAvailabilityException {
      try {
        dbInterface.deleteAllSyncETagsUnderServer(appName, dbHandleName, verifiedUri);
      } catch ( Exception e ) {
@@ -1812,7 +1817,7 @@ public class OdkDbSerializedInterface {
     * @param modificationTimestamp timestamp of last file modification
     */
    public String getFileSyncETag(String appName, OdkDbHandle dbHandleName, String verifiedUri,
-       String tableId, long modificationTimestamp) {
+       String tableId, long modificationTimestamp) throws ServicesAvailabilityException {
      try {
        return dbInterface
           .getFileSyncETag(appName, dbHandleName, verifiedUri, tableId, modificationTimestamp);
@@ -1831,7 +1836,7 @@ public class OdkDbSerializedInterface {
     * @param tableId      (null if an application-level manifest)
     */
    public String getManifestSyncETag(String appName, OdkDbHandle dbHandleName, String verifiedUri,
-       String tableId) {
+       String tableId) throws ServicesAvailabilityException {
      try {
        return dbInterface.getManifestSyncETag(appName, dbHandleName, verifiedUri, tableId);
      } catch ( Exception e ) {
@@ -1854,7 +1859,7 @@ public class OdkDbSerializedInterface {
     * @param eTag
     */
    public void updateFileSyncETag(String appName, OdkDbHandle dbHandleName, String verifiedUri,
-       String tableId, long modificationTimestamp, String eTag) {
+       String tableId, long modificationTimestamp, String eTag) throws ServicesAvailabilityException {
      try {
        dbInterface
           .updateFileSyncETag(appName, dbHandleName, verifiedUri, tableId, modificationTimestamp,
@@ -1875,7 +1880,7 @@ public class OdkDbSerializedInterface {
     * @param eTag
     */
    public void updateManifestSyncETag(String appName, OdkDbHandle dbHandleName,
-       String verifiedUri, String tableId, String eTag) {
+       String verifiedUri, String tableId, String eTag) throws ServicesAvailabilityException {
      try {
        dbInterface.updateManifestSyncETag(appName, dbHandleName, verifiedUri, tableId, eTag);
      } catch ( Exception e ) {

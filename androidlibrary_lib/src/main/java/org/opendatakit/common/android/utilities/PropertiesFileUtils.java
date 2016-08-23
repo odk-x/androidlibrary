@@ -15,8 +15,6 @@
  */
 package org.opendatakit.common.android.utilities;
 
-import android.os.RemoteException;
-
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
@@ -25,6 +23,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.common.android.data.ColumnDefinition;
 import org.opendatakit.common.android.data.ColumnList;
 import org.opendatakit.common.android.data.OrderedColumns;
+import org.opendatakit.common.android.exception.ServicesAvailabilityException;
 import org.opendatakit.common.android.provider.ColumnDefinitionsColumns;
 import org.opendatakit.common.android.provider.KeyValueStoreColumns;
 import org.opendatakit.database.service.KeyValueStoreEntry;
@@ -74,11 +73,11 @@ public final class PropertiesFileUtils {
    * @param definitionCsv
    * @param propertiesCsv
    * @return
-   * @throws RemoteException
+   * @throws ServicesAvailabilityException
    */
   public static synchronized boolean writePropertiesIntoCsv(String appName, String tableId,
       OrderedColumns orderedDefns, List<KeyValueStoreEntry> kvsEntries,
-      File definitionCsv, File propertiesCsv) throws RemoteException {
+      File definitionCsv, File propertiesCsv) throws ServicesAvailabilityException {
     WebLogger.getLogger(appName).i(TAG, "writePropertiesIntoCsv: tableId: " + tableId);
 
     // writing metadata
