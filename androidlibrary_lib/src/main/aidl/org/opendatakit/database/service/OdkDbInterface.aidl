@@ -392,6 +392,25 @@ interface OdkDbInterface {
    */
   OdkDbChunk rawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
       in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds);
+
+  /**
+   * Privileged version of the above interface.
+   *
+   * Get a {@link OdkDbTable} for the result set of an arbitrary sql query
+   * and bind parameters.
+   *
+   * The sql query can be arbitrarily complex and can include joins, unions, etc.
+   * The data are returned as string values.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param sqlCommand
+   * @param sqlBindArgs
+   * @return
+   */
+  OdkDbChunk privilegedRawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
+      in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds);
+
   /**
    * Insert or update a single table-level metadata KVS entry.
    * 
@@ -509,6 +528,23 @@ interface OdkDbInterface {
    * @return one or more rows (depending upon sync conflict and edit checkpoint states)
    */
   OdkDbChunk getRowsWithId(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId, in String rowId);
+
+  /**
+   * CSV UTIL
+   * For detecting existing rows when importing csvs.
+    *
+   * Return the row(s) for the given tableId and rowId. If the row has
+   * checkpoints or conflicts, the returned UserTable will have more than one
+   * Row returned. Otherwise, it will contain a single row.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param rowId
+   * @return one or more rows (depending upon sync conflict and edit checkpoint states)
+   */
+  OdkDbChunk privilegedGetRowsWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in String rowId);
 
   /**

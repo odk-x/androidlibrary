@@ -15,6 +15,7 @@
 package org.opendatakit.database;
 
 import android.content.ContentValues;
+import android.database.sqlite.SQLiteException;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -25,6 +26,7 @@ import org.opendatakit.common.android.data.ColumnList;
 import org.opendatakit.common.android.data.OrderedColumns;
 import org.opendatakit.common.android.data.TableDefinitionEntry;
 import org.opendatakit.common.android.data.UserTable;
+import org.opendatakit.common.android.exception.ActionNotAuthorizedException;
 import org.opendatakit.common.android.provider.DataTableColumns;
 import org.opendatakit.database.service.BindArgs;
 import org.opendatakit.database.service.KeyValueStoreEntry;
@@ -38,7 +40,6 @@ import org.opendatakit.database.service.queries.OdkDbResumableQuery;
 import org.opendatakit.database.service.queries.OdkDbSimpleQuery;
 import org.opendatakit.database.service.queries.QueryBounds;
 import org.opendatakit.database.utilities.OdkDbChunkUtil;
-import org.opendatakit.database.utilities.OdkDbQueryUtil;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -70,6 +71,67 @@ public class OdkDbSerializedInterface {
       this.dbInterface = dbInterface;
    }
 
+   private void rethrowNotAuthorizedRemoteException(Exception e)
+       throws ActionNotAuthorizedException {
+      if ( !(e instanceof RemoteException) ) {
+         throw new IllegalStateException("not RemoteException on OdkDbInterface: " +
+             e.getClass().getName() + ": " + e.toString());
+      }
+      String prefix = "via RemoteException on OdkDbInterface: ";
+      String msg = e.getMessage();
+      int idx = msg.indexOf(':');
+      if ( idx == -1 ) {
+         throw new IllegalStateException(prefix + msg);
+      }
+      String exceptionName = msg.substring(0,idx);
+      String message = msg.substring(idx+2);
+      if ( !exceptionName.startsWith("org.opendatakit|") ) {
+         throw new IllegalStateException(prefix + msg);
+      }
+      exceptionName = exceptionName.substring(exceptionName.indexOf('|')+1);
+      if ( exceptionName.equals("ActionNotAuthorizedException")) {
+         throw new ActionNotAuthorizedException(prefix + message);
+      }
+      if ( exceptionName.equals(IllegalArgumentException.class.getName())) {
+        throw new IllegalArgumentException(prefix + message);
+      }
+      if ( exceptionName.equals(SQLiteException.class.getName())) {
+        throw new SQLiteException(prefix + message);
+      }
+      // should only throw illegal argument exceptions.
+      // anything else is not properly detected in the server layer
+      throw new IllegalStateException(prefix + msg);
+   }
+
+
+   private void rethrowAlwaysAllowedRemoteException(Exception e) {
+      if ( !(e instanceof RemoteException) ) {
+         throw new IllegalStateException("not RemoteException on OdkDbInterface: " +
+             e.getClass().getName() + ": " + e.toString());
+      }
+      String prefix = "via RemoteException on OdkDbInterface: ";
+      String msg = e.getMessage();
+      int idx = msg.indexOf(':');
+      if ( idx == -1 ) {
+         throw new IllegalStateException(prefix + msg);
+      }
+      String exceptionName = msg.substring(0,idx);
+      String message = msg.substring(idx+2);
+      if ( !exceptionName.startsWith("org.opendatakit|") ) {
+         throw new IllegalStateException(prefix + msg);
+      }
+      exceptionName = exceptionName.substring(exceptionName.indexOf('|')+1);
+      if ( exceptionName.equals(IllegalArgumentException.class.getName())) {
+         throw new IllegalArgumentException(prefix + message);
+      }
+      if ( exceptionName.equals(SQLiteException.class.getName())) {
+       throw new SQLiteException(prefix + message);
+      }
+      // should only throw illegal argument exceptions.
+      // anything else is not properly detected in the server layer
+      throw new IllegalStateException(prefix + msg);
+   }
+
    /**
     * Return the roles of a verified username or google account.
     * If the username or google account have not been verified,
@@ -80,8 +142,13 @@ public class OdkDbSerializedInterface {
     *
     * @return empty string or JSON serialization of an array of ROLES. See RoleConsts for possible values.
     */
-   public String getRolesList(String appName) throws RemoteException {
-      return dbInterface.getRolesList(appName);
+   public String getRolesList(String appName) {
+      try {
+         return dbInterface.getRolesList(appName);
+      } catch ( Exception e ) {
+         rethrowAlwaysAllowedRemoteException(e);
+        throw new IllegalStateException("unreachable - keep IDE happy");
+      }
    }
 
    /**
@@ -96,8 +163,13 @@ public class OdkDbSerializedInterface {
     * @return empty string or JSON serialization of an array of objects
     * structured as { "user_id": "...", "full_name": "...", "roles": ["...",...] }
     */
-   public String getUsersList(String appName) throws RemoteException {
-      return dbInterface.getUsersList(appName);
+   public String getUsersList(String appName) {
+      try {
+         return dbInterface.getUsersList(appName);
+      } catch ( Exception e ) {
+        rethrowAlwaysAllowedRemoteException(e);
+        throw new IllegalStateException("unreachable - keep IDE happy");
+      }
    }
 
    /**
@@ -106,8 +178,13 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @return dbHandleName
     */
-   public OdkDbHandle openDatabase(String appName) throws RemoteException {
-      return dbInterface.openDatabase(appName);
+   public OdkDbHandle openDatabase(String appName) {
+      try {
+         return dbInterface.openDatabase(appName);
+      } catch ( Exception e ) {
+         rethrowAlwaysAllowedRemoteException(e);
+        throw new IllegalStateException("unreachable - keep IDE happy");
+      }
    }
 
    /**
@@ -117,8 +194,13 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     */
-   public void closeDatabase(String appName, OdkDbHandle dbHandleName) throws RemoteException {
-      dbInterface.closeDatabase(appName, dbHandleName);
+   public void closeDatabase(String appName, OdkDbHandle dbHandleName) {
+     try {
+       dbInterface.closeDatabase(appName, dbHandleName);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -129,14 +211,17 @@ public class OdkDbSerializedInterface {
     * @param tableId
     * @param columns
     * @return
-    * @throws RemoteException
     */
    public OrderedColumns createLocalOnlyDbTableWithColumns(String appName, OdkDbHandle dbHandleName,
-       String tableId, ColumnList columns) throws RemoteException {
-
+       String tableId, ColumnList columns) {
+     try {
       return fetchAndRebuildChunks(
           dbInterface.createLocalOnlyDbTableWithColumns(appName, dbHandleName, tableId, columns),
           OrderedColumns.CREATOR);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -145,11 +230,14 @@ public class OdkDbSerializedInterface {
     * @param appName
     * @param dbHandleName
     * @param tableId
-    * @throws RemoteException
     */
-   public void deleteLocalOnlyDBTable(String appName, OdkDbHandle dbHandleName, String tableId)
-       throws RemoteException {
-      dbInterface.deleteLocalOnlyDBTable(appName, dbHandleName, tableId);
+   public void deleteLocalOnlyDBTable(String appName, OdkDbHandle dbHandleName, String tableId) {
+     try {
+       dbInterface.deleteLocalOnlyDBTable(appName, dbHandleName, tableId);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -159,11 +247,15 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param tableId
     * @param rowValues
-    * @throws RemoteException
     */
    public void insertLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
-       ContentValues rowValues) throws RemoteException {
-      dbInterface.insertLocalOnlyRow(appName, dbHandleName, tableId, rowValues);
+       ContentValues rowValues) {
+     try {
+       dbInterface.insertLocalOnlyRow(appName, dbHandleName, tableId, rowValues);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -175,27 +267,35 @@ public class OdkDbSerializedInterface {
     * @param rowValues
     * @param whereClause
     * @param whereArgs
-    * @throws RemoteException
     */
    public void updateLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
-       ContentValues rowValues, String whereClause, String[] whereArgs) throws RemoteException {
-      dbInterface
-          .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause, whereArgs);
+       ContentValues rowValues, String whereClause, String[] whereArgs) {
+     try {
+       dbInterface
+           .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause, whereArgs);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
-   /**
-    * Delete a row in a local only table
-    *
-    * @param appName
-    * @param dbHandleName
-    * @param tableId
-    * @param whereClause
-    * @param whereArgs
-    * @throws RemoteException
-    */
+     /**
+      * Delete a row in a local only table
+      *
+      * @param appName
+      * @param dbHandleName
+      * @param tableId
+      * @param whereClause
+      * @param whereArgs
+      */
    public void deleteLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
-       String whereClause, String[] whereArgs) throws RemoteException {
+       String whereClause, String[] whereArgs) {
+     try {
       dbInterface.deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, whereArgs);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -240,9 +340,15 @@ public class OdkDbSerializedInterface {
     * }
     */
    public void privilegedServerTableSchemaETagChanged(String appName, OdkDbHandle dbHandleName,
-       String tableId, String schemaETag, String tableInstanceFilesUri) throws RemoteException {
-      dbInterface.privilegedServerTableSchemaETagChanged(appName, dbHandleName, tableId, schemaETag,
+       String tableId, String schemaETag, String tableInstanceFilesUri) {
+     try {
+       dbInterface.privilegedServerTableSchemaETagChanged(appName, dbHandleName, tableId,
+           schemaETag,
           tableInstanceFilesUri);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -255,9 +361,13 @@ public class OdkDbSerializedInterface {
     * @param choiceListJSON -- the actual JSON choice list text.
     * @return choiceListId -- the unique code mapping to the choiceListJSON
     */
-   public String setChoiceList(String appName, OdkDbHandle dbHandleName, String choiceListJSON)
-       throws RemoteException {
-      return dbInterface.setChoiceList(appName, dbHandleName, choiceListJSON);
+   public String setChoiceList(String appName, OdkDbHandle dbHandleName, String choiceListJSON) {
+     try {
+       return dbInterface.setChoiceList(appName, dbHandleName, choiceListJSON);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -268,9 +378,13 @@ public class OdkDbSerializedInterface {
     * @param choiceListId -- the md5 hash of the choiceListJSON
     * @return choiceListJSON -- the actual JSON choice list text.
     */
-   public String getChoiceList(String appName, OdkDbHandle dbHandleName, String choiceListId)
-       throws RemoteException {
-      return dbInterface.getChoiceList(appName, dbHandleName, choiceListId);
+   public String getChoiceList(String appName, OdkDbHandle dbHandleName, String choiceListId) {
+     try {
+       return dbInterface.getChoiceList(appName, dbHandleName, choiceListId);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -287,11 +401,15 @@ public class OdkDbSerializedInterface {
     * @return the OrderedColumns of the user columns in the table.
     */
    public OrderedColumns createOrOpenDBTableWithColumns(String appName, OdkDbHandle dbHandleName,
-       String tableId, ColumnList columns) throws RemoteException {
-
+       String tableId, ColumnList columns) {
+     try {
       return fetchAndRebuildChunks(
           dbInterface.createOrOpenDBTableWithColumns(appName, dbHandleName, tableId, columns),
           OrderedColumns.CREATOR);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -314,11 +432,15 @@ public class OdkDbSerializedInterface {
     */
    public OrderedColumns createOrOpenDBTableWithColumnsAndProperties(String appName,
        OdkDbHandle dbHandleName, String tableId, ColumnList columns,
-       List<KeyValueStoreEntry> metaData, boolean clear) throws RemoteException {
-
-      return fetchAndRebuildChunks(dbInterface
+       List<KeyValueStoreEntry> metaData, boolean clear) {
+      try {
+        return fetchAndRebuildChunks(dbInterface
           .createOrOpenDBTableWithColumnsAndProperties(appName, dbHandleName, tableId, columns,
               metaData, clear), OrderedColumns.CREATOR);
+      } catch ( Exception e ) {
+        rethrowAlwaysAllowedRemoteException(e);
+        throw new IllegalStateException("unreachable - keep IDE happy");
+      }
    }
 
    /**
@@ -329,9 +451,13 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param tableId
     */
-   public void deleteDBTableAndAllData(String appName, OdkDbHandle dbHandleName, String tableId)
-       throws RemoteException {
-      dbInterface.deleteDBTableAndAllData(appName, dbHandleName, tableId);
+   public void deleteDBTableAndAllData(String appName, OdkDbHandle dbHandleName, String tableId) {
+     try {
+        dbInterface.deleteDBTableAndAllData(appName, dbHandleName, tableId);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -346,8 +472,13 @@ public class OdkDbSerializedInterface {
     * @param key
     */
    public void deleteDBTableMetadata(String appName, OdkDbHandle dbHandleName, String tableId,
-       String partition, String aspect, String key) throws RemoteException {
-      dbInterface.deleteDBTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
+       String partition, String aspect, String key) {
+     try {
+       dbInterface.deleteDBTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -356,8 +487,13 @@ public class OdkDbSerializedInterface {
     *
     * @return
     */
-   public String[] getAdminColumns() throws RemoteException {
-      return fetchAndRebuildChunks(dbInterface.getAdminColumns(), String[].class);
+   public String[] getAdminColumns() {
+     try {
+       return fetchAndRebuildChunks(dbInterface.getAdminColumns(), String[].class);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -371,10 +507,14 @@ public class OdkDbSerializedInterface {
     * @param tableId
     * @return
     */
-   public String[] getAllColumnNames(String appName, OdkDbHandle dbHandleName, String tableId)
-       throws RemoteException {
-      return fetchAndRebuildChunks(dbInterface.getAllColumnNames(appName, dbHandleName, tableId),
+   public String[] getAllColumnNames(String appName, OdkDbHandle dbHandleName, String tableId) {
+     try {
+       return fetchAndRebuildChunks(dbInterface.getAllColumnNames(appName, dbHandleName, tableId),
           String[].class);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -385,11 +525,16 @@ public class OdkDbSerializedInterface {
     * @return List<String> of tableIds
     */
    @SuppressWarnings("unchecked")
-   public List<String> getAllTableIds(String appName, OdkDbHandle dbHandleName)
-       throws RemoteException {
-      Serializable result = fetchAndRebuildChunks(dbInterface.getAllTableIds(appName, dbHandleName),
+   public List<String> getAllTableIds(String appName, OdkDbHandle dbHandleName) {
+     try {
+       Serializable result = fetchAndRebuildChunks(dbInterface.getAllTableIds(appName,
+           dbHandleName),
           Serializable.class);
-      return (List<String>) result;
+       return (List<String>) result;
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -400,15 +545,20 @@ public class OdkDbSerializedInterface {
     * @param aspect
     * @param key
     * @return list of KeyValueStoreEntry values matching the filter criteria
-    * @throws RemoteException
     */
    @SuppressWarnings("unchecked")
    public List<KeyValueStoreEntry> getDBTableMetadata(String appName, OdkDbHandle dbHandleName,
-       String tableId, String partition, String aspect, String key) throws RemoteException {
-      Serializable result = fetchAndRebuildChunks(
+       String tableId, String partition, String aspect, String key) {
+     try {
+       Serializable result = fetchAndRebuildChunks(
           dbInterface.getDBTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
           Serializable.class);
-      return (List<KeyValueStoreEntry>) result;
+       return (List<KeyValueStoreEntry>) result;
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
+
    }
 
    /**
@@ -417,8 +567,13 @@ public class OdkDbSerializedInterface {
     *
     * @return
     */
-   public String[] getExportColumns() throws RemoteException {
-      return fetchAndRebuildChunks(dbInterface.getExportColumns(), String[].class);
+   public String[] getExportColumns() {
+     try {
+       return fetchAndRebuildChunks(dbInterface.getExportColumns(), String[].class);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -432,10 +587,14 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public TableDefinitionEntry getTableDefinitionEntry(String appName, OdkDbHandle dbHandleName,
-       String tableId) throws RemoteException {
-      return fetchAndRebuildChunks(
-          dbInterface.getTableDefinitionEntry(appName, dbHandleName, tableId),
-          TableDefinitionEntry.CREATOR);
+       String tableId) {
+     try {
+       return fetchAndRebuildChunks(
+           dbInterface.getTableDefinitionEntry(appName, dbHandleName, tableId), TableDefinitionEntry.CREATOR);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -446,12 +605,16 @@ public class OdkDbSerializedInterface {
     * @return the list of TableHealthInfo records for this appName
     */
    @SuppressWarnings("unchecked")
-   public List<TableHealthInfo> getTableHealthStatuses(String appName, OdkDbHandle dbHandleName)
-       throws RemoteException {
-      Serializable results = fetchAndRebuildChunks(
+   public List<TableHealthInfo> getTableHealthStatuses(String appName, OdkDbHandle dbHandleName) {
+     try {
+       Serializable results = fetchAndRebuildChunks(
           dbInterface.getTableHealthStatuses(appName, dbHandleName), Serializable.class);
 
-      return (List<TableHealthInfo>) results;
+       return (List<TableHealthInfo>) results;
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -465,10 +628,14 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public OrderedColumns getUserDefinedColumns(String appName, OdkDbHandle dbHandleName,
-       String tableId) throws RemoteException {
-      return fetchAndRebuildChunks(
-          dbInterface.getUserDefinedColumns(appName, dbHandleName, tableId),
-          OrderedColumns.CREATOR);
+       String tableId) {
+     try {
+       return fetchAndRebuildChunks(dbInterface.getUserDefinedColumns(appName, dbHandleName, tableId),
+           OrderedColumns.CREATOR);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -479,9 +646,13 @@ public class OdkDbSerializedInterface {
     * @param tableId
     * @return true if table is listed in table definitions.
     */
-   public boolean hasTableId(String appName, OdkDbHandle dbHandleName, String tableId)
-       throws RemoteException {
+   public boolean hasTableId(String appName, OdkDbHandle dbHandleName, String tableId) {
+     try {
       return dbInterface.hasTableId(appName, dbHandleName, tableId);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /********** RAW GENERIC QUERIES **********/
@@ -511,9 +682,61 @@ public class OdkDbSerializedInterface {
     */
    public OdkDbTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        String whereClause, Object[] bindArgs, String[] groupBy, String having,
-       String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset)
-       throws RemoteException {
+       String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset) {
 
+     try {
+       OdkDbSimpleQuery query = new OdkDbSimpleQuery(tableId, new BindArgs(bindArgs), whereClause,
+          groupBy, having, orderByColNames, orderByDirections, limit, offset);
+
+       String paginatedSqlQuery = query.getPaginatedSqlCommand();
+       BindArgs args = query.getSqlBindArgs();
+       QueryBounds bounds = query.getSqlQueryBounds();
+
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+          .rawSqlQuery(appName, dbHandleName, query.getPaginatedSqlCommand(),
+              query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
+
+       baseTable.setQuery(query);
+
+       return baseTable;
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
+   }
+
+  /**
+   * SYNC ONLY
+   *
+   * Privileged version of above query.
+   *
+   * Get a {@link OdkDbTable} for this table based on the given SQL command. All
+   * columns from the table are returned.
+   *
+   * If any of the clause parts are omitted (null), then the appropriate
+   * simplified SQL statement is constructed.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param whereClause       the whereClause for the selection, beginning with "WHERE". Must
+   *                          include "?" instead of actual values, which are instead passed in
+   *                          the selectionArgs.
+   * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
+   *                          bind parameters
+   * @param groupBy           an array of elementKeys
+   * @param having
+   * @param orderByColNames   array of columns to order the results by
+   * @param orderByDirections either "ASC" or "DESC", corresponding to each column name
+   * @param limit             the maximum number of rows to return
+   * @param offset            the index to start counting the limit from
+   * @return A {@link UserTable} containing the results of the query
+   */
+  public OdkDbTable privilegedRawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
+      String whereClause, Object[] bindArgs, String[] groupBy, String having,
+      String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset) {
+
+    try {
       OdkDbSimpleQuery query = new OdkDbSimpleQuery(tableId, new BindArgs(bindArgs), whereClause,
           groupBy, having, orderByColNames, orderByDirections, limit, offset);
 
@@ -522,13 +745,17 @@ public class OdkDbSerializedInterface {
       QueryBounds bounds = query.getSqlQueryBounds();
 
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
-          .rawSqlQuery(appName, dbHandleName, query.getPaginatedSqlCommand(),
+          .privilegedRawSqlQuery(appName, dbHandleName, query.getPaginatedSqlCommand(),
               query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
 
       baseTable.setQuery(query);
 
       return baseTable;
-   }
+    } catch ( Exception e ) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
 
    /**
     * Get a {@link OdkDbTable} for the result set of an arbitrary sql query
@@ -551,18 +778,22 @@ public class OdkDbSerializedInterface {
     */
    public OdkDbTable arbitrarySqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        String sqlCommand, Object[] bindArgs, String[] orderByColNames,
-       String[] orderByDirections, Integer limit, Integer offset) throws RemoteException {
-
-      OdkDbAbstractQuery query = new OdkDbAbstractQuery(tableId, new BindArgs(bindArgs),
+       String[] orderByDirections, Integer limit, Integer offset) {
+     try {
+       OdkDbAbstractQuery query = new OdkDbAbstractQuery(tableId, new BindArgs(bindArgs),
           sqlCommand, orderByColNames, orderByDirections, limit, offset);
 
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
           query.getPaginatedSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
           OdkDbTable.CREATOR);
 
-      baseTable.setQuery(query);
+       baseTable.setQuery(query);
 
-      return baseTable;
+       return baseTable;
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -572,19 +803,50 @@ public class OdkDbSerializedInterface {
     * @param dbHandleName
     * @param query The original query with the bounds adjusted
     * @return
-    * @throws RemoteException
     */
    public OdkDbTable resumeRawSqlQuery(String appName, OdkDbHandle dbHandleName,
-       OdkDbResumableQuery query) throws RemoteException {
+       OdkDbResumableQuery query) {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
+          query.getPaginatedSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
+          OdkDbTable.CREATOR);
 
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
+       baseTable.setQuery(query);
+
+       return baseTable;
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
+   }
+
+  /**
+   * SYNC ONLY
+   *
+   * Privileged version of above query.
+   * Get a {@link OdkDbTable} that holds the results from the continued query.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param query The original query with the bounds adjusted
+   * @return
+   */
+  public OdkDbTable resumePrivilegedRawSqlQuery(String appName, OdkDbHandle dbHandleName,
+      OdkDbResumableQuery query) {
+    try {
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.privilegedRawSqlQuery(appName,
+          dbHandleName,
           query.getPaginatedSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
           OdkDbTable.CREATOR);
 
       baseTable.setQuery(query);
 
       return baseTable;
-   }
+    } catch ( Exception e ) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
 
    /********** USERTABLE QUERY WRAPPERS **********/
 
@@ -615,13 +877,60 @@ public class OdkDbSerializedInterface {
    public UserTable rawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns columnDefns, String whereClause, Object[] bindArgs, String[] groupBy,
        String having, String[] orderByColNames, String[] orderByDirections, Integer limit,
-       Integer offset) throws RemoteException {
+       Integer offset) {
+     try {
+       OdkDbTable baseTable = rawSqlQuery(appName, dbHandleName, tableId, whereClause, bindArgs,
+           groupBy, having, orderByColNames, orderByDirections, limit, offset);
 
-      OdkDbTable baseTable = rawSqlQuery(appName, dbHandleName, tableId, whereClause, bindArgs,
+       return new UserTable(baseTable, columnDefns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
+   }
+
+  /**
+   * SYNC ONLY
+   *
+   * Privileged version of the above query.
+   * Get a {@link UserTable} for this table based on the given SQL command. All
+   * columns from the table are returned.
+   *
+   * If any of the clause parts are omitted (null), then the appropriate
+   * simplified SQL statement is constructed.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param columnDefns
+   * @param whereClause       the whereClause for the selection, beginning with "WHERE". Must
+   *                          include "?" instead of actual values, which are instead passed in
+   *                          the selectionArgs.
+   * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
+   *                          bind parameters
+   * @param groupBy           an array of elementKeys
+   * @param having
+   * @param orderByColNames   array of columns to order the results by
+   * @param orderByDirections either "ASC" or "DESC", corresponding to each column name
+   * @param limit             the maximum number of rows to return
+   * @param offset            the index to start counting the limit from
+   * @return A {@link UserTable} containing the results of the query
+   */
+  public UserTable privilegedRawSqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
+      OrderedColumns columnDefns, String whereClause, Object[] bindArgs, String[] groupBy,
+      String having, String[] orderByColNames, String[] orderByDirections, Integer limit,
+      Integer offset) {
+    try {
+      OdkDbTable baseTable = privilegedRawSqlQuery(appName, dbHandleName, tableId, whereClause,
+          bindArgs,
           groupBy, having, orderByColNames, orderByDirections, limit, offset);
 
       return new UserTable(baseTable, columnDefns, getAdminColumns());
-   }
+    } catch ( Exception e ) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
 
    /**
     * Get a {@link UserTable} for the result set of an arbitrary sql query
@@ -645,12 +954,17 @@ public class OdkDbSerializedInterface {
    public UserTable arbitrarySqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns columnDefns,
        String sqlCommand, Object[] bindArgs, String[] orderByColNames,
-       String[] orderByDirections, Integer limit, Integer offset) throws RemoteException {
+       String[] orderByDirections, Integer limit, Integer offset) {
+     try {
+       OdkDbTable baseTable = arbitrarySqlQuery(appName, dbHandleName, tableId, sqlCommand, bindArgs,
+           orderByColNames, orderByDirections, limit, offset);
 
-      OdkDbTable baseTable = arbitrarySqlQuery(appName, dbHandleName, tableId, sqlCommand, bindArgs,
-          orderByColNames, orderByDirections, limit, offset);
+       return new UserTable(baseTable, columnDefns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
 
-      return new UserTable(baseTable, columnDefns, getAdminColumns());
    }
 
    /**
@@ -661,19 +975,50 @@ public class OdkDbSerializedInterface {
     * @param columnDefns
     * @param query The original query with the bounds adjusted
     * @return
-    * @throws RemoteException
     */
    public UserTable resumeRawSqlQuery(String appName, OdkDbHandle dbHandleName, OrderedColumns
-       columnDefns, OdkDbResumableQuery query) throws RemoteException {
+       columnDefns, OdkDbResumableQuery query) {
+     try {
+       OdkDbTable baseTable = resumeRawSqlQuery(appName, dbHandleName, query);
 
-      OdkDbTable baseTable = resumeRawSqlQuery(appName, dbHandleName, query);
+       return new UserTable(baseTable, columnDefns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
 
-      return new UserTable(baseTable, columnDefns, getAdminColumns());
    }
 
 
+  /**
+   * SYNC ONLY
+   *
+   * Privileged version of the above.
+   * Get a {@link UserTable} that holds the results from the continued query.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param columnDefns
+   * @param query The original query with the bounds adjusted
+   * @return
+   */
+  public UserTable resumePrivilegedRawSqlQuery(String appName, OdkDbHandle dbHandleName,
+      OrderedColumns
+      columnDefns, OdkDbResumableQuery query) {
+    try {
+      OdkDbTable baseTable = resumePrivilegedRawSqlQuery(appName, dbHandleName, query);
 
-   /**
+      return new UserTable(baseTable, columnDefns, getAdminColumns());
+    } catch ( Exception e ) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+
+  }
+
+
+
+  /**
     * Insert or update a single table-level metadata KVS entry.
     *
     * @param appName
@@ -681,9 +1026,13 @@ public class OdkDbSerializedInterface {
     * @param entry
     */
    public void replaceDBTableMetadata(String appName, OdkDbHandle dbHandleName,
-       KeyValueStoreEntry entry) throws RemoteException {
-
-      dbInterface.replaceDBTableMetadata(appName, dbHandleName, entry);
+       KeyValueStoreEntry entry) {
+     try {
+       dbInterface.replaceDBTableMetadata(appName, dbHandleName, entry);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -697,12 +1046,15 @@ public class OdkDbSerializedInterface {
     * @param entries      List<KeyValueStoreEntry>
     * @param clear        if true then delete the existing set of values for this tableId
     *                     before inserting the new ones.
-    * @throws RemoteException
-     */
+    */
    public void replaceDBTableMetadataList(String appName, OdkDbHandle dbHandleName, String tableId,
-       List<KeyValueStoreEntry> entries, boolean clear) throws RemoteException {
-
-      dbInterface.replaceDBTableMetadataList(appName, dbHandleName, tableId, entries, clear);
+       List<KeyValueStoreEntry> entries, boolean clear) {
+     try {
+       dbInterface.replaceDBTableMetadataList(appName, dbHandleName, tableId, entries, clear);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -715,14 +1067,16 @@ public class OdkDbSerializedInterface {
     * @param partition
     * @param aspect
     * @param entries     List<KeyValueStoreEntry>
-    * @throws RemoteException
     */
    public void replaceDBTableMetadataSubList(String appName, OdkDbHandle dbHandleName,
-       String tableId, String partition, String aspect, List<KeyValueStoreEntry> entries)
-       throws RemoteException {
-
-      dbInterface.replaceDBTableMetadataSubList(appName, dbHandleName, tableId, partition, aspect,
-          entries);
+       String tableId, String partition, String aspect, List<KeyValueStoreEntry> entries) {
+     try {
+       dbInterface.replaceDBTableMetadataSubList(appName, dbHandleName, tableId, partition, aspect,
+           entries);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -737,11 +1091,14 @@ public class OdkDbSerializedInterface {
     * @param lastDataETag
     */
    public void privilegedUpdateDBTableETags(String appName, OdkDbHandle dbHandleName, String
-       tableId,
-       String schemaETag, String lastDataETag) throws RemoteException {
-
-      dbInterface.privilegedUpdateDBTableETags(appName, dbHandleName, tableId, schemaETag,
-          lastDataETag);
+       tableId, String schemaETag, String lastDataETag) {
+     try {
+       dbInterface
+           .privilegedUpdateDBTableETags(appName, dbHandleName, tableId, schemaETag, lastDataETag);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -755,10 +1112,13 @@ public class OdkDbSerializedInterface {
     * @param tableId
     */
    public void privilegedUpdateDBTableLastSyncTime(String appName, OdkDbHandle dbHandleName,
-       String tableId)
-       throws RemoteException {
-
-      dbInterface.privilegedUpdateDBTableLastSyncTime(appName, dbHandleName, tableId);
+       String tableId) {
+     try {
+       dbInterface.privilegedUpdateDBTableLastSyncTime(appName, dbHandleName, tableId);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -770,9 +1130,13 @@ public class OdkDbSerializedInterface {
     * row does not exist.
     */
    public String getSyncState(String appName, OdkDbHandle dbHandleName, String tableId,
-       String rowId) throws RemoteException {
-
-      return dbInterface.getSyncState(appName, dbHandleName, tableId, rowId);
+       String rowId) {
+     try {
+       return dbInterface.getSyncState(appName, dbHandleName, tableId, rowId);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -789,12 +1153,15 @@ public class OdkDbSerializedInterface {
     * @param syncState    - the SyncState.name()
     */
    public void privilegedUpdateRowETagAndSyncState(String appName, OdkDbHandle dbHandleName,
-       String tableId,
-       String rowId, String rowETag, String syncState) throws RemoteException {
-
-      dbInterface
+       String tableId, String rowId, String rowETag, String syncState) {
+     try {
+       dbInterface
           .privilegedUpdateRowETagAndSyncState(appName, dbHandleName, tableId, rowId, rowETag,
               syncState);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -810,13 +1177,43 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public UserTable getRowsWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-       OrderedColumns orderedColumns, String rowId) throws RemoteException {
-
+       OrderedColumns orderedColumns, String rowId) {
+     try {
       OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.getRowsWithId(appName, dbHandleName, tableId, rowId),
           OdkDbTable.CREATOR);
 
       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
+   }
+
+   /**
+    * Return the row with the most recent changes for the given tableId and rowId.
+    * If the row has conflicts, it throws an exception. Otherwise, it returns the
+    * most recent checkpoint or non-checkpoint value; it will contain a single row.
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    * @param orderedColumns
+    * @param rowId
+    * @return
+    */
+   public UserTable privilegedGetRowsWithId(String appName, OdkDbHandle dbHandleName, String
+       tableId, OrderedColumns orderedColumns, String rowId) {
+      try {
+         OdkDbTable baseTable = fetchAndRebuildChunks(
+             dbInterface.privilegedGetRowsWithId(appName, dbHandleName, tableId, rowId),
+             OdkDbTable.CREATOR);
+
+         return new UserTable(baseTable, orderedColumns, getAdminColumns());
+      } catch ( Exception e ) {
+         rethrowAlwaysAllowedRemoteException(e);
+         throw new IllegalStateException("unreachable - keep IDE happy");
+      }
    }
 
    /**
@@ -832,14 +1229,18 @@ public class OdkDbSerializedInterface {
     * @return
     */
    public UserTable getMostRecentRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-       OrderedColumns orderedColumns, String rowId) throws RemoteException {
-
+       OrderedColumns orderedColumns, String rowId)
+       throws ActionNotAuthorizedException {
+     try {
       OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.getMostRecentRowWithId(appName, dbHandleName, tableId, rowId),
           OdkDbTable.CREATOR);
 
       return new UserTable(baseTable, orderedColumns, getAdminColumns());
-
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -866,13 +1267,17 @@ public class OdkDbSerializedInterface {
     */
    public UserTable privilegedPlaceRowIntoConflictWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId,
-       int localRowConflictType) throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+       int localRowConflictType) {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedPlaceRowIntoConflictWithId(appName, dbHandleName, tableId, orderedColumns,
               cvValues, rowId, localRowConflictType), OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -893,13 +1298,17 @@ public class OdkDbSerializedInterface {
     * @return single-row table with the content of the inserted row
     */
    public UserTable privilegedInsertRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-                                              OrderedColumns orderedColumns, ContentValues cvValues, String rowId, boolean asCsvRequestedChange) throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+                                              OrderedColumns orderedColumns, ContentValues cvValues, String rowId, boolean asCsvRequestedChange) {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedInsertRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
               rowId, asCsvRequestedChange), OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -918,13 +1327,17 @@ public class OdkDbSerializedInterface {
     */
    public UserTable insertCheckpointRowWithId(String appName, OdkDbHandle dbHandleName,
        String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
-       throws RemoteException {
+       throws ActionNotAuthorizedException {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+                .insertCheckpointRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
+                    rowId), OdkDbTable.CREATOR);
 
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
-          .insertCheckpointRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
-              rowId), OdkDbTable.CREATOR);
-
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -944,13 +1357,18 @@ public class OdkDbSerializedInterface {
     * @return single-row table with the content of the inserted row
     */
    public UserTable insertRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-       OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
-
+       OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
+       throws ActionNotAuthorizedException {
+     try {
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .insertRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
           OdkDbTable.CREATOR);
 
       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -964,17 +1382,20 @@ public class OdkDbSerializedInterface {
     * @param tableId
     * @param rowId
     * @return table with the content for this rowId. May be empty.
-    * @throws RemoteException
     */
    public UserTable deleteAllCheckpointRowsWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, OrderedColumns orderedColumns, String rowId) throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(
+       String tableId, OrderedColumns orderedColumns, String rowId)
+       throws ActionNotAuthorizedException {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.deleteAllCheckpointRowsWithId(appName, dbHandleName, tableId, rowId),
           OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
-
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -989,17 +1410,20 @@ public class OdkDbSerializedInterface {
     * @param orderedColumns
     * @param rowId
     * @return table with the content for this rowId. May be empty.
-    * @throws RemoteException
     */
    public UserTable deleteLastCheckpointRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, OrderedColumns orderedColumns, String rowId) throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(
+       String tableId, OrderedColumns orderedColumns, String rowId)
+       throws ActionNotAuthorizedException {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.deleteLastCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
           OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
-
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1015,16 +1439,19 @@ public class OdkDbSerializedInterface {
     * @param orderedColumns
     * @param rowId
     * @return table with the content for this rowId. May be empty. May be marked as deleted and awaiting sync
-    * @throws RemoteException
     */
    public UserTable privilegedDeleteRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, OrderedColumns orderedColumns, String rowId) throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(
+       String tableId, OrderedColumns orderedColumns, String rowId) {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.privilegedDeleteRowWithId(appName, dbHandleName, tableId, rowId),
           OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1046,15 +1473,19 @@ public class OdkDbSerializedInterface {
     * @param orderedColumns
     * @param rowId
     * @return table with the content for this rowId. May be empty. May be marked as deleted and awaiting sync
-    * @throws RemoteException
     */
    public UserTable deleteRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-       OrderedColumns orderedColumns, String rowId) throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(
+       OrderedColumns orderedColumns, String rowId)
+       throws ActionNotAuthorizedException {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(
           dbInterface.deleteRowWithId(appName, dbHandleName, tableId, rowId), OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1070,17 +1501,20 @@ public class OdkDbSerializedInterface {
     * @param orderedColumns
     * @param rowId
     * @return single-row table with the content of the row as specified
-    * @throws RemoteException
     */
    public UserTable saveAsIncompleteMostRecentCheckpointRowWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, OrderedColumns orderedColumns,
-       String rowId) throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+       String rowId) throws ActionNotAuthorizedException {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .saveAsIncompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
           OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1096,17 +1530,20 @@ public class OdkDbSerializedInterface {
     * @param orderedColumns
     * @param rowId
     * @return single-row table with the content of the saved-as-incomplete row
-    * @throws RemoteException
     */
    public UserTable saveAsCompleteMostRecentCheckpointRowWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, OrderedColumns orderedColumns,
-       String rowId) throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+       String rowId) throws ActionNotAuthorizedException {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .saveAsCompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
           OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1125,13 +1562,18 @@ public class OdkDbSerializedInterface {
     * @return single-row table with the content of the saved-as-incomplete row
     */
    public UserTable updateRowWithId(String appName, OdkDbHandle dbHandleName, String tableId,
-       OrderedColumns orderedColumns, ContentValues cvValues, String rowId) throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+       OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
+       throws ActionNotAuthorizedException {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .updateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
           OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
   /**
@@ -1145,13 +1587,11 @@ public class OdkDbSerializedInterface {
    * @param filterValue
    * @param rowId
    * @return
-   * @throws RemoteException
-   * @throws IllegalArgumentException
    */
    public UserTable changeRowFilterWithId(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, String filterType, String filterValue,
-       String rowId) throws
-       RemoteException, IllegalArgumentException {
+       String rowId) throws IllegalArgumentException,
+       ActionNotAuthorizedException {
 
       if ( filterType == null ) {
          throw new IllegalArgumentException("filterType is null");
@@ -1167,11 +1607,16 @@ public class OdkDbSerializedInterface {
          cvValues.put(DataTableColumns.FILTER_VALUE, filterValue);
       }
 
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
               .updateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues, rowId),
           OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1193,14 +1638,18 @@ public class OdkDbSerializedInterface {
     * @return single-row table with the content of the saved-as-incomplete row
     */
    public UserTable privilegedUpdateRowWithId(String appName, OdkDbHandle dbHandleName,
-                                              String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId, boolean asCsvRequestedChange)
-       throws RemoteException {
-
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+          String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId, boolean asCsvRequestedChange)
+       {
+     try {
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedUpdateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
               rowId, asCsvRequestedChange), OdkDbTable.CREATOR);
 
-      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+       return new UserTable(baseTable, orderedColumns, getAdminColumns());
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1224,9 +1673,13 @@ public class OdkDbSerializedInterface {
     * @param rowId
     */
    public void resolveServerConflictWithDeleteRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, String rowId) throws RemoteException {
-
-      dbInterface.resolveServerConflictWithDeleteRowWithId(appName, dbHandleName, tableId, rowId);
+       String tableId, String rowId) throws ActionNotAuthorizedException {
+     try {
+       dbInterface.resolveServerConflictWithDeleteRowWithId(appName, dbHandleName, tableId, rowId);
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1240,9 +1693,13 @@ public class OdkDbSerializedInterface {
     * @param rowId
     */
    public void resolveServerConflictTakeLocalRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, String rowId) throws RemoteException {
-
+       String tableId, String rowId) throws ActionNotAuthorizedException {
+     try {
       dbInterface.resolveServerConflictTakeLocalRowWithId(appName, dbHandleName, tableId, rowId);
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1260,11 +1717,15 @@ public class OdkDbSerializedInterface {
     */
    public void resolveServerConflictTakeLocalRowPlusServerDeltasWithId(String appName,
        OdkDbHandle dbHandleName, String tableId, ContentValues cvValues, String rowId)
-       throws RemoteException {
-
+       throws ActionNotAuthorizedException {
+     try {
       dbInterface
           .resolveServerConflictTakeLocalRowPlusServerDeltasWithId(appName, dbHandleName, tableId,
               cvValues, rowId);
+     } catch ( Exception e ) {
+       rethrowNotAuthorizedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1276,9 +1737,13 @@ public class OdkDbSerializedInterface {
     * @param rowId
     */
    public void resolveServerConflictTakeServerRowWithId(String appName, OdkDbHandle dbHandleName,
-       String tableId, String rowId) throws RemoteException {
-
-      dbInterface.resolveServerConflictTakeServerRowWithId(appName, dbHandleName, tableId, rowId);
+       String tableId, String rowId) {
+     try {
+       dbInterface.resolveServerConflictTakeServerRowWithId(appName, dbHandleName, tableId, rowId);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1290,9 +1755,13 @@ public class OdkDbSerializedInterface {
     * @param tableId
     */
    public void deleteAllSyncETagsForTableId(String appName, OdkDbHandle dbHandleName,
-       String tableId) throws RemoteException {
-
-      dbInterface.deleteAllSyncETagsForTableId(appName, dbHandleName, tableId);
+       String tableId) {
+     try {
+       dbInterface.deleteAllSyncETagsForTableId(appName, dbHandleName, tableId);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1304,9 +1773,13 @@ public class OdkDbSerializedInterface {
     * @param verifiedUri  (e.g., https://opendatakit-tablesdemo.appspot.com)
     */
    public void deleteAllSyncETagsExceptForServer(String appName, OdkDbHandle dbHandleName,
-       String verifiedUri) throws RemoteException {
-
-      dbInterface.deleteAllSyncETagsExceptForServer(appName, dbHandleName, verifiedUri);
+       String verifiedUri) {
+     try {
+       dbInterface.deleteAllSyncETagsExceptForServer(appName, dbHandleName, verifiedUri);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1317,9 +1790,13 @@ public class OdkDbSerializedInterface {
     * @param verifiedUri  (e.g., https://opendatakit-tablesdemo.appspot.com)
     */
    public void deleteAllSyncETagsUnderServer(String appName, OdkDbHandle dbHandleName,
-       String verifiedUri) throws RemoteException {
-
-      dbInterface.deleteAllSyncETagsUnderServer(appName, dbHandleName, verifiedUri);
+       String verifiedUri) {
+     try {
+       dbInterface.deleteAllSyncETagsUnderServer(appName, dbHandleName, verifiedUri);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1335,10 +1812,14 @@ public class OdkDbSerializedInterface {
     * @param modificationTimestamp timestamp of last file modification
     */
    public String getFileSyncETag(String appName, OdkDbHandle dbHandleName, String verifiedUri,
-       String tableId, long modificationTimestamp) throws RemoteException {
-
-      return dbInterface
+       String tableId, long modificationTimestamp) {
+     try {
+       return dbInterface
           .getFileSyncETag(appName, dbHandleName, verifiedUri, tableId, modificationTimestamp);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1350,9 +1831,13 @@ public class OdkDbSerializedInterface {
     * @param tableId      (null if an application-level manifest)
     */
    public String getManifestSyncETag(String appName, OdkDbHandle dbHandleName, String verifiedUri,
-       String tableId) throws RemoteException {
-
-      return dbInterface.getManifestSyncETag(appName, dbHandleName, verifiedUri, tableId);
+       String tableId) {
+     try {
+       return dbInterface.getManifestSyncETag(appName, dbHandleName, verifiedUri, tableId);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1369,11 +1854,15 @@ public class OdkDbSerializedInterface {
     * @param eTag
     */
    public void updateFileSyncETag(String appName, OdkDbHandle dbHandleName, String verifiedUri,
-       String tableId, long modificationTimestamp, String eTag) throws RemoteException {
-
-      dbInterface
+       String tableId, long modificationTimestamp, String eTag) {
+     try {
+       dbInterface
           .updateFileSyncETag(appName, dbHandleName, verifiedUri, tableId, modificationTimestamp,
               eTag);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
@@ -1386,9 +1875,13 @@ public class OdkDbSerializedInterface {
     * @param eTag
     */
    public void updateManifestSyncETag(String appName, OdkDbHandle dbHandleName,
-       String verifiedUri, String tableId, String eTag) throws RemoteException {
-
-      dbInterface.updateManifestSyncETag(appName, dbHandleName, verifiedUri, tableId, eTag);
+       String verifiedUri, String tableId, String eTag) {
+     try {
+       dbInterface.updateManifestSyncETag(appName, dbHandleName, verifiedUri, tableId, eTag);
+     } catch ( Exception e ) {
+       rethrowAlwaysAllowedRemoteException(e);
+       throw new IllegalStateException("unreachable - keep IDE happy");
+     }
    }
 
    /**
