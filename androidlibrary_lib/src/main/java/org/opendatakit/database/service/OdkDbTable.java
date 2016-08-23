@@ -169,7 +169,7 @@ public class OdkDbTable implements Parcelable {
 
     QueryBounds bounds = mQuery.getSqlQueryBounds();
 
-    if (bounds.mOffset < 0) {
+    if (bounds.mOffset <= 0) {
       return 0;
     }
 
@@ -177,7 +177,7 @@ public class OdkDbTable implements Parcelable {
   }
 
   public int getEndIndex() {
-    return getStartIndex() + getNumberOfRows();
+    return getStartIndex() + getNumberOfRows() - 1;
   }
 
    /**
@@ -194,7 +194,7 @@ public class OdkDbTable implements Parcelable {
      }
 
      int numCurrentRows = getNumberOfRows();
-     if (numCurrentRows == 0 || numCurrentRows <= mQuery.getSqlLimit()) {
+     if (numCurrentRows == 0 || numCurrentRows < mQuery.getSqlLimit()) {
        // We have reached the end of the query results
        return null;
      }
@@ -236,7 +236,7 @@ public class OdkDbTable implements Parcelable {
     }
 
     mQuery.setSqlLimit(limit);
-    mQuery.setSqlOffset(startIndex);
+    mQuery.setSqlOffset(startIndex - limit);
 
     return mQuery;
   }
