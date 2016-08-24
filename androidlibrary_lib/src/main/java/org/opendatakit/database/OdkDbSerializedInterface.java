@@ -73,67 +73,71 @@ public class OdkDbSerializedInterface {
    }
 
    private void rethrowNotAuthorizedRemoteException(Exception e)
-       throws IllegalArgumentException, IllegalStateException,
+       throws IllegalArgumentException, IllegalStateException, SQLiteException,
        ActionNotAuthorizedException, ServicesAvailabilityException {
-      if ( !(e instanceof RemoteException) ) {
-         throw new IllegalStateException("not RemoteException on OdkDbInterface: " +
+      if ( (e instanceof IllegalStateException) || (e instanceof RemoteException) ) {
+         String prefix = "via RemoteException on OdkDbInterface: ";
+         String msg = e.getMessage();
+         int idx = msg.indexOf(':');
+         if (idx == -1) {
+            throw new ServicesAvailabilityException(prefix + msg);
+         }
+         String exceptionName = msg.substring(0, idx);
+         String message = msg.substring(idx + 2);
+         if (!exceptionName.startsWith("org.opendatakit|")) {
+            throw new ServicesAvailabilityException(prefix + msg);
+         }
+         exceptionName = exceptionName.substring(exceptionName.indexOf('|') + 1);
+         if (exceptionName.equals(ActionNotAuthorizedException.class.getName())) {
+            throw new ActionNotAuthorizedException(prefix + message);
+         }
+         if (exceptionName.equals(IllegalArgumentException.class.getName())) {
+            throw new IllegalArgumentException(prefix + message);
+         }
+         if (exceptionName.equals(SQLiteException.class.getName())) {
+            throw new SQLiteException(prefix + message);
+         }
+         // should only throw illegal argument exceptions.
+         // anything else is not properly detected in the server layer
+         throw new IllegalStateException(prefix + msg);
+      } else {
+         throw new IllegalStateException(
+             "not IllegalStateException or RemoteException on OdkDbInterface: " +
              e.getClass().getName() + ": " + e.toString());
       }
-      String prefix = "via RemoteException on OdkDbInterface: ";
-      String msg = e.getMessage();
-      int idx = msg.indexOf(':');
-      if ( idx == -1 ) {
-         throw new ServicesAvailabilityException(prefix + msg);
-      }
-      String exceptionName = msg.substring(0,idx);
-      String message = msg.substring(idx+2);
-      if ( !exceptionName.startsWith("org.opendatakit|") ) {
-         throw new ServicesAvailabilityException(prefix + msg);
-      }
-      exceptionName = exceptionName.substring(exceptionName.indexOf('|')+1);
-      if ( exceptionName.equals("ActionNotAuthorizedException")) {
-         throw new ActionNotAuthorizedException(prefix + message);
-      }
-      if ( exceptionName.equals(IllegalArgumentException.class.getName())) {
-        throw new IllegalArgumentException(prefix + message);
-      }
-      if ( exceptionName.equals(SQLiteException.class.getName())) {
-        throw new SQLiteException(prefix + message);
-      }
-      // should only throw illegal argument exceptions.
-      // anything else is not properly detected in the server layer
-      throw new IllegalStateException(prefix + msg);
    }
 
 
    private void rethrowAlwaysAllowedRemoteException(Exception e)
-       throws IllegalArgumentException, IllegalStateException,
+       throws IllegalArgumentException, IllegalStateException, SQLiteException,
        ServicesAvailabilityException {
-      if ( !(e instanceof RemoteException) ) {
-         throw new IllegalStateException("not RemoteException on OdkDbInterface: " +
+      if ( (e instanceof IllegalStateException) || (e instanceof RemoteException) ) {
+         String prefix = "via RemoteException on OdkDbInterface: ";
+         String msg = e.getMessage();
+         int idx = msg.indexOf(':');
+         if (idx == -1) {
+            throw new ServicesAvailabilityException(prefix + msg);
+         }
+         String exceptionName = msg.substring(0, idx);
+         String message = msg.substring(idx + 2);
+         if (!exceptionName.startsWith("org.opendatakit|")) {
+            throw new ServicesAvailabilityException(prefix + msg);
+         }
+         exceptionName = exceptionName.substring(exceptionName.indexOf('|') + 1);
+         if (exceptionName.equals(IllegalArgumentException.class.getName())) {
+            throw new IllegalArgumentException(prefix + message);
+         }
+         if (exceptionName.equals(SQLiteException.class.getName())) {
+            throw new SQLiteException(prefix + message);
+         }
+         // should only throw illegal argument exceptions.
+         // anything else is not properly detected in the server layer
+         throw new IllegalStateException(prefix + msg);
+      } else {
+         throw new IllegalStateException(
+             "not IllegalStateException or RemoteException on OdkDbInterface: " +
              e.getClass().getName() + ": " + e.toString());
       }
-      String prefix = "via RemoteException on OdkDbInterface: ";
-      String msg = e.getMessage();
-      int idx = msg.indexOf(':');
-      if ( idx == -1 ) {
-         throw new ServicesAvailabilityException(prefix + msg);
-      }
-      String exceptionName = msg.substring(0,idx);
-      String message = msg.substring(idx+2);
-      if ( !exceptionName.startsWith("org.opendatakit|") ) {
-         throw new ServicesAvailabilityException(prefix + msg);
-      }
-      exceptionName = exceptionName.substring(exceptionName.indexOf('|')+1);
-      if ( exceptionName.equals(IllegalArgumentException.class.getName())) {
-         throw new IllegalArgumentException(prefix + message);
-      }
-      if ( exceptionName.equals(SQLiteException.class.getName())) {
-       throw new SQLiteException(prefix + message);
-      }
-      // should only throw illegal argument exceptions.
-      // anything else is not properly detected in the server layer
-      throw new IllegalStateException(prefix + msg);
    }
 
    /**
