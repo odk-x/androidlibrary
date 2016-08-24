@@ -315,7 +315,6 @@ interface OdkDbInterface {
    * @param key
    *
    * @return list of KeyValueStoreEntry values matching the filter criteria
-   * @throws RemoteException
    */
   OdkDbChunk getDBTableMetadata(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in String partition, in String aspect, in String key);
