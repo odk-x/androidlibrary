@@ -125,11 +125,11 @@ interface OdkDbInterface {
    * @param tableId
    * @param rowValues
    * @param whereClause
-   * @param whereArgs
+   * @param sqlBindArgs
    * @throws ActionNotAuthorizedException
    */
   void updateLocalOnlyRow(in String appName, in OdkDbHandle dbHandleName, in String tableId,
-        in ContentValues rowValues, in String whereClause, in String[] whereArgs);
+        in ContentValues rowValues, in String whereClause, in BindArgs sqlBindArgs);
 
   /**
    * Delete a row in a local only table
@@ -138,11 +138,11 @@ interface OdkDbInterface {
    * @param dbHandleName
    * @param tableId
    * @param whereClause
-   * @param whereArgs
+   * @param sqlBindArgs
    * @throws ActionNotAuthorizedException
    */
   void deleteLocalOnlyRow(in String appName, in OdkDbHandle dbHandleName, in String tableId,
-        in String whereClause, in String[] whereArgs);
+        in String whereClause, in BindArgs sqlBindArgs);
 
   /**
    * SYNC Only. ADMIN Privileges

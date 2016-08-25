@@ -292,11 +292,12 @@ public class OdkDbSerializedInterface {
     * @param tableId
     * @param rowValues
     * @param whereClause
-    * @param whereArgs
+    * @param bindArgs
     * @throws ServicesAvailabilityException
     */
    public void updateLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
-       ContentValues rowValues, String whereClause, String[] whereArgs) throws ServicesAvailabilityException {
+       ContentValues rowValues, String whereClause, Object[] bindArgs) throws
+       ServicesAvailabilityException {
  
      if (!tableId.startsWith("L_")) {
        tableId = "L_" + tableId;
@@ -304,7 +305,7 @@ public class OdkDbSerializedInterface {
  
      try {
        dbInterface
-           .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause, whereArgs);
+           .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause, new BindArgs(bindArgs));
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
@@ -318,18 +319,18 @@ public class OdkDbSerializedInterface {
       * @param dbHandleName
       * @param tableId
       * @param whereClause
-      * @param whereArgs
+      * @param bindArgs
       * @throws ServicesAvailabilityException
       */
    public void deleteLocalOnlyRow(String appName, OdkDbHandle dbHandleName, String tableId,
-       String whereClause, String[] whereArgs) throws ServicesAvailabilityException {
+       String whereClause, Object[] bindArgs) throws ServicesAvailabilityException {
  
      if (!tableId.startsWith("L_")) {
        tableId = "L_" + tableId;
      }
  
      try {
-       dbInterface.deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, whereArgs);
+       dbInterface.deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, new BindArgs(bindArgs));
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
