@@ -387,23 +387,20 @@ public class OdkDbSerializedInterface {
     * @param sqlCommand
     * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
     *                          bind parameters
-    * @param orderByColNames   array of columns to order the results by (optional)
-    * @param orderByDirections  either "ASC" or "DESC" (optional)
     * @param limit             the maximum number of rows to return (optional)
     * @param offset            the index to start counting the limit from (optional)
     * @return An  {@link OdkDbTable}. Containing the results of the query
     * @throws ServicesAvailabilityException
     */
    public OdkDbTable arbitrarySqlQueryLocalOnlyTables(String appName, OdkDbHandle dbHandleName,
-       String tableId, String sqlCommand, Object[] bindArgs, String[] orderByColNames,
-       String[] orderByDirections, Integer limit, Integer offset) throws ServicesAvailabilityException {
+       String tableId, String sqlCommand, Object[] bindArgs, Integer limit, Integer offset) throws ServicesAvailabilityException {
 
       if (!tableId.startsWith("L_")) {
          tableId = "L_" + tableId;
       }
 
       return arbitrarySqlQuery(appName, dbHandleName, tableId, sqlCommand, bindArgs,
-          orderByColNames, orderByDirections, limit, offset);
+          limit, offset);
    }
 
    /**
@@ -894,18 +891,15 @@ public class OdkDbSerializedInterface {
     * @param sqlCommand
     * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
     *                          bind parameters
-    * @param orderByColNames   array of columns to order the results by (optional)
-    * @param orderByDirections  either "ASC" or "DESC" (optional)
     * @param limit             the maximum number of rows to return (optional)
     * @param offset            the index to start counting the limit from (optional)
     * @return An  {@link OdkDbTable}. Containing the results of the query
     */
    public OdkDbTable arbitrarySqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
-       String sqlCommand, Object[] bindArgs, String[] orderByColNames,
-       String[] orderByDirections, Integer limit, Integer offset) throws ServicesAvailabilityException {
+       String sqlCommand, Object[] bindArgs, Integer limit, Integer offset) throws ServicesAvailabilityException {
      try {
        OdkDbAbstractQuery query = new OdkDbAbstractQuery(tableId, new BindArgs(bindArgs),
-          sqlCommand, orderByColNames, orderByDirections, limit, offset);
+          sqlCommand, null, null, limit, offset);
 
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
           query.getPaginatedSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
@@ -1069,19 +1063,16 @@ public class OdkDbSerializedInterface {
     * @param sqlCommand
     * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
     *                          bind parameters
-    * @param orderByColNames   array of columns to order the results by
-    * @param orderByDirections  either "ASC" or "DESC"
     * @param limit             the maximum number of rows to return
     * @param offset            the index to start counting the limit from
     * @return An  {@link OdkDbTable}. Containing the results of the query
     */
    public UserTable arbitrarySqlQuery(String appName, OdkDbHandle dbHandleName, String tableId,
        OrderedColumns columnDefns,
-       String sqlCommand, Object[] bindArgs, String[] orderByColNames,
-       String[] orderByDirections, Integer limit, Integer offset) throws ServicesAvailabilityException {
+       String sqlCommand, Object[] bindArgs, Integer limit, Integer offset) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = arbitrarySqlQuery(appName, dbHandleName, tableId, sqlCommand, bindArgs,
-           orderByColNames, orderByDirections, limit, offset);
+           limit, offset);
 
        return new UserTable(baseTable, columnDefns, getAdminColumns());
      } catch ( Exception e ) {
