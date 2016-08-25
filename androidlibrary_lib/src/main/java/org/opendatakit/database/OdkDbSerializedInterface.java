@@ -809,12 +809,8 @@ public class OdkDbSerializedInterface {
        OdkDbSimpleQuery query = new OdkDbSimpleQuery(tableId, new BindArgs(bindArgs), whereClause,
           groupBy, having, orderByColNames, orderByDirections, limit, offset);
 
-       String paginatedSqlQuery = query.getPaginatedSqlCommand();
-       BindArgs args = query.getSqlBindArgs();
-       QueryBounds bounds = query.getSqlQueryBounds();
-
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
-          .rawSqlQuery(appName, dbHandleName, query.getPaginatedSqlCommand(),
+          .rawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
               query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
 
        baseTable.setQuery(query);
@@ -861,12 +857,8 @@ public class OdkDbSerializedInterface {
       OdkDbSimpleQuery query = new OdkDbSimpleQuery(tableId, new BindArgs(bindArgs), whereClause,
           groupBy, having, orderByColNames, orderByDirections, limit, offset);
 
-      String paginatedSqlQuery = query.getPaginatedSqlCommand();
-      BindArgs args = query.getSqlBindArgs();
-      QueryBounds bounds = query.getSqlQueryBounds();
-
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
-          .privilegedRawSqlQuery(appName, dbHandleName, query.getPaginatedSqlCommand(),
+          .privilegedRawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
               query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
 
       baseTable.setQuery(query);
@@ -899,11 +891,11 @@ public class OdkDbSerializedInterface {
        String sqlCommand, Object[] bindArgs, Integer limit, Integer offset) throws ServicesAvailabilityException {
      try {
        OdkDbAbstractQuery query = new OdkDbAbstractQuery(tableId, new BindArgs(bindArgs),
-          sqlCommand, null, null, limit, offset);
+           sqlCommand, limit, offset);
 
-       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
-          query.getPaginatedSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
-          OdkDbTable.CREATOR);
+       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+           .rawSqlQuery(appName, dbHandleName, query.getSqlCommand(), query.getSqlBindArgs(),
+               query.getSqlQueryBounds()), OdkDbTable.CREATOR);
 
        baseTable.setQuery(query);
 
@@ -926,7 +918,7 @@ public class OdkDbSerializedInterface {
        OdkDbResumableQuery query) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
-          query.getPaginatedSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
+          query.getSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
           OdkDbTable.CREATOR);
 
        baseTable.setQuery(query);
@@ -952,10 +944,9 @@ public class OdkDbSerializedInterface {
   public OdkDbTable resumePrivilegedRawSqlQuery(String appName, OdkDbHandle dbHandleName,
       OdkDbResumableQuery query) throws ServicesAvailabilityException {
     try {
-      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.privilegedRawSqlQuery(appName,
-          dbHandleName,
-          query.getPaginatedSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
-          OdkDbTable.CREATOR);
+      OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
+          .privilegedRawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
+              query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
 
       baseTable.setQuery(query);
 

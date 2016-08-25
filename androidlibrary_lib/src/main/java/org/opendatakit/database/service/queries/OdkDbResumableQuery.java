@@ -30,16 +30,6 @@ public abstract class OdkDbResumableQuery implements OdkDbQuery {
    protected final BindArgs mBindArgs;
 
    /**
-    * The ORDER BY arguments
-    */
-   protected final String[] mOrderByColNames;
-
-   /**
-    * The direction of each ORDER BY argument
-    */
-   protected final String[] mOrderByDirections;
-
-   /**
     * The maximum number of rows to return
     */
    protected int mLimit;
@@ -49,33 +39,22 @@ public abstract class OdkDbResumableQuery implements OdkDbQuery {
     */
    protected int mOffset;
 
-   public OdkDbResumableQuery (String tableId, BindArgs bindArgs, String[] orderByColNames,
-       String[] orderByDirections, Integer limit, Integer offset) {
+   public OdkDbResumableQuery(String tableId, BindArgs bindArgs, Integer limit, Integer offset) {
       if (tableId == null) {
          throw new IllegalArgumentException("Table ID must not be null");
       }
 
       this.mTableId = tableId;
       this.mBindArgs = bindArgs;
-      this.mOrderByColNames = orderByColNames;
-      this.mOrderByDirections = orderByDirections;
       this.mLimit = limit != null ? limit.intValue() : -1;
       this.mOffset = offset != null ? offset.intValue() : -1;
    }
 
-   public OdkDbResumableQuery(String tableId, BindArgs bindArgs, String[] orderByColNames,
-       String[] orderByDirections, QueryBounds bounds) {
+   public OdkDbResumableQuery(String tableId, BindArgs bindArgs, QueryBounds bounds) {
 
-      this(tableId, bindArgs, orderByColNames, orderByDirections, bounds.mLimit, bounds.mOffset);
+      this(tableId, bindArgs, (bounds != null ? bounds.mLimit : null),
+          (bounds != null ? bounds.mOffset : null));
    }
-
-   /**
-    * Use the limit, direction, and the resume points to construct a SQL command to retrieve the
-    * next or previous set of rows
-    *
-    * @return the paginated SQL command string
-    */
-   abstract public String getPaginatedSqlCommand();
 
    /**
     * Retrieve the id of the table to be queried
@@ -142,32 +121,5 @@ public abstract class OdkDbResumableQuery implements OdkDbQuery {
     */
    public int getSqlOffset() {
       return mOffset;
-   }
-
-   /**
-    * Return the list of columns to order the results by
-    *
-    * @return column names to order by
-    */
-   public String[] getOrderByColNames() {
-      return (mOrderByColNames != null ? mOrderByColNames.clone() : null);
-   }
-
-   /**
-    * Return the list of direction values corresponding to the order by columns
-    *
-    * @return directions to order results by for each column
-    */
-   public String[] getOrderByDirections() {
-      return (mOrderByDirections != null ? mOrderByDirections.clone() : null);
-   }
-
-   /**
-    * Return whether sufficient conditions have been met to resume this query
-    *
-    * @return if the query can be resumed
-    */
-   public boolean isResumable() {
-      return (mOrderByColNames != null && mOrderByColNames.length > 0);
    }
 }

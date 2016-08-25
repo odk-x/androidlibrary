@@ -38,6 +38,17 @@ public class OdkDbSimpleQuery extends OdkDbResumableQuery {
     */
    private final String mHavingClause;
 
+   /**
+    * The ORDER BY arguments
+    */
+   private final String[] mOrderByColNames;
+
+   /**
+    * The direction of each ORDER BY argument
+    */
+   private final String[] mOrderByDirections;
+
+
 
    /**
     * Construct the query
@@ -56,11 +67,14 @@ public class OdkDbSimpleQuery extends OdkDbResumableQuery {
        String[] groupByArgs, String havingClause, String[] orderByColNames,
        String[] orderByDirections, Integer limit, Integer offset) {
 
-      super(tableId, bindArgs, orderByColNames, orderByDirections, limit, offset);
+      super(tableId, bindArgs, limit, offset);
 
       this.mWhereClause = whereClause;
       this.mGroupByArgs = groupByArgs;
       this.mHavingClause = havingClause;
+
+      this.mOrderByColNames = orderByColNames;
+      this.mOrderByDirections = orderByDirections;
    }
 
    public OdkDbSimpleQuery(String tableId, BindArgs bindArgs, String whereClause,
@@ -78,17 +92,6 @@ public class OdkDbSimpleQuery extends OdkDbResumableQuery {
           mOrderByColNames, mOrderByDirections);
    }
 
-   public String getPaginatedSqlCommand() {
-      String originalSqlCommand = OdkDbQueryUtil.buildSqlStatement(mTableId, mWhereClause,
-          mGroupByArgs, mHavingClause, null, null);
-
-      if (!isResumable()) {
-         return originalSqlCommand;
-      }
-
-      return OdkDbQueryUtil.wrapOrderBy(originalSqlCommand, mOrderByColNames, mOrderByDirections);
-   }
-
    public String getWhereClause() {
       return mWhereClause;
    }
@@ -99,5 +102,23 @@ public class OdkDbSimpleQuery extends OdkDbResumableQuery {
 
    public String getHavingClause() {
       return mHavingClause;
+   }
+
+   /**
+    * Return the list of columns to order the results by
+    *
+    * @return column names to order by
+    */
+   public String[] getOrderByColNames() {
+      return (mOrderByColNames != null ? mOrderByColNames.clone() : null);
+   }
+
+   /**
+    * Return the list of direction values corresponding to the order by columns
+    *
+    * @return directions to order results by for each column
+    */
+   public String[] getOrderByDirections() {
+      return (mOrderByDirections != null ? mOrderByDirections.clone() : null);
    }
 }

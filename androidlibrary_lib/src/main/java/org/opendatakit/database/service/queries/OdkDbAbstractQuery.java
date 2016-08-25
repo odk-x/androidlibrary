@@ -28,21 +28,18 @@ public class OdkDbAbstractQuery extends OdkDbResumableQuery {
     */
    private final String mSqlCommand;
 
-
    /**
     * Constructor the query
     *
-    * @param tableId The table to query
-    * @param bindArgs The sql selection args
+    * @param tableId    The table to query
+    * @param bindArgs   The sql selection args
     * @param sqlCommand The arbitrary sql command
-    * @param orderByColNames The columns to order by
-    * @param orderByDirections The directions to order by
-    * @param limit The maximum number of rows to return
-    * @param offset The offset to start counting the limit from
+    * @param limit      The maximum number of rows to return
+    * @param offset     The offset to start counting the limit from
     */
-   public OdkDbAbstractQuery(String tableId, BindArgs bindArgs, String sqlCommand,
-       String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset) {
-      super(tableId, bindArgs, orderByColNames, orderByDirections, limit, offset);
+   public OdkDbAbstractQuery(String tableId, BindArgs bindArgs, String sqlCommand, Integer limit,
+       Integer offset) {
+      super(tableId, bindArgs, limit, offset);
 
       if (sqlCommand == null) {
          throw new IllegalArgumentException("SQL command must not be null");
@@ -52,22 +49,14 @@ public class OdkDbAbstractQuery extends OdkDbResumableQuery {
    }
 
    public OdkDbAbstractQuery(String tableId, BindArgs bindArgs, String sqlCommand,
-       String[] orderByColNames, String[] orderByDirections, QueryBounds bounds) {
+       QueryBounds bounds) {
 
-      this(tableId, bindArgs, sqlCommand, orderByColNames, orderByDirections,
-          (bounds != null ? bounds.mLimit : -1), (bounds != null ? bounds.mOffset : -1));
+      this(tableId, bindArgs, sqlCommand, (bounds != null ? bounds.mLimit : -1),
+          (bounds != null ? bounds.mOffset : -1));
    }
 
    public String getSqlCommand() {
       return mSqlCommand;
-   }
-
-   public String getPaginatedSqlCommand() {
-      if (!isResumable()) {
-         return mSqlCommand;
-      }
-
-      return OdkDbQueryUtil.wrapOrderBy(mSqlCommand, mOrderByColNames, mOrderByDirections);
    }
 
 }

@@ -189,7 +189,7 @@ public class OdkDbTable implements Parcelable {
     * @return
     */
    public OdkDbResumableQuery resumeQueryForward(int limit) {
-     if (mQuery == null || !mQuery.isResumable()) {
+     if (mQuery == null) {
        return null;
      }
 
@@ -218,7 +218,7 @@ public class OdkDbTable implements Parcelable {
    * @return
    */
   public OdkDbResumableQuery resumeQueryBackward(int limit) {
-    if (mQuery == null || !mQuery.isResumable()) {
+    if (mQuery == null) {
       return null;
     }
 

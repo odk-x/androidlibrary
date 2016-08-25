@@ -131,6 +131,14 @@ public class UserTable implements Parcelable, ParentTable{
     return mBaseTable.getQuery();
   }
 
+  public OdkDbResumableQuery resumeQueryForward(int limit) {
+    return mBaseTable.resumeQueryForward(limit);
+  }
+
+  public OdkDbResumableQuery resumeQueryBackward(int limit) {
+    return mBaseTable.resumeQueryBackward(limit);
+  }
+
 
   /*** Unique methods to UserTable ***/
   public String getAppName() {
