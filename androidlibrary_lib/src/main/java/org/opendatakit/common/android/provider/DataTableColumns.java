@@ -62,6 +62,14 @@ public class DataTableColumns implements BaseColumns {
   public static final String FORM_ID = TableConstants.FORM_ID;
   public static final String LOCALE = TableConstants.LOCALE;
 
+  // These columns are added to report effective privileges on the data rows
+  // Effective privilegs are one of "r", "rw" or "rwd" and are determined by
+  // the verified user's roles and the status of the table. There are two columns
+  // returned, one for when the table is locked, and one when it is not.
+  // caller must interpret and use the appropriate field.
+  public static final String EFFECTIVE_ACCESS_LOCKED = "_effective_access_locked";
+  public static final String EFFECTIVE_ACCESS_UNLOCKED = "_effective_access_unlocked";
+
   // These are the default values that will be set to the database in case
   // there is nothing included. This has been a problem when downloading a
   // table from the server.
