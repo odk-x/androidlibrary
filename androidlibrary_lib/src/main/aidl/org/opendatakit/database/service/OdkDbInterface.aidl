@@ -22,15 +22,49 @@ import android.os.ParcelUuid;
 import org.opendatakit.common.android.data.OrderedColumns;
 import org.opendatakit.common.android.data.ColumnList;
 import org.opendatakit.common.android.data.TableDefinitionEntry;
-import org.opendatakit.common.android.data.UserTable;
-import org.opendatakit.common.android.data.RawUserTable;
+import org.opendatakit.database.service.BindArgs;
+import org.opendatakit.database.service.queries.QueryBounds;
 import org.opendatakit.database.service.OdkDbHandle;
 import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.TableHealthInfo;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 
+/**
+* any interface that begins privileged.... will run with elevated privileges.
+* I.e., it has no user-permissions restrictions imposed upon it. For the most
+* part, these should be called only by:
+* (1) SYNC
+* (2) InitializationTask
+* (3) CSV Import
+*/
 interface OdkDbInterface {
-    
+
+  /**
+   * Return the roles of a verified username or google account.
+   * If the username or google account have not been verified,
+   * or if the server settings specify to use an anonymous user,
+   * then return an empty string.
+   *
+   * @param appName
+   *
+   * @return empty string or JSON serialization of an array of ROLES. See RoleConsts for possible values.
+   */
+  String getRolesList(in String appName);
+
+  /**
+   * Return the users configured on the server if the current
+   * user is verified to have Tables Super-user, Administer Tables or
+   * Site Administrator roles. Otherwise, returns information about
+   * the current user. If the user is syncing anonymously with the
+   * server, this returns an empty string.
+   *
+   * @param appName
+   *
+   * @return empty string or JSON serialization of an array of objects
+   * structured as { "user_id": "...", "full_name": "...", "roles": ["...",...] }
+   */
+  String getUsersList(in String appName);
+
   /**
    * Obtain a databaseHandleName
    *
@@ -47,9 +81,72 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    */
-   void closeDatabase(in String appName, in OdkDbHandle dbHandleName); 
+   void closeDatabase(in String appName, in OdkDbHandle dbHandleName);
 
   /**
+   * Create a local only table and prepend the given id with an "L_"
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param columns
+   * @return
+   */
+  OdkDbChunk createLocalOnlyDbTableWithColumns(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId, in ColumnList columns);
+
+  /**
+    * Drop the given local only table
+    *
+    * @param appName
+    * @param dbHandleName
+    * @param tableId
+    */
+  void deleteLocalOnlyDBTable(in String appName, in OdkDbHandle dbHandleName,
+     in String tableId);
+
+  /**
+   * Insert a row into a local only table
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param rowValues
+   * @throws ActionNotAuthorizedException
+   */
+  void insertLocalOnlyRow(in String appName, in OdkDbHandle dbHandleName, in String tableId,
+     in ContentValues rowValues);
+
+  /**
+   * Update a row in a local only table
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param rowValues
+   * @param whereClause
+   * @param sqlBindArgs
+   * @throws ActionNotAuthorizedException
+   */
+  void updateLocalOnlyRow(in String appName, in OdkDbHandle dbHandleName, in String tableId,
+        in ContentValues rowValues, in String whereClause, in BindArgs sqlBindArgs);
+
+  /**
+   * Delete a row in a local only table
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param whereClause
+   * @param sqlBindArgs
+   * @throws ActionNotAuthorizedException
+   */
+  void deleteLocalOnlyRow(in String appName, in OdkDbHandle dbHandleName, in String tableId,
+        in String whereClause, in BindArgs sqlBindArgs);
+
+  /**
+   * SYNC Only. ADMIN Privileges
+   *
    * Call this when the schemaETag for the given tableId has changed on the server.
    *
    * This is a combination of:
@@ -88,7 +185,7 @@ interface OdkDbInterface {
    *   deleteAllSyncETagsUnderServer(sc.getAppName(), db, tableInstanceFilesUri);
    * }
    */
-  void serverTableSchemaETagChanged(in String appName, in OdkDbHandle dbHandleName,
+  void privilegedServerTableSchemaETagChanged(in String appName, in OdkDbHandle dbHandleName,
     in String tableId, in String schemaETag, in String tableInstanceFilesUri);
 
   /**
@@ -218,7 +315,6 @@ interface OdkDbInterface {
    * @param key
    *
    * @return list of KeyValueStoreEntry values matching the filter criteria
-   * @throws RemoteException
    */
   OdkDbChunk getDBTableMetadata(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in String partition, in String aspect, in String key);
@@ -281,43 +377,8 @@ interface OdkDbInterface {
   /* rawQuery */
 
   /**
-   * Get a {@link UserTable} for this table based on the given where clause. All
-   * columns from the table are returned.
-   * <p>
-   * SELECT * FROM table WHERE whereClause GROUP BY groupBy[]s HAVING
-   * havingClause ORDER BY orderbyElement orderByDirection
-   * <p>
-   * If any of the clause parts are omitted (null), then the appropriate
-   * simplified SQL statement is constructed.
-   * 
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param columnDefns
-   * @param whereClause
-   *          the whereClause for the selection, beginning with "WHERE". Must
-   *          include "?" instead of actual values, which are instead passed in
-   *          the selectionArgs.
-   * @param selectionArgs
-   *          an array of string values for bind parameters
-   * @param groupBy
-   *          an array of elementKeys
-   * @param having
-   * @param orderByElementKey
-   *          elementKey to order the results by
-   * @param orderByDirection
-   *          either "ASC" or "DESC"
-   * @return
-   */
-  OdkDbChunk rawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
-        in String tableId,
-        in OrderedColumns columnDefns, in String whereClause, in String[] selectionArgs,
-        in String[] groupBy, in String having, in String orderByElementKey, in String orderByDirection);
-
-  /**
-   * Get a {@link RawUserTable} for the result set of an arbitrary sql query
-   * and bind parameters. If the result set has an _id column, it is used as
-   * the RowId of the RawRow. Otherwise, an ordinal number is generated and used.
+   * Get a {@link OdkDbTable} for the result set of an arbitrary sql query
+   * and bind parameters.
    *
    * The sql query can be arbitrarily complex and can include joins, unions, etc.
    * The data are returned as string values.
@@ -328,8 +389,27 @@ interface OdkDbInterface {
    * @param sqlBindArgs
    * @return
    */
-  OdkDbChunk arbitraryQuery(in String appName, in OdkDbHandle dbHandleName,
-      in String sqlCommand, in String[] sqlBindArgs);
+  OdkDbChunk rawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
+      in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds);
+
+  /**
+   * Privileged version of the above interface.
+   *
+   * Get a {@link OdkDbTable} for the result set of an arbitrary sql query
+   * and bind parameters.
+   *
+   * The sql query can be arbitrarily complex and can include joins, unions, etc.
+   * The data are returned as string values.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param sqlCommand
+   * @param sqlBindArgs
+   * @return
+   */
+  OdkDbChunk privilegedRawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
+      in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds);
+
   /**
    * Insert or update a single table-level metadata KVS entry.
    * 
@@ -374,7 +454,9 @@ interface OdkDbInterface {
       in String tableId, in String partition, in String aspect,
       in List<KeyValueStoreEntry> metaData);
 
-    /**
+  /**
+   * SYNC Only. ADMIN Privileges
+   *
    * Update the schema and data-modification ETags of a given tableId.
    *
    * @param appName
@@ -383,11 +465,13 @@ interface OdkDbInterface {
    * @param schemaETag
    * @param lastDataETag
    */
-  void updateDBTableETags(in String appName, in OdkDbHandle dbHandleName,
+  void privilegedUpdateDBTableETags(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in String schemaETag,
       in String lastDataETag);
 
   /**
+   * SYNC Only. ADMIN Privileges
+   *
    * Update the timestamp of the last entirely-successful synchronization
    * attempt of this table.
    *
@@ -395,7 +479,8 @@ interface OdkDbInterface {
    * @param dbHandleName
    * @param tableId
    */
-  void updateDBTableLastSyncTime(in String appName, in OdkDbHandle dbHandleName, in String tableId);
+  void privilegedUpdateDBTableLastSyncTime(in String appName, in OdkDbHandle dbHandleName, in
+  String tableId);
 
   /////////////////////////////////////////////////////////////////////////////////////
   // Row level changes
@@ -414,6 +499,8 @@ interface OdkDbInterface {
       in String tableId, in String rowId);
 
   /**
+   * SYNC Only. ADMIN Privileges
+   *
    * Update the ETag and SyncState of a given rowId. There should be exactly one
    * record for this rowId in thed database (i.e., no conflicts or checkpoints).
    *
@@ -424,8 +511,9 @@ interface OdkDbInterface {
    * @param rowETag
    * @param syncState - the SyncState.name()
    */
-  void updateRowETagAndSyncState(in String appName, in OdkDbHandle dbHandleName,
+  void privilegedUpdateRowETagAndSyncState(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in String rowId, in String rowETag, in String syncState);
+
 
   /**
    * Return the row(s) for the given tableId and rowId. If the row has
@@ -435,12 +523,28 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedDefns
    * @param rowId
    * @return one or more rows (depending upon sync conflict and edit checkpoint states)
    */
   OdkDbChunk getRowsWithId(in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedDefns, in String rowId);
+      in String tableId, in String rowId);
+
+  /**
+   * CSV UTIL
+   * For detecting existing rows when importing csvs.
+    *
+   * Return the row(s) for the given tableId and rowId. If the row has
+   * checkpoints or conflicts, the returned UserTable will have more than one
+   * Row returned. Otherwise, it will contain a single row.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param rowId
+   * @return one or more rows (depending upon sync conflict and edit checkpoint states)
+   */
+  OdkDbChunk privilegedGetRowsWithId(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId, in String rowId);
 
   /**
    * Return the row with the most recent changes for the given tableId and rowId.
@@ -450,15 +554,15 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedDefns
    * @param rowId
    * @return
    */
-  OdkDbChunk getMostRecentRowWithId(in String appName,
-      in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedDefns, in String rowId);
+  OdkDbChunk getMostRecentRowWithId(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId, in String rowId);
 
   /**
+   * SYNC ONLY
+   *
    * A combination of:
    *
    * deleteServerConflictRowWithId(appName, db, tableId, rowId)
@@ -473,15 +577,36 @@ interface OdkDbInterface {
    * @param dbHandleName
    * @param tableId
    * @param orderedColumns
-   * @param cvValues
+   * @param cvValues  server's field values for this row
    * @param rowId
    * @param localRowConflictType
    *          expected to be one of ConflictType.LOCAL_DELETED_OLD_VALUES (0) or
    *          ConflictType.LOCAL_UPDATED_UPDATED_VALUES (1)
    */
-  OdkDbChunk placeRowIntoServerConflictWithId(in String appName, in OdkDbHandle dbHandleName,
+  OdkDbChunk privilegedPlaceRowIntoConflictWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues,
       in String rowId, in int localRowConflictType);
+
+  /**
+   * SYNC, CSV Import ONLY
+   *
+   * Insert the given rowId with the values in the cvValues. This is data from
+   * the server. All metadata values must be specified in the cvValues (even null values).
+   *
+   * If a row with this rowId is present, then an exception is thrown.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param orderedColumns
+   * @param cvValues
+   * @param rowId
+   * @return single-row table with the content of the inserted row
+   */
+  OdkDbChunk privilegedInsertRowWithId(in String appName, in OdkDbHandle dbHandleName,
+  	  in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId,
+  	  boolean asCsvRequestedChange);
+
 
   /**
    * Inserts a checkpoint row for the given rowId in the tableId. Checkpoint
@@ -533,7 +658,7 @@ interface OdkDbInterface {
    * @param rowId
    */
   OdkDbChunk deleteAllCheckpointRowsWithId(in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in String rowId);
+      in String tableId, in String rowId);
 
   /**
    * Delete any checkpoint rows for the given rowId in the tableId. Checkpoint
@@ -544,11 +669,10 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    */
   OdkDbChunk deleteLastCheckpointRowWithId(in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in String rowId);
+      in String tableId, in String rowId);
 
  /**
    * Delete the specified rowId in this tableId. Deletion respects sync
@@ -566,11 +690,26 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    */
   OdkDbChunk deleteRowWithId(in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in String rowId);
+      in String tableId, in String rowId);
+
+
+  /**
+   * SYNC, conflict resolution ONLY
+   *
+   * Delete the specified rowId in this tableId. This is enforcing the server
+   * state on the device. I.e., the sync interaction instructed us to delete
+   * this row.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param rowId
+   */
+  OdkDbChunk privilegedDeleteRowWithId(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId, in String rowId);
 
 
   /**
@@ -583,14 +722,12 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param columnDefns
-   * @param cvValues
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
   OdkDbChunk saveAsIncompleteMostRecentCheckpointRowWithId(
   	  in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns columnDefns, in ContentValues cvValues, in String rowId);
+      in String tableId, in String rowId);
 
  /**
    * Update all rows for the given rowId to SavepointType 'INCOMPLETE' and
@@ -602,14 +739,12 @@ interface OdkDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param columnDefns
-   * @param cvValues
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
   OdkDbChunk saveAsCompleteMostRecentCheckpointRowWithId(
   	  in String appName, in OdkDbHandle dbHandleName,
-      in String tableId, in OrderedColumns columnDefns, in ContentValues cvValues, in String rowId);
+      in String tableId, in String rowId);
 
   /**
    * Update the given rowId with the values in the cvValues. If certain metadata
@@ -629,6 +764,28 @@ interface OdkDbInterface {
   OdkDbChunk updateRowWithId(in String appName, in OdkDbHandle dbHandleName,
       in String tableId,
       in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+
+  /**
+   * SYNC, CSV Import ONLY
+   *
+   * Update the given rowId with the values in the cvValues. All field
+   * values are specified in the cvValues. This is a server-induced update
+   * of the row to match all fields from the server. An error is thrown if
+   * there isn't a row matching this rowId or if there are checkpoint or
+   * conflict entries for this rowId.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param orderedColumns
+   * @param cvValues
+   * @param rowId
+   * @return single-row table with the content of the saved-as-incomplete row
+   */
+  OdkDbChunk privilegedUpdateRowWithId(in String appName, in OdkDbHandle dbHandleName,
+      in String tableId,
+      in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId,
+      boolean asCsvRequestedChange);
 
   /**
    * Delete the local and server conflict records to resolve a server conflict

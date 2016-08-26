@@ -16,9 +16,18 @@ package org.opendatakit.common.android.utilities;
 
 import android.os.FileObserver;
 import android.util.Log;
+
 import org.apache.commons.lang3.CharEncoding;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -62,7 +71,7 @@ public class WebLoggerImpl implements WebLoggerIf {
   private long lastFlush = 0L;
 
   // date formatter
-  private SimpleDateFormat restrictedFileDateFormatter =
+  private final SimpleDateFormat restrictedFileDateFormatter =
       new SimpleDateFormat(DATE_FORMAT, Locale.US);
 
   public String getFormattedFileDateNow() {
@@ -77,7 +86,7 @@ public class WebLoggerImpl implements WebLoggerIf {
 
   }
 
-  private SimpleDateFormat restrictedLogLineDateFormatter =
+  private final SimpleDateFormat restrictedLogLineDateFormatter =
       new SimpleDateFormat(LOG_LINE_DATE_FORMAT, Locale.US);
 
   public String getFormattedLogLineDateNow() {

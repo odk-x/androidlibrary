@@ -15,13 +15,13 @@
  */
 package org.opendatakit.common.android.utilities;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class ODKDataUtils {
 

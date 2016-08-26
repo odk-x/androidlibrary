@@ -14,21 +14,19 @@
 
 package org.opendatakit.common.android.utilities;
 
+import android.content.Context;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.type.CollectionType;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.type.CollectionType;
-import org.opendatakit.common.android.utilities.ODKFileUtils;
-
-import android.content.Context;
-
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
  * Holds the files required for a submission to the ODK Aggregate legacy
@@ -46,7 +44,7 @@ public class FileSet {
   public static final class MimeFile {
     public File file;
     public String contentType;
-  };
+  }
 
   public ArrayList<MimeFile> attachmentFiles = new ArrayList<MimeFile>();
 

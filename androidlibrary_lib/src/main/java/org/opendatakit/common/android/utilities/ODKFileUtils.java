@@ -15,6 +15,20 @@
 
 package org.opendatakit.common.android.utilities;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.util.Log;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.CharEncoding;
+import org.opendatakit.common.android.provider.FormsColumns;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -35,20 +49,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.CharEncoding;
-import org.opendatakit.common.android.provider.FormsColumns;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Environment;
-import android.util.Log;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Static methods used for common file operations.
@@ -265,9 +265,7 @@ public class ODKFileUtils {
 
       @Override
       public boolean accept(File pathname) {
-        if (!pathname.isDirectory())
-          return false;
-        return true;
+        return (pathname.isDirectory());
       }
     });
 

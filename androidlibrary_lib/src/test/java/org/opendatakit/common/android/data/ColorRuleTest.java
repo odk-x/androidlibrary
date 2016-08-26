@@ -14,18 +14,18 @@
 
 package org.opendatakit.common.android.data;
 
-import java.util.Locale;
-import java.util.TimeZone;
-
 import android.graphics.Color;
-import org.junit.*;
-import static org.junit.Assert.*;
 
-import org.opendatakit.aggregate.odktables.rest.ElementDataType;
-import org.opendatakit.common.android.data.ColorRule;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.opendatakit.common.android.utilities.StaticStateManipulator;
 import org.opendatakit.common.android.utilities.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ColorRuleTest {
 

@@ -17,6 +17,7 @@ package org.opendatakit.common.android.logic;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.IntentConsts;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
@@ -24,11 +25,12 @@ import org.opendatakit.androidlibrary.R;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
 import org.opendatakit.common.android.utilities.WebLogger;
 
-import java.io.*;
-import java.lang.reflect.Method;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
 
@@ -53,9 +55,8 @@ public class PropertiesSingleton {
   private static final String t = "PropertiesSingleton";
 
   private static final String GENERAL_PROPERTIES_FILENAME = "app.properties";
+  private static final String DEFAULT_DEVICE_PROPERTIES_FILENAME = "default.device.properties";
   private static final String DEVICE_PROPERTIES_FILENAME = "device.properties";
-
-  private static boolean isMocked = false;
 
   private final String mAppName;
   private long lastGeneralModified = 0L;
@@ -66,6 +67,7 @@ public class PropertiesSingleton {
   private final TreeMap<String, String> mSecureDefaults;
 
   private Properties mGeneralProps;
+  private Properties mGlobalDeviceProps;
   private Properties mDeviceProps;
   private Context mBaseContext;
 
@@ -90,41 +92,8 @@ public class PropertiesSingleton {
         init();
       }
     } catch (Exception e) {
-      // TODO: remove the mocking logic? it looks like garbage...
-      if (isMocked) {
-        mBaseContext = context;
-      } else {
-        boolean faked = false;
-        Context app = context.getApplicationContext();
-        Class<?> classObj = app.getClass();
-        String appName = classObj.getSimpleName();
-        while (!appName.equals("CommonApplication")) {
-          classObj = classObj.getSuperclass();
-          if (classObj == null)
-            break;
-          appName = classObj.getSimpleName();
-        }
-
-        if (classObj != null) {
-          try {
-            Class<?>[] argClassList = new Class[] {};
-            Method m = classObj.getDeclaredMethod("isMocked", argClassList);
-            Object[] argList = new Object[] {};
-            Object o = m.invoke(null, argList);
-            if (((Boolean) o).booleanValue()) {
-              mBaseContext = context;
-              isMocked = true;
-              faked = true;
-            }
-          } catch (Exception e1) {
-          }
-        }
-        if (!faked) {
-          e.printStackTrace();
-          throw new IllegalStateException("ODK Services must be installed!");
-        }
-      }
-      init();
+      e.printStackTrace();
+      throw new IllegalStateException("ODK Services must be installed!");
     }
   }
 
@@ -277,7 +246,7 @@ public class PropertiesSingleton {
       }
     } else {
       if (isModified()) {
-        readProperties();
+        readProperties(false);
       }
       if (isDeviceProperty(propertyName) ) {
         mDeviceProps.setProperty(propertyName, value);
@@ -298,7 +267,7 @@ public class PropertiesSingleton {
   public boolean shouldRunInitializationTask(String toolName) {
     // this is stored in the device properties
     if (isModified()) {
-      readProperties();
+      readProperties(false);
     }
 
     String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
@@ -317,7 +286,7 @@ public class PropertiesSingleton {
   public void clearRunInitializationTask(String toolName) {
     // this is stored in the device properties
     if (isModified()) {
-      readProperties();
+      readProperties(false);
     }
 
     mDeviceProps.setProperty(toolInitializationPropertyName(toolName),
@@ -334,7 +303,7 @@ public class PropertiesSingleton {
   public void setRunInitializationTask(String toolName) {
     // this is stored in the device properties
     if (isModified()) {
-      readProperties();
+      readProperties(false);
     }
 
     mDeviceProps.remove(toolInitializationPropertyName(toolName));
@@ -393,11 +362,12 @@ public class PropertiesSingleton {
 
     // initialize the cache of properties read from the sdcard
     mGeneralProps = new Properties();
+    mGlobalDeviceProps = new Properties();
     mDeviceProps = new Properties();
 
     // set our context
     // this will automatically call init();
-    setCurrentContext(mBaseContext);
+    setCurrentContext(context);
   }
 
   void init() {
@@ -407,34 +377,35 @@ public class PropertiesSingleton {
     lastDeviceModified = 0L;
 
     mGeneralProps.clear();
+    mGlobalDeviceProps.clear();
     mDeviceProps.clear();
 
     // populate the caches from disk...
-    readProperties();
+    readProperties(true);
 
     boolean dirtyProps = false;
 
     // see if there are missing values in the general props
     // and update them from the mGeneralDefaults map.
     for (TreeMap.Entry<String, String> entry : mGeneralDefaults.entrySet()) {
-      if (mGeneralProps.containsKey(entry.getKey()) == false) {
+      if (!mGeneralProps.containsKey(entry.getKey())) {
         mGeneralProps.setProperty(entry.getKey(), entry.getValue());
         dirtyProps = true;
       }
     }
 
-    // scan for device properties in the (syncable) app properties file.
+    // scan for device properties in the (syncable) device properties file.
     // update the provided mDeviceDefaults with these new default values.
     for (TreeMap.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
-      if (mGeneralProps.containsKey(entry.getKey())) {
-        entry.setValue(mGeneralProps.getProperty(entry.getKey()));
+      if (mGlobalDeviceProps.containsKey(entry.getKey())) {
+        entry.setValue(mGlobalDeviceProps.getProperty(entry.getKey()));
       }
     }
 
     // see if there are missing values in the device props
-    // and update them from the mGeneralDefaults map.
+    // and update them from the mDeviceDefaults map.
     for (TreeMap.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
-      if (mDeviceProps.containsKey(entry.getKey()) == false) {
+      if (!mDeviceProps.containsKey(entry.getKey())) {
         mDeviceProps.setProperty(entry.getKey(), entry.getValue());
         dirtyProps = true;
       }
@@ -493,7 +464,7 @@ public class PropertiesSingleton {
       return true;
     }
 
-    configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
+    configFile = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
 
     if (configFile.exists()) {
       if (lastDeviceModified != configFile.lastModified()) {
@@ -507,7 +478,7 @@ public class PropertiesSingleton {
     return false;
   }
 
-  public void readProperties() {
+  public void readProperties(boolean includingGlobalDeviceProps) {
     verifyDirectories();
 
     FileInputStream configFileInputStream = null;
@@ -529,6 +500,31 @@ public class PropertiesSingleton {
         } catch (IOException e) {
           // ignore
           WebLogger.getLogger(mAppName).printStackTrace(e);
+        }
+      }
+    }
+
+    // read-only values
+    if ( includingGlobalDeviceProps ) {
+      configFileInputStream = null;
+      try {
+        File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), DEFAULT_DEVICE_PROPERTIES_FILENAME);
+
+        if (configFile.exists()) {
+          configFileInputStream = new FileInputStream(configFile);
+
+          mGlobalDeviceProps.loadFromXML(configFileInputStream);
+        }
+      } catch (Exception e) {
+        WebLogger.getLogger(mAppName).printStackTrace(e);
+      } finally {
+        if (configFileInputStream != null) {
+          try {
+            configFileInputStream.close();
+          } catch (IOException e) {
+            // ignore
+            WebLogger.getLogger(mAppName).printStackTrace(e);
+          }
         }
       }
     }

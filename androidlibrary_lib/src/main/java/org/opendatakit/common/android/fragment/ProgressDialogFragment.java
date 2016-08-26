@@ -14,10 +14,14 @@
 
 package org.opendatakit.common.android.fragment;
 
-import android.app.*;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+
 import org.opendatakit.androidlibrary.R;
 
 /**
@@ -27,8 +31,8 @@ import org.opendatakit.androidlibrary.R;
  */
 public class ProgressDialogFragment extends DialogFragment {
 
-  public static interface CancelProgressDialog {
-    public void cancelProgressDialog();
+  public interface CancelProgressDialog {
+    void cancelProgressDialog();
   }
 
   public static ProgressDialogFragment newInstance(String title, String message) {
