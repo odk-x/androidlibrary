@@ -114,6 +114,9 @@ public class OdkDbSerializedInterface {
       if ( (e instanceof IllegalStateException) || (e instanceof RemoteException) ) {
          String prefix = "via RemoteException on OdkDbInterface: ";
          String msg = e.getMessage();
+         if ( msg == null ) {
+            throw new IllegalStateException(prefix + e.toString());
+         }
          int idx = msg.indexOf(':');
          if (idx == -1) {
             throw new ServicesAvailabilityException(prefix + msg);
