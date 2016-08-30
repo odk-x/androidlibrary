@@ -811,7 +811,7 @@ public class OdkDbSerializedInterface {
 
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .rawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
-              query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
+              query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()), OdkDbTable.CREATOR);
 
        baseTable.setQuery(query);
 
@@ -859,7 +859,7 @@ public class OdkDbSerializedInterface {
 
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedRawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
-              query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
+              query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()), OdkDbTable.CREATOR);
 
       baseTable.setQuery(query);
 
@@ -895,7 +895,7 @@ public class OdkDbSerializedInterface {
 
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
            .rawSqlQuery(appName, dbHandleName, query.getSqlCommand(), query.getSqlBindArgs(),
-               query.getSqlQueryBounds()), OdkDbTable.CREATOR);
+               query.getSqlQueryBounds(), query.getTableId()), OdkDbTable.CREATOR);
 
        baseTable.setQuery(query);
 
@@ -918,7 +918,7 @@ public class OdkDbSerializedInterface {
        OdkDbResumableQuery query) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
-          query.getSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
+          query.getSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()),
           OdkDbTable.CREATOR);
 
        baseTable.setQuery(query);
@@ -946,7 +946,7 @@ public class OdkDbSerializedInterface {
     try {
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedRawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
-              query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
+              query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()), OdkDbTable.CREATOR);
 
       baseTable.setQuery(query);
 

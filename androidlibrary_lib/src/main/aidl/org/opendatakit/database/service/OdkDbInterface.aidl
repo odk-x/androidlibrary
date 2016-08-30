@@ -387,10 +387,14 @@ interface OdkDbInterface {
    * @param dbHandleName
    * @param sqlCommand
    * @param sqlBindArgs
+   * @param tableId -- optional. If not null and _filter_type, _filter_value and _sync_state are
+   *       present in the result cursor, append an _effective_access column with r, rw, or rwd
+   *       values.
    * @return
    */
   OdkDbChunk rawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
-      in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds);
+      in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds,
+      in String tableId);
 
   /**
    * Privileged version of the above interface.
@@ -405,10 +409,14 @@ interface OdkDbInterface {
    * @param dbHandleName
    * @param sqlCommand
    * @param sqlBindArgs
+   * @param tableId -- optional. If not null and _filter_type, _filter_value and _sync_state are
+   *       present in the result cursor, append an _effective_access column with r, rw, or rwd
+   *       values.
    * @return
    */
   OdkDbChunk privilegedRawSqlQuery(in String appName, in OdkDbHandle dbHandleName,
-      in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds);
+      in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds,
+      in String tableId);
 
   /**
    * Insert or update a single table-level metadata KVS entry.
