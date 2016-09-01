@@ -50,6 +50,12 @@ public class OdkDbTable implements Parcelable {
   protected ParentTable mParent;
 
   /**
+   * True if the user has the permissions to create a row.
+   * Defaults to false.
+   */
+  protected boolean mEffectiveAccessCreateRow;
+
+  /**
    * The query performed
    */
   protected OdkDbResumableQuery mQuery;
@@ -80,6 +86,8 @@ public class OdkDbTable implements Parcelable {
   public OdkDbTable(OdkDbResumableQuery query, String[] elementKeyForIndex,
       Map<String, Integer> elementKeyToIndex, String[] primaryKey, Integer rowCount) {
     this.mParent = null;
+
+    this.mEffectiveAccessCreateRow = false;
 
     this.mQuery = query;
 
@@ -121,6 +129,8 @@ public class OdkDbTable implements Parcelable {
       OdkDbRow r = table.getRowAtIndex(indexes.get(i));
       mRows.add(r);
     }
+
+    this.mEffectiveAccessCreateRow = table.mEffectiveAccessCreateRow;
     this.mQuery = table.mQuery;
     this.mPrimaryKey = table.mPrimaryKey;
     this.mElementKeyForIndex = table.mElementKeyForIndex;
@@ -133,6 +143,8 @@ public class OdkDbTable implements Parcelable {
     int dataCount;
 
     try {
+      byte eacr = in.readByte();
+      mEffectiveAccessCreateRow = (eacr == 0) ? false : true;
       mPrimaryKey = OdkMarshallUtil.unmarshallStringArray(in);
       mElementKeyForIndex = OdkMarshallUtil.unmarshallStringArray(in);
       mElementKeyToIndex = generateElementKeyToIndex();
@@ -152,6 +164,14 @@ public class OdkDbTable implements Parcelable {
     // The parent and the query are not parceled
     this.mParent = null;
     this.mQuery = null;
+  }
+
+  public void setEffectiveAccessCreateRow(boolean canCreateRow) {
+    this.mEffectiveAccessCreateRow = canCreateRow;
+  }
+
+  public boolean getEffectiveAccessCreateRow() {
+    return mEffectiveAccessCreateRow;
   }
 
   public void setQuery(OdkDbResumableQuery query) {
@@ -321,6 +341,7 @@ public class OdkDbTable implements Parcelable {
     // Do not marshall mElementKeyToIndex; just rebuilt it from the mElementKeyForIndex
 
     try {
+      out.writeByte(mEffectiveAccessCreateRow ? ((byte) 1) : ((byte) 0));
       OdkMarshallUtil.marshallStringArray(out, mPrimaryKey);
       OdkMarshallUtil.marshallStringArray(out, mElementKeyForIndex);
     } catch (Throwable t) {
