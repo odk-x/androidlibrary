@@ -877,6 +877,15 @@ interface OdkDbInterface {
    ************************************/
 
   /**
+   * Remove app and table level manifests. Invoked when we select reset configuration
+   * and the initialization task is executed.
+   *
+   * @param appName
+   * @param dbHandleName
+   */
+  void deleteAppAndTableLevelManifestSyncETags(in String appName, in OdkDbHandle dbHandleName);
+
+  /**
    * Forget the document ETag values for the given tableId on all servers.
    * Used when deleting a table. Exposed mainly for integration testing.
    *

@@ -33,13 +33,12 @@ import org.opendatakit.database.service.BindArgs;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.OdkDbHandle;
-import org.opendatakit.database.service.OdkDbTable;
 import org.opendatakit.database.service.OdkDbInterface;
+import org.opendatakit.database.service.OdkDbTable;
 import org.opendatakit.database.service.TableHealthInfo;
 import org.opendatakit.database.service.queries.OdkDbAbstractQuery;
 import org.opendatakit.database.service.queries.OdkDbResumableQuery;
 import org.opendatakit.database.service.queries.OdkDbSimpleQuery;
-import org.opendatakit.database.service.queries.QueryBounds;
 import org.opendatakit.database.utilities.OdkDbChunkUtil;
 
 import java.io.Serializable;
@@ -1855,6 +1854,23 @@ public class OdkDbSerializedInterface {
        throw new IllegalStateException("unreachable - keep IDE happy");
      }
    }
+
+  /**
+   * Remove app and table level manifests. Invoked when we select reset configuration
+   * and the initialization task is executed.
+   *
+   * @param appName
+   * @param dbHandleName
+   */
+  public void deleteAppAndTableLevelManifestSyncETags(String appName, OdkDbHandle dbHandleName)
+        throws ServicesAvailabilityException {
+    try {
+      dbInterface.deleteAppAndTableLevelManifestSyncETags(appName, dbHandleName);
+    } catch ( Exception e ) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
 
    /**
     * Forget the document ETag values for the given tableId on all servers.
