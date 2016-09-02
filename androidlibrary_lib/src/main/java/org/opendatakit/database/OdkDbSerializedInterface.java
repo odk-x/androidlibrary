@@ -33,13 +33,12 @@ import org.opendatakit.database.service.BindArgs;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 import org.opendatakit.database.service.OdkDbChunk;
 import org.opendatakit.database.service.OdkDbHandle;
-import org.opendatakit.database.service.OdkDbTable;
 import org.opendatakit.database.service.OdkDbInterface;
+import org.opendatakit.database.service.OdkDbTable;
 import org.opendatakit.database.service.TableHealthInfo;
 import org.opendatakit.database.service.queries.OdkDbAbstractQuery;
 import org.opendatakit.database.service.queries.OdkDbResumableQuery;
 import org.opendatakit.database.service.queries.OdkDbSimpleQuery;
-import org.opendatakit.database.service.queries.QueryBounds;
 import org.opendatakit.database.utilities.OdkDbChunkUtil;
 
 import java.io.Serializable;
@@ -114,6 +113,9 @@ public class OdkDbSerializedInterface {
       if ( (e instanceof IllegalStateException) || (e instanceof RemoteException) ) {
          String prefix = "via RemoteException on OdkDbInterface: ";
          String msg = e.getMessage();
+         if ( msg == null ) {
+            throw new IllegalStateException(prefix + e.toString());
+         }
          int idx = msg.indexOf(':');
          if (idx == -1) {
             throw new ServicesAvailabilityException(prefix + msg);
@@ -811,7 +813,7 @@ public class OdkDbSerializedInterface {
 
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .rawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
-              query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
+              query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()), OdkDbTable.CREATOR);
 
        baseTable.setQuery(query);
 
@@ -859,7 +861,7 @@ public class OdkDbSerializedInterface {
 
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedRawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
-              query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
+              query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()), OdkDbTable.CREATOR);
 
       baseTable.setQuery(query);
 
@@ -895,7 +897,7 @@ public class OdkDbSerializedInterface {
 
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
            .rawSqlQuery(appName, dbHandleName, query.getSqlCommand(), query.getSqlBindArgs(),
-               query.getSqlQueryBounds()), OdkDbTable.CREATOR);
+               query.getSqlQueryBounds(), query.getTableId()), OdkDbTable.CREATOR);
 
        baseTable.setQuery(query);
 
@@ -918,7 +920,7 @@ public class OdkDbSerializedInterface {
        OdkDbResumableQuery query) throws ServicesAvailabilityException {
      try {
        OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
-          query.getSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds()),
+          query.getSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()),
           OdkDbTable.CREATOR);
 
        baseTable.setQuery(query);
@@ -946,7 +948,7 @@ public class OdkDbSerializedInterface {
     try {
       OdkDbTable baseTable = fetchAndRebuildChunks(dbInterface
           .privilegedRawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
-              query.getSqlBindArgs(), query.getSqlQueryBounds()), OdkDbTable.CREATOR);
+              query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()), OdkDbTable.CREATOR);
 
       baseTable.setQuery(query);
 
@@ -1852,6 +1854,23 @@ public class OdkDbSerializedInterface {
        throw new IllegalStateException("unreachable - keep IDE happy");
      }
    }
+
+  /**
+   * Remove app and table level manifests. Invoked when we select reset configuration
+   * and the initialization task is executed.
+   *
+   * @param appName
+   * @param dbHandleName
+   */
+  public void deleteAppAndTableLevelManifestSyncETags(String appName, OdkDbHandle dbHandleName)
+        throws ServicesAvailabilityException {
+    try {
+      dbInterface.deleteAppAndTableLevelManifestSyncETags(appName, dbHandleName);
+    } catch ( Exception e ) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
 
    /**
     * Forget the document ETag values for the given tableId on all servers.

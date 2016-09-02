@@ -127,6 +127,10 @@ public class UserTable implements Parcelable, ParentTable{
     return mBaseTable.getElementKeyToIndex();
   }
 
+  public boolean getEffectiveAccessCreateRow() {
+    return mBaseTable.getEffectiveAccessCreateRow();
+  }
+
   public OdkDbResumableQuery getQuery() {
     return mBaseTable.getQuery();
   }

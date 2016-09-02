@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -310,6 +311,28 @@ public class PropertiesSingleton {
     writeProperties();
   }
 
+  /**
+   * Indicate that all initialization tasks for all tools should be run (again).
+   */
+  public void setAllRunInitializationTasks() {
+    // this is stored in the device properties
+    if (isModified()) {
+      readProperties(false);
+    }
+
+    ArrayList<Object> keysToRemove = new ArrayList<Object>();
+
+    for ( Object okey : mDeviceProps.keySet() ) {
+      if ( isToolInitializationPropertyName((String) okey) ) {
+        keysToRemove.add(okey);
+      }
+    }
+    for ( Object okey : keysToRemove ) {
+      mDeviceProps.remove(okey);
+    }
+    writeProperties();
+  }
+
   public String getActiveUser() {
     final String CREDENTIAL_TYPE_NONE = mBaseContext.getString(R.string.credential_type_none);
     final String CREDENTIAL_TYPE_USERNAME_PASSWORD = mBaseContext.getString(R.string.credential_type_username_password);
@@ -341,8 +364,13 @@ public class PropertiesSingleton {
     return Locale.getDefault().toString();
   }
 
+  private static String TOOL_INITIALIZATION_SUFFIX = ".tool_last_initialization_start_time";
   private static String toolInitializationPropertyName(String toolName) {
-    return toolName + ".tool_last_initialization_start_time";
+    return toolName + TOOL_INITIALIZATION_SUFFIX;
+  }
+
+  private static boolean isToolInitializationPropertyName(String toolName) {
+    return toolName.endsWith(TOOL_INITIALIZATION_SUFFIX);
   }
 
   public static String toolVersionPropertyName(String toolName) {
