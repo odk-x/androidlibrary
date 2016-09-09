@@ -16,20 +16,26 @@ package org.opendatakit.common.android.utilities;
 
 import android.os.Parcel;
 import android.test.AndroidTestCase;
-import org.opendatakit.aggregate.odktables.rest.*;
+
+import org.opendatakit.aggregate.odktables.rest.ElementDataType;
+import org.opendatakit.aggregate.odktables.rest.ElementType;
+import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
+import org.opendatakit.aggregate.odktables.rest.SyncState;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.common.android.data.ColumnDefinition;
 import org.opendatakit.common.android.data.OrderedColumns;
-import org.opendatakit.common.android.data.Row;
 import org.opendatakit.common.android.data.UserTable;
 import org.opendatakit.common.android.provider.DataTableColumns;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
+import org.opendatakit.database.service.OdkDbRow;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeMap;
 
 public class UserTableTest extends AndroidTestCase {
 
@@ -388,15 +394,16 @@ public class UserTableTest extends AndroidTestCase {
 
     String[] adminColumnOrder = ADMIN_COLUMNS.toArray(new String[ADMIN_COLUMNS.size()]);
 
-    UserTable table = new UserTable(orderedColumns, MY_COL + "=?", new String[]{"5","9"},
-        new String[]{GROUP_COL}, YOUR_COL + "=?", THEIR_COL, "ASC", adminColumnOrder,
-        elementKeyToIndex, elementKeyForIndex, null);
+    UserTable table = new UserTable(orderedColumns, MY_COL + "=?",
+        new Object[] { "test", 5, 9.8, false },
+        new String[] { GROUP_COL }, YOUR_COL + "=?", new String[] { THEIR_COL },
+        new String[] { "ASC" }, adminColumnOrder, elementKeyToIndex, elementKeyForIndex, null);
 
-    Row row;
+    OdkDbRow row;
 
-    row = new Row(table, INSTANCE_ID_1, rowValues1.clone());
+    row = new OdkDbRow(rowValues1.clone(), table.getBaseTable());
     table.addRow(row);
-    row = new Row(table, INSTANCE_ID_2, rowValues2.clone());
+    row = new OdkDbRow(rowValues2.clone(), table.getBaseTable());
     table.addRow(row);
 
     Parcel p = Parcel.obtain();
@@ -414,39 +421,6 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(table.getAppName(), t.getAppName());
     // tableId
     assertEquals(table.getTableId(), t.getTableId());
-    // whereClause
-    assertEquals(table.getWhereClause(), t.getWhereClause());
-    // selectionArgs
-    String[] sa = table.getSelectionArgs();
-    String[] sb = t.getSelectionArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for ( i = 0 ; i < sa.length ; ++i ) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // groupBy columns
-    assertEquals(table.isGroupedBy(), t.isGroupedBy());
-    sa = table.getGroupByArgs();
-    sb = t.getGroupByArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // having clause
-    assertEquals(table.getHavingClause(), t.getHavingClause());
-    // order by elementKey
-    assertEquals(table.getOrderByElementKey(), t.getOrderByElementKey());
-    // order by direction
-    assertEquals(table.getOrderByDirection(), t.getOrderByDirection());
 
     OrderedColumns ta = table.getColumnDefinitions();
     OrderedColumns tb = table.getColumnDefinitions();
@@ -491,67 +465,76 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(0, t.getRowNumFromId(INSTANCE_ID_1));
     assertEquals(1, table.getRowNumFromId(INSTANCE_ID_2));
     assertEquals(1, t.getRowNumFromId(INSTANCE_ID_2));
-    Row rat1 = table.getRowAtIndex(0);
-    Row rat2 = table.getRowAtIndex(1);
-    Row rbt1 = t.getRowAtIndex(0);
-    Row rbt2 = t.getRowAtIndex(1);
+    OdkDbRow rat1 = table.getRowAtIndex(0);
+    OdkDbRow rat2 = table.getRowAtIndex(1);
+    OdkDbRow rbt1 = t.getRowAtIndex(0);
+    OdkDbRow rbt2 = t.getRowAtIndex(1);
 
-    assertEquals(rat1.getRowId(), INSTANCE_ID_1);
-    assertEquals(rbt1.getRowId(), INSTANCE_ID_1);
-    assertEquals(rat2.getRowId(), INSTANCE_ID_2);
-    assertEquals(rbt2.getRowId(), INSTANCE_ID_2);
+    assertEquals(rat1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
+    assertEquals(rbt1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
+    assertEquals(rat2.getDataByKey(DataTableColumns.ID), INSTANCE_ID_2);
+    assertEquals(rbt2.getDataByKey(DataTableColumns.ID), INSTANCE_ID_2);
+    assertEquals(rat1.getDataByKey(DataTableColumns.ID), table.getRowId(0));
+    assertEquals(rbt1.getDataByKey(DataTableColumns.ID), table.getRowId(0));
+    assertEquals(rat2.getDataByKey(DataTableColumns.ID), table.getRowId(1));
+    assertEquals(rbt2.getDataByKey(DataTableColumns.ID), table.getRowId(1));
     for ( i = 0 ; i < table.getWidth() ; ++i ) {
       String elementKey = table.getElementKey(i);
-      assertEquals(rowValues1[i], rat1.getRawDataOrMetadataByElementKey(elementKey));
-      assertEquals(rowValues1[i], rbt1.getRawDataOrMetadataByElementKey(elementKey));
-      assertEquals(rowValues2[i], rat2.getRawDataOrMetadataByElementKey(elementKey));
-      assertEquals(rowValues2[i], rbt2.getRawDataOrMetadataByElementKey(elementKey));
+      assertEquals(rowValues1[i], rat1.getDataByKey(elementKey));
+      assertEquals(rowValues1[i], rbt1.getDataByKey(elementKey));
+      assertEquals(rowValues2[i], rat2.getDataByKey(elementKey));
+      assertEquals(rowValues2[i], rbt2.getDataByKey(elementKey));
       try {
-        ColumnDefinition cd = orderedColumns.find(elementKey);
-        assertEquals(rat1.getDisplayTextOfData(table.getColumnDefinitions().find(elementKey).getType(), elementKey),
-              rbt1.getDisplayTextOfData(t.getColumnDefinitions().find(elementKey).getType(),
-                  elementKey));
-        assertEquals(rat2.getDisplayTextOfData(table.getColumnDefinitions().find(elementKey).getType(), elementKey),
-            rbt2.getDisplayTextOfData(t.getColumnDefinitions().find(elementKey).getType(),
-                elementKey));
+        assertEquals(table.getDisplayTextOfData(0, table.getColumnDefinitions().find(elementKey)
+            .getType(), elementKey), t.getDisplayTextOfData(0, t.getColumnDefinitions().find
+            (elementKey).getType(), elementKey));
+        assertEquals(table.getDisplayTextOfData(1, table.getColumnDefinitions().find(elementKey)
+            .getType(), elementKey), t.getDisplayTextOfData(1, t.getColumnDefinitions().find
+            (elementKey).getType(), elementKey));
       } catch ( Exception e) {
         // ignore...
       }
     }
-    Long va = rat1.getRawDataType(GROUP_COL, Long.class);
-    Long vb = rbt1.getRawDataType(GROUP_COL, Long.class);
+
+    int cellIndex = table.getColumnIndexOfElementKey(GROUP_COL);
+    Long va = rat1.getDataType(cellIndex, Long.class);
+    Long vb = rbt1.getDataType(cellIndex, Long.class);
     assertEquals(va, Long.valueOf(15));
     assertEquals(va, vb);
-    Integer vai = rat1.getRawDataType(GROUP_COL, Integer.class);
-    Integer vbi = rbt1.getRawDataType(GROUP_COL, Integer.class);
+    Integer vai = rat1.getDataType(cellIndex, Integer.class);
+    Integer vbi = rbt1.getDataType(cellIndex, Integer.class);
     assertEquals(vai, Integer.valueOf(15));
     assertEquals(vai, vbi);
-    Double vad = rat1.getRawDataType(geopointCells.get(2), Double.class);
-    Double vbd = rbt1.getRawDataType(geopointCells.get(2), Double.class);
+    cellIndex = table.getColumnIndexOfElementKey(geopointCells.get(2));
+    Double vad = rat1.getDataType(cellIndex, Double.class);
+    Double vbd = rbt1.getDataType(cellIndex, Double.class);
     assertEquals(vad, Double.valueOf(47.6097));
     assertEquals(vad, vbd);
-    assertEquals("47.6097",
-        rat1.getDisplayTextOfData(orderedColumns.find(geopointCells.get(2)).getType(),
-            geopointCells.get(2)));
-    Boolean vabb = rat1.getRawDataType(YOUR_BOOLEAN_COL, Boolean.class);
-    Boolean vbbb = rbt1.getRawDataType(YOUR_BOOLEAN_COL, Boolean.class);
+    assertEquals("47.6097", table.getDisplayTextOfData(0, orderedColumns.find(geopointCells.get(2))
+        .getType(), geopointCells.get(2)));
+    cellIndex = table.getColumnIndexOfElementKey(YOUR_BOOLEAN_COL);
+    Boolean vabb = rat1.getDataType(cellIndex, Boolean.class);
+    Boolean vbbb = rbt1.getDataType(cellIndex, Boolean.class);
     assertEquals(vabb, Boolean.TRUE);
     assertEquals(vabb, vbbb);
-    vabb = rat2.getRawDataType(YOUR_BOOLEAN_COL, Boolean.class);
-    vbbb = rbt2.getRawDataType(YOUR_BOOLEAN_COL, Boolean.class);
+    vabb = rat2.getDataType(cellIndex, Boolean.class);
+    vbbb = rbt2.getDataType(cellIndex, Boolean.class);
     assertNull(vabb);
     assertEquals(vabb, vbbb);
-    String vaf = rat1.getRawDataType(YOUR_ROW_FILE_COL, String.class);
-    String vbf = rbt1.getRawDataType(YOUR_ROW_FILE_COL, String.class);
+    cellIndex = table.getColumnIndexOfElementKey(YOUR_ROW_FILE_COL);
+    String vaf = rat1.getDataType(cellIndex, String.class);
+    String vbf = rbt1.getDataType(cellIndex, String.class);
     assertEquals(vaf, "filename.jpg");
     assertEquals(vaf, vbf);
-    ArrayList<Object> vaar = rat1.getRawDataType(LIST_COL, ArrayList.class);
-    ArrayList<Object> vbar = rbt1.getRawDataType(LIST_COL, ArrayList.class);
+    cellIndex = table.getColumnIndexOfElementKey(LIST_COL);
+    ArrayList<Object> vaar = rat1.getDataType(cellIndex, ArrayList.class);
+    ArrayList<Object> vbar = rbt1.getDataType(cellIndex, ArrayList.class);
     assertEquals(vaar.size(), vbar.size());
     for ( i = 0 ; i < vaar.size() ; ++i) {
       assertEquals(vaar.get(i), vbar.get(i));
     }
-    Integer cta = rat1.getRawDataType(DataTableColumns.CONFLICT_TYPE, Integer.class);
+    cellIndex = table.getColumnIndexOfElementKey(DataTableColumns.CONFLICT_TYPE);
+    Integer cta = rat1.getDataType(cellIndex, Integer.class);
     assertNull(cta);
   }
 
@@ -642,11 +625,11 @@ public class UserTableTest extends AndroidTestCase {
         adminColumnOrder,
         elementKeyToIndex, elementKeyForIndex, null);
 
-    Row row;
+    OdkDbRow row;
 
-    row = new Row(table, INSTANCE_ID_1, rowValues1.clone());
+    row = new OdkDbRow(rowValues1.clone(), table.getBaseTable());
     table.addRow(row);
-    row = new Row(table, INSTANCE_ID_2, rowValues2.clone());
+    row = new OdkDbRow(rowValues2.clone(), table.getBaseTable());
     table.addRow(row);
 
     Parcel p = Parcel.obtain();
@@ -664,39 +647,6 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(table.getAppName(), t.getAppName());
     // tableId
     assertEquals(table.getTableId(), t.getTableId());
-    // whereClause
-    assertEquals(table.getWhereClause(), t.getWhereClause());
-    // selectionArgs
-    String[] sa = table.getSelectionArgs();
-    String[] sb = t.getSelectionArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for ( i = 0 ; i < sa.length ; ++i ) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // groupBy columns
-    assertEquals(table.isGroupedBy(), t.isGroupedBy());
-    sa = table.getGroupByArgs();
-    sb = t.getGroupByArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // having clause
-    assertEquals(table.getHavingClause(), t.getHavingClause());
-    // order by elementKey
-    assertEquals(table.getOrderByElementKey(), t.getOrderByElementKey());
-    // order by direction
-    assertEquals(table.getOrderByDirection(), t.getOrderByDirection());
 
     OrderedColumns ta = table.getColumnDefinitions();
     OrderedColumns tb = table.getColumnDefinitions();
@@ -741,21 +691,25 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(0, t.getRowNumFromId(INSTANCE_ID_1));
     assertEquals(1, table.getRowNumFromId(INSTANCE_ID_2));
     assertEquals(1, t.getRowNumFromId(INSTANCE_ID_2));
-    Row rat1 = table.getRowAtIndex(0);
-    Row rat2 = table.getRowAtIndex(1);
-    Row rbt1 = t.getRowAtIndex(0);
-    Row rbt2 = t.getRowAtIndex(1);
+    OdkDbRow rat1 = table.getRowAtIndex(0);
+    OdkDbRow rat2 = table.getRowAtIndex(1);
+    OdkDbRow rbt1 = t.getRowAtIndex(0);
+    OdkDbRow rbt2 = t.getRowAtIndex(1);
 
-    assertEquals(rat1.getRowId(), INSTANCE_ID_1);
-    assertEquals(rbt1.getRowId(), INSTANCE_ID_1);
-    assertEquals(rat2.getRowId(), INSTANCE_ID_2);
-    assertEquals(rbt2.getRowId(), INSTANCE_ID_2);
+    assertEquals(rat1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
+    assertEquals(rbt1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
+    assertEquals(rat2.getDataByKey(DataTableColumns.ID), INSTANCE_ID_2);
+    assertEquals(rbt2.getDataByKey(DataTableColumns.ID), INSTANCE_ID_2);
+    assertEquals(rat1.getDataByKey(DataTableColumns.ID), table.getRowId(0));
+    assertEquals(rbt1.getDataByKey(DataTableColumns.ID), table.getRowId(0));
+    assertEquals(rat2.getDataByKey(DataTableColumns.ID), table.getRowId(1));
+    assertEquals(rbt2.getDataByKey(DataTableColumns.ID), table.getRowId(1));
     for ( i = 0 ; i < table.getWidth() ; ++i ) {
       String elementKey = table.getElementKey(i);
-      assertEquals(rowValues1[i], rat1.getRawDataOrMetadataByElementKey(elementKey));
-      assertEquals(rowValues1[i], rbt1.getRawDataOrMetadataByElementKey(elementKey));
-      assertEquals(rowValues2[i], rat2.getRawDataOrMetadataByElementKey(elementKey));
-      assertEquals(rowValues2[i], rbt2.getRawDataOrMetadataByElementKey(elementKey));
+      assertEquals(rowValues1[i], rat1.getDataByKey(elementKey));
+      assertEquals(rowValues1[i], rbt1.getDataByKey(elementKey));
+      assertEquals(rowValues2[i], rat2.getDataByKey(elementKey));
+      assertEquals(rowValues2[i], rbt2.getDataByKey(elementKey));
     }
 
     assertFalse(table.hasCheckpointRows());
@@ -851,11 +805,11 @@ public class UserTableTest extends AndroidTestCase {
         adminColumnOrder,
         elementKeyToIndex, elementKeyForIndex, null);
 
-    Row row;
+    OdkDbRow row;
 
-    row = new Row(table, INSTANCE_ID_1, rowValues1.clone());
+    row = new OdkDbRow(rowValues1.clone(), table.getBaseTable());
     table.addRow(row);
-    row = new Row(table, INSTANCE_ID_2, rowValues2.clone());
+    row = new OdkDbRow(rowValues2.clone(), table.getBaseTable());
     table.addRow(row);
 
     List<Integer> idxs = new ArrayList<Integer>();
@@ -867,39 +821,6 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(table.getAppName(), t.getAppName());
     // tableId
     assertEquals(table.getTableId(), t.getTableId());
-    // whereClause
-    assertEquals(table.getWhereClause(), t.getWhereClause());
-    // selectionArgs
-    String[] sa = table.getSelectionArgs();
-    String[] sb = t.getSelectionArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for ( i = 0 ; i < sa.length ; ++i ) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // groupBy columns
-    assertEquals(table.isGroupedBy(), t.isGroupedBy());
-    sa = table.getGroupByArgs();
-    sb = t.getGroupByArgs();
-    if ( sa != null && sb != null ) {
-      assertEquals(sa.length, sb.length);
-      for (i = 0; i < sa.length; ++i) {
-        assertEquals(sa[i], sb[i]);
-      }
-    } else {
-      assertNull(sa);
-      assertNull(sb);
-    }
-    // having clause
-    assertEquals(table.getHavingClause(), t.getHavingClause());
-    // order by elementKey
-    assertEquals(table.getOrderByElementKey(), t.getOrderByElementKey());
-    // order by direction
-    assertEquals(table.getOrderByDirection(), t.getOrderByDirection());
 
     OrderedColumns ta = table.getColumnDefinitions();
     OrderedColumns tb = table.getColumnDefinitions();
@@ -944,21 +865,25 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(0, t.getRowNumFromId(INSTANCE_ID_1));
     assertEquals(1, table.getRowNumFromId(INSTANCE_ID_2));
     assertEquals(1, t.getRowNumFromId(INSTANCE_ID_2));
-    Row rat1 = table.getRowAtIndex(0);
-    Row rat2 = table.getRowAtIndex(1);
-    Row rbt1 = t.getRowAtIndex(0);
-    Row rbt2 = t.getRowAtIndex(1);
+    OdkDbRow rat1 = table.getRowAtIndex(0);
+    OdkDbRow rat2 = table.getRowAtIndex(1);
+    OdkDbRow rbt1 = t.getRowAtIndex(0);
+    OdkDbRow rbt2 = t.getRowAtIndex(1);
 
-    assertEquals(rat1.getRowId(), INSTANCE_ID_1);
-    assertEquals(rbt1.getRowId(), INSTANCE_ID_1);
-    assertEquals(rat2.getRowId(), INSTANCE_ID_2);
-    assertEquals(rbt2.getRowId(), INSTANCE_ID_2);
+    assertEquals(rat1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
+    assertEquals(rbt1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
+    assertEquals(rat2.getDataByKey(DataTableColumns.ID), INSTANCE_ID_2);
+    assertEquals(rbt2.getDataByKey(DataTableColumns.ID), INSTANCE_ID_2);
+    assertEquals(rat1.getDataByKey(DataTableColumns.ID), table.getRowId(0));
+    assertEquals(rbt1.getDataByKey(DataTableColumns.ID), table.getRowId(0));
+    assertEquals(rat2.getDataByKey(DataTableColumns.ID), table.getRowId(1));
+    assertEquals(rbt2.getDataByKey(DataTableColumns.ID), table.getRowId(1));
     for ( i = 0 ; i < table.getWidth() ; ++i ) {
       String elementKey = table.getElementKey(i);
-      assertEquals(rowValues1[i], rat1.getRawDataOrMetadataByElementKey(elementKey));
-      assertEquals(rowValues1[i], rbt1.getRawDataOrMetadataByElementKey(elementKey));
-      assertEquals(rowValues2[i], rat2.getRawDataOrMetadataByElementKey(elementKey));
-      assertEquals(rowValues2[i], rbt2.getRawDataOrMetadataByElementKey(elementKey));
+      assertEquals(rowValues1[i], rat1.getDataByKey(elementKey));
+      assertEquals(rowValues1[i], rbt1.getDataByKey(elementKey));
+      assertEquals(rowValues2[i], rat2.getDataByKey(elementKey));
+      assertEquals(rowValues2[i], rbt2.getDataByKey(elementKey));
     }
 
     assertFalse(table.hasCheckpointRows());

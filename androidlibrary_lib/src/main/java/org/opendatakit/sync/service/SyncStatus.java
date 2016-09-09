@@ -20,7 +20,7 @@ import android.os.Parcelable;
 
 /**
  * If no sync is in progress, and there are no results from an earlier sync, the sync service will
- * return INACTIVE.
+ * return NONE.
  *
  * If a sync is in progress, it will return SYNCING and the current
  * state of the sync action can be retrieved by requesting the most recent SyncProgressEvent

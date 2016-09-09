@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 University of Washington
+ * Copyright (C) 2016 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,63 +13,79 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.common.android.data;
+package org.opendatakit.database.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
 import org.opendatakit.common.android.utilities.ODKFileUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 /**
  * This represents a single row of data in a table.
- *
- * @author sudar.sam@gmail.com
- *
  */
-/*
- * This class is final to try and reduce overhead. As final there is no
- * extended-class pointer. Not positive this is really a thing, need to
- * investigate. Nothing harmed by finalizing, though.
- */
-public final class RawRow implements Parcelable {
+public final class OdkDbRow implements Parcelable {
 
-  private final RawUserTable mUserTable;
-  /**
-   * The id of the row.
-   */
-  private final String mRowId;
+  static final String TAG = OdkDbRow.class.getSimpleName();
 
   /**
-   * Holds a mix of user-data and meta-data of the row
+   * The data held in the rows columns
    */
   private final String[] mRowData;
 
   /**
+   * The table that the row belongs to
+   */
+  private final OdkDbTable mOwnerTable;
+
+  /**
    * Construct the row.
    *
-   * @param rowId
-   * @param rowData
-   *          the combined set of data and metadata in the row.
+   * @param rowData the data in the row.
+   * @param ownerTable the table that the row belongs to
    */
-  public RawRow(RawUserTable userTable, String rowId, String[] rowData) {
-    this.mUserTable = userTable;
-    this.mRowId = rowId;
+  public OdkDbRow(String[] rowData, OdkDbTable ownerTable) {
+    if (ownerTable== null || rowData == null) {
+      throw new IllegalArgumentException("Null arguments are not permitted");
+    }
     this.mRowData = rowData;
+    this.mOwnerTable = ownerTable;
   }
 
   /**
-   * Return the id of this row.
+   * Unmarshall the row
    *
-   * @return
+   * @param in the marshalled data
+   * @param ownerTable the table that the row belongs to
    */
-  public String getRowId() {
-    return this.mRowId;
+  public OdkDbRow(Parcel in, OdkDbTable ownerTable) {
+    if (ownerTable== null) {
+      throw new IllegalArgumentException("Null arguments are not permitted");
+    }
+    this.mOwnerTable = ownerTable;
+
+    int dataCount = in.readInt();
+    this.mRowData = new String[dataCount];
+    in.readStringArray(mRowData);
+  }
+
+  /**
+   * The owner table is not marshalled, so we cannot reconstruct the row without it
+   *
+   * @param in the marshalled data
+   * @throws IllegalStateException always thrown
+   */
+  public OdkDbRow(Parcel in) {
+    throw new IllegalStateException("OdkDbRow invalid constructor");
   }
 
   /**
@@ -82,13 +98,59 @@ public final class RawRow implements Parcelable {
    * @return String representation of contents of column. Null values are
    *         returned as null. Note that boolean values are reported as "1" or "0"
    */
-  public String getRawDataOrMetadataByIndex(int cellIndex) {
+  public String getDataByIndex(int cellIndex) {
+    return this.mRowData[cellIndex];
+  }
+
+   /**
+    * Return the String representing the contents of the cell in the "key" column.
+    * <p>
+    * Null values are returned as nulls.
+    *
+    * @param key
+    *         The name of the column holding the desired data
+    * @return String representation of contents of column. Null values are
+    *         returned as null. Note that boolean values are reported as "1" or "0"
+    */
+  public String getDataByKey(String key) {
     String result;
-    result = this.mRowData[cellIndex];
-    if (result == null) {
+    Integer cell = getCellIndexByKey(key);
+    if (cell == null) {
       return null;
     }
+    result = getDataByIndex(cell);
     return result;
+  }
+
+  /**
+   * Return the index of the "key" column.
+   * <p>
+   * Null values are returned as nulls.
+   *
+   * @param key
+   *         The name of the column
+   * @return int index of the column
+   */
+  public int getCellIndexByKey(String key) {
+    return mOwnerTable.getColumnIndexOfElementKey(key);
+  }
+
+  /**
+   * Return a pointer to the table this row belongs to
+   *
+   * @return the owner table
+   */
+  public String[] getElementKeyForIndexMap() {
+    return mOwnerTable.getElementKeyForIndex();
+  }
+
+  /**
+   * Return a pointer to the table this row belongs to
+   *
+   * @return the owner table
+   */
+  public OdkDbTable getOwnerTable() {
+    return mOwnerTable;
   }
 
   /**
@@ -106,27 +168,28 @@ public final class RawRow implements Parcelable {
    * @return
    */
   @SuppressWarnings("unchecked")
-  public final <T> T getRawDataType(int cellIndex, Class<T> clazz) {
+  public final <T> T getDataType(int cellIndex, Class<T> clazz) {
     // If you add additional return types here be sure to modify the javadoc.
     try {
-      String value = getRawDataOrMetadataByIndex(cellIndex);
+      String value = getDataByIndex(cellIndex);
       if (value == null) {
         return null;
       }
       if (clazz == Long.class) {
         Long l = Long.parseLong(value);
-        return (T) (Long) l;
+        return (T) l;
       } else if (clazz == Integer.class) {
         Integer l = Integer.parseInt(value);
-        return (T) (Integer) l;
+        return (T) l;
       } else if (clazz == Double.class) {
         Double d = Double.parseDouble(value);
-        return (T) (Double) d;
+        return (T) d;
       } else if (clazz == String.class) {
-        return (T) (String) value;
+        return (T) value;
       } else if (clazz == Boolean.class) {
         // booleans are stored as integer 1 or 0 in user tables.
-        return (T) (Boolean) Boolean.valueOf(!value.equals("0"));
+        Boolean b = Boolean.valueOf(!value.equals("0"));
+        return (T) b;
       } else if (clazz == ArrayList.class) {
         // json deserialization of an array
         return (T) ODKFileUtils.mapper.readValue(value, ArrayList.class);
@@ -158,13 +221,9 @@ public final class RawRow implements Parcelable {
     }
   }
 
-  @Override
-  public int hashCode() {
-    final int PRIME = 31;
-    int result = 1;
-    result = result * PRIME + this.mRowId.hashCode();
-    result = result * PRIME + this.mRowData.hashCode();
-    return result;
+
+  public final <T> T getDataType(String elementKey, Class<T> clazz) {
+    return getDataType(getCellIndexByKey(elementKey), clazz);
   }
 
   @Override
@@ -174,10 +233,10 @@ public final class RawRow implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel out, int flags) {
-    out.writeString(mRowId);
+    String[] emptyString = {};
+
     if (mRowData == null) {
       out.writeInt(0);
-      String[] emptyString = {};
       out.writeStringArray(emptyString);
     } else {
       out.writeInt(mRowData.length);
@@ -185,35 +244,13 @@ public final class RawRow implements Parcelable {
     }
   }
 
-  public RawRow(RawUserTable userTable, Parcel in) {
-    this.mUserTable = userTable;
-    this.mRowId = in.readString();
-    int count;
-    count = in.readInt();
-    this.mRowData = new String[count];
-    in.readStringArray(mRowData);
-  }
-
-  /**
-   * The CREATOR and this constructor are not used.
-   * Row is constructed within the UserTable parcel context.
-   *
-   * @param in
-   */
-  public RawRow(Parcel in) {
-    throw new IllegalStateException("never used");
-  }
-
-  /**
-   * Declared to appease lint
-   */
-  public static final Creator<RawRow> CREATOR = new Creator<RawRow>() {
-    public RawRow createFromParcel(Parcel in) {
-      return new RawRow(in);
+  public static final Creator<OdkDbRow> CREATOR = new Creator<OdkDbRow>() {
+    public OdkDbRow createFromParcel(Parcel in) {
+      return new OdkDbRow(in);
     }
 
-    public RawRow[] newArray(int size) {
-      return new RawRow[size];
+    public OdkDbRow[] newArray(int size) {
+      return new OdkDbRow[size];
     }
   };
 }

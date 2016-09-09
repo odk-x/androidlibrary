@@ -14,10 +14,10 @@
 
 package org.opendatakit.common.android.provider;
 
-import java.util.List;
-
 import android.net.Uri;
 import android.provider.BaseColumns;
+
+import java.util.List;
 
 /**
  * ODK Survey (only)

@@ -17,10 +17,6 @@ package org.opendatakit.sync.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
-import org.opendatakit.common.android.utilities.WebLogger;
-
-import java.io.IOException;
 
 /**
  * The mapping of a table to the SyncOutcome of its synchronization.

@@ -14,14 +14,14 @@
 
 package org.opendatakit.common.android.logic;
 
-import java.util.HashMap;
-import java.util.Locale;
-
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+
+import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Used to return device properties to JavaRosa
@@ -46,7 +46,7 @@ public class PropertyManager {
     String getInstanceDirectory();
 
     String getUriFragmentNewInstanceFile(String uriDeviceId, String extension);
-  };
+  }
 
   private HashMap<String, String> mProperties;
 

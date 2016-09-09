@@ -16,8 +16,6 @@ apply plugin: 'com.android.library'
 
 group = groupId
 
-com.android.ddmlib.DdmPreferences.setTimeOut(60000)
-
 android {
 
     // The following are set in the common.gradle file
@@ -92,7 +90,7 @@ configurations.all {
 
 allprojects {
     tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+        options.compilerArgs << "-Xlint:deprecation"
     }
 }
 

@@ -14,15 +14,8 @@
 
 package org.opendatakit.common.android.fragment;
 
-import android.os.AsyncTask;
-import org.opendatakit.androidlibrary.R;
-import org.opendatakit.common.android.activities.IAppAwareActivity;
-import org.opendatakit.common.android.application.AppAwareApplication;
-import org.opendatakit.common.android.listener.LicenseReaderListener;
-import org.opendatakit.common.android.task.LicenseReaderTask;
-import org.opendatakit.common.android.utilities.WebLogger;
-
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.util.Linkify;
@@ -31,6 +24,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.opendatakit.androidlibrary.R;
+import org.opendatakit.common.android.activities.IAppAwareActivity;
+import org.opendatakit.common.android.application.AppAwareApplication;
+import org.opendatakit.common.android.listener.LicenseReaderListener;
+import org.opendatakit.common.android.task.LicenseReaderTask;
+import org.opendatakit.common.android.utilities.WebLogger;
 
 public class AboutMenuFragment extends Fragment implements LicenseReaderListener {
   private static final String t = "AboutMenuFragment";

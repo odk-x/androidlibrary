@@ -14,15 +14,11 @@
 
 package org.opendatakit.common.android.utilities;
 
-import java.util.Locale;
-import java.util.TimeZone;
-
-import org.junit.*;
-import static org.junit.Assert.*;
-
-import org.opendatakit.common.android.utilities.StaticStateManipulator;
-import org.opendatakit.common.android.utilities.WebLogger;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
+
+import static org.junit.Assert.assertEquals;
 
 public class NameUtilTest {
 

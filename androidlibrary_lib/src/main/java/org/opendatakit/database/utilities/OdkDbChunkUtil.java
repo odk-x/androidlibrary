@@ -13,20 +13,35 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.common.android.utilities;
+package org.opendatakit.database.utilities;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import org.opendatakit.common.android.data.UserTable;
+
 import org.opendatakit.database.service.OdkDbChunk;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
-public class OdkDbChunkUtil {
+public final class OdkDbChunkUtil {
 
   private static final String TAG = OdkDbChunkUtil.class.getSimpleName();
+
+  private OdkDbChunkUtil() {
+    // This class should never be instantiated
+    throw new IllegalStateException("Never Instantiate this static class");
+  }
 
   /**
    * Construct an OdkDbChunk from a serialized parcel.
@@ -37,7 +52,7 @@ public class OdkDbChunkUtil {
    * @param prevChunk  The previous chunk in the payload. Needed for adding linked list pointers
    * @return The chunk
    */
-  private static final OdkDbChunk createChunk(byte[] sourceData, int dataIndex, int chunkSize,
+  private static OdkDbChunk createChunk(byte[] sourceData, int dataIndex, int chunkSize,
       OdkDbChunk prevChunk) {
 
     UUID chunkID = UUID.randomUUID();
@@ -108,7 +123,7 @@ public class OdkDbChunkUtil {
    * @param chunkSize
    * @return
    */
-  private static final List<OdkDbChunk> createChunkList(byte[] bytes, int chunkSize) {
+  private static List<OdkDbChunk> createChunkList(byte[] bytes, int chunkSize) {
     // Partition bytes into chunks, inserting them into the list along the way
     int dataIndex = 0;
     OdkDbChunk currChunk = null;
@@ -162,8 +177,9 @@ public class OdkDbChunkUtil {
    * @param <T>          The type of the parcelable object to rebuild
    * @return The original object
    */
+  @SuppressWarnings("unchecked")
   public static final <T> T rebuildFromChunks(List<OdkDbChunk> chunks, Class<T> serializable)
-      throws Exception {
+      throws IOException, ClassNotFoundException {
 
     if (chunks == null || chunks.size() == 0 || serializable == null) {
       Log.w(TAG, "rebuildFromChunks: Invalid input. Null returned");
@@ -187,7 +203,7 @@ public class OdkDbChunkUtil {
    * @param chunks
    * @return
    */
-  private static final byte[] getData(List<OdkDbChunk> chunks) {
+  private static byte[] getData(List<OdkDbChunk> chunks) {
     // Find the size of data
     int dataSize = 0;
     Iterator<OdkDbChunk> iterator = chunks.iterator();

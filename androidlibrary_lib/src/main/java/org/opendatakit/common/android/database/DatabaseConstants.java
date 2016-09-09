@@ -73,4 +73,5 @@ public class DatabaseConstants {
    * Maintains the (choiceListId, choiceListJSON) mapping.
    */
   public static final String CHOICE_LIST_TABLE_NAME = "_choice_lists";
+
 }

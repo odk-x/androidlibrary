@@ -6,5 +6,5 @@ package org.opendatakit.common.android.utilities;
  * @author mitchellsundt@gmail.com
  */
 public interface WebLoggerFactoryIf {
-   public WebLoggerIf createWebLogger(String appName);
+   WebLoggerIf createWebLogger(String appName);
 }

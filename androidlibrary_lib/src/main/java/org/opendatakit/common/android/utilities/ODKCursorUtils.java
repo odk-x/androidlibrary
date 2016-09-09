@@ -15,15 +15,15 @@
  */
 package org.opendatakit.common.android.utilities;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import android.annotation.SuppressLint;
 import android.database.Cursor;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ODKCursorUtils {
 

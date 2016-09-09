@@ -16,9 +16,6 @@ package org.opendatakit.common.android.utilities;
 
 import android.test.AndroidTestCase;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import org.opendatakit.common.android.utilities.StaticStateManipulator;
-import org.opendatakit.common.android.utilities.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 
 import java.io.ByteArrayInputStream;

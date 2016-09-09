@@ -14,9 +14,9 @@
 
 package org.opendatakit.common.android.logic;
 
-import java.util.TreeMap;
-
 import android.content.Context;
+
+import java.util.TreeMap;
 
 public abstract class PropertiesSingletonFactory {
 

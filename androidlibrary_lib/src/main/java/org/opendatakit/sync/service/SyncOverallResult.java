@@ -18,7 +18,11 @@ package org.opendatakit.sync.service;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * An object for measuring the results of a synchronization call. This is

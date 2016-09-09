@@ -14,10 +14,6 @@
 
 package org.opendatakit.common.android.utilities;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -31,6 +27,10 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Consolidate all interactions with media providers here.
