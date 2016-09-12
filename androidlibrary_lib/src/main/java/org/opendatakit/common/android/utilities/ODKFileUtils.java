@@ -76,6 +76,8 @@ public class ODKFileUtils {
   
   private static final String SYSTEM_FOLDER_NAME = "system";
 
+  private static final String PERMANENT_FOLDER_NAME = "permanent";
+
   // 3rd level -- directories
 
   // under config
@@ -154,22 +156,52 @@ public class ODKFileUtils {
   private static final String DEFINITION_CSV = "definition.csv";
 
   /**
-   * directories within an application that are inaccessible via the
-   * getAsFile() API.
+   *
+   * uri on web server begins with appName.
+   * construct the full file.
+   *
+   * return null if the file does not exist or is not an
+   * accessible uri thru the WebServer. (i.e., the getAsFile() API).
    */
-  private static final Set<String> topLevelWebServerExclusions;
-  static {
+  public static File fileFromUriOnWebServer(String uri) {
+    String appName;
+    String uriFragment;
+    int idxAppName = uri.indexOf('/');
+    if ( idxAppName == -1 ) {
+      return null;
+    }
+    if ( idxAppName == 0 ) {
+      idxAppName = uri.indexOf('/', idxAppName+1);
+      if (idxAppName == -1) {
+        return null;
+      }
+      appName = uri.substring(1, idxAppName);
+      uriFragment = uri.substring(idxAppName+1);
+    } else {
+      appName = uri.substring(0, idxAppName);
+      uriFragment = uri.substring(idxAppName+1);
+    }
 
-    TreeSet<String> temp;
+    File filename = getAsFile(appName, uriFragment);
+    if ( !filename.exists() ) {
+      return null;
+    }
 
-    temp = new TreeSet<String>();
-    temp.add(SYSTEM_FOLDER_NAME);
-    temp.add(OUTPUT_FOLDER_NAME);
-    topLevelWebServerExclusions = Collections.unmodifiableSet(temp);
-  }
-
-  public static Set<String> getDirectoriesToExcludeFromWebServer() {
-    return topLevelWebServerExclusions;
+    String[] parts = uriFragment.split("/");
+    if ( parts.length > 1 ) {
+      if ( parts[0].equals(CONFIG_FOLDER_NAME) ) {
+        return filename;
+      } else if ( parts[0].equals(SYSTEM_FOLDER_NAME) ) {
+        return filename;
+      } else if ( parts[0].equals(PERMANENT_FOLDER_NAME) ) {
+        return filename;
+      } else if ( parts[0].equals(DATA_FOLDER_NAME) ) {
+        if (( parts.length > 2 ) && parts[1].equals(TABLES_FOLDER_NAME) ) {
+          return filename;
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -194,6 +226,10 @@ public class ODKFileUtils {
    */
   private static String getNameOfSystemFolder() {
     return SYSTEM_FOLDER_NAME;
+  }
+
+  private static String getNameOfPermanentFolder() {
+    return PERMANENT_FOLDER_NAME;
   }
 
   /**
@@ -282,6 +318,7 @@ public class ODKFileUtils {
         getDataFolder(appName),
         getOutputFolder(appName),
         getSystemFolder(appName),
+        getPermanentFolder(appName),
         // under Config
         getAssetsFolder(appName),
         getTablesFolder(appName),
@@ -552,6 +589,11 @@ public class ODKFileUtils {
 
   public static String getSystemFolder(String appName) {
     String path = getAppFolder(appName) + File.separator + SYSTEM_FOLDER_NAME;
+    return path;
+  }
+
+  public static String getPermanentFolder(String appName) {
+    String path = getAppFolder(appName) + File.separator + PERMANENT_FOLDER_NAME;
     return path;
   }
 
