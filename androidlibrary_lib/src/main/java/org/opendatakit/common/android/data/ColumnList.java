@@ -14,13 +14,13 @@
 
 package org.opendatakit.common.android.data;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Wrapper class for a list of Columns so that it can 

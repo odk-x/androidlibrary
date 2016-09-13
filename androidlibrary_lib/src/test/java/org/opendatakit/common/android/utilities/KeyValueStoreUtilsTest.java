@@ -14,35 +14,19 @@
 
 package org.opendatakit.common.android.utilities;
 
-import java.io.IOException;
-import java.lang.IllegalArgumentException;
-import java.lang.String;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.TreeMap;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dalvik.annotation.TestTarget;
-import org.junit.*;
-import static org.junit.Assert.*;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
-import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.common.android.data.ColumnDefinition;
-import org.opendatakit.common.android.data.OrderedColumns;
-import org.opendatakit.common.android.utilities.*;
-import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.common.android.utilities.RowPathColumnUtil;
-import org.opendatakit.common.android.utilities.StaticStateManipulator;
-import org.opendatakit.common.android.utilities.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 import org.opendatakit.database.service.KeyValueStoreEntry;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static org.junit.Assert.assertEquals;
 
 public class KeyValueStoreUtilsTest {
 
@@ -141,9 +125,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(MY_KEY, e.key);
       assertEquals(ElementDataType.bool, ElementDataType.valueOf(e.type));
       assertEquals("1", e.value);
-
-      Boolean value = Boolean.TRUE;
-      assertEquals(value, KeyValueStoreUtils.getBoolean(APP_NAME, e));
+      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(APP_NAME, e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -158,9 +140,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(MY_KEY, e.key);
       assertEquals(ElementDataType.array, ElementDataType.valueOf(e.type));
       assertEquals("1", e.value);
-
-      Boolean value = Boolean.TRUE;
-      assertEquals(value, KeyValueStoreUtils.getBoolean(APP_NAME, e));
+      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(APP_NAME, e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -175,9 +155,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(MY_KEY, e.key);
       assertEquals(ElementDataType.bool, ElementDataType.valueOf(e.type));
       assertEquals(VALUE, e.value);
-
-      Boolean value = Boolean.TRUE;
-      assertEquals(value, KeyValueStoreUtils.getBoolean(APP_NAME, e));
+      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(APP_NAME, e));
    }
 
    @Test

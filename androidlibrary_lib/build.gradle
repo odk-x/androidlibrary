@@ -13,23 +13,20 @@ libraryScripts.each {
 }
 
 apply plugin: 'com.android.model.library'
-//apply plugin: 'com.github.dcendents.android-maven'
 
 group = groupId
 
-// com.android.ddmlib.DdmPreferences.setTimeOut(60000)
-
 model {
-    android {
-        // The following are set in the common.gradle file
-        compileSdkVersion(compileVersion)
-        buildToolsVersion(buildTools)
-    
-        defaultConfig {
-            minSdkVersion.apiLevel minVersion 
-            targetSdkVersion.apiLevel targetVersion 
-            versionCode releaseVersionCode 
-            versionName versionCodeName 
+	android {
+
+		// The following are set in the common.gradle file
+		compileSdkVersion(compileVersion)
+		buildToolsVersion(buildTools)
+		defaultConfig {
+			minSdkVersion.apiLevel minVersion
+			targetSdkVersion.apiLevel targetVersion
+			versionCode(releaseVersionCode)
+			versionName(versionCodeName)
 
             buildConfigFields {
                 create() {
@@ -38,22 +35,38 @@ model {
                     value "1"
                 }
             }
+		}
+
+		// set by command line arguments
+		publishNonDefault(gradle.ext.odkPublishConfig.toBoolean())
+		defaultPublishConfig(gradle.ext.odkDefaultPublishConfig)
+
+		productFlavors {
+			create("demo") {
+			}
+
+			create("master") {
+			}
+
+			create("snapshot") {
+			}
+
+			create("uitest") {
+			}
+		}
+    }
+
+    android.buildTypes {
+        release {
+            minifyEnabled(minify)
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        debug {
+            debuggable(true)
+            testCoverageEnabled(testCoverage) // Allows AndroidTest JaCoCo reports to be generated
         }
     }
-    
-    android.buildTypes {
-            release {
-                minifyEnabled(minify)
-                // proguardFiles.add(file(getDefaultProguardFile('proguard-android.txt'))).add(file('proguard-rules.txt'))
-            }
-            // snapshot {
-                // Build type for snapshots
-            // }
-            debug {
-                testCoverageEnabled(testCoverage) // Allows AndroidTest JaCoCo reports to be generated
-            }
-        }
-    
+
     android.packagingOptions { // Pick first occurrence of any files that cause conflicts, as defined in common.gradle
         packageList.each {
             pickFirst it
@@ -64,7 +77,19 @@ model {
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
     }
+
+    // android.variantFilter { variant ->
+	    // def names = variant.flavors*.name
+        // if(gradle.ext.odkPublishConfig) {
+        //    if (names.contains(gradle.ext.odkPublishConfigName)) {
+        //        variant.setIgnore(false)
+        //    } else {
+        //        variant.setIgnore(true)
+        //    }
+        //}
+    // }
 }
+
 
 configurations.all {
     resolutionStrategy {
@@ -72,6 +97,13 @@ configurations.all {
         cacheChangingModulesFor(0, 'seconds')
     }
 }
+
+allprojects {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:deprecation"
+    }
+}
+
 
 dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')

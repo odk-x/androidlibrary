@@ -22,6 +22,14 @@ package org.opendatakit.common.android.utilities;
  */
 public final class LocalKeyValueStoreConstants {
 
+  public static final class TableSecurity {
+    public static final String ASPECT = "security";
+
+    public static final String KEY_FILTER_TYPE_ON_CREATION = "filterTypeOnCreation";
+    public static final String KEY_UNVERIFIED_USER_CAN_CREATE = "unverifiedUserCanCreate";
+    public static final String KEY_LOCKED = "locked";
+  }
+
   public static final class TableColorRules {
     public static final String PARTITION = "TableColorRuleGroup";
     // Aspect: Default
@@ -72,8 +80,6 @@ public final class LocalKeyValueStoreConstants {
     public static final String COLOR_TYPE_TABLE = "Table Color Rules";
     /** The constant if we want the color rules based off of the status column. */
     public static final String COLOR_TYPE_STATUS = "Status Column Color Rules";
-    /** The constant if we want the color rules based off of a column. */
-    public static final String COLOR_TYPE_COLUMN = "Selectable Column Color Rules";
 
     // anything for detail view?
   }

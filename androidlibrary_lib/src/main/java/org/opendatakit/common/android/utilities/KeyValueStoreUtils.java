@@ -14,10 +14,10 @@
 
 package org.opendatakit.common.android.utilities;
 
-import android.os.RemoteException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.type.CollectionType;
+
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.database.service.KeyValueStoreEntry;
 
@@ -61,6 +61,25 @@ public class KeyValueStoreUtils {
       }
    }
 
+  public static Long getLong(String appName,
+      KeyValueStoreEntry entry) throws IllegalArgumentException {
+    if (entry == null) {
+      return null;
+    }
+    if (!entry.type.equals(ElementDataType.integer.name())) {
+      throw new IllegalArgumentException("requested int entry for " +
+          "key: " + entry.key + ", but the corresponding entry in the store was " +
+          "not of type: " + ElementDataType.integer.name());
+    }
+    try {
+      return Long.parseLong(entry.value);
+    } catch ( NumberFormatException e ) {
+      throw new IllegalArgumentException("requested int entry for " +
+          "key: " + entry.key + ", but the value in the store failed to " +
+          "parse to type: " + ElementDataType.integer.name());
+    }
+  }
+
    public static Integer getInteger(String appName,
        KeyValueStoreEntry entry) throws IllegalArgumentException {
       if (entry == null) {
@@ -90,6 +109,16 @@ public class KeyValueStoreUtils {
              "key: " + entry.key + ", but the corresponding entry in the store was " +
              "not of type: " + ElementDataType.bool.name());
       }
+      if ( entry.value == null ) {
+         return null;
+      }
+      // allow for true/false
+      if ( entry.value.compareToIgnoreCase("true") == 0 ) {
+         return true;
+      } else if ( entry.value.compareToIgnoreCase("false") == 0 ) {
+         return false;
+      }
+      // otherwise, assume it is a 0/1 value.
       try {
          return DataHelper.intToBool(Integer.parseInt(entry.value));
       } catch ( NumberFormatException e ) {

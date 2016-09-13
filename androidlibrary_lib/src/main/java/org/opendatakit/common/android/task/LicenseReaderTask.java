@@ -16,16 +16,16 @@
 package org.opendatakit.common.android.task;
 
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import android.app.Application;
+import android.os.AsyncTask;
 
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.common.android.application.AppAwareApplication;
 import org.opendatakit.common.android.listener.LicenseReaderListener;
 
-import android.app.Application;
-import android.os.AsyncTask;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class LicenseReaderTask extends AsyncTask<Void, Integer, String> {
 

@@ -66,7 +66,7 @@ public class StaticStateManipulator {
      * Implementers are expected to perform this 
      * resetting action (however they see fit).
      */
-    public void reset();
+    void reset();
   }
 
   private final ArrayList<IStaticFieldManipulator> mStaticManipulators = new ArrayList<IStaticFieldManipulator>();
@@ -105,7 +105,7 @@ public class StaticStateManipulator {
    *     <li>50 -- RowPathColumnUtil</li>
    *     <li>50 -- TableUtil</li>
    *     <li>50 -- WebUtils</li>
-   *     <li>50 -- PropertiesSingletonFactory</li>
+   *     <li>50 -- CommonPropertiesSingletonFactory</li>
    *     <li>75 -- ClientConnectionManagerFactory</li>
    *     <li>75 -- ODKWebChromeClient (Survey)</li>
    *     <li>90 -- ElementTypeManipulatorFactory (Tables)</li>

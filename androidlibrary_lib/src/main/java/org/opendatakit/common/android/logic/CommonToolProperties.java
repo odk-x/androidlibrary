@@ -14,11 +14,12 @@
 
 package org.opendatakit.common.android.logic;
 
-import java.util.TreeMap;
+import android.content.Context;
 
 import org.opendatakit.androidlibrary.R;
+import org.opendatakit.common.android.utilities.StaticStateManipulator;
 
-import android.content.Context;
+import java.util.TreeMap;
 
 public class CommonToolProperties {
 
@@ -26,7 +27,25 @@ public class CommonToolProperties {
   /****************************************************************
    * CommonToolPropertiesSingletonFactory (opendatakit.properties)
    */
-  
+
+   /*******************
+    * Garbage 'properties' to control PreferencesCategories and PreferencesScreens
+    */
+  public static final String GROUPING_PASSWORD_SCREEN = "group.common.password_screen";
+
+  public static final String GROUPING_DEVICE_CATEGORY = "group.common.device";
+
+  public static final String GROUPING_SERVER_CATEGORY = "group.common.server";
+
+
+  public static final String GROUPING_TOOL_TABLES_CATEGORY = "group.common.tables";
+
+  public static final String GROUPING_TOOL_SURVEY_CATEGORY = "group.common.survey";
+
+  public static final String GROUPING_TOOL_SCAN_CATEGORY = "group.common.scan";
+
+  public static final String GROUPING_TOOL_SENSORS_CATEGORY = "group.common.sensors";
+
   /*******************
    * General Settings
    */
@@ -34,9 +53,9 @@ public class CommonToolProperties {
   // server identity
   /** ODK 2.0 server URL */
   public static final String KEY_SYNC_SERVER_URL = "common.sync_server_url";
-  /** ODK 1.x server URL */
-  public static final String KEY_LEGACY_SERVER_URL = "common.legacy_server_url";
-  
+
+  public static final String KEY_AUTHENTICATION_TYPE = "common.auth_credentials";
+
   // account identity
   /** gmail account */
   public static final String KEY_ACCOUNT = "common.account";
@@ -46,19 +65,28 @@ public class CommonToolProperties {
   // general settings
   public static final String KEY_FONT_SIZE = "common.font_size";
 
+  public static final String KEY_SHOW_SPLASH = "common.show_splash";
+
+  public static final String KEY_SPLASH_PATH = "common.splash_path";
+
+  /////////////////////////////////////////////////////////////
+  // ODK Tables specific
+  public static final String KEY_USE_HOME_SCREEN = "tables.custom_home_screen";
+
   /*******************
    * Admin Settings 
    */
   public static final String KEY_CHANGE_SYNC_SERVER = "common.change_sync_server";
-  public static final String KEY_CHANGE_LEGACY_SERVER = "common.change_legacy_server";
-  
+
+  public static final String KEY_CHANGE_AUTHENTICATION_TYPE = "common.change_auth_credentials";
   public static final String KEY_CHANGE_GOOGLE_ACCOUNT = "common.change_google_account";
-  public static final String KEY_CHANGE_USERNAME = "common.change_username";
-  public static final String KEY_CHANGE_PASSWORD = "common.change_password";
-  public static final String KEY_STORE_PASSWORD = "common.store_password";
-  
+  public static final String KEY_CHANGE_USERNAME_PASSWORD = "common.change_username_password";
+
   public static final String KEY_CHANGE_FONT_SIZE = "common.change_font_size";
 
+  public static final String KEY_CHANGE_SPLASH_SETTINGS = "common.change_splash_settings";
+
+  public static final String KEY_CHANGE_USE_HOME_SCREEN = "tables.change_custom_home_screen";
 
   /***********************************************************************
    * Secure properties (always move into appName-secure location).
@@ -73,60 +101,100 @@ public class CommonToolProperties {
   public static final String KEY_AUTH = "common.auth";
   /** ODK Aggregate password */
   public static final String KEY_PASSWORD = "common.password";
+  /** Roles that the user is known to have. JSON encoded list of strings */
+  public static final String KEY_ROLES_LIST = "common.roles";
+  /** List of all users and their roles on the server.
+   * JSON encoded list of { "user_id": "...", "full_name": "...", "roles": ["...","...",...]} */
+  public static final String KEY_USERS_LIST = "common.users";
   /** Admin Settings password */
   public static final String KEY_ADMIN_PW = "common.admin_pw";
   
   public static void accumulateProperties( Context context, 
-      TreeMap<String,String> plainProperties, TreeMap<String,String> secureProperties) {
+      TreeMap<String,String> generalProperties, TreeMap<String,String> deviceProperties,
+      TreeMap<String,String> secureProperties) {
     
     // Set default values as necessary
     
     // the properties managed through the general settings pages.
-    
-    plainProperties.put(KEY_SYNC_SERVER_URL, 
+
+    generalProperties.put(KEY_SYNC_SERVER_URL,
        context.getString(R.string.default_sync_server_url));
-    plainProperties.put(KEY_LEGACY_SERVER_URL,
-        context.getString(R.string.default_legacy_server_url));
-    plainProperties.put(KEY_ACCOUNT, "");
-    plainProperties.put(KEY_USERNAME, "");
-    plainProperties.put(KEY_FONT_SIZE, Integer.toString(DEFAULT_FONT_SIZE));
+
+    generalProperties.put(KEY_FONT_SIZE, Integer.toString(DEFAULT_FONT_SIZE));
+    generalProperties.put(KEY_SHOW_SPLASH, "true");
+    generalProperties.put(KEY_SPLASH_PATH, "ODK Default");
 
     // the properties that are managed through the admin settings pages.
-   
-    plainProperties.put(KEY_CHANGE_SYNC_SERVER, "true");
-    plainProperties.put(KEY_CHANGE_LEGACY_SERVER, "true");
-    
-    plainProperties.put(KEY_CHANGE_GOOGLE_ACCOUNT, "true");
-    plainProperties.put(KEY_CHANGE_USERNAME, "true");
-    plainProperties.put(KEY_CHANGE_PASSWORD, "true");
-    
-    plainProperties.put(KEY_CHANGE_FONT_SIZE, "true");
 
-    // handle the secure properties. If these are in the incoming property file,
-    // remove them and move them into the secure properties area.
+    generalProperties.put(KEY_CHANGE_SYNC_SERVER, "true");
+
+    generalProperties.put(KEY_CHANGE_AUTHENTICATION_TYPE, "true");
+    generalProperties.put(KEY_CHANGE_GOOGLE_ACCOUNT, "true");
+    generalProperties.put(KEY_CHANGE_USERNAME_PASSWORD, "true");
+
+    generalProperties.put(KEY_CHANGE_FONT_SIZE, "true");
+    generalProperties.put(KEY_CHANGE_SPLASH_SETTINGS, "true");
+
+    // device properties can be set on a per-device basis and are not
+    // over-written by the server configuration. Admins can manually set
+    // these via the generalProperties; that is not secure as these values
+    // will be left in the syncable file.
+
+    deviceProperties.put(KEY_AUTHENTICATION_TYPE, "none");
+    deviceProperties.put(KEY_ACCOUNT, "");
+    deviceProperties.put(KEY_USERNAME, "");
+    deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("survey"), "");
+    deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("scan"), "");
+    deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("tables"), "");
+    deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("sensors"), "");
+    deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("survey"), "");
+    deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("scan"), "");
+    deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("tables"), "");
+    deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("sensors"), "");
+
+    // handle the secure properties. If these are in the incoming syncable general
+    // property file, those values will be used to initialize these fields (if there is not an
+    // existing value set for them). BUT: they won't be removed from that syncable file.
+    //
+    // I.e., that is a lazy way to distribute these values, but it is not robustly secure.
     //
     secureProperties.put(KEY_AUTH, "");
     secureProperties.put(KEY_PASSWORD, "");
+    secureProperties.put(KEY_ROLES_LIST, "");
+    secureProperties.put(KEY_USERS_LIST, "");
     secureProperties.put(KEY_ADMIN_PW, "");
   }
 
   private static class CommonPropertiesSingletonFactory extends PropertiesSingletonFactory {
 
-    private CommonPropertiesSingletonFactory(TreeMap<String,String> generalDefaults, TreeMap<String,String> adminDefaults) {
-      super(generalDefaults, adminDefaults);
+    private CommonPropertiesSingletonFactory(TreeMap<String,String> generalDefaults,
+        TreeMap<String,String> deviceDefaults, TreeMap<String,String> secureDefaults) {
+      super(generalDefaults, deviceDefaults, secureDefaults);
     }
   }
   
   private static CommonPropertiesSingletonFactory factory = null;
-  
+  static {
+    // register a state-reset manipulator for 'connectionFactory' field.
+    StaticStateManipulator.get().register(50, new StaticStateManipulator.IStaticFieldManipulator() {
+
+      @Override
+      public void reset() {
+        factory = null;
+      }
+
+    });
+  }
+
   public static synchronized PropertiesSingleton get(Context context, String appName) {
     if ( factory == null ) {
-      TreeMap<String,String> plainProperties = new TreeMap<String,String>();
+      TreeMap<String,String> generalProperties = new TreeMap<String,String>();
+      TreeMap<String,String> deviceProperties = new TreeMap<String,String>();
       TreeMap<String,String> secureProperties = new TreeMap<String,String>();
       
-      CommonToolProperties.accumulateProperties(context, plainProperties, secureProperties);
+      CommonToolProperties.accumulateProperties(context, generalProperties, deviceProperties, secureProperties);
       
-      factory = new CommonPropertiesSingletonFactory(plainProperties, secureProperties);
+      factory = new CommonPropertiesSingletonFactory(generalProperties, deviceProperties, secureProperties);
     }
     return factory.getSingleton(context, appName);
   }

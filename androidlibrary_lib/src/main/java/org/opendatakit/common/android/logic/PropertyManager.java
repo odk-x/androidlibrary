@@ -14,14 +14,14 @@
 
 package org.opendatakit.common.android.logic;
 
-import java.util.HashMap;
-import java.util.Locale;
-
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+
+import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Used to return device properties to JavaRosa
@@ -33,6 +33,10 @@ import android.telephony.TelephonyManager;
 public class PropertyManager {
 
   public interface DynamicPropertiesInterface {
+    String getActiveUser();
+
+    String getLocale();
+
     String getUsername();
 
     String getUserEmail();
@@ -42,7 +46,7 @@ public class PropertyManager {
     String getInstanceDirectory();
 
     String getUriFragmentNewInstanceFile(String uriDeviceId, String extension);
-  };
+  }
 
   private HashMap<String, String> mProperties;
 
@@ -61,6 +65,10 @@ public class PropertyManager {
    * DynamicPropertiesInterface. As with all property names,
    * they are compared in a case-insensitive manner.
    */
+
+  public final static String LOCALE = "locale";
+
+  public final static String ACTIVE_USER = "active_user";
 
   // username -- current username
   public final static String USERNAME = "username";
@@ -85,6 +93,7 @@ public class PropertyManager {
   public PropertyManager(Context context) {
 
     mProperties = new HashMap<String, String>();
+
     TelephonyManager mTelephonyManager = (TelephonyManager) context
         .getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -147,7 +156,11 @@ public class PropertyManager {
     String propertyName = rawPropertyName.toLowerCase(Locale.ENGLISH);
 
     // retrieve the dynamic values via the callback...
-    if (USERNAME.equals(propertyName)) {
+    if (ACTIVE_USER.equals(propertyName)) {
+      return callback.getActiveUser();
+    } else if (LOCALE.equals(propertyName)) {
+      return callback.getLocale();
+    } else if (USERNAME.equals(propertyName)) {
       return callback.getUsername();
     } else if (OR_USERNAME.equals(propertyName)) {
       String value = callback.getUsername();
@@ -179,7 +192,8 @@ public class PropertyManager {
       } else {
         ext = "";
       }
-      String value = callback.getUriFragmentNewInstanceFile(mProperties.get(OR_DEVICE_ID_PROPERTY),ext);
+      String value = callback
+          .getUriFragmentNewInstanceFile(mProperties.get(OR_DEVICE_ID_PROPERTY), ext);
       return value;
     } else {
       return mProperties.get(propertyName);

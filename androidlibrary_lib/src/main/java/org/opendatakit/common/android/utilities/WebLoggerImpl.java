@@ -16,9 +16,18 @@ package org.opendatakit.common.android.utilities;
 
 import android.os.FileObserver;
 import android.util.Log;
+
 import org.apache.commons.lang3.CharEncoding;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -44,7 +53,7 @@ public class WebLoggerImpl implements WebLoggerIf {
   private static final int SUCCESS = 7;
   private static final int TIP = 8;
 
-  private static final int MIN_LOG_LEVEL_TO_SPEW = 3;
+  private static final int MIN_LOG_LEVEL_TO_SPEW = INFO;
   private static final String DATE_FORMAT = "yyyy-MM-dd_HH";
   private static final String LOG_LINE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
@@ -62,7 +71,7 @@ public class WebLoggerImpl implements WebLoggerIf {
   private long lastFlush = 0L;
 
   // date formatter
-  private SimpleDateFormat restrictedFileDateFormatter =
+  private final SimpleDateFormat restrictedFileDateFormatter =
       new SimpleDateFormat(DATE_FORMAT, Locale.US);
 
   public String getFormattedFileDateNow() {
@@ -77,7 +86,7 @@ public class WebLoggerImpl implements WebLoggerIf {
 
   }
 
-  private SimpleDateFormat restrictedLogLineDateFormatter =
+  private final SimpleDateFormat restrictedLogLineDateFormatter =
       new SimpleDateFormat(LOG_LINE_DATE_FORMAT, Locale.US);
 
   public String getFormattedLogLineDateNow() {
@@ -205,16 +214,17 @@ public class WebLoggerImpl implements WebLoggerIf {
       }
 
       // ensure we have the directories created...
-      ODKFileUtils.verifyExternalStorageAvailability();
-      ODKFileUtils.assertDirectoryStructure(appName);
+      try {
+        ODKFileUtils.verifyExternalStorageAvailability();
+        ODKFileUtils.assertDirectoryStructure(appName);
+      } catch ( Exception e ) {
+        e.printStackTrace();
+        Log.e("WebLogger", "Unable to create logging directory");
+        return;
+      }
+
       String loggingPath = ODKFileUtils.getLoggingFolder(appName);
       File loggingDirectory = new File(loggingPath);
-      if (!loggingDirectory.exists()) {
-        if (!loggingDirectory.mkdirs()) {
-          Log.e("WebLogger", "Unable to create logging directory");
-          return;
-        }
-      }
 
       if (!loggingDirectory.isDirectory()) {
         Log.e("WebLogger", "Logging Directory exists but is not a directory!");
@@ -262,10 +272,6 @@ public class WebLoggerImpl implements WebLoggerIf {
 
   public void log(int severity, String t, String logMsg) {
     try {
-      if (MIN_LOG_LEVEL_TO_SPEW > severity) {
-        // we are suppressing this level of logging
-        return;
-      }
 
       String androidLogLine = logMsg;
 
@@ -287,17 +293,19 @@ public class WebLoggerImpl implements WebLoggerIf {
         androidTag = t.substring(periodIdx+1);
       }
 
-      // do logcat logging...
-      if (severity == ERROR) {
-        Log.e(androidTag, androidLogLine);
-      } else if (severity == WARN) {
-        Log.w(androidTag, androidLogLine);
-      } else if (severity == INFO || severity == SUCCESS || severity == TIP) {
-        Log.i(androidTag, androidLogLine);
-      } else if (severity == DEBUG){
-        Log.d(androidTag, androidLogLine);
-      } else {
-        Log.v(androidTag, androidLogLine);
+      if (severity >= MIN_LOG_LEVEL_TO_SPEW) {
+        // do logcat logging...
+        if (severity == ERROR) {
+          Log.e(androidTag, androidLogLine);
+        } else if (severity == WARN) {
+          Log.w(androidTag, androidLogLine);
+        } else if (severity == INFO || severity == SUCCESS || severity == TIP) {
+          Log.i(androidTag, androidLogLine);
+        } else if (severity == DEBUG){
+          Log.d(androidTag, androidLogLine);
+        } else {
+          Log.v(androidTag, androidLogLine);
+        }
       }
 
       // and compose the log to the file...

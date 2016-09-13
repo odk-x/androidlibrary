@@ -15,13 +15,12 @@
  */
 package org.opendatakit.common.android.utilities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * Methods for dealing with naming conventions.

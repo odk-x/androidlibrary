@@ -14,21 +14,21 @@
 
 package org.opendatakit.common.android.data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 
 public class OrderedColumns implements Parcelable {
 
   public interface OrderedColumnsIterator {
-    public void doAction( ColumnDefinition cd) throws Exception;
+    void doAction( ColumnDefinition cd) throws Exception;
   }
   
   private final String appName;
@@ -170,6 +170,15 @@ public class OrderedColumns implements Parcelable {
   
   public TreeMap<String, Object> getDataModel() {
     return ColumnDefinition.getDataModel(orderedDefns);
+  }
+
+  /**
+   * Return the JSON schema of the table that includes all the metadata columns.
+   *
+   * @return
+   */
+  public TreeMap<String, Object> getExtendedDataModel() {
+    return ColumnDefinition.getExtendedDataModel(orderedDefns);
   }
 
   @Override

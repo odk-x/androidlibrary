@@ -14,11 +14,11 @@
 
 package org.opendatakit.common.android.logic;
 
-import java.io.File;
-import java.io.FileFilter;
-
 import org.opendatakit.common.android.logic.PropertyManager.DynamicPropertiesInterface;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
+
+import java.io.File;
+import java.io.FileFilter;
 
 /**
  * Implements property access methods that return dynamic values
@@ -31,15 +31,34 @@ public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
   private final String appName;
   private final String tableId;
   private final String instanceId;
+  private final String activeUser;
+  private final String locale;
   private final String username;
   private final String userEmail;
 
-  public DynamicPropertiesCallback(String appName, String tableId, String instanceId, String username, String userEmail) {
+  public DynamicPropertiesCallback(String appName, String tableId, String instanceId,
+      String activeUser, String locale, String username, String userEmail) {
     this.appName = appName;
     this.tableId = tableId;
     this.instanceId = instanceId;
+    this.activeUser = activeUser;
+    this.locale = locale;
     this.username = username;
     this.userEmail = userEmail;
+  }
+
+  @Override
+  public String getActiveUser() {
+    // Get the activeUser as determined by
+    // the authentication type in use (property) and the
+    // value of the username or account properties.
+    return activeUser;
+  }
+
+  @Override
+  public String getLocale() {
+    // Get the locale in use
+    return locale;
   }
 
   @Override

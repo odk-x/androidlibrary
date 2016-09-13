@@ -19,6 +19,8 @@ package org.opendatakit.database.service;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
+
 /**
  * This holds one row from the key-value store.
  * <p>
@@ -28,7 +30,8 @@ import android.os.Parcelable;
  * @author sudar.sam@gmail.com
  *
  */
-public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreEntry> {
+public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreEntry>,
+    Serializable {
 
   /**
    * The table id of the table to which this entry belongs.

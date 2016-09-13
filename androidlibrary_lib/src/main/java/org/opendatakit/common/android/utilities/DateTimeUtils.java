@@ -15,6 +15,7 @@
 package org.opendatakit.common.android.utilities;
 
 import android.annotation.SuppressLint;
+
 import org.opendatakit.common.android.utilities.StaticStateManipulator.IStaticFieldManipulator;
 
 import java.text.ParsePosition;
@@ -92,7 +93,7 @@ public final class DateTimeUtils {
   }
 
   protected DateTimeUtils() {
-  };
+  }
 
   @SuppressLint("SimpleDateFormat")
   private Date parseDateSubset(String value, String[] parsePatterns, Locale l, TimeZone tz) {

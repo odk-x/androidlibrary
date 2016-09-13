@@ -23,22 +23,22 @@ package org.opendatakit.common.android.utilities;
  */
 public interface WebLoggerIf {
 
-  public void staleFileScan(long now);
+  void staleFileScan(long now);
 
-  public void close();
+  void close();
 
-  public void log(int severity, String t, String logMsg);
+  void log(int severity, String t, String logMsg);
 
-  public void a(String t, String logMsg);
+  void a(String t, String logMsg);
 
-  public void t(String t, String logMsg);
-  public void v(String t, String logMsg);
-  public void d(String t, String logMsg);
-  public void i(String t, String logMsg);
-  public void w(String t, String logMsg);
-  public void e(String t, String logMsg);
-  public void s(String t, String logMsg);
+  void t(String t, String logMsg);
+  void v(String t, String logMsg);
+  void d(String t, String logMsg);
+  void i(String t, String logMsg);
+  void w(String t, String logMsg);
+  void e(String t, String logMsg);
+  void s(String t, String logMsg);
 
-  public void printStackTrace(Throwable e);
+  void printStackTrace(Throwable e);
 
 }

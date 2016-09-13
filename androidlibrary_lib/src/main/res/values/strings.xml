@@ -7,10 +7,9 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
-    <string name="core_permission_tree">Open Data Kit Core Services</string>
+    <string name="services_permission_tree">Open Data Kit Services</string>
 	<string name="webkit_launch_permission">Launch WebServer</string>
 	<string name="database_launch_permission">Launch Database</string>
-	<string name="dbshim_launch_permission">Launch DbShim</string>
     <string name="sync_launch_permission">Launch Sync</string>
 
 	<string name="added_on_date_at_time">\'Added on\' EEE, MMM dd, yyyy \'at\' HH:mm</string><!-- http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html -->
@@ -26,5 +25,15 @@
  	<string name="waiting_for_license">Retrieving license info &#8230;</string>
 	<string name="read_license_success">Read license file successfully</string>
 	<string name="read_license_fail">Failed to read license file</string>
+
+	<string name="font_size_extra_large">Extra Large</string>
+	<string name="font_size_large">Large</string>
+	<string name="font_size_medium">Medium</string>
+	<string name="font_size_small">Small</string>
+	<string name="font_size_extra_small">Extra Small</string>
+
+	<string name="credential_none">None (anonymous access)</string>
+	<string name="credential_username_password">Username</string>
+	<string name="credential_google_account">Google Account</string>
 
 </resources>

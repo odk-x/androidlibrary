@@ -14,15 +14,8 @@
 
 package org.opendatakit.common.android.fragment;
 
-import android.os.AsyncTask;
-import org.opendatakit.androidlibrary.R;
-import org.opendatakit.common.android.activities.IAppAwareActivity;
-import org.opendatakit.common.android.application.AppAwareApplication;
-import org.opendatakit.common.android.listener.LicenseReaderListener;
-import org.opendatakit.common.android.task.LicenseReaderTask;
-import org.opendatakit.common.android.utilities.WebLogger;
-
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.util.Linkify;
@@ -31,6 +24,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.opendatakit.androidlibrary.R;
+import org.opendatakit.common.android.activities.IAppAwareActivity;
+import org.opendatakit.common.android.application.AppAwareApplication;
+import org.opendatakit.common.android.listener.LicenseReaderListener;
+import org.opendatakit.common.android.task.LicenseReaderTask;
+import org.opendatakit.common.android.utilities.WebLogger;
 
 public class AboutMenuFragment extends Fragment implements LicenseReaderListener {
   private static final String t = "AboutMenuFragment";
@@ -60,8 +60,8 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     View aboutMenuView = inflater.inflate(ID, container, false);
 
     TextView versionBox = (TextView) aboutMenuView.findViewById(R.id.versionText);
-    versionBox.setText(((AppAwareApplication) getActivity().getApplication()).getVersionedAppName
-        ());
+    versionBox.setText(((AppAwareApplication) getActivity().getApplication())
+        .getVersionedAppName());
 
     mTextView = (TextView) aboutMenuView.findViewById(R.id.text1);
     mTextView.setAutoLinkMask(Linkify.WEB_URLS);

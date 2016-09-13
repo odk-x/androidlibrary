@@ -14,20 +14,17 @@
 
 package org.opendatakit.common.android.utilities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
+
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.*;
-import static org.junit.Assert.*;
-
-import org.opendatakit.common.android.utilities.ODKDataUtils;
-import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.common.android.utilities.StaticStateManipulator;
-import org.opendatakit.common.android.utilities.WebLogger;
-import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
+import static org.junit.Assert.assertEquals;
 
 public class ODKDataUtilsTest {
 

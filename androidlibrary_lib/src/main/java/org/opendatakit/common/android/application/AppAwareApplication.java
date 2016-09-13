@@ -19,14 +19,16 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.util.Log;
+
 import org.opendatakit.common.android.logic.CommonToolProperties;
 import org.opendatakit.common.android.logic.PropertiesSingleton;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
+import org.opendatakit.common.android.utilities.PRNGFixes;
 import org.opendatakit.common.android.utilities.WebLogger;
 
 /**
  * Move some of the functionality of CommonApplication up into androidlibrary
- * so that it can be shared with Core Services. License reader task is moved
+ * so that it can be shared with Services. License reader task is moved
  * out of global state and into the AboutMenuFragment static state.
  *
  * @author mitchellsundt@gmail.com
@@ -51,6 +53,7 @@ public abstract class AppAwareApplication extends Application {
 
   public AppAwareApplication() {
     super();
+    PRNGFixes.apply();
   }
 
   /**
@@ -113,9 +116,8 @@ public abstract class AppAwareApplication extends Application {
     try {
       PackageInfo pinfo;
       pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-      int versionNumber = pinfo.versionCode;
       String versionName = pinfo.versionName;
-      versionDetail = " " + versionName + " (rev " + versionNumber + ")";
+      versionDetail = " " + versionName;
     } catch (NameNotFoundException e) {
       e.printStackTrace();
     }

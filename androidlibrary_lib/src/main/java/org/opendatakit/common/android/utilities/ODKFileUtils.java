@@ -15,6 +15,20 @@
 
 package org.opendatakit.common.android.utilities;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.util.Log;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.CharEncoding;
+import org.opendatakit.common.android.provider.FormsColumns;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -36,20 +50,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.CharEncoding;
-import org.opendatakit.common.android.provider.FormsColumns;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Environment;
-import android.util.Log;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Static methods used for common file operations.
  *
@@ -57,6 +57,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ODKFileUtils {
   private final static String t = "ODKFileUtils";
+
+  // Default app name when unspecified
+  private static final String ODK_DEFAULT_APP_NAME = "default";
 
   // base path
   private static final String ODK_FOLDER_NAME = "opendatakit";
@@ -72,6 +75,8 @@ public class ODKFileUtils {
   private static final String OUTPUT_FOLDER_NAME = "output";
   
   private static final String SYSTEM_FOLDER_NAME = "system";
+
+  private static final String PERMANENT_FOLDER_NAME = "permanent";
 
   // 3rd level -- directories
 
@@ -123,6 +128,9 @@ public class ODKFileUtils {
   // under data/webDb
   private static final String DATABASE_NAME = "sqlite.db";
 
+  // under data/webDb
+  private static final String DATABASE_LOCK_FILE_NAME = "db.lock";
+
   /**
    * Miscellaneous well-known file names
    */
@@ -148,22 +156,52 @@ public class ODKFileUtils {
   private static final String DEFINITION_CSV = "definition.csv";
 
   /**
-   * directories within an application that are inaccessible via the
-   * getAsFile() API.
+   *
+   * uri on web server begins with appName.
+   * construct the full file.
+   *
+   * return null if the file does not exist or is not an
+   * accessible uri thru the WebServer. (i.e., the getAsFile() API).
    */
-  private static final Set<String> topLevelWebServerExclusions;
-  static {
+  public static File fileFromUriOnWebServer(String uri) {
+    String appName;
+    String uriFragment;
+    int idxAppName = uri.indexOf('/');
+    if ( idxAppName == -1 ) {
+      return null;
+    }
+    if ( idxAppName == 0 ) {
+      idxAppName = uri.indexOf('/', idxAppName+1);
+      if (idxAppName == -1) {
+        return null;
+      }
+      appName = uri.substring(1, idxAppName);
+      uriFragment = uri.substring(idxAppName+1);
+    } else {
+      appName = uri.substring(0, idxAppName);
+      uriFragment = uri.substring(idxAppName+1);
+    }
 
-    TreeSet<String> temp;
+    File filename = getAsFile(appName, uriFragment);
+    if ( !filename.exists() ) {
+      return null;
+    }
 
-    temp = new TreeSet<String>();
-    temp.add(SYSTEM_FOLDER_NAME);
-    temp.add(OUTPUT_FOLDER_NAME);
-    topLevelWebServerExclusions = Collections.unmodifiableSet(temp);
-  }
-
-  public static Set<String> getDirectoriesToExcludeFromWebServer() {
-    return topLevelWebServerExclusions;
+    String[] parts = uriFragment.split("/");
+    if ( parts.length > 1 ) {
+      if ( parts[0].equals(CONFIG_FOLDER_NAME) ) {
+        return filename;
+      } else if ( parts[0].equals(SYSTEM_FOLDER_NAME) ) {
+        return filename;
+      } else if ( parts[0].equals(PERMANENT_FOLDER_NAME) ) {
+        return filename;
+      } else if ( parts[0].equals(DATA_FOLDER_NAME) ) {
+        if (( parts.length > 2 ) && parts[1].equals(TABLES_FOLDER_NAME) ) {
+          return filename;
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -190,6 +228,10 @@ public class ODKFileUtils {
     return SYSTEM_FOLDER_NAME;
   }
 
+  private static String getNameOfPermanentFolder() {
+    return PERMANENT_FOLDER_NAME;
+  }
+
   /**
    * Get the name of the instances folder, without a path.
    * @return
@@ -200,6 +242,10 @@ public class ODKFileUtils {
 
   public static String getNameOfSQLiteDatabase() {
     return DATABASE_NAME;
+  }
+
+  public static String getNameOfSQLiteDatabaseLockFile() {
+    return DATABASE_LOCK_FILE_NAME;
   }
   
   public static final ObjectMapper mapper = new ObjectMapper();
@@ -244,6 +290,10 @@ public class ODKFileUtils {
     return path;
   }
 
+  public static String getOdkDefaultAppName() {
+    return ODK_DEFAULT_APP_NAME;
+  }
+
   public static File[] getAppFolders() {
     File odk = new File(getOdkFolder());
 
@@ -251,9 +301,7 @@ public class ODKFileUtils {
 
       @Override
       public boolean accept(File pathname) {
-        if (!pathname.isDirectory())
-          return false;
-        return true;
+        return (pathname.isDirectory());
       }
     });
 
@@ -261,7 +309,7 @@ public class ODKFileUtils {
   }
 
   public static void assertDirectoryStructure(String appName) {
-    if ( !appName.equals("tables") ) {
+    if ( !appName.equals(getOdkDefaultAppName()) ) {
       int i=0;
       ++i;
     }
@@ -270,6 +318,7 @@ public class ODKFileUtils {
         getDataFolder(appName),
         getOutputFolder(appName),
         getSystemFolder(appName),
+        getPermanentFolder(appName),
         // under Config
         getAssetsFolder(appName),
         getTablesFolder(appName),
@@ -299,6 +348,45 @@ public class ODKFileUtils {
           throw e;
         }
       }
+    }
+    // and create an empty .nomedia file
+    File nomedia = new File(getAppFolder(appName), ".nomedia");
+    try {
+      nomedia.createNewFile();
+    } catch (IOException ex) {
+      RuntimeException e = new RuntimeException("Cannot create .nomedia in app directory: " +
+          ex.toString());
+      throw e;
+    }
+  }
+
+  /**
+   * This routine clears all the marker files used by the various tools to
+   * avoid re-running the initialization task.
+   *
+   * @param appName
+    */
+  public static void clearConfiguredToolFiles(String appName) {
+    File dataDir = new File(ODKFileUtils.getDataFolder(appName));
+    File[] filesToDelete = dataDir.listFiles(new FileFilter() {
+      @Override public boolean accept(File pathname) {
+        if ( pathname.isDirectory()) {
+          return false;
+        }
+        String name = pathname.getName();
+        int idx = name.lastIndexOf('.');
+        if ( idx == -1 ) {
+          return false;
+        }
+        String type = name.substring(idx+1);
+        if ( type.equals("version") ) {
+          return true;
+        }
+        return false;
+      }
+    });
+    for ( File f : filesToDelete ) {
+      f.delete();
     }
   }
 
@@ -504,6 +592,11 @@ public class ODKFileUtils {
     return path;
   }
 
+  public static String getPermanentFolder(String appName) {
+    String path = getAppFolder(appName) + File.separator + PERMANENT_FOLDER_NAME;
+    return path;
+  }
+
   //////////////////////////////////////////////////////////
   // Everything under config folder
   
@@ -595,12 +688,6 @@ public class ODKFileUtils {
   }
 
   public static String getFormFolder(String appName, String tableId, String formId) {
-    if ( FormsColumns.COMMON_BASE_FORM_ID.equals(tableId) ) {
-      if ( !FormsColumns.COMMON_BASE_FORM_ID.equals(formId) ) {
-        throw new IllegalStateException(FormsColumns.COMMON_BASE_FORM_ID + " can only have " + FormsColumns.COMMON_BASE_FORM_ID + " for a formId");
-      }
-    }
-
     if (formId == null || formId.length() == 0) {
       throw new IllegalArgumentException("getFormFolder: formId is null or the empty string!");
     } else {

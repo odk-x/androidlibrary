@@ -23,6 +23,8 @@ public class IntentConsts {
   public static final String INTENT_KEY_URI_FRAGMENT = "uriFragment";
   public static final String INTENT_KEY_CONTENT_TYPE = "contentType";
 
+  public static final String INTENT_KEY_SETTINGS_IN_ADMIN_MODE = "adminMode";
+  public static final String INTENT_KEY_SETTINGS_ADMIN_ENABLED = "adminEnabled";
   /**
    * Intent Extras:
    * <ol><li>INTENT_KEY_APP_NAME</li>
@@ -30,7 +32,7 @@ public class IntentConsts {
    * <li>INTENT_KEY_INSTANCE_ID (optional)</li></ol>
    */
   public class ResolveCheckpoint {
-    public static final String APPLICATION_NAME = "org.opendatakit.core";
+    public static final String APPLICATION_NAME = "org.opendatakit.services";
     public static final String ACTIVITY_NAME =
         "org.opendatakit.resolve.checkpoint.CheckpointResolutionActivity";
   }
@@ -42,7 +44,7 @@ public class IntentConsts {
    * <li>INTENT_KEY_INSTANCE_ID (optional)</li></ol>
    */
   public class ResolveConflict {
-    public static final String APPLICATION_NAME = "org.opendatakit.core";
+    public static final String APPLICATION_NAME = "org.opendatakit.services";
     public static final String ACTIVITY_NAME =
         "org.opendatakit.resolve.conflict.ConflictResolutionActivity";
   }
@@ -52,8 +54,20 @@ public class IntentConsts {
    * <ol><li>INTENT_KEY_APP_NAME</li></ol>
    */
   public class Sync {
-    public static final String APPLICATION_NAME = "org.opendatakit.core";
+    public static final String APPLICATION_NAME = "org.opendatakit.services";
     public static final String ACTIVITY_NAME =
         "org.opendatakit.sync.activities.SyncActivity";
+    public static final String SERVICE_NAME =
+        "org.opendatakit.sync.service.OdkSyncService";
+  }
+
+  /**
+   * Intent Extras:
+   * <ol><li>INTENT_KEY_APP_NAME</li></ol>
+   */
+  public class AppProperties {
+    public static final String APPLICATION_NAME = "org.opendatakit.services";
+    public static final String ACTIVITY_NAME =
+        "org.opendatakit.common.android.activities.AppPropertiesActivity";
   }
 }

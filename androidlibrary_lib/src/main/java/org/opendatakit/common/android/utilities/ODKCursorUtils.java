@@ -15,15 +15,15 @@
  */
 package org.opendatakit.common.android.utilities;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import android.annotation.SuppressLint;
 import android.database.Cursor;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ODKCursorUtils {
 
@@ -119,7 +119,7 @@ public class ODKCursorUtils {
    * @param i
    * @return
    */
-  @SuppressLint("NewApi")
+  @SuppressWarnings("unchecked")
   public static final <T> T getIndexAsType(Cursor c, Class<T> clazz, int i) {
     // If you add additional return types here be sure to modify the javadoc.
     try {

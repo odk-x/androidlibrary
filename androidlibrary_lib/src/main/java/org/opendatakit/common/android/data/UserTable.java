@@ -15,15 +15,25 @@
  */
 package org.opendatakit.common.android.data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.opendatakit.common.android.provider.DataTableColumns;
-
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import org.opendatakit.aggregate.odktables.rest.ElementDataType;
+import org.opendatakit.aggregate.odktables.rest.ElementType;
+import org.opendatakit.common.android.provider.DataTableColumns;
+
+import org.opendatakit.common.android.utilities.ODKFileUtils;
+import org.opendatakit.database.service.BindArgs;
+import org.opendatakit.database.service.queries.OdkDbResumableQuery;
+import org.opendatakit.database.service.queries.OdkDbSimpleQuery;
+import org.opendatakit.database.service.OdkDbRow;
+import org.opendatakit.database.service.OdkDbTable;
+import org.opendatakit.database.service.ParentTable;
+import org.opendatakit.database.utilities.OdkMarshallUtil;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents a table. This can be conceptualized as a list of rows.
@@ -36,69 +46,105 @@ import android.os.Parcelable;
  * @author sudar.sam@gmail.com
  *
  */
-public class UserTable implements Parcelable {
+public class UserTable implements Parcelable, ParentTable{
 
   static final String TAG = UserTable.class.getSimpleName();
 
-  private final OrderedColumns mColumnDefns;
-  private final ArrayList<Row> mRows;
+  private static final String[] primaryKey = {"rowId", "savepoint_timestamp"};
 
-  private final String mSqlWhereClause;
-  private final String[] mSqlSelectionArgs;
-  private final String[] mSqlGroupByArgs;
-  private final String mSqlHavingClause;
-  private final String mSqlOrderByElementKey;
-  private final String mSqlOrderByDirection;
+  private final OdkDbTable mBaseTable;
+
+  private final OrderedColumns mColumnDefns;
 
   private final String[] mAdminColumnOrder;
 
-  private final Map<String, Integer> mElementKeyToIndex;
-  private final String[] mElementKeyForIndex;
-
   public UserTable(UserTable table, List<Integer> indexes) {
+    this.mBaseTable = new OdkDbTable(table.mBaseTable, indexes);
     this.mColumnDefns = table.mColumnDefns;
-    mRows = new ArrayList<Row>(indexes.size());
-    for (int i = 0; i < indexes.size(); ++i) {
-      Row r = table.getRowAtIndex(indexes.get(i));
-      mRows.add(r);
-    }
-    this.mSqlWhereClause = table.mSqlWhereClause;
-    this.mSqlSelectionArgs = table.mSqlSelectionArgs;
-    this.mSqlGroupByArgs = table.mSqlGroupByArgs;
-    this.mSqlHavingClause = table.mSqlHavingClause;
-    this.mSqlOrderByElementKey = table.mSqlOrderByElementKey;
-    this.mSqlOrderByDirection = table.mSqlOrderByDirection;
     this.mAdminColumnOrder = table.mAdminColumnOrder;
-    this.mElementKeyToIndex = table.mElementKeyToIndex;
-    this.mElementKeyForIndex = table.mElementKeyForIndex;
   }
 
-  public UserTable(OrderedColumns columnDefns, String sqlWhereClause, String[] sqlSelectionArgs,
-      String[] sqlGroupByArgs, String sqlHavingClause, String sqlOrderByElementKey,
-      String sqlOrderByDirection, String[] adminColumnOrder,
-      HashMap<String, Integer> elementKeyToIndex, String[] elementKeyForIndex, Integer rowCount) {
+  public UserTable(OdkDbTable baseTable, OrderedColumns columnDefns, String[] adminColumnOrder) {
+    this.mBaseTable = baseTable;
+    baseTable.registerParentTable(this);
+
     this.mColumnDefns = columnDefns;
-
-    this.mSqlWhereClause = sqlWhereClause;
-    this.mSqlSelectionArgs = sqlSelectionArgs;
-    this.mSqlGroupByArgs = sqlGroupByArgs;
-    this.mSqlHavingClause = sqlHavingClause;
-    this.mSqlOrderByElementKey = sqlOrderByElementKey;
-    this.mSqlOrderByDirection = sqlOrderByDirection;
     this.mAdminColumnOrder = adminColumnOrder;
-    this.mElementKeyToIndex = elementKeyToIndex;
-    this.mElementKeyForIndex = elementKeyForIndex;
-    if (rowCount != null) {
-      mRows = new ArrayList<Row>(rowCount);
-    } else {
-      mRows = new ArrayList<Row>();
-    }
   }
 
-  public void addRow(Row row) {
-    mRows.add(row);
+  public UserTable(OrderedColumns columnDefns, String sqlWhereClause, Object[] sqlBindArgs,
+      String[] sqlGroupByArgs, String sqlHavingClause, String[] sqlOrderByElementKeys,
+      String[] sqlOrderByDirections, String[] adminColumnOrder,
+      Map<String, Integer> elementKeyToIndex, String[] elementKeyForIndex, Integer rowCount) {
+
+    OdkDbResumableQuery query = new OdkDbSimpleQuery(columnDefns.getTableId(),
+        new BindArgs(sqlBindArgs), sqlWhereClause, sqlGroupByArgs, sqlHavingClause,
+        sqlOrderByElementKeys, sqlOrderByDirections, null);
+
+    this.mBaseTable = new OdkDbTable(query, elementKeyForIndex, elementKeyToIndex, primaryKey,
+        rowCount);
+
+    this.mColumnDefns = columnDefns;
+    this.mAdminColumnOrder = adminColumnOrder;
   }
 
+  /***
+   * Methods that pass straight down to OdkDbTable
+   ***/
+  public OdkDbTable getBaseTable() {
+    return mBaseTable;
+  }
+
+  public void addRow(OdkDbRow row) {
+    mBaseTable.addRow(row);
+  }
+
+  public OdkDbRow getRowAtIndex(int index) {
+    return mBaseTable.getRowAtIndex(index);
+  }
+
+  public String getElementKey(int colNum) {
+    return mBaseTable.getElementKey(colNum);
+  }
+
+  public Integer getColumnIndexOfElementKey(String elementKey) {
+    return mBaseTable.getColumnIndexOfElementKey(elementKey);
+  }
+
+  public BindArgs getSelectionArgs() {
+    return mBaseTable.getSqlBindArgs();
+  }
+
+  public int getWidth() {
+    return mBaseTable.getWidth();
+  }
+
+  public int getNumberOfRows() {
+    return mBaseTable.getNumberOfRows();
+  }
+
+  public Map<String, Integer> getElementKeyToIndex() {
+    return mBaseTable.getElementKeyToIndex();
+  }
+
+  public boolean getEffectiveAccessCreateRow() {
+    return mBaseTable.getEffectiveAccessCreateRow();
+  }
+
+  public OdkDbResumableQuery getQuery() {
+    return mBaseTable.getQuery();
+  }
+
+  public OdkDbResumableQuery resumeQueryForward(int limit) {
+    return mBaseTable.resumeQueryForward(limit);
+  }
+
+  public OdkDbResumableQuery resumeQueryBackward(int limit) {
+    return mBaseTable.resumeQueryBackward(limit);
+  }
+
+
+  /*** Unique methods to UserTable ***/
   public String getAppName() {
     return mColumnDefns.getAppName();
   }
@@ -111,79 +157,54 @@ public class UserTable implements Parcelable {
     return mColumnDefns;
   }
 
-  public Row getRowAtIndex(int index) {
-    return this.mRows.get(index);
+  public String getRowId(int rowIndex) {
+    return getRowAtIndex(rowIndex).getDataByKey(DataTableColumns.ID);
   }
 
-  public Integer getColumnIndexOfElementKey(String elementKey) {
-    return this.mElementKeyToIndex.get(elementKey);
-  }
+  public String getDisplayTextOfData(int rowIndex, ElementType type, String
+      elementKey) {
+    // TODO: share processing with CollectUtil.writeRowDataToBeEdited(...)
+    OdkDbRow row = getRowAtIndex(rowIndex);
+    String raw = row.getDataByKey(elementKey);
+    String rowId = row.getDataByKey(DataTableColumns.ID);
 
-  /**
-   * This is EXPENSIVE!!!  Used only for JS return value
-   * Do not use for anything else!!!!
-   *
-   * @return copy of the map. Used for JS return value
-   */
-  public Map<String, Integer> getElementKeyMap() {
-    HashMap<String, Integer> copyMap = new HashMap<String, Integer>(this.mElementKeyToIndex);
-    return copyMap;
-  }
-
-  public String getElementKey(int colNum) {
-    return this.mElementKeyForIndex[colNum];
-  }
-
-  public String getWhereClause() {
-    return mSqlWhereClause;
-  }
-
-  public String[] getSelectionArgs() {
-    if ( mSqlSelectionArgs == null ) {
+    if (raw == null) {
       return null;
+    } else if (raw.length() == 0) {
+      throw new IllegalArgumentException("unexpected zero-length string in database! "
+          + elementKey);
     }
-    return mSqlSelectionArgs.clone();
-  }
 
-  /**
-   * True if the table has a group-by clause in its query
-   *
-   * @return
-   */
-  public boolean isGroupedBy() {
-    return mSqlGroupByArgs != null && mSqlGroupByArgs.length != 0;
-  }
-
-  public String[] getGroupByArgs() {
-    if (mSqlGroupByArgs == null) {
-      return null;
+    if (type == null) {
+      return raw;
+    } else if (type.getDataType() == ElementDataType.number && raw.indexOf('.') != -1) {
+      // trim trailing zeros on numbers (leaving the last one)
+      int lnz = raw.length() - 1;
+      while (lnz > 0 && raw.charAt(lnz) == '0') {
+        lnz--;
+      }
+      if (lnz >= raw.length() - 2) {
+        // ended in non-zero or x0
+        return raw;
+      } else {
+        // ended in 0...0
+        return raw.substring(0, lnz + 2);
+      }
+    } else if (type.getDataType() == ElementDataType.rowpath) {
+      File theFile = ODKFileUtils.getRowpathFile(getAppName(),
+          getTableId(), rowId, raw);
+      return theFile.getName();
+    } else if (type.getDataType() == ElementDataType.configpath) {
+      return raw;
+    } else {
+      return raw;
     }
-    return mSqlGroupByArgs.clone();
-  }
-
-  public String getHavingClause() {
-    return mSqlHavingClause;
-  }
-
-  public String getOrderByElementKey() {
-    return mSqlOrderByElementKey;
-  }
-
-  public String getOrderByDirection() {
-    return mSqlOrderByDirection;
-  }
-
-  public int getWidth() {
-    return mElementKeyForIndex.length;
-  }
-
-  public int getNumberOfRows() {
-    return this.mRows.size();
   }
 
   public boolean hasCheckpointRows() {
-    for (Row row : mRows) {
-      String type = row.getRawDataOrMetadataByElementKey(DataTableColumns.SAVEPOINT_TYPE);
+    List<OdkDbRow> rows = mBaseTable.getRows();
+    for (OdkDbRow row : rows) {
+      String type = row.getDataByKey(DataTableColumns.SAVEPOINT_TYPE);
       if (type == null || type.length() == 0) {
         return true;
       }
@@ -192,8 +213,9 @@ public class UserTable implements Parcelable {
   }
 
   public boolean hasConflictRows() {
-    for (Row row : mRows) {
-      String conflictType = row.getRawDataOrMetadataByElementKey(DataTableColumns.CONFLICT_TYPE);
+    List<OdkDbRow> rows = mBaseTable.getRows();
+    for (OdkDbRow row : rows) {
+      String conflictType = row.getDataByKey(DataTableColumns.CONFLICT_TYPE);
       if (conflictType != null && conflictType.length() != 0) {
         return true;
       }
@@ -212,12 +234,16 @@ public class UserTable implements Parcelable {
    * @return
    */
   public int getRowNumFromId(String rowId) {
-    for (int i = 0; i < this.mRows.size(); i++) {
-      if (this.mRows.get(i).getRowId().equals(rowId)) {
+    for (int i = 0; i < mBaseTable.getNumberOfRows(); i++) {
+      if (getRowId(i).equals(rowId)) {
         return i;
       }
     }
     return -1;
+  }
+
+  public ParentTable getParentTable() {
+    return this;
   }
 
   @Override
@@ -227,84 +253,16 @@ public class UserTable implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel out, int flags) {
-    String[] emptyString = {};
-    out.writeString(mSqlWhereClause);
-    if (mSqlSelectionArgs == null) {
-      out.writeInt(-1);
-    } else {
-      out.writeInt(mSqlSelectionArgs.length);
-      out.writeStringArray(mSqlSelectionArgs);
-    }
-    if (mSqlGroupByArgs == null) {
-      out.writeInt(-1);
-    } else {
-      out.writeInt(mSqlGroupByArgs.length);
-      out.writeStringArray(mSqlGroupByArgs);
-    }
-    out.writeString(mSqlHavingClause);
-    out.writeString(mSqlOrderByElementKey);
-    out.writeString(mSqlOrderByDirection);
     this.mColumnDefns.writeToParcel(out, flags);
-    out.writeInt(mAdminColumnOrder.length);
-    out.writeStringArray(mAdminColumnOrder);
-    out.writeInt(mRows.size());
-    for (Row r : mRows) {
-      r.writeToParcel(out, flags);
-    }
+    OdkMarshallUtil.marshallStringArray(out, mAdminColumnOrder);
+    this.mBaseTable.writeToParcel(out, flags);
   }
 
   public UserTable(Parcel in) {
-    this.mSqlWhereClause = in.readString();
-    int n = in.readInt();
-    if ( n == -1 ) {
-      this.mSqlSelectionArgs = null;
-    } else {
-      this.mSqlSelectionArgs = new String[n];
-      in.readStringArray(mSqlSelectionArgs);
-    }
-    n = in.readInt();
-    if ( n == -1 ) {
-      this.mSqlGroupByArgs = null;
-    } else {
-      this.mSqlGroupByArgs = new String[n];
-      in.readStringArray(mSqlGroupByArgs);
-    }
-    this.mSqlHavingClause = in.readString();
-    this.mSqlOrderByElementKey = in.readString();
-    this.mSqlOrderByDirection = in.readString();
     this.mColumnDefns = new OrderedColumns(in);
-    this.mAdminColumnOrder = new String[in.readInt()];
-    in.readStringArray(mAdminColumnOrder);
-    // count of rows...
-    int i = in.readInt();
-    mRows = new ArrayList<Row>(i);
-    for (; i > 0; --i) {
-      Row r = new Row(this, in);
-      mRows.add(r);
-    }
-
-    // These maps will map the element key to the corresponding index in
-    // either data or metadata. If the user has defined a column with the
-    // element key _my_data, and this column is at index 5 in the data
-    // array, dataKeyToIndex would then have a mapping of _my_data:5.
-    // The sync_state column, if present at index 7, would have a mapping
-    // in metadataKeyToIndex of sync_state:7.
-    mElementKeyToIndex = new HashMap<String, Integer>();
-    List<String> userColumnOrder = mColumnDefns.getRetentionColumnNames();
-    mElementKeyForIndex = new String[userColumnOrder.size() + mAdminColumnOrder.length];
-    for (i = 0; i < userColumnOrder.size(); i++) {
-      String elementKey = userColumnOrder.get(i);
-      mElementKeyForIndex[i] = elementKey;
-      mElementKeyToIndex.put(elementKey, i);
-    }
-
-    for (int j = 0; j < mAdminColumnOrder.length; j++) {
-      // TODO: problem is here. unclear how to best get just the
-      // metadata in here. hmm.
-      String elementKey = mAdminColumnOrder[j];
-      mElementKeyForIndex[i + j] = elementKey;
-      mElementKeyToIndex.put(elementKey, i + j);
-    }
+    this.mAdminColumnOrder = OdkMarshallUtil.unmarshallStringArray(in);
+    this.mBaseTable = new OdkDbTable(in);
+    this.mBaseTable.registerParentTable(this);
   }
 
   public static final Parcelable.Creator<UserTable> CREATOR = new Parcelable.Creator<UserTable>() {
