@@ -21,8 +21,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.common.android.data.ColumnDefinition;
-import org.opendatakit.common.android.data.OrderedColumns;
+import org.opendatakit.common.android.database.data.ColumnDefinition;
+import org.opendatakit.common.android.database.data.OrderedColumns;
+import org.opendatakit.common.android.logging.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 
 import java.io.IOException;

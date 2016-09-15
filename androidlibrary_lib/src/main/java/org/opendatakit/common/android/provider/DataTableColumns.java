@@ -41,7 +41,7 @@ public class DataTableColumns implements BaseColumns {
 
   /**
    * (_savepoint_timestamp, _savepoint_type)
-   * are managed by the database layer based upon the OdkDbInterface methods being
+   * are managed by the database layer based upon the AidlDbInterface methods being
    * called to update a record.
    *
    * <p>_savepoint_timestamp is an iso8601-style UTC timestamp with nanosecond resolution.</p>

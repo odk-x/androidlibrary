@@ -23,12 +23,14 @@ import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.SyncState;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.common.android.data.ColumnDefinition;
-import org.opendatakit.common.android.data.OrderedColumns;
-import org.opendatakit.common.android.data.UserTable;
+import org.opendatakit.common.android.data.utilities.DataHelper;
+import org.opendatakit.common.android.database.data.ColumnDefinition;
+import org.opendatakit.common.android.database.data.Row;
+import org.opendatakit.common.android.database.data.OrderedColumns;
+import org.opendatakit.common.android.database.data.UserTable;
+import org.opendatakit.common.android.logging.WebLogger;
 import org.opendatakit.common.android.provider.DataTableColumns;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
-import org.opendatakit.database.service.OdkDbRow;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -399,11 +401,11 @@ public class UserTableTest extends AndroidTestCase {
         new String[] { GROUP_COL }, YOUR_COL + "=?", new String[] { THEIR_COL },
         new String[] { "ASC" }, adminColumnOrder, elementKeyToIndex, elementKeyForIndex, null);
 
-    OdkDbRow row;
+    Row row;
 
-    row = new OdkDbRow(rowValues1.clone(), table.getBaseTable());
+    row = new Row(rowValues1.clone(), table.getBaseTable());
     table.addRow(row);
-    row = new OdkDbRow(rowValues2.clone(), table.getBaseTable());
+    row = new Row(rowValues2.clone(), table.getBaseTable());
     table.addRow(row);
 
     Parcel p = Parcel.obtain();
@@ -465,10 +467,10 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(0, t.getRowNumFromId(INSTANCE_ID_1));
     assertEquals(1, table.getRowNumFromId(INSTANCE_ID_2));
     assertEquals(1, t.getRowNumFromId(INSTANCE_ID_2));
-    OdkDbRow rat1 = table.getRowAtIndex(0);
-    OdkDbRow rat2 = table.getRowAtIndex(1);
-    OdkDbRow rbt1 = t.getRowAtIndex(0);
-    OdkDbRow rbt2 = t.getRowAtIndex(1);
+    Row rat1 = table.getRowAtIndex(0);
+    Row rat2 = table.getRowAtIndex(1);
+    Row rbt1 = t.getRowAtIndex(0);
+    Row rbt2 = t.getRowAtIndex(1);
 
     assertEquals(rat1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
     assertEquals(rbt1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
@@ -625,11 +627,11 @@ public class UserTableTest extends AndroidTestCase {
         adminColumnOrder,
         elementKeyToIndex, elementKeyForIndex, null);
 
-    OdkDbRow row;
+    Row row;
 
-    row = new OdkDbRow(rowValues1.clone(), table.getBaseTable());
+    row = new Row(rowValues1.clone(), table.getBaseTable());
     table.addRow(row);
-    row = new OdkDbRow(rowValues2.clone(), table.getBaseTable());
+    row = new Row(rowValues2.clone(), table.getBaseTable());
     table.addRow(row);
 
     Parcel p = Parcel.obtain();
@@ -691,10 +693,10 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(0, t.getRowNumFromId(INSTANCE_ID_1));
     assertEquals(1, table.getRowNumFromId(INSTANCE_ID_2));
     assertEquals(1, t.getRowNumFromId(INSTANCE_ID_2));
-    OdkDbRow rat1 = table.getRowAtIndex(0);
-    OdkDbRow rat2 = table.getRowAtIndex(1);
-    OdkDbRow rbt1 = t.getRowAtIndex(0);
-    OdkDbRow rbt2 = t.getRowAtIndex(1);
+    Row rat1 = table.getRowAtIndex(0);
+    Row rat2 = table.getRowAtIndex(1);
+    Row rbt1 = t.getRowAtIndex(0);
+    Row rbt2 = t.getRowAtIndex(1);
 
     assertEquals(rat1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
     assertEquals(rbt1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
@@ -805,11 +807,11 @@ public class UserTableTest extends AndroidTestCase {
         adminColumnOrder,
         elementKeyToIndex, elementKeyForIndex, null);
 
-    OdkDbRow row;
+    Row row;
 
-    row = new OdkDbRow(rowValues1.clone(), table.getBaseTable());
+    row = new Row(rowValues1.clone(), table.getBaseTable());
     table.addRow(row);
-    row = new OdkDbRow(rowValues2.clone(), table.getBaseTable());
+    row = new Row(rowValues2.clone(), table.getBaseTable());
     table.addRow(row);
 
     List<Integer> idxs = new ArrayList<Integer>();
@@ -865,10 +867,10 @@ public class UserTableTest extends AndroidTestCase {
     assertEquals(0, t.getRowNumFromId(INSTANCE_ID_1));
     assertEquals(1, table.getRowNumFromId(INSTANCE_ID_2));
     assertEquals(1, t.getRowNumFromId(INSTANCE_ID_2));
-    OdkDbRow rat1 = table.getRowAtIndex(0);
-    OdkDbRow rat2 = table.getRowAtIndex(1);
-    OdkDbRow rbt1 = t.getRowAtIndex(0);
-    OdkDbRow rbt2 = t.getRowAtIndex(1);
+    Row rat1 = table.getRowAtIndex(0);
+    Row rat2 = table.getRowAtIndex(1);
+    Row rbt1 = t.getRowAtIndex(0);
+    Row rbt2 = t.getRowAtIndex(1);
 
     assertEquals(rat1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
     assertEquals(rbt1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);

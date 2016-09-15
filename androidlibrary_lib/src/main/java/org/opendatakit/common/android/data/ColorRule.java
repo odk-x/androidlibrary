@@ -18,7 +18,7 @@ package org.opendatakit.common.android.data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
-import org.opendatakit.database.service.OdkDbRow;
+import org.opendatakit.common.android.database.data.Row;
 
 import java.util.TreeMap;
 import java.util.UUID;
@@ -294,7 +294,7 @@ public class ColorRule {
     this.mElementKey = elementKey;
   }
 
-  public boolean checkMatch(ElementDataType type, OdkDbRow row) {
+  public boolean checkMatch(ElementDataType type, Row row) {
     try {
       // Get the value we're testing against.
       String testValue = row.getDataByKey(mElementKey);

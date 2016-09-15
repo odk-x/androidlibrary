@@ -19,8 +19,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
+import org.opendatakit.common.android.database.utilities.KeyValueStoreUtils;
+import org.opendatakit.common.android.logging.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
-import org.opendatakit.database.service.KeyValueStoreEntry;
+import org.opendatakit.common.android.database.data.KeyValueStoreEntry;
 
 import java.util.ArrayList;
 import java.util.Map;

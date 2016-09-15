@@ -19,11 +19,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.apache.commons.lang3.CharEncoding;
-import org.opendatakit.IntentConsts;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
-import org.opendatakit.common.android.utilities.WebLogger;
+import org.opendatakit.common.android.logging.WebLogger;
 
 import java.io.File;
 import java.io.FileInputStream;

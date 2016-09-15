@@ -16,8 +16,8 @@
 package org.opendatakit.common.android.utilities;
 
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
-import org.opendatakit.common.android.data.ColumnDefinition;
-import org.opendatakit.common.android.data.OrderedColumns;
+import org.opendatakit.common.android.database.data.ColumnDefinition;
+import org.opendatakit.common.android.database.data.OrderedColumns;
 import org.opendatakit.common.android.utilities.StaticStateManipulator.IStaticFieldManipulator;
 
 import java.util.ArrayList;

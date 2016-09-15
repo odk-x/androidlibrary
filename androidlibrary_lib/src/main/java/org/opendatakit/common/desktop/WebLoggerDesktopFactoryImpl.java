@@ -16,8 +16,8 @@ package org.opendatakit.common.desktop;
 
 import android.annotation.SuppressLint;
 
-import org.opendatakit.common.android.utilities.WebLoggerFactoryIf;
-import org.opendatakit.common.android.utilities.WebLoggerIf;
+import org.opendatakit.common.android.logging.WebLoggerFactoryIf;
+import org.opendatakit.common.android.logging.WebLoggerIf;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

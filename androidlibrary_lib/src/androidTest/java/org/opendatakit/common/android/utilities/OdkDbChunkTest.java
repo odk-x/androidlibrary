@@ -18,9 +18,10 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
 
+import org.opendatakit.common.android.database.service.DbChunk;
+import org.opendatakit.common.android.logging.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
-import org.opendatakit.database.service.OdkDbChunk;
-import org.opendatakit.database.utilities.OdkDbChunkUtil;
+import org.opendatakit.common.android.database.utilities.DbChunkUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
   public void testConvertSerializableNull() {
     String[] nullData = null;
     try {
-      assertNull(OdkDbChunkUtil.convertToChunks(nullData, largeChunkSize));
+      assertNull(DbChunkUtil.convertToChunks(nullData, largeChunkSize));
     } catch (IOException e) {
       fail("Should not throw exception on null input");
       return;
@@ -57,10 +58,10 @@ public class OdkDbChunkTest extends AndroidTestCase {
   }
 
   public void testRebuildSerializableNull() {
-    List<OdkDbChunk> nullList = null;
+    List<DbChunk> nullList = null;
 
     try {
-      assertNull(OdkDbChunkUtil.rebuildFromChunks(nullList, String[].class));
+      assertNull(DbChunkUtil.rebuildFromChunks(nullList, String[].class));
     } catch (IOException e) {
       fail("Should not throw exception on null");
       return;
@@ -71,10 +72,10 @@ public class OdkDbChunkTest extends AndroidTestCase {
   }
 
   public void testConvertSerializableToAndFromChunk() {
-    List<OdkDbChunk> chunks;
+    List<DbChunk> chunks;
 
     try {
-      chunks = OdkDbChunkUtil.convertToChunks(testData, largeChunkSize);
+      chunks = DbChunkUtil.convertToChunks(testData, largeChunkSize);
     } catch (IOException e) {
       fail("Failed to convert serializable to chunks: " + e.getMessage());
       return;
@@ -82,12 +83,12 @@ public class OdkDbChunkTest extends AndroidTestCase {
 
     assertTrue("Unexpected number of chunks", chunks.size() == 1);
 
-    OdkDbChunk chunk = chunks.get(0);
+    DbChunk chunk = chunks.get(0);
     assertFalse("Single chunk shouldn't point to another", chunk.hasNextID());
 
     String[] results;
     try {
-      results = OdkDbChunkUtil.rebuildFromChunks(chunks, String[].class);
+      results = DbChunkUtil.rebuildFromChunks(chunks, String[].class);
     } catch (IOException e) {
       fail("Failed to rebuild serializable from chunks: " + e.getMessage());
       return;
@@ -104,10 +105,10 @@ public class OdkDbChunkTest extends AndroidTestCase {
   }
 
   public void testConvertSerializableToAndFromChunks() {
-    List<OdkDbChunk> chunks;
+    List<DbChunk> chunks;
 
     try {
-      chunks = OdkDbChunkUtil.convertToChunks(testData, smallChunkSize);
+      chunks = DbChunkUtil.convertToChunks(testData, smallChunkSize);
     } catch (IOException e) {
       fail("Failed to convert serializable to chunks: " + e.getMessage());
       return;
@@ -116,8 +117,8 @@ public class OdkDbChunkTest extends AndroidTestCase {
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     // Test chunk list pointers
-    ListIterator<OdkDbChunk> iterator = chunks.listIterator();
-    OdkDbChunk currChunk = iterator.next();
+    ListIterator<DbChunk> iterator = chunks.listIterator();
+    DbChunk currChunk = iterator.next();
     assertTrue("Missing pointer to next chunk", currChunk.hasNextID());
     UUID nextChunkId = currChunk.getNextID();
     while(iterator.hasNext()) {
@@ -133,7 +134,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
     // Test unpack
     String[] results;
     try {
-      results = OdkDbChunkUtil.rebuildFromChunks(chunks, String[].class);
+      results = DbChunkUtil.rebuildFromChunks(chunks, String[].class);
     } catch (IOException e) {
       fail("Failed to rebuild serializable from chunks: " + e.getMessage());
       return;
@@ -152,28 +153,28 @@ public class OdkDbChunkTest extends AndroidTestCase {
   public void testConvertParcelableNull() {
     Bundle nullData = null;
 
-    assertNull(OdkDbChunkUtil.convertToChunks(nullData, largeChunkSize));
+    assertNull(DbChunkUtil.convertToChunks(nullData, largeChunkSize));
   }
 
   public void testRebuildParcelableNull() {
-    List<OdkDbChunk> nullList = null;
+    List<DbChunk> nullList = null;
 
-    assertNull(OdkDbChunkUtil.rebuildFromChunks(nullList, Bundle.CREATOR));
+    assertNull(DbChunkUtil.rebuildFromChunks(nullList, Bundle.CREATOR));
   }
 
   public void testConvertParcelableToAndFromChunk() {
-    List<OdkDbChunk> chunks;
+    List<DbChunk> chunks;
     Bundle parcelableTestData = new Bundle();
     parcelableTestData.putStringArray("testData", testData);
 
-    chunks = OdkDbChunkUtil.convertToChunks(parcelableTestData, largeChunkSize);
+    chunks = DbChunkUtil.convertToChunks(parcelableTestData, largeChunkSize);
 
     assertTrue("Unexpected number of chunks", chunks.size() == 1);
 
-    OdkDbChunk chunk = chunks.get(0);
+    DbChunk chunk = chunks.get(0);
     assertFalse("Single chunk shouldn't point to another", chunk.hasNextID());
 
-    Bundle results = OdkDbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
+    Bundle results = DbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
 
     assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
     assertTrue("Data unpack error", results.containsKey("testData"));
@@ -185,17 +186,17 @@ public class OdkDbChunkTest extends AndroidTestCase {
   }
 
   public void testConvertParcelableToAndFromChunks() {
-    List<OdkDbChunk> chunks;
+    List<DbChunk> chunks;
     Bundle parcelableTestData = new Bundle();
     parcelableTestData.putStringArray("testData", testData);
 
-    chunks = OdkDbChunkUtil.convertToChunks(parcelableTestData, smallChunkSize);
+    chunks = DbChunkUtil.convertToChunks(parcelableTestData, smallChunkSize);
 
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     // Test chunk list pointers
-    ListIterator<OdkDbChunk> iterator = chunks.listIterator();
-    OdkDbChunk currChunk = iterator.next();
+    ListIterator<DbChunk> iterator = chunks.listIterator();
+    DbChunk currChunk = iterator.next();
     assertTrue("Missing pointer to next chunk", currChunk.hasNextID());
     UUID nextChunkId = currChunk.getNextID();
     while(iterator.hasNext()) {
@@ -209,7 +210,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
     }
 
     // Test unpack
-    Bundle results = OdkDbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
+    Bundle results = DbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
 
     assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
     assertTrue("Data unpack error", results.containsKey("testData"));
@@ -221,10 +222,10 @@ public class OdkDbChunkTest extends AndroidTestCase {
   }
 
   public void testChunkParcelation() {
-    List<OdkDbChunk> chunks;
+    List<DbChunk> chunks;
 
     try {
-      chunks = OdkDbChunkUtil.convertToChunks(testData, largeChunkSize);
+      chunks = DbChunkUtil.convertToChunks(testData, largeChunkSize);
     } catch (IOException e) {
       fail("Failed to convert serializable to chunks: " + e.getMessage());
       return;
@@ -232,7 +233,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
 
     assertTrue("Unexpected number of chunks", chunks.size() == 1);
 
-    OdkDbChunk chunk = chunks.get(0);
+    DbChunk chunk = chunks.get(0);
 
      /*
      * Marshall the test data
@@ -246,13 +247,13 @@ public class OdkDbChunkTest extends AndroidTestCase {
     p.unmarshall(bytes, 0, bytes.length);
     p.setDataPosition(0);
 
-    OdkDbChunk result = OdkDbChunk.CREATOR.createFromParcel(p);
-    List<OdkDbChunk> resultChunks = new ArrayList<OdkDbChunk>();
+    DbChunk result = DbChunk.CREATOR.createFromParcel(p);
+    List<DbChunk> resultChunks = new ArrayList<DbChunk>();
     resultChunks.add(result);
 
     String[] results;
     try {
-      results = OdkDbChunkUtil.rebuildFromChunks(resultChunks, String[].class);
+      results = DbChunkUtil.rebuildFromChunks(resultChunks, String[].class);
     } catch (IOException e) {
       fail("Failed to rebuild serializable from chunks: " + e.getMessage());
       return;
@@ -269,10 +270,10 @@ public class OdkDbChunkTest extends AndroidTestCase {
   }
 
   public void testChunksParcelation() {
-    List<OdkDbChunk> chunks;
+    List<DbChunk> chunks;
 
     try {
-      chunks = OdkDbChunkUtil.convertToChunks(testData, smallChunkSize);
+      chunks = DbChunkUtil.convertToChunks(testData, smallChunkSize);
     } catch (IOException e) {
       fail("Failed to convert serializable to chunks: " + e.getMessage());
       return;
@@ -284,10 +285,10 @@ public class OdkDbChunkTest extends AndroidTestCase {
      * Marshall the test data
      */
     List<byte[]> marshalledChunks = new LinkedList<byte[]>();
-    List<OdkDbChunk> resultChunks = new LinkedList<OdkDbChunk>();
-    ListIterator<OdkDbChunk> iterator = chunks.listIterator();
+    List<DbChunk> resultChunks = new LinkedList<DbChunk>();
+    ListIterator<DbChunk> iterator = chunks.listIterator();
     while (iterator.hasNext()) {
-      OdkDbChunk chunk = iterator.next();
+      DbChunk chunk = iterator.next();
 
       Parcel p = Parcel.obtain();
       chunk.writeToParcel(p, 0);
@@ -298,14 +299,14 @@ public class OdkDbChunkTest extends AndroidTestCase {
       p = Parcel.obtain();
       p.unmarshall(bytes, 0, bytes.length);
       p.setDataPosition(0);
-      OdkDbChunk result = OdkDbChunk.CREATOR.createFromParcel(p);
+      DbChunk result = DbChunk.CREATOR.createFromParcel(p);
       resultChunks.add(result);
     }
 
     // Test unpack
     String[] results;
     try {
-      results = OdkDbChunkUtil.rebuildFromChunks(chunks, String[].class);
+      results = DbChunkUtil.rebuildFromChunks(chunks, String[].class);
     } catch (IOException e) {
       fail("Failed to rebuild serializable from chunks: " + e.getMessage());
       return;
