@@ -31,7 +31,7 @@ import org.opendatakit.common.android.exception.ServicesAvailabilityException;
 import org.opendatakit.common.android.provider.DataTableColumns;
 import org.opendatakit.common.android.database.service.AidlDbInterface;
 import org.opendatakit.common.android.database.data.BaseTable;
-import org.opendatakit.common.android.database.queries.AbstractQuery;
+import org.opendatakit.common.android.database.queries.ArbitraryQuery;
 import org.opendatakit.common.android.database.queries.ResumableQuery;
 import org.opendatakit.common.android.database.queries.SimpleQuery;
 import org.opendatakit.common.android.database.utilities.DbChunkUtil;
@@ -358,7 +358,7 @@ public class UserDbInterface {
     * @return A {@link UserTable} containing the results of the query
     * @throws ServicesAvailabilityException
     */
-   public BaseTable rawSqlQueryLocalOnlyTables(String appName, DbHandle dbHandleName,
+   public BaseTable simpleQueryLocalOnlyTables(String appName, DbHandle dbHandleName,
        String tableId, String whereClause, Object[] bindArgs, String[] groupBy, String having,
        String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset)
        throws ServicesAvailabilityException {
@@ -367,7 +367,7 @@ public class UserDbInterface {
          tableId = "L_" + tableId;
       }
 
-      return rawSqlQuery(appName, dbHandleName, tableId, whereClause, bindArgs, groupBy, having,
+      return simpleQuery(appName, dbHandleName, tableId, whereClause, bindArgs, groupBy, having,
           orderByColNames, orderByDirections, limit, offset);
    }
 
@@ -402,7 +402,7 @@ public class UserDbInterface {
 
    /**
     * Get a {@link BaseTable} that holds the results from the continued query. Note that this is
-    * just a wrapper of resumeRawSqlQuery, which could successfully be used instead.
+    * just a wrapper of resumeSimpleQuery, which could successfully be used instead.
     *
     * @param appName
     * @param dbHandleName
@@ -410,10 +410,10 @@ public class UserDbInterface {
     * @return
     * @throws ServicesAvailabilityException
     */
-   public BaseTable resumeRawSqlQueryLocalOnlyTables(String appName, DbHandle dbHandleName,
+   public BaseTable resumeSimpleQueryLocalOnlyTables(String appName, DbHandle dbHandleName,
        ResumableQuery query) throws ServicesAvailabilityException {
 
-      return resumeRawSqlQuery(appName, dbHandleName, query);
+      return resumeSimpleQuery(appName, dbHandleName, query);
    }
 
    /**
@@ -798,7 +798,7 @@ public class UserDbInterface {
     * @param offset            the index to start counting the limit from
     * @return A {@link UserTable} containing the results of the query
     */
-   public BaseTable rawSqlQuery(String appName, DbHandle dbHandleName, String tableId,
+   public BaseTable simpleQuery(String appName, DbHandle dbHandleName, String tableId,
        String whereClause, Object[] bindArgs, String[] groupBy, String having,
        String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset) throws ServicesAvailabilityException {
 
@@ -807,7 +807,7 @@ public class UserDbInterface {
           groupBy, having, orderByColNames, orderByDirections, limit, offset);
 
        BaseTable baseTable = fetchAndRebuildChunks(dbInterface
-          .rawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
+          .simpleQuery(appName, dbHandleName, query.getSqlCommand(),
               query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()), BaseTable.CREATOR);
 
        baseTable.setQuery(query);
@@ -846,7 +846,7 @@ public class UserDbInterface {
    * @param offset            the index to start counting the limit from
    * @return A {@link UserTable} containing the results of the query
    */
-  public BaseTable privilegedRawSqlQuery(String appName, DbHandle dbHandleName, String tableId,
+  public BaseTable privilegedSimpleQuery(String appName, DbHandle dbHandleName, String tableId,
       String whereClause, Object[] bindArgs, String[] groupBy, String having,
       String[] orderByColNames, String[] orderByDirections, Integer limit, Integer offset) throws ServicesAvailabilityException {
 
@@ -855,7 +855,7 @@ public class UserDbInterface {
           groupBy, having, orderByColNames, orderByDirections, limit, offset);
 
       BaseTable baseTable = fetchAndRebuildChunks(dbInterface
-          .privilegedRawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
+          .privilegedSimpleQuery(appName, dbHandleName, query.getSqlCommand(),
               query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()), BaseTable.CREATOR);
 
       baseTable.setQuery(query);
@@ -887,11 +887,11 @@ public class UserDbInterface {
    public BaseTable arbitrarySqlQuery(String appName, DbHandle dbHandleName, String tableId,
        String sqlCommand, Object[] bindArgs, Integer limit, Integer offset) throws ServicesAvailabilityException {
      try {
-       AbstractQuery query = new AbstractQuery(tableId, new BindArgs(bindArgs),
+       ArbitraryQuery query = new ArbitraryQuery(tableId, new BindArgs(bindArgs),
            sqlCommand, limit, offset);
 
        BaseTable baseTable = fetchAndRebuildChunks(dbInterface
-           .rawSqlQuery(appName, dbHandleName, query.getSqlCommand(), query.getSqlBindArgs(),
+           .simpleQuery(appName, dbHandleName, query.getSqlCommand(), query.getSqlBindArgs(),
                query.getSqlQueryBounds(), query.getTableId()), BaseTable.CREATOR);
 
        baseTable.setQuery(query);
@@ -911,10 +911,10 @@ public class UserDbInterface {
     * @param query The original query with the bounds adjusted
     * @return
     */
-   public BaseTable resumeRawSqlQuery(String appName, DbHandle dbHandleName,
+   public BaseTable resumeSimpleQuery(String appName, DbHandle dbHandleName,
        ResumableQuery query) throws ServicesAvailabilityException {
      try {
-       BaseTable baseTable = fetchAndRebuildChunks(dbInterface.rawSqlQuery(appName, dbHandleName,
+       BaseTable baseTable = fetchAndRebuildChunks(dbInterface.simpleQuery(appName, dbHandleName,
           query.getSqlCommand(), query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()),
           BaseTable.CREATOR);
 
@@ -938,11 +938,11 @@ public class UserDbInterface {
    * @param query The original query with the bounds adjusted
    * @return
    */
-  public BaseTable resumePrivilegedRawSqlQuery(String appName, DbHandle dbHandleName,
+  public BaseTable resumePrivilegedSimpleQuery(String appName, DbHandle dbHandleName,
       ResumableQuery query) throws ServicesAvailabilityException {
     try {
       BaseTable baseTable = fetchAndRebuildChunks(dbInterface
-          .privilegedRawSqlQuery(appName, dbHandleName, query.getSqlCommand(),
+          .privilegedSimpleQuery(appName, dbHandleName, query.getSqlCommand(),
               query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId()), BaseTable.CREATOR);
 
       baseTable.setQuery(query);
@@ -980,12 +980,12 @@ public class UserDbInterface {
     * @param offset            the index to start counting the limit from
     * @return A {@link UserTable} containing the results of the query
     */
-   public UserTable rawSqlQuery(String appName, DbHandle dbHandleName, String tableId,
+   public UserTable simpleQuery(String appName, DbHandle dbHandleName, String tableId,
        OrderedColumns columnDefns, String whereClause, Object[] bindArgs, String[] groupBy,
        String having, String[] orderByColNames, String[] orderByDirections, Integer limit,
        Integer offset) throws ServicesAvailabilityException {
      try {
-       BaseTable baseTable = rawSqlQuery(appName, dbHandleName, tableId, whereClause, bindArgs,
+       BaseTable baseTable = simpleQuery(appName, dbHandleName, tableId, whereClause, bindArgs,
            groupBy, having, orderByColNames, orderByDirections, limit, offset);
 
        return new UserTable(baseTable, columnDefns, getAdminColumns());
@@ -1022,12 +1022,12 @@ public class UserDbInterface {
    * @param offset            the index to start counting the limit from
    * @return A {@link UserTable} containing the results of the query
    */
-  public UserTable privilegedRawSqlQuery(String appName, DbHandle dbHandleName, String tableId,
+  public UserTable privilegedSimpleQuery(String appName, DbHandle dbHandleName, String tableId,
       OrderedColumns columnDefns, String whereClause, Object[] bindArgs, String[] groupBy,
       String having, String[] orderByColNames, String[] orderByDirections, Integer limit,
       Integer offset) throws ServicesAvailabilityException {
     try {
-      BaseTable baseTable = privilegedRawSqlQuery(appName, dbHandleName, tableId, whereClause,
+      BaseTable baseTable = privilegedSimpleQuery(appName, dbHandleName, tableId, whereClause,
           bindArgs,
           groupBy, having, orderByColNames, orderByDirections, limit, offset);
 
@@ -1079,10 +1079,10 @@ public class UserDbInterface {
     * @param query The original query with the bounds adjusted
     * @return
     */
-   public UserTable resumeRawSqlQuery(String appName, DbHandle dbHandleName, OrderedColumns
+   public UserTable resumeSimpleQuery(String appName, DbHandle dbHandleName, OrderedColumns
        columnDefns, ResumableQuery query) throws ServicesAvailabilityException {
      try {
-       BaseTable baseTable = resumeRawSqlQuery(appName, dbHandleName, query);
+       BaseTable baseTable = resumeSimpleQuery(appName, dbHandleName, query);
 
        return new UserTable(baseTable, columnDefns, getAdminColumns());
      } catch ( Exception e ) {
@@ -1105,11 +1105,11 @@ public class UserDbInterface {
    * @param query The original query with the bounds adjusted
    * @return
    */
-  public UserTable resumePrivilegedRawSqlQuery(String appName, DbHandle dbHandleName,
+  public UserTable resumePrivilegedSimpleQuery(String appName, DbHandle dbHandleName,
       OrderedColumns
       columnDefns, ResumableQuery query) throws ServicesAvailabilityException {
     try {
-      BaseTable baseTable = resumePrivilegedRawSqlQuery(appName, dbHandleName, query);
+      BaseTable baseTable = resumePrivilegedSimpleQuery(appName, dbHandleName, query);
 
       return new UserTable(baseTable, columnDefns, getAdminColumns());
     } catch ( Exception e ) {

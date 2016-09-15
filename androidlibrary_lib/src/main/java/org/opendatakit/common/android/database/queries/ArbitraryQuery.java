@@ -18,7 +18,7 @@ package org.opendatakit.common.android.database.queries;
 /**
  * This is a basic query with the typical building blocks.
  */
-public class AbstractQuery extends ResumableQuery {
+public class ArbitraryQuery extends ResumableQuery {
 
    /**
     * The the abstract SQL command
@@ -34,7 +34,7 @@ public class AbstractQuery extends ResumableQuery {
     * @param limit      The maximum number of rows to return
     * @param offset     The offset to start counting the limit from
     */
-   public AbstractQuery(String tableId, BindArgs bindArgs, String sqlCommand, Integer limit,
+   public ArbitraryQuery(String tableId, BindArgs bindArgs, String sqlCommand, Integer limit,
        Integer offset) {
       super(tableId, bindArgs, limit, offset);
 
@@ -45,7 +45,7 @@ public class AbstractQuery extends ResumableQuery {
       this.mSqlCommand = sqlCommand;
    }
 
-   public AbstractQuery(String tableId, BindArgs bindArgs, String sqlCommand,
+   public ArbitraryQuery(String tableId, BindArgs bindArgs, String sqlCommand,
        QueryBounds bounds) {
 
       this(tableId, bindArgs, sqlCommand, (bounds != null ? bounds.mLimit : -1),

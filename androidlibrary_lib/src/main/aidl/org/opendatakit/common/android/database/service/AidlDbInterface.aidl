@@ -392,7 +392,7 @@ interface AidlDbInterface {
    *       values.
    * @return
    */
-  DbChunk rawSqlQuery(in String appName, in DbHandle dbHandleName,
+  DbChunk simpleQuery(in String appName, in DbHandle dbHandleName,
       in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds,
       in String tableId);
 
@@ -414,7 +414,7 @@ interface AidlDbInterface {
    *       values.
    * @return
    */
-  DbChunk privilegedRawSqlQuery(in String appName, in DbHandle dbHandleName,
+  DbChunk privilegedSimpleQuery(in String appName, in DbHandle dbHandleName,
       in String sqlCommand, in BindArgs sqlBindArgs, in QueryBounds sqlQueryBounds,
       in String tableId);
 
