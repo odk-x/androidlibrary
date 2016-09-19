@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.CharEncoding;
+import org.opendatakit.common.android.logging.WebLogger;
 import org.opendatakit.common.android.provider.FormsColumns;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -45,10 +46,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Static methods used for common file operations.

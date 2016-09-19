@@ -16,6 +16,7 @@ package org.opendatakit.common.android.utilities;
 
 import android.test.AndroidTestCase;
 
+import org.opendatakit.common.android.logging.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 
 import java.io.ByteArrayInputStream;

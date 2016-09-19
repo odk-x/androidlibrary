@@ -16,6 +16,7 @@ package org.opendatakit.common.android.utilities;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendatakit.common.android.logging.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 
 import static org.junit.Assert.assertTrue;

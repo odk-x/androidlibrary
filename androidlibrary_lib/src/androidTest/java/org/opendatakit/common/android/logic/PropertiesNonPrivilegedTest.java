@@ -5,7 +5,7 @@ import android.test.AndroidTestCase;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
 import org.opendatakit.common.android.utilities.StaticStateManipulator;
-import org.opendatakit.common.android.utilities.WebLogger;
+import org.opendatakit.common.android.logging.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 
 /**

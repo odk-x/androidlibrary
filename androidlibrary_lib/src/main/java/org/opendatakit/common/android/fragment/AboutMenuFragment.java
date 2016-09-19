@@ -30,7 +30,7 @@ import org.opendatakit.common.android.activities.IAppAwareActivity;
 import org.opendatakit.common.android.application.AppAwareApplication;
 import org.opendatakit.common.android.listener.LicenseReaderListener;
 import org.opendatakit.common.android.task.LicenseReaderTask;
-import org.opendatakit.common.android.utilities.WebLogger;
+import org.opendatakit.common.android.logging.WebLogger;
 
 public class AboutMenuFragment extends Fragment implements LicenseReaderListener {
   private static final String t = "AboutMenuFragment";

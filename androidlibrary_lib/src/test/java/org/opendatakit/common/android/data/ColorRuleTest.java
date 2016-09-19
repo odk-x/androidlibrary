@@ -19,7 +19,7 @@ import android.graphics.Color;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendatakit.common.android.utilities.StaticStateManipulator;
-import org.opendatakit.common.android.utilities.WebLogger;
+import org.opendatakit.common.android.logging.WebLogger;
 import org.opendatakit.common.desktop.WebLoggerDesktopFactoryImpl;
 
 import static org.junit.Assert.assertEquals;
