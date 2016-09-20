@@ -18,6 +18,7 @@ import android.os.FileObserver;
 import android.util.Log;
 
 import org.apache.commons.lang3.CharEncoding;
+import org.joda.time.DateTime;
 import org.opendatakit.common.android.utilities.ODKFileUtils;
 
 import java.io.BufferedOutputStream;
@@ -29,9 +30,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * Implementation of WebLoggerIf for android that emits logs to the
@@ -71,34 +69,12 @@ public class WebLoggerImpl implements WebLoggerIf {
   // the last time we flushed our output stream
   private long lastFlush = 0L;
 
-  // date formatter
-  private final SimpleDateFormat restrictedFileDateFormatter =
-      new SimpleDateFormat(DATE_FORMAT, Locale.US);
-
   public String getFormattedFileDateNow() {
-    // SimpleDateFormat is not thread safe...
-    synchronized (restrictedFileDateFormatter) {
-      // the format() return is a String overlaying a common buffer.
-      // the string content can change unexpectedly. Access it only
-      // within this synchronized section.
-      String value = restrictedFileDateFormatter.format(new Date());
-      return new String(value);
-    }
-
+    return (new DateTime()).toString(DATE_FORMAT);
   }
 
-  private final SimpleDateFormat restrictedLogLineDateFormatter =
-      new SimpleDateFormat(LOG_LINE_DATE_FORMAT, Locale.US);
-
   public String getFormattedLogLineDateNow() {
-    // SimpleDateFormat is not thread safe...
-    synchronized (restrictedLogLineDateFormatter) {
-      // the format() return is a String overlaying a common buffer.
-      // the string content can change unexpectedly. Access it only
-      // within this synchronized section.
-      String value = restrictedLogLineDateFormatter.format(new Date());
-      return new String(value);
-    }
+    return (new DateTime()).toString(LOG_LINE_DATE_FORMAT);
   }
 
 
