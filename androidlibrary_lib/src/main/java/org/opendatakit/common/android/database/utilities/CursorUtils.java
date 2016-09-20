@@ -74,9 +74,10 @@ public class CursorUtils {
        String v = l.toString();
        return v;
     }
-    case Cursor.FIELD_TYPE_NULL:
-      return c.getString(i);
     default:
+      // all the possible values are enumerated. Nothing should fall here.
+    case Cursor.FIELD_TYPE_NULL:
+      // should be handled by c.isNull() earlier
     case Cursor.FIELD_TYPE_BLOB:
       throw new IllegalStateException("Unexpected data type in SQLite table");
     }
@@ -98,6 +99,7 @@ public class CursorUtils {
     case Cursor.FIELD_TYPE_INTEGER:
       return Long.class;
     case Cursor.FIELD_TYPE_NULL:
+      // this cell is a null. Use String class as a placeholder.
       return String.class;
     default:
     case Cursor.FIELD_TYPE_BLOB:

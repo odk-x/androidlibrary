@@ -133,7 +133,7 @@ public class BaseTable implements Parcelable {
     this.mQuery = table.mQuery;
     this.mPrimaryKey = table.mPrimaryKey;
     this.mElementKeyForIndex = table.mElementKeyForIndex;
-    this.mElementKeyToIndex = table.generateElementKeyToIndex();
+    this.mElementKeyToIndex = table.mElementKeyToIndex;
     this.mParent = null; // Set this with register
   }
 
@@ -268,8 +268,14 @@ public class BaseTable implements Parcelable {
     return this.mRows.get(index);
   }
 
+  /**
+   * Return the list of rows in the table.
+   * Caller should treat this as a read-only (immutable) list.
+   *
+   * @return
+     */
   public List<Row> getRows() {
-    return Collections.unmodifiableList(mRows);
+    return mRows;
   }
 
   public String getElementKey(int colNum) {
@@ -288,15 +294,27 @@ public class BaseTable implements Parcelable {
     return (mQuery != null ? mQuery.getSqlBindArgs() : null);
   }
 
+  /**
+   * Get the list of columns that comprise the primary key for the table.
+   * Caller should treat this as a read-only array. I.e., don't change it.
+   *
+   * @return
+     */
   public String[] getPrimaryKey() {
     if (mPrimaryKey == null) {
       return null;
     }
-    return mPrimaryKey.clone();
+    return mPrimaryKey;
   }
 
+  /**
+   * Get the list of column names in the table.
+   * Caller should treat this as a read-only array. I.e., don't change it.
+   *
+   * @return
+     */
   public String[] getElementKeyForIndex() {
-    return mElementKeyForIndex.clone();
+    return mElementKeyForIndex;
   }
 
   /**
