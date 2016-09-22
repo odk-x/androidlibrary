@@ -711,6 +711,16 @@ public class ODKFileUtils {
     return path;
   }
 
+  public static String getTempDrawFile(String appName) {
+    String path = getAppCacheFolder(appName) + File.separator + "tmpDraw.jpg";
+    return path;
+  }
+
+  public static String getTempFile(String appName) {
+    String path = getAppCacheFolder(appName) + File.separator + "tmp.jpg";
+    return path;
+  }
+
   public static String getGeoCacheFolder(String appName) {
     String path = getDataFolder(appName) + File.separator + GEO_CACHE_FOLDER_NAME;
     return path;
