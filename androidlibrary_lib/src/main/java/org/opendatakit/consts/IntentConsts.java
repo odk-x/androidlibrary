@@ -68,7 +68,7 @@ public class IntentConsts {
   public class AppProperties {
     public static final String APPLICATION_NAME = "org.opendatakit.services";
     public static final String ACTIVITY_NAME =
-        "org.opendatakit.activities.AppPropertiesActivity";
+        "org.opendatakit.services.preferences.activities.AppPropertiesActivity";
   }
 
   public class Database {
