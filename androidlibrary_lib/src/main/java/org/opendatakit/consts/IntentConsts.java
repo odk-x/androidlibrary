@@ -76,4 +76,10 @@ public class IntentConsts {
     public static final String DATABASE_SERVICE_PACKAGE = "org.opendatakit.services";
     public static final String DATABASE_SERVICE_CLASS = "org.opendatakit.services.database.service.OdkDatabaseService";
   }
+
+  public class Survey {
+    public static final String SURVEY_PACKAGE_NAME = "org.opendatakit.survey";
+    public static final String SURVEY_MAIN_MENU_ACTIVITY_COMPONENT_NAME = "org.opendatakit.survey"
+        + ".activities.SplashScreenActivity";
+  }
 }
