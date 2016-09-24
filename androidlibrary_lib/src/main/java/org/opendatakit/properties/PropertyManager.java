@@ -32,6 +32,8 @@ import java.util.Locale;
 
 public class PropertyManager {
 
+  private static final String ANDROID6_FAKE_MAC = "02:00:00:00:00:00";
+
   public interface DynamicPropertiesInterface {
     String getActiveUser();
 
@@ -82,7 +84,6 @@ public class PropertyManager {
   // uriFragmentNewFile -- the appName-relative uri for a non-existent file with the given extension
   public final static String URI_FRAGMENT_NEW_INSTANCE_FILE_WITHOUT_COLON = "urifragmentnewinstancefile";
   public final static String URI_FRAGMENT_NEW_INSTANCE_FILE = URI_FRAGMENT_NEW_INSTANCE_FILE_WITHOUT_COLON + ":";
-
   /**
    * Constructor used within the Application object to create a singleton of the
    * property manager. Access it through
@@ -117,8 +118,11 @@ public class PropertyManager {
       // Get WiFi status
       WifiInfo info = wifi.getConnectionInfo();
       if (info != null) {
-        deviceId = info.getMacAddress();
-        orDeviceId = "mac:" + deviceId;
+        String macId = info.getMacAddress();
+        if ( macId != null && !ANDROID6_FAKE_MAC.equals(macId) ) {
+          deviceId = macId;
+          orDeviceId = "mac:" + deviceId;
+        }
       }
     }
 
