@@ -22,7 +22,7 @@ public class IntentConsts {
   // for rowpath and/or configpath
   public static final String INTENT_KEY_URI_FRAGMENT = "uriFragment";
   public static final String INTENT_KEY_CONTENT_TYPE = "contentType";
-  public static final String INTENT_KEY_SAVED_URI = "savedUri";
+  public static final String INTENT_KEY_CURRENT_URI_FRAGMENT = "currentUriFragment";
 
   public static final String INTENT_KEY_SETTINGS_IN_ADMIN_MODE = "adminMode";
   public static final String INTENT_KEY_SETTINGS_ADMIN_ENABLED = "adminEnabled";
