@@ -680,7 +680,7 @@ public class UserDbInterface {
        if (tableId == null) {
          // Ignore the cache, as it only caches table specific metadata
          entries = fetchAndRebuildChunks(
-             dbInterface.getDBTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
+             dbInterface.getTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
              TableMetaDataEntries.CREATOR);
        } else {
          TableMetaDataEntries allEntries = null;
@@ -694,7 +694,7 @@ public class UserDbInterface {
          // the given tableId
          if (allEntries == null || !allEntries.getRevId().equals(revId)){
            allEntries = fetchAndRebuildChunks(
-               dbInterface.getDBTableMetadata(appName, dbHandleName, tableId, null, null, null),
+               dbInterface.getTableMetadata(appName, dbHandleName, tableId, null, null, null),
                TableMetaDataEntries.CREATOR);
            metaDataCache.put(tableId, allEntries);
          }
