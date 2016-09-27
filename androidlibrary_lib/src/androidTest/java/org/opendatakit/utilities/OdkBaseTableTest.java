@@ -64,7 +64,7 @@ public class OdkBaseTableTest extends AndroidTestCase {
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
 
-  public void testOdkDbTableParcelation() throws IOException {
+  public void testOdkTableParcelation() throws IOException {
 
     /*
      * Create test data

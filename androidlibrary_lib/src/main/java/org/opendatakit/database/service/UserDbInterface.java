@@ -217,7 +217,7 @@ public class UserDbInterface {
     * @return
     * @throws ServicesAvailabilityException
     */
-   public OrderedColumns createLocalOnlyDbTableWithColumns(String appName, DbHandle dbHandleName,
+   public OrderedColumns createLocalOnlyTableWithColumns(String appName, DbHandle dbHandleName,
        String tableId, ColumnList columns) throws ServicesAvailabilityException {
 
      if (!tableId.startsWith("L_")) {
@@ -226,7 +226,7 @@ public class UserDbInterface {
 
      try {
        return fetchAndRebuildChunks(
-          dbInterface.createLocalOnlyDbTableWithColumns(appName, dbHandleName, tableId, columns),
+          dbInterface.createLocalOnlyTableWithColumns(appName, dbHandleName, tableId, columns),
           OrderedColumns.CREATOR);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
@@ -242,14 +242,15 @@ public class UserDbInterface {
     * @param tableId
     * @throws ServicesAvailabilityException
     */
-   public void deleteLocalOnlyDBTable(String appName, DbHandle dbHandleName, String tableId) throws ServicesAvailabilityException {
+   public void deleteLocalOnlyTable(String appName, DbHandle dbHandleName, String tableId)
+       throws ServicesAvailabilityException {
 
      if (!tableId.startsWith("L_")) {
        tableId = "L_" + tableId;
      }
 
      try {
-       dbInterface.deleteLocalOnlyDBTable(appName, dbHandleName, tableId);
+       dbInterface.deleteLocalOnlyTable(appName, dbHandleName, tableId);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
@@ -429,7 +430,7 @@ public class UserDbInterface {
     * we need to clear out the dataETag so
     * that we will pull all server changes and sync our properties.
     * <p/>
-    * updateDBTableETags(sc.getAppName(), db, tableId, schemaETag, null);
+    * updateTableETags(sc.getAppName(), db, tableId, schemaETag, null);
     * <p/>
     * Although the server does not recognize this tableId, we can
     * keep our record of the ETags for the table-level files and
@@ -517,11 +518,11 @@ public class UserDbInterface {
     * @param columns      simple transport wrapper for List<Columns>
     * @return the OrderedColumns of the user columns in the table.
     */
-   public OrderedColumns createOrOpenDBTableWithColumns(String appName, DbHandle dbHandleName,
+   public OrderedColumns createOrOpenTableWithColumns(String appName, DbHandle dbHandleName,
        String tableId, ColumnList columns) throws ServicesAvailabilityException {
      try {
       return fetchAndRebuildChunks(
-          dbInterface.createOrOpenDBTableWithColumns(appName, dbHandleName, tableId, columns),
+          dbInterface.createOrOpenTableWithColumns(appName, dbHandleName, tableId, columns),
           OrderedColumns.CREATOR);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
@@ -547,12 +548,12 @@ public class UserDbInterface {
     *                     tableId before inserting or replacing with the new ones.
     * @return the OrderedColumns of the user columns in the table.
     */
-   public OrderedColumns createOrOpenDBTableWithColumnsAndProperties(String appName,
+   public OrderedColumns createOrOpenTableWithColumnsAndProperties(String appName,
        DbHandle dbHandleName, String tableId, ColumnList columns,
        List<KeyValueStoreEntry> metaData, boolean clear) throws ServicesAvailabilityException {
       try {
         return fetchAndRebuildChunks(dbInterface
-          .createOrOpenDBTableWithColumnsAndProperties(appName, dbHandleName, tableId, columns,
+          .createOrOpenTableWithColumnsAndProperties(appName, dbHandleName, tableId, columns,
               metaData, clear), OrderedColumns.CREATOR);
       } catch ( Exception e ) {
         rethrowAlwaysAllowedRemoteException(e);
@@ -568,9 +569,9 @@ public class UserDbInterface {
     * @param dbHandleName
     * @param tableId
     */
-   public void deleteDBTableAndAllData(String appName, DbHandle dbHandleName, String tableId) throws ServicesAvailabilityException {
+   public void deleteTableAndAllData(String appName, DbHandle dbHandleName, String tableId) throws ServicesAvailabilityException {
      try {
-        dbInterface.deleteDBTableAndAllData(appName, dbHandleName, tableId);
+        dbInterface.deleteTableAndAllData(appName, dbHandleName, tableId);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
@@ -588,10 +589,10 @@ public class UserDbInterface {
     * @param aspect
     * @param key
     */
-   public void deleteDBTableMetadata(String appName, DbHandle dbHandleName, String tableId,
+   public void deleteTableMetadata(String appName, DbHandle dbHandleName, String tableId,
        String partition, String aspect, String key) throws ServicesAvailabilityException {
      try {
-       dbInterface.deleteDBTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
+       dbInterface.deleteTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
@@ -664,11 +665,11 @@ public class UserDbInterface {
     * @return list of KeyValueStoreEntry values matching the filter criteria
     */
    @SuppressWarnings("unchecked")
-   public List<KeyValueStoreEntry> getDBTableMetadata(String appName, DbHandle dbHandleName,
+   public List<KeyValueStoreEntry> getTableMetadata(String appName, DbHandle dbHandleName,
        String tableId, String partition, String aspect, String key) throws ServicesAvailabilityException {
      try {
        Serializable result = fetchAndRebuildChunks(
-          dbInterface.getDBTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
+          dbInterface.getTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
           Serializable.class);
        return (List<KeyValueStoreEntry>) result;
      } catch ( Exception e ) {
@@ -1127,10 +1128,10 @@ public class UserDbInterface {
     * @param dbHandleName
     * @param entry
     */
-   public void replaceDBTableMetadata(String appName, DbHandle dbHandleName,
+   public void replaceTableMetadata(String appName, DbHandle dbHandleName,
        KeyValueStoreEntry entry) throws ServicesAvailabilityException {
      try {
-       dbInterface.replaceDBTableMetadata(appName, dbHandleName, entry);
+       dbInterface.replaceTableMetadata(appName, dbHandleName, entry);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
@@ -1149,10 +1150,10 @@ public class UserDbInterface {
     * @param clear        if true then delete the existing set of values for this tableId
     *                     before inserting the new ones.
     */
-   public void replaceDBTableMetadataList(String appName, DbHandle dbHandleName, String tableId,
+   public void replaceTableMetadataList(String appName, DbHandle dbHandleName, String tableId,
        List<KeyValueStoreEntry> entries, boolean clear) throws ServicesAvailabilityException {
      try {
-       dbInterface.replaceDBTableMetadataList(appName, dbHandleName, tableId, entries, clear);
+       dbInterface.replaceTableMetadataList(appName, dbHandleName, tableId, entries, clear);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
@@ -1170,10 +1171,10 @@ public class UserDbInterface {
     * @param aspect
     * @param entries     List<KeyValueStoreEntry>
     */
-   public void replaceDBTableMetadataSubList(String appName, DbHandle dbHandleName,
+   public void replaceTableMetadataSubList(String appName, DbHandle dbHandleName,
        String tableId, String partition, String aspect, List<KeyValueStoreEntry> entries) throws ServicesAvailabilityException {
      try {
-       dbInterface.replaceDBTableMetadataSubList(appName, dbHandleName, tableId, partition, aspect,
+       dbInterface.replaceTableMetadataSubList(appName, dbHandleName, tableId, partition, aspect,
            entries);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
@@ -1192,11 +1193,11 @@ public class UserDbInterface {
     * @param schemaETag
     * @param lastDataETag
     */
-   public void privilegedUpdateDBTableETags(String appName, DbHandle dbHandleName, String
+   public void privilegedUpdateTableETags(String appName, DbHandle dbHandleName, String
        tableId, String schemaETag, String lastDataETag) throws ServicesAvailabilityException {
      try {
        dbInterface
-           .privilegedUpdateDBTableETags(appName, dbHandleName, tableId, schemaETag, lastDataETag);
+           .privilegedUpdateTableETags(appName, dbHandleName, tableId, schemaETag, lastDataETag);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
@@ -1213,10 +1214,10 @@ public class UserDbInterface {
     * @param dbHandleName
     * @param tableId
     */
-   public void privilegedUpdateDBTableLastSyncTime(String appName, DbHandle dbHandleName,
+   public void privilegedUpdateTableLastSyncTime(String appName, DbHandle dbHandleName,
        String tableId) throws ServicesAvailabilityException {
      try {
-       dbInterface.privilegedUpdateDBTableLastSyncTime(appName, dbHandleName, tableId);
+       dbInterface.privilegedUpdateTableLastSyncTime(appName, dbHandleName, tableId);
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
@@ -1353,7 +1354,7 @@ public class UserDbInterface {
     * deleteServerConflictRowWithId(appName, db, tableId, rowId)
     * placeRowIntoConflict(appName, db, tableId, rowId, localRowConflictType)
     * and, for the values which are the server row changes:
-    * insertDataIntoExistingDBTableWithId( appName, db, tableId, orderedColumns, values, rowId)
+    * insertDataIntoExistingTableWithId( appName, db, tableId, orderedColumns, values, rowId)
     * <p/>
     * Change the conflictType for the given row from null (not in conflict) to
     * the specified one.

@@ -92,7 +92,7 @@ interface AidlDbInterface {
    * @param columns
    * @return
    */
-  DbChunk createLocalOnlyDbTableWithColumns(in String appName, in DbHandle dbHandleName,
+  DbChunk createLocalOnlyTableWithColumns(in String appName, in DbHandle dbHandleName,
       in String tableId, in ColumnList columns);
 
   /**
@@ -102,7 +102,7 @@ interface AidlDbInterface {
     * @param dbHandleName
     * @param tableId
     */
-  void deleteLocalOnlyDBTable(in String appName, in DbHandle dbHandleName,
+  void deleteLocalOnlyTable(in String appName, in DbHandle dbHandleName,
      in String tableId);
 
   /**
@@ -158,7 +158,7 @@ interface AidlDbInterface {
    * we need to clear out the dataETag so
    * that we will pull all server changes and sync our properties.
    *
-   * updateDBTableETags(sc.getAppName(), db, tableId, schemaETag, null);
+   * updateTableETags(sc.getAppName(), db, tableId, schemaETag, null);
    *
    * Although the server does not recognize this tableId, we can
    * keep our record of the ETags for the table-level files and
@@ -224,7 +224,7 @@ interface AidlDbInterface {
    * @param columns simple transport wrapper for List<Columns>
    * @return the OrderedColumns of the user columns in the table.
    */
-  DbChunk createOrOpenDBTableWithColumns(in String appName, in DbHandle dbHandleName,
+  DbChunk createOrOpenTableWithColumns(in String appName, in DbHandle dbHandleName,
       in String tableId, in ColumnList columns);
 
 	/**
@@ -245,7 +245,7 @@ interface AidlDbInterface {
    *          tableId before inserting or replacing with the new ones.
    * @return the OrderedColumns of the user columns in the table.
 	 */
-  DbChunk createOrOpenDBTableWithColumnsAndProperties(in String appName,
+  DbChunk createOrOpenTableWithColumnsAndProperties(in String appName,
       in DbHandle dbHandleName,
       in String tableId, in ColumnList columns,
       in List<KeyValueStoreEntry> metaData, in boolean clear);
@@ -258,7 +258,7 @@ interface AidlDbInterface {
    * @param dbHandleName
    * @param tableId
    */
-  void deleteDBTableAndAllData(in String appName, in DbHandle dbHandleName,
+  void deleteTableAndAllData(in String appName, in DbHandle dbHandleName,
       in String tableId);
 		
   /**
@@ -272,7 +272,7 @@ interface AidlDbInterface {
    * @param aspect
    * @param key
    */
-  void deleteDBTableMetadata(in String appName, in DbHandle dbHandleName,
+  void deleteTableMetadata(in String appName, in DbHandle dbHandleName,
       in String tableId, in String partition, in String aspect, in String key);
 
   /**
@@ -316,7 +316,7 @@ interface AidlDbInterface {
    *
    * @return list of KeyValueStoreEntry values matching the filter criteria
    */
-  DbChunk getDBTableMetadata(in String appName, in DbHandle dbHandleName,
+  DbChunk getTableMetadata(in String appName, in DbHandle dbHandleName,
       in String tableId, in String partition, in String aspect, in String key);
 
   /**
@@ -425,7 +425,7 @@ interface AidlDbInterface {
    * @param dbHandleName
    * @param entry
    */
-  void replaceDBTableMetadata(in String appName, in DbHandle dbHandleName, 
+  void replaceTableMetadata(in String appName, in DbHandle dbHandleName,
       in KeyValueStoreEntry entry);
 
   /**
@@ -442,7 +442,7 @@ interface AidlDbInterface {
    *          if true then delete the existing set of values for this tableId
    *          before inserting the new ones.
    */
-  void replaceDBTableMetadataList(in String appName, in DbHandle dbHandleName, 
+  void replaceTableMetadataList(in String appName, in DbHandle dbHandleName,
       in String tableId,
       in List<KeyValueStoreEntry> metaData, in boolean clear);
 
@@ -458,7 +458,7 @@ interface AidlDbInterface {
    * @param metadata
    *          a List<KeyValueStoreEntry>
    */
-  void replaceDBTableMetadataSubList(in String appName, in DbHandle dbHandleName,
+  void replaceTableMetadataSubList(in String appName, in DbHandle dbHandleName,
       in String tableId, in String partition, in String aspect,
       in List<KeyValueStoreEntry> metaData);
 
@@ -473,7 +473,7 @@ interface AidlDbInterface {
    * @param schemaETag
    * @param lastDataETag
    */
-  void privilegedUpdateDBTableETags(in String appName, in DbHandle dbHandleName,
+  void privilegedUpdateTableETags(in String appName, in DbHandle dbHandleName,
       in String tableId, in String schemaETag,
       in String lastDataETag);
 
@@ -487,7 +487,7 @@ interface AidlDbInterface {
    * @param dbHandleName
    * @param tableId
    */
-  void privilegedUpdateDBTableLastSyncTime(in String appName, in DbHandle dbHandleName, in
+  void privilegedUpdateTableLastSyncTime(in String appName, in DbHandle dbHandleName, in
   String tableId);
 
   /////////////////////////////////////////////////////////////////////////////////////
@@ -576,7 +576,7 @@ interface AidlDbInterface {
    * deleteServerConflictRowWithId(appName, db, tableId, rowId)
    * placeRowIntoConflict(appName, db, tableId, rowId, localRowConflictType)
    * and, for the values which are the server row changes:
-   * insertDataIntoExistingDBTableWithId( appName, db, tableId, orderedColumns, values, rowId)
+   * insertDataIntoExistingTableWithId( appName, db, tableId, orderedColumns, values, rowId)
    *
    * Change the conflictType for the given row from null (not in conflict) to
    * the specified one.
