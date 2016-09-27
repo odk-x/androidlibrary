@@ -320,6 +320,21 @@ interface AidlDbInterface {
       in String tableId, in String partition, in String aspect, in String key);
 
   /**
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param revId
+   * @param partition
+   * @param aspect
+   * @param key
+   *
+   * @return list of KeyValueStoreEntry values matching the filter criteria, or an empty list if
+   * nothing has changed
+   */
+  DbChunk getTableMetadataIfChanged(in String appName, in DbHandle dbHandleName,
+      in String tableId, in String revId);
+
+  /**
    * Return an array of the admin columns that should be exported to
    * a CSV file. This list excludes the SYNC_STATE and CONFLICT_TYPE columns.
    * 

@@ -660,61 +660,65 @@ public class UserDbInterface {
      }
    }
 
-   /**
-    * @param appName
-    * @param dbHandleName
-    * @param tableId
-    * @param partition
-    * @param aspect
-    * @param key
-    * @return list of KeyValueStoreEntry values matching the filter criteria
-    */
-   @SuppressWarnings("unchecked")
-   public TableMetaDataEntries getTableMetadata(String appName, DbHandle dbHandleName,
-       String tableId, String partition, String aspect, String key, String revId) throws
-       ServicesAvailabilityException {
+  /**
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param partition
+   * @param aspect
+   * @param key
+   * @return list of KeyValueStoreEntry values matching the filter criteria
+   */
+  @SuppressWarnings("unchecked")
+  public TableMetaDataEntries getTableMetadata(String appName, DbHandle dbHandleName,
+      String tableId, String partition, String aspect, String key, String revId) throws
+      ServicesAvailabilityException {
 
-     TableMetaDataEntries entries = null;
+    TableMetaDataEntries entries = null;
 
-     try {
-       if (tableId == null) {
-         // Ignore the cache, as it only caches table specific metadata
-         entries = fetchAndRebuildChunks(
-             dbInterface.getTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
-             TableMetaDataEntries.CREATOR);
-       } else {
-         TableMetaDataEntries allEntries = null;
+    try {
+      if (tableId == null) {
+        // Ignore the cache, as it only caches table specific metadata
+        entries = fetchAndRebuildChunks(
+            dbInterface.getTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
+            TableMetaDataEntries.CREATOR);
+      } else {
+        TableMetaDataEntries allEntries = metaDataCache.get(tableId);
 
-         // Check the cache for existing KVS entries
-         if (revId != null) {
-           allEntries = metaDataCache.get(tableId);
-         }
+        if ( allEntries == null ) {
+          // If there is no cache hit, fetch from the database
+          allEntries = fetchAndRebuildChunks(
+              dbInterface.getTableMetadata(appName, dbHandleName, tableId, null, null, null),
+              TableMetaDataEntries.CREATOR);
+          metaDataCache.put(tableId, allEntries);
+        } else {
+          // If there is a cache hit, check if it is stale
+          TableMetaDataEntries newEntries = fetchAndRebuildChunks(
+              dbInterface.getTableMetadataIfChanged(appName, dbHandleName, tableId,
+                  allEntries.getRevId()), TableMetaDataEntries.CREATOR);
+          if ( !newEntries.getRevId().equals(allEntries.getRevId()) ) {
+            metaDataCache.put(tableId, newEntries);
+            allEntries = newEntries;
+          }
+        }
 
-         // If there is no cache entry, or the cache is stale, fetch the list of KVS entries for
-         // the given tableId
-         if (allEntries == null || !allEntries.getRevId().equals(revId)){
-           allEntries = fetchAndRebuildChunks(
-               dbInterface.getTableMetadata(appName, dbHandleName, tableId, null, null, null),
-               TableMetaDataEntries.CREATOR);
-           metaDataCache.put(tableId, allEntries);
-         }
+        // Filter the requested entries from the full list
+        entries = filterEntries(allEntries, partition, aspect, key);
+      }
 
-         // Filter the requested entries from the full list
-         entries = filterEntries(allEntries, partition, aspect, key);
-       }
+    } catch ( Exception e ) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
 
-     } catch ( Exception e ) {
-       rethrowAlwaysAllowedRemoteException(e);
-       throw new IllegalStateException("unreachable - keep IDE happy");
-     }
+    if (entries == null) {
+      // Do not return null. API is expected to return an empty list if no results are found.
+      entries = new TableMetaDataEntries(tableId, null);
+    }
+    return entries;
 
-     if (entries == null) {
-       // Do not return null. API is expected to return an empty list if no results are found.
-       entries = new TableMetaDataEntries(tableId, null);
-     }
-     return entries;
+  }
 
-   }
 
   private TableMetaDataEntries filterEntries(TableMetaDataEntries allEntries, String partition,
       String aspect, String key) {
