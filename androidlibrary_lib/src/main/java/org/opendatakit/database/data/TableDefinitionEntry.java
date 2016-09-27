@@ -28,6 +28,8 @@ public class TableDefinitionEntry implements Parcelable {
 
   public String tableId;
 
+  public String revId;
+
   public String schemaETag;
 
   public String lastDataETag;
@@ -44,6 +46,14 @@ public class TableDefinitionEntry implements Parcelable {
 
   public String getTableId() {
     return tableId;
+  }
+
+  public String getRevId() {
+    return revId;
+  }
+
+  public void setRevId(String revId) {
+    this.revId = revId;
   }
 
   public String getSchemaETag() {
@@ -78,6 +88,7 @@ public class TableDefinitionEntry implements Parcelable {
   @Override
   public void writeToParcel(Parcel out, int flags) {
     out.writeString(tableId);
+    out.writeString(revId);
     out.writeString(schemaETag);
     out.writeString(lastDataETag);
     out.writeString(lastSyncTime);
@@ -85,6 +96,7 @@ public class TableDefinitionEntry implements Parcelable {
   
   private void readFromParcel(Parcel in) {
     tableId = in.readString();
+    revId = in.readString();
     schemaETag = in.readString();
     lastDataETag = in.readString();
     lastSyncTime = in.readString();

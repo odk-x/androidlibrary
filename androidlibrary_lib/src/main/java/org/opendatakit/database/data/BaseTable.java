@@ -48,6 +48,12 @@ public class BaseTable implements Parcelable {
   protected ParentTable mParent;
 
   /**
+   * Table metadata rev_id. If this differs from your cached value, you need to requery the
+   * metadata.
+   */
+  protected String mMetaDataRev;
+
+  /**
    * True if the user has the permissions to create a row.
    * Defaults to false.
    */
@@ -134,6 +140,7 @@ public class BaseTable implements Parcelable {
     this.mElementKeyForIndex = table.mElementKeyForIndex;
     this.mElementKeyToIndex = table.mElementKeyToIndex;
     this.mParent = null; // Set this with register
+    this.mMetaDataRev = null;
   }
 
 
@@ -162,6 +169,7 @@ public class BaseTable implements Parcelable {
     // The parent and the query are not parceled
     this.mParent = null;
     this.mQuery = null;
+    this.mMetaDataRev = null;
   }
 
   public void setEffectiveAccessCreateRow(boolean canCreateRow) {
@@ -261,6 +269,14 @@ public class BaseTable implements Parcelable {
 
   public void addRow(Row row) {
     mRows.add(row);
+  }
+
+  public void setMetaDataRev(String metaDataRev) {
+    mMetaDataRev = metaDataRev;
+  }
+
+  public String getMetaDataRev() {
+    return mMetaDataRev;
   }
 
   public Row getRowAtIndex(int index) {

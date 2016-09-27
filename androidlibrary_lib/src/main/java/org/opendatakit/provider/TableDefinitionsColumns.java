@@ -25,6 +25,7 @@ public class TableDefinitionsColumns implements BaseColumns {
   public static final String SCHEMA_ETAG = "_schema_etag";
   public static final String LAST_DATA_ETAG = "_last_data_etag";
   public static final String LAST_SYNC_TIME = "_last_sync_time";
+  public static final String REV_ID = "_rev_id";
 
   // This class cannot be instantiated
   private TableDefinitionsColumns() {
@@ -33,7 +34,8 @@ public class TableDefinitionsColumns implements BaseColumns {
   public static String getTableCreateSql(String tableName) {
     // @formatter:off
     String create = "CREATE TABLE IF NOT EXISTS " + tableName + "("
-      + TABLE_ID + " TEXT NOT NULL PRIMARY KEY, " 
+      + TABLE_ID + " TEXT NOT NULL PRIMARY KEY, "
+      + REV_ID + " TEXT NOT NULL,"
       + SCHEMA_ETAG + " TEXT NULL,"
       + LAST_DATA_ETAG + " TEXT NULL,"
       + LAST_SYNC_TIME + " TEXT NOT NULL )";
