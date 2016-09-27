@@ -96,6 +96,10 @@ public class UserTable implements Parcelable, ParentTable {
     mBaseTable.addRow(row);
   }
 
+  public String getMetaDataRev() {
+    return mBaseTable.getMetaDataRev();
+  }
+
   public Row getRowAtIndex(int index) {
     return mBaseTable.getRowAtIndex(index);
   }

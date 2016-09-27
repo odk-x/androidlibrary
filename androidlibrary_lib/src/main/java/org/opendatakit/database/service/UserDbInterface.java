@@ -36,8 +36,10 @@ import org.opendatakit.database.queries.SimpleQuery;
 import org.opendatakit.database.utilities.DbChunkUtil;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class UserDbInterface {
 
@@ -45,12 +47,15 @@ public class UserDbInterface {
 
    private AidlDbInterface dbInterface;
 
+  private Map<String, TableMetaDataEntries> metaDataCache;
+
    public UserDbInterface(AidlDbInterface dbInterface) throws IllegalArgumentException {
       if (dbInterface == null) {
          throw new IllegalArgumentException("Database Interface must not be null");
       }
 
       this.dbInterface = dbInterface;
+      this.metaDataCache = new HashMap<>();
    }
 
    public AidlDbInterface getDbInterface() {
@@ -665,19 +670,70 @@ public class UserDbInterface {
     * @return list of KeyValueStoreEntry values matching the filter criteria
     */
    @SuppressWarnings("unchecked")
-   public List<KeyValueStoreEntry> getTableMetadata(String appName, DbHandle dbHandleName,
-       String tableId, String partition, String aspect, String key) throws ServicesAvailabilityException {
+   public TableMetaDataEntries getTableMetadata(String appName, DbHandle dbHandleName,
+       String tableId, String partition, String aspect, String key, String revId) throws
+       ServicesAvailabilityException {
+
+     TableMetaDataEntries entries = null;
+
      try {
-       Serializable result = fetchAndRebuildChunks(
-          dbInterface.getTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
-          Serializable.class);
-       return (List<KeyValueStoreEntry>) result;
+       if (tableId == null) {
+         // Ignore the cache, as it only caches table specific metadata
+         entries = fetchAndRebuildChunks(
+             dbInterface.getDBTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
+             TableMetaDataEntries.CREATOR);
+       } else {
+         TableMetaDataEntries allEntries = null;
+
+         // Check the cache for existing KVS entries
+         if (revId != null) {
+           allEntries = metaDataCache.get(tableId);
+         }
+
+         // If there is no cache entry, or the cache is stale, fetch the list of KVS entries for
+         // the given tableId
+         if (allEntries == null || !allEntries.getRevId().equals(revId)){
+           allEntries = fetchAndRebuildChunks(
+               dbInterface.getDBTableMetadata(appName, dbHandleName, tableId, null, null, null),
+               TableMetaDataEntries.CREATOR);
+           metaDataCache.put(tableId, allEntries);
+         }
+
+         // Filter the requested entries from the full list
+         entries = filterEntries(allEntries, partition, aspect, key);
+       }
+
      } catch ( Exception e ) {
        rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
      }
 
+     if (entries == null) {
+       // Do not return null. API is expected to return an empty list if no results are found.
+       entries = new TableMetaDataEntries(tableId, null);
+     }
+     return entries;
+
    }
+
+  private TableMetaDataEntries filterEntries(TableMetaDataEntries allEntries, String partition,
+      String aspect, String key) {
+    if (partition == null && aspect == null && key == null) {
+      return new TableMetaDataEntries(allEntries);
+    }
+
+    TableMetaDataEntries entries = new TableMetaDataEntries(allEntries.getTableId(),
+        allEntries.getRevId());
+
+    for (KeyValueStoreEntry entry : allEntries.getEntries()) {
+      if ((partition == null || entry.partition.equals(partition)) &&
+          (aspect == null || entry.aspect.equals(aspect)) &&
+          (key == null || entry.key.equals(key))) {
+        entries.addEntry(entry);
+      }
+    }
+    return entries;
+  }
 
    /**
     * Return an array of the admin columns that should be exported to
