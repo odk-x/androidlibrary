@@ -1014,6 +1014,27 @@ public class UserDbInterface {
     }
   }
 
+  /**
+   * Execute an arbitrary command with bind parameters.
+   *
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param sqlCommand
+   * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
+   *                          bind parameters
+   */
+  public void privilegedExecute(String appName, DbHandle dbHandleName,
+      String sqlCommand, Object[] bindArgs) throws ServicesAvailabilityException {
+    try {
+      dbInterface.privilegedExecute(appName, dbHandleName, sqlCommand,
+          new BindArgs(bindArgs));
+    } catch ( Exception e ) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
+
    /********** USERTABLE QUERY WRAPPERS **********/
 
    /**

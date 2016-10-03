@@ -434,6 +434,21 @@ interface AidlDbInterface {
       in String tableId);
 
   /**
+   * Privileged execute of an arbitrary SQL command.
+   * For obvious reasons, this is very dangerous!
+   *
+   * The sql command can be any valid SQL command that does not return a result set.
+   * No data is returned (e.g., insert into table ... or similar).
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param sqlCommand
+   * @param sqlBindArgs
+   */
+  void privilegedExecute(in String appName, in DbHandle dbHandleName,
+      in String sqlCommand, in BindArgs sqlBindArgs);
+
+  /**
    * Insert or update a single table-level metadata KVS entry.
    * 
    * @param appName

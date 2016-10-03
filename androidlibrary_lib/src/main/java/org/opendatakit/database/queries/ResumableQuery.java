@@ -38,10 +38,6 @@ public abstract class ResumableQuery implements Query {
    protected int mOffset;
 
    public ResumableQuery(String tableId, BindArgs bindArgs, Integer limit, Integer offset) {
-      if (tableId == null) {
-         throw new IllegalArgumentException("Table ID must not be null");
-      }
-
       this.mTableId = tableId;
       this.mBindArgs = bindArgs;
       this.mLimit = limit != null ? limit.intValue() : -1;

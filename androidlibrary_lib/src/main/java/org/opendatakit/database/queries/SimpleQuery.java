@@ -68,6 +68,10 @@ public class SimpleQuery extends ResumableQuery {
 
       super(tableId, bindArgs, limit, offset);
 
+      if (tableId == null) {
+         throw new IllegalArgumentException("Table ID must not be null");
+      }
+
       this.mWhereClause = whereClause;
       this.mGroupByArgs = groupByArgs;
       this.mHavingClause = havingClause;
