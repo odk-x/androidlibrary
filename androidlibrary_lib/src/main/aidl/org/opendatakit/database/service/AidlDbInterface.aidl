@@ -604,33 +604,6 @@ interface AidlDbInterface {
    * A combination of:
    *
    * deleteServerConflictRowWithId(appName, db, tableId, rowId)
-   * placeRowIntoConflict(appName, db, tableId, rowId, localRowConflictType)
-   * and, for the values which are the server row changes:
-   * insertDataIntoExistingTableWithId( appName, db, tableId, orderedColumns, values, rowId)
-   *
-   * Change the conflictType for the given row from null (not in conflict) to
-   * the specified one.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param orderedColumns
-   * @param cvValues  server's field values for this row
-   * @param rowId
-   * @param localRowConflictType
-   *          expected to be one of ConflictType.LOCAL_DELETED_OLD_VALUES (0) or
-   *          ConflictType.LOCAL_UPDATED_UPDATED_VALUES (1)
-   */
-  DbChunk privilegedPlaceRowIntoConflictWithId(in String appName, in DbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues,
-      in String rowId, in int localRowConflictType);
-
-  /**
-   * SYNC ONLY
-   *
-   * A combination of:
-   *
-   * deleteServerConflictRowWithId(appName, db, tableId, rowId)
    * getRowWithId(appname, db, tableId, rowId)
    * if (canresolve) {
    *    update with resolution
@@ -831,28 +804,6 @@ interface AidlDbInterface {
   DbChunk updateRowWithId(in String appName, in DbHandle dbHandleName,
       in String tableId,
       in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
-
-  /**
-   * SYNC, CSV Import ONLY
-   *
-   * Update the given rowId with the values in the cvValues. All field
-   * values are specified in the cvValues. This is a server-induced update
-   * of the row to match all fields from the server. An error is thrown if
-   * there isn't a row matching this rowId or if there are checkpoint or
-   * conflict entries for this rowId.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param orderedColumns
-   * @param cvValues
-   * @param rowId
-   * @return single-row table with the content of the saved-as-incomplete row
-   */
-  DbChunk privilegedUpdateRowWithId(in String appName, in DbHandle dbHandleName,
-      in String tableId,
-      in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId,
-      boolean asCsvRequestedChange);
 
   /**
    * Delete the local and server conflict records to resolve a server conflict

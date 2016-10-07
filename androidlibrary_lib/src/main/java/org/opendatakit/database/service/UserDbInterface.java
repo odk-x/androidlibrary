@@ -1427,60 +1427,15 @@ public class UserDbInterface {
      }
    }
 
-   /**
-    * SYNC ONLY
-    *
-    * A combination of:
-    * <p/>
-    * deleteServerConflictRowWithId(appName, db, tableId, rowId)
-    * placeRowIntoConflict(appName, db, tableId, rowId, localRowConflictType)
-    * and, for the values which are the server row changes:
-    * insertDataIntoExistingTableWithId( appName, db, tableId, orderedColumns, values, rowId)
-    * <p/>
-    * Change the conflictType for the given row from null (not in conflict) to
-    * the specified one.
-    *
-    * @param appName
-    * @param dbHandleName
-    * @param tableId
-    * @param orderedColumns
-    * @param cvValues   the field values on the server
-    * @param rowId
-    * @param localRowConflictType expected to be one of ConflictType.LOCAL_DELETED_OLD_VALUES (0) or
-    *                             ConflictType.LOCAL_UPDATED_UPDATED_VALUES (1)
-    */
-   public UserTable privilegedPlaceRowIntoConflictWithId(String appName, DbHandle dbHandleName,
-       String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId,
-       int localRowConflictType) throws ServicesAvailabilityException {
-     try {
-       BaseTable baseTable = fetchAndRebuildChunks(dbInterface
-          .privilegedPlaceRowIntoConflictWithId(appName, dbHandleName, tableId, orderedColumns,
-              cvValues, rowId, localRowConflictType), BaseTable.CREATOR);
-
-       return new UserTable(baseTable, orderedColumns, getAdminColumns());
-     } catch ( Exception e ) {
-       rethrowAlwaysAllowedRemoteException(e);
-       throw new IllegalStateException("unreachable - keep IDE happy");
-     }
-   }
-
   /**
    * SYNC ONLY
    *
-   * A combination of:
+   * Takes the row field values from a server Row (obtained through the Sync protocol)
+   * and applies them to the local row (which must already exist and cannot have checkpoints).
    * <p/>
-   * deleteServerConflictRowWithId(appName, db, tableId, rowId)
-   * getRowWithId(appName, db, tableId, rowId)
-   * if (can resolve conflict) {
-   *   privilegedUpdateRowWithId(...);
-   * } else {
-   *   placeRowIntoConflict(appName, db, tableId, rowId, localRowConflictType)
-   * and, for the values which are the server row changes:
-   *   insertDataIntoExistingTableWithId( appName, db, tableId, orderedColumns, values, rowId)
-   * }
-   * <p/>
-   * Change the conflictType for the given row from null (not in conflict) to
-   * the specified one.
+   * The outcome may delete the local row, update it to the server's values, or
+   * place the local row into conflict with the server values (ending with 2 rows
+   * in the database for this rowId).
    *
    * @param appName
    * @param dbHandleName
@@ -1488,6 +1443,7 @@ public class UserDbInterface {
    * @param orderedColumns
    * @param cvValues   the field values on the server
    * @param rowId
+   * @return The rows in the database matching the rowId (may be 0, 1 or 2 rows).
    */
   public UserTable privilegedPerhapsPlaceRowIntoConflictWithId(String appName, DbHandle
       dbHandleName,
@@ -1841,39 +1797,6 @@ public class UserDbInterface {
        return new UserTable(baseTable, orderedColumns, getAdminColumns());
      } catch ( Exception e ) {
        rethrowNotAuthorizedRemoteException(e);
-       throw new IllegalStateException("unreachable - keep IDE happy");
-     }
-   }
-
-   /**
-    * SYNC, CSV Import ONLY
-    *
-    * Update the given rowId with the values in the cvValues. All field
-    * values are specified in the cvValues. This is a server-induced update
-    * of the row to match all fields from the server. An error is thrown if
-    * there isn't a row matching this rowId or if there are checkpoint or
-    * conflict entries for this rowId.
-    *
-    * @param appName
-    * @param dbHandleName
-    * @param tableId
-    * @param orderedColumns
-    * @param cvValues
-    * @param rowId
-    * @param asCsvRequestedChange
-    * @return single-row table with the content of the saved-as-incomplete row
-    */
-   public UserTable privilegedUpdateRowWithId(String appName, DbHandle dbHandleName,
-          String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId,
-       boolean asCsvRequestedChange) throws ServicesAvailabilityException {
-     try {
-       BaseTable baseTable = fetchAndRebuildChunks(dbInterface
-          .privilegedUpdateRowWithId(appName, dbHandleName, tableId, orderedColumns, cvValues,
-              rowId, asCsvRequestedChange), BaseTable.CREATOR);
-
-       return new UserTable(baseTable, orderedColumns, getAdminColumns());
-     } catch ( Exception e ) {
-       rethrowAlwaysAllowedRemoteException(e);
        throw new IllegalStateException("unreachable - keep IDE happy");
      }
    }
