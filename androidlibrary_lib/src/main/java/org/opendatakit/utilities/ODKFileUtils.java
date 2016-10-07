@@ -377,10 +377,8 @@ public class ODKFileUtils {
           return false;
         }
         String type = name.substring(idx+1);
-        if ( type.equals("version") ) {
-          return true;
-        }
-        return false;
+        boolean outcome = type.equals("version");
+        return outcome;
       }
     });
     for ( File f : filesToDelete ) {
@@ -435,7 +433,9 @@ public class ODKFileUtils {
         }
       }
       try {
-        fs.close();
+        if ( fs != null ) {
+          fs.close();
+        }
       } catch (IOException e) {
         WebLogger.getLogger(appName).printStackTrace(e);
       }
@@ -489,7 +489,9 @@ public class ODKFileUtils {
         }
       }
       try {
-        fs.close();
+        if ( fs != null ) {
+          fs.close();
+        }
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -1088,7 +1090,9 @@ public class ODKFileUtils {
     } finally {
       // Close the input stream
       try {
-        is.close();
+        if ( is != null ) {
+          is.close();
+        }
       } catch (IOException e) {
         WebLogger.getLogger(appName).e(t, "Cannot close input stream for " + file.getName());
         WebLogger.getLogger(appName).printStackTrace(e);

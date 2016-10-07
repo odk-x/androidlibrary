@@ -41,7 +41,7 @@ public class TableMetaDataEntries implements Parcelable {
   public TableMetaDataEntries(TableMetaDataEntries other) {
     this.tableId = other.tableId;
     this.revId = other.revId;
-    this.entries = (ArrayList) other.entries.clone();
+    this.entries = new ArrayList<>(other.entries);
   }
 
   public TableMetaDataEntries(Parcel in) {
@@ -81,6 +81,7 @@ public class TableMetaDataEntries implements Parcelable {
     out.writeSerializable(entries);
   }
 
+  @SuppressWarnings("unchecked")
   private void readFromParcel(Parcel in) {
     boolean notNull = in.readByte() == 1;
     tableId = notNull ? in.readString() : null;

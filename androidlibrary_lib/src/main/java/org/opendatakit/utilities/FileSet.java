@@ -79,7 +79,7 @@ public class FileSet {
     return serializedString;
   }
 
-  public static final FileSet parse(Context context, String appName, InputStream src) throws JsonParseException,
+  public static FileSet parse(Context context, String appName, InputStream src) throws JsonParseException,
       JsonMappingException, IOException {
     CollectionType javaType =
         ODKFileUtils.mapper.getTypeFactory().constructCollectionType(ArrayList.class, Map.class);

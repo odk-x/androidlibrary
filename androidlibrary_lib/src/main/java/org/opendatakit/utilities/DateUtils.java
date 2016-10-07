@@ -15,7 +15,6 @@
  */
 package org.opendatakit.utilities;
 
-import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -310,7 +309,7 @@ public class DateUtils {
         if (!locale.getLanguage().equals(Locale.ENGLISH.getLanguage())) {
             return null;
         }
-        DateTime start = new DateMidnight().toDateTime();
+        DateTime start = new DateTime().withTimeAtStartOfDay();
         boolean match = false;
         if (input.equalsIgnoreCase("today")) {
             match = true;

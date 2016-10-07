@@ -49,7 +49,7 @@ public class BindArgs implements Parcelable, Serializable {
     }
   }
 
-  private static final void marshallObject(Parcel out, Object toMarshall) {
+  private static void marshallObject(Parcel out, Object toMarshall) {
     if (toMarshall == null) {
       out.writeInt(0);
     } else if ( toMarshall instanceof String ) {
@@ -78,7 +78,7 @@ public class BindArgs implements Parcelable, Serializable {
     }
   }
 
-  private static final Object unmarshallObject(Parcel in) {
+  private static Object unmarshallObject(Parcel in) {
     int dataType = in.readInt();
     switch(dataType) {
     case 0:

@@ -67,9 +67,9 @@ public class PropertiesSingleton {
   private final TreeMap<String, String> mDeviceDefaults;
   private final TreeMap<String, String> mSecureDefaults;
 
-  private Properties mGeneralProps;
-  private Properties mGlobalDeviceProps;
-  private Properties mDeviceProps;
+  private final Properties mGeneralProps;
+  private final Properties mGlobalDeviceProps;
+  private final Properties mDeviceProps;
   private Context mBaseContext;
 
   public String getAppName() {
@@ -364,7 +364,7 @@ public class PropertiesSingleton {
     return Locale.getDefault().toString();
   }
 
-  private static String TOOL_INITIALIZATION_SUFFIX = ".tool_last_initialization_start_time";
+  private static final String TOOL_INITIALIZATION_SUFFIX = ".tool_last_initialization_start_time";
   private static String toolInitializationPropertyName(String toolName) {
     return toolName + TOOL_INITIALIZATION_SUFFIX;
   }

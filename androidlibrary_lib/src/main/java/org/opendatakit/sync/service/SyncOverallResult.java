@@ -38,7 +38,7 @@ public class SyncOverallResult implements Parcelable {
 
   private SyncOutcome appLevelSyncOutcome = SyncOutcome.WORKING;
 
-  private TreeMap<String, TableLevelResult> mResults = new TreeMap<String, TableLevelResult>();
+  private final TreeMap<String, TableLevelResult> mResults = new TreeMap<String, TableLevelResult>();
 
   public SyncOverallResult() {
   }

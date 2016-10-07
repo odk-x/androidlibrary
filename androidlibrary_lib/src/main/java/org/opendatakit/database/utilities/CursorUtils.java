@@ -90,7 +90,7 @@ public class CursorUtils {
    * @param i
    * @return
    */
-  public static final Class<?> getIndexDataType(Cursor c, int i) {
+  public static Class<?> getIndexDataType(Cursor c, int i) {
     switch (c.getType(i)) {
     case Cursor.FIELD_TYPE_STRING:
       return String.class;
@@ -123,7 +123,7 @@ public class CursorUtils {
    * @return
    */
   @SuppressWarnings("unchecked")
-  public static final <T> T getIndexAsType(Cursor c, Class<T> clazz, int i) {
+  public static <T> T getIndexAsType(Cursor c, Class<T> clazz, int i) {
     // If you add additional return types here be sure to modify the javadoc.
     try {
       if (i == -1)

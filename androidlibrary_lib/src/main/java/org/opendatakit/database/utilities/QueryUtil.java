@@ -26,7 +26,7 @@ public class QueryUtil {
       throw new IllegalStateException("Never Instantiate this static class");
    }
 
-   public static final String buildSqlStatement(String tableId, String whereClause,
+   public static String buildSqlStatement(String tableId, String whereClause,
        String[] groupBy, String having, String[] orderByElementKey, String[] orderByDirection) {
       StringBuilder s = new StringBuilder();
       s.append("SELECT * FROM \"").append(tableId).append("\" ");
@@ -69,7 +69,7 @@ public class QueryUtil {
             s.append(orderByElementKey[i]);
 
             if (directionSpecified && orderByDirection[i] != null && orderByDirection.length > 0) {
-               s.append(" " + orderByDirection[i]);
+               s.append(" ").append(orderByDirection[i]);
             } else {
                s.append(" ASC");
             }

@@ -75,7 +75,7 @@ public final class DbChunkUtil {
    * @param chunkSize  The size of the chunks
    * @return Ordered list of serialized chunks
    */
-  public static final List<DbChunk> convertToChunks(Parcelable parcelable, int chunkSize) {
+  public static List<DbChunk> convertToChunks(Parcelable parcelable, int chunkSize) {
 
     if (parcelable == null || chunkSize <= 0) {
       Log.w(TAG, "convertToChunks: Invalid input. Empty chunk list returned");
@@ -98,7 +98,7 @@ public final class DbChunkUtil {
    * @param chunkSize    The size of the chunks
    * @return Ordered list of serialized chunks
    */
-  public static final List<DbChunk> convertToChunks(Serializable serializable, int chunkSize)
+  public static List<DbChunk> convertToChunks(Serializable serializable, int chunkSize)
       throws IOException {
 
     if (serializable == null || chunkSize <= 0) {
@@ -151,7 +151,7 @@ public final class DbChunkUtil {
    * @param <T>     The type of the parcelable object to rebuild
    * @return The original object
    */
-  public static final <T> T rebuildFromChunks(List<DbChunk> chunks,
+  public static <T> T rebuildFromChunks(List<DbChunk> chunks,
       Parcelable.Creator<T> creator) {
 
     if (chunks == null || chunks.size() == 0 || creator == null) {
@@ -178,7 +178,7 @@ public final class DbChunkUtil {
    * @return The original object
    */
   @SuppressWarnings("unchecked")
-  public static final <T> T rebuildFromChunks(List<DbChunk> chunks, Class<T> serializable)
+  public static <T> T rebuildFromChunks(List<DbChunk> chunks, Class<T> serializable)
       throws IOException, ClassNotFoundException {
 
     if (chunks == null || chunks.size() == 0 || serializable == null) {

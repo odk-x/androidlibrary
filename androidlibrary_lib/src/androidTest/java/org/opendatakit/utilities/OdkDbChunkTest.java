@@ -38,7 +38,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
   private static int largeChunkSize = 946176;
   private static int smallChunkSize = 10;
 
-  String[] testData = { "Miscellaneous", "test", "data", "to", "parcel", "and", "unpack" };
+  private String[] testData = { "Miscellaneous", "test", "data", "to", "parcel", "and", "unpack" };
 
   @Override
   protected void setUp() throws Exception {

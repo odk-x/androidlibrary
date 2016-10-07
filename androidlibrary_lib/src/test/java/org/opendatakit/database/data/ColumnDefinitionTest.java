@@ -620,6 +620,7 @@ public class ColumnDefinitionTest {
           "testTable", columns);
    }
 
+   @SuppressWarnings("unchecked")
    @Test
    public void testBuildExtendedJson() {
       List<Column> columns = new ArrayList<Column>();
@@ -1274,6 +1275,7 @@ public class ColumnDefinitionTest {
       assertEquals(metaCount, 11);
    }
 
+   @SuppressWarnings("unchecked")
    private void recursiveMatch(String parent, TreeMap<String,Object> value, Map<String,Object>
        xlsxValue) {
       for ( String key : value.keySet() ) {

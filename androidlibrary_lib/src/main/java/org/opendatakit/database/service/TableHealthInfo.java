@@ -22,8 +22,8 @@ import java.io.Serializable;
 
 public class TableHealthInfo implements Parcelable, Serializable {
 
-  private String tableId;
-  private TableHealthStatus status;
+  private final String tableId;
+  private final TableHealthStatus status;
   
   public String getTableId() {
     return tableId;

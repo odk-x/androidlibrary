@@ -33,7 +33,7 @@ public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
 
   public class WebLoggerDesktopImpl implements WebLoggerIf {
 
-    private String appName;
+    private final String appName;
 
     public WebLoggerDesktopImpl(String appName) {
       this.appName = appName;

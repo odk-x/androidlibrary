@@ -50,7 +50,7 @@ public class PropertyManager {
     String getUriFragmentNewInstanceFile(String uriDeviceId, String extension);
   }
 
-  private HashMap<String, String> mProperties;
+  private final HashMap<String, String> mProperties;
 
   public final static String DEVICE_ID_PROPERTY = "deviceid"; // imei
   public final static String SUBSCRIBER_ID_PROPERTY = "subscriberid"; // imsi

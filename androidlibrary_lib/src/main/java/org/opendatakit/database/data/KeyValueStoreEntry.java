@@ -18,6 +18,7 @@ package org.opendatakit.database.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 
@@ -126,7 +127,7 @@ public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreE
   }
 
   @Override
-  public int compareTo(KeyValueStoreEntry that) {
+  public int compareTo(@NonNull KeyValueStoreEntry that) {
     int partitionComparison = this.partition.compareTo(that.partition);
     if (partitionComparison != 0) {
       return partitionComparison;

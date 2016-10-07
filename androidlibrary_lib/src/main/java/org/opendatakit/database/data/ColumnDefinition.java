@@ -15,6 +15,7 @@
  */
 package org.opendatakit.database.data;
 
+import android.support.annotation.NonNull;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
@@ -198,7 +199,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
    * @return
    */
   @SuppressWarnings("unchecked")
-  static final ArrayList<ColumnDefinition> buildColumnDefinitions(String appName, String tableId, List<Column> columns) {
+  static ArrayList<ColumnDefinition> buildColumnDefinitions(String appName, String tableId, List<Column> columns) {
 
      if ( appName == null || appName.length() == 0 ) {
         throw new IllegalArgumentException("appName cannot be null or an empty string");
@@ -598,7 +599,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
   }
 
   @Override
-  public int compareTo(ColumnDefinition another) {
+  public int compareTo(@NonNull ColumnDefinition another) {
     return this.getElementKey().compareTo(another.getElementKey());
   }
 

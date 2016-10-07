@@ -107,12 +107,10 @@ public class OrderedColumns implements Parcelable {
 
     ColumnDefinition cdParent = cd.getParent();
 
-    if (cdParent != null && geoPointList.contains(cdParent)
-        && cd.getElementName().equals("latitude")) {
-      return true;
-    }
-
-    return false;
+    boolean outcome = (cdParent != null)
+        && geoPointList.contains(cdParent)
+        && cd.getElementName().equals("latitude");
+    return outcome;
   }
 
   public boolean isLongitudeColumnDefinition(List<ColumnDefinition> geoPointList,
@@ -128,12 +126,10 @@ public class OrderedColumns implements Parcelable {
 
     ColumnDefinition cdParent = cd.getParent();
 
-    if (cdParent != null && geoPointList.contains(cdParent)
-        && cd.getElementName().equals("longitude")) {
-      return true;
-    }
-
-    return false;
+    boolean outcome = (cdParent != null)
+        && geoPointList.contains(cdParent)
+        && cd.getElementName().equals("longitude");
+    return outcome;
   }
 
   public boolean mapViewIsPossible() {

@@ -56,7 +56,7 @@ public class MediaUtils {
     return ep;
   }
 
-  public static final Uri getImageUriFromMediaProvider(Context ctxt, String imageFile) {
+  public static Uri getImageUriFromMediaProvider(Context ctxt, String imageFile) {
     String selection = Images.ImageColumns.DATA + "=?";
     String[] selectArgs = { imageFile };
     String[] projection = { Images.ImageColumns._ID };
@@ -65,7 +65,7 @@ public class MediaUtils {
       c = ctxt.getContentResolver().query(
           android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection,
           selectArgs, null);
-      if (c.getCount() > 0) {
+      if (c != null && c.getCount() > 0) {
         c.moveToFirst();
         String id = CursorUtils.getIndexAsString(c, c.getColumnIndex(Images.ImageColumns._ID));
 
@@ -80,7 +80,7 @@ public class MediaUtils {
     }
   }
 
-  public static final int deleteImageFileFromMediaProvider(Context ctxt, String appName, String imageFile) {
+  public static int deleteImageFileFromMediaProvider(Context ctxt, String appName, String imageFile) {
     if (imageFile == null)
       return 0;
 
@@ -95,7 +95,7 @@ public class MediaUtils {
       String[] projection = { Images.ImageColumns._ID };
       imageCursor = cr.query(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
           projection, select, selectArgs, null);
-      if (imageCursor.getCount() > 0) {
+      if (imageCursor != null && imageCursor.getCount() > 0) {
         imageCursor.moveToFirst();
         List<Uri> imagesToDelete = new ArrayList<Uri>();
         do {
@@ -124,7 +124,7 @@ public class MediaUtils {
     return count;
   }
 
-  public static final int deleteImagesInFolderFromMediaProvider(Context ctxt, String appName, File folder) {
+  public static int deleteImagesInFolderFromMediaProvider(Context ctxt, String appName, File folder) {
     if (folder == null)
       return 0;
 
@@ -139,7 +139,7 @@ public class MediaUtils {
       String[] projection = { Images.ImageColumns._ID };
       imageCursor = cr.query(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
           projection, select, selectArgs, null);
-      if (imageCursor.getCount() > 0) {
+      if (imageCursor != null && imageCursor.getCount() > 0) {
         imageCursor.moveToFirst();
         List<Uri> imagesToDelete = new ArrayList<Uri>();
         do {
@@ -164,7 +164,7 @@ public class MediaUtils {
     return count;
   }
 
-  public static final Uri getAudioUriFromMediaProvider(Context ctxt, String audioFile) {
+  public static Uri getAudioUriFromMediaProvider(Context ctxt, String audioFile) {
     String selection = Audio.AudioColumns.DATA + "=?";
     String[] selectArgs = { audioFile };
     String[] projection = { Audio.AudioColumns._ID };
@@ -173,7 +173,7 @@ public class MediaUtils {
       c = ctxt.getContentResolver().query(
           android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection,
           selectArgs, null);
-      if (c.getCount() > 0) {
+      if (c != null && c.getCount() > 0) {
         c.moveToFirst();
         String id = CursorUtils.getIndexAsString(c, c.getColumnIndex(Audio.AudioColumns._ID));
 
@@ -188,7 +188,7 @@ public class MediaUtils {
     }
   }
 
-  public static final int deleteAudioFileFromMediaProvider(Context ctxt, String appName, String audioFile) {
+  public static int deleteAudioFileFromMediaProvider(Context ctxt, String appName, String audioFile) {
     if (audioFile == null)
       return 0;
 
@@ -203,7 +203,7 @@ public class MediaUtils {
       String[] projection = { Audio.AudioColumns._ID };
       audioCursor = cr.query(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
           projection, select, selectArgs, null);
-      if (audioCursor.getCount() > 0) {
+      if (audioCursor != null && audioCursor.getCount() > 0) {
         audioCursor.moveToFirst();
         List<Uri> audioToDelete = new ArrayList<Uri>();
         do {
@@ -232,7 +232,7 @@ public class MediaUtils {
     return count;
   }
 
-  public static final int deleteAudioInFolderFromMediaProvider(Context ctxt, String appName, File folder) {
+  public static int deleteAudioInFolderFromMediaProvider(Context ctxt, String appName, File folder) {
     if (folder == null)
       return 0;
 
@@ -247,7 +247,7 @@ public class MediaUtils {
       String[] projection = { Audio.AudioColumns._ID };
       audioCursor = cr.query(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
           projection, select, selectArgs, null);
-      if (audioCursor.getCount() > 0) {
+      if (audioCursor != null && audioCursor.getCount() > 0) {
         audioCursor.moveToFirst();
         List<Uri> audioToDelete = new ArrayList<Uri>();
         do {
@@ -272,7 +272,7 @@ public class MediaUtils {
     return count;
   }
 
-  public static final Uri getVideoUriFromMediaProvider(Context ctxt, String videoFile) {
+  public static Uri getVideoUriFromMediaProvider(Context ctxt, String videoFile) {
     String selection = Video.VideoColumns.DATA + "=?";
     String[] selectArgs = { videoFile };
     String[] projection = { Video.VideoColumns._ID };
@@ -281,7 +281,7 @@ public class MediaUtils {
       c = ctxt.getContentResolver().query(
           android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, selection,
           selectArgs, null);
-      if (c.getCount() > 0) {
+      if (c != null && c.getCount() > 0) {
         c.moveToFirst();
         String id = CursorUtils.getIndexAsString(c, c.getColumnIndex(Video.VideoColumns._ID));
 
@@ -296,7 +296,7 @@ public class MediaUtils {
     }
   }
 
-  public static final int deleteVideoFileFromMediaProvider(Context ctxt, String appName, String videoFile) {
+  public static int deleteVideoFileFromMediaProvider(Context ctxt, String appName, String videoFile) {
     if (videoFile == null)
       return 0;
 
@@ -311,7 +311,7 @@ public class MediaUtils {
       String[] projection = { Video.VideoColumns._ID };
       videoCursor = cr.query(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
           projection, select, selectArgs, null);
-      if (videoCursor.getCount() > 0) {
+      if (videoCursor != null && videoCursor.getCount() > 0) {
         videoCursor.moveToFirst();
         List<Uri> videoToDelete = new ArrayList<Uri>();
         do {
@@ -340,7 +340,7 @@ public class MediaUtils {
     return count;
   }
 
-  public static final int deleteVideoInFolderFromMediaProvider(Context ctxt, String appName, File folder) {
+  public static int deleteVideoInFolderFromMediaProvider(Context ctxt, String appName, File folder) {
     if (folder == null)
       return 0;
 
@@ -355,7 +355,7 @@ public class MediaUtils {
       String[] projection = { Video.VideoColumns._ID };
       videoCursor = cr.query(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
           projection, select, selectArgs, null);
-      if (videoCursor.getCount() > 0) {
+      if (videoCursor != null && videoCursor.getCount() > 0) {
         videoCursor.moveToFirst();
         List<Uri> videoToDelete = new ArrayList<Uri>();
         do {
@@ -394,9 +394,9 @@ public class MediaUtils {
         Cursor c = null;
         try {
           c = ctxt.getContentResolver().query(uri, projection, null, null, null);
-          int column_index = c.getColumnIndexOrThrow(pathKey);
           String path = null;
-          if (c.getCount() > 0) {
+          if (c != null && c.getCount() > 0) {
+            int column_index = c.getColumnIndexOrThrow(pathKey);
             c.moveToFirst();
             path = CursorUtils.getIndexAsString(c, column_index);
           }

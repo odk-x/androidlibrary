@@ -31,7 +31,7 @@ public class WebLogger {
   private static final long MILLISECONDS_DAY = 86400000L;
 
   private static long lastStaleScan = 0L;
-  private static Map<String, WebLoggerIf> loggers = new HashMap<String, WebLoggerIf>();
+  private static final Map<String, WebLoggerIf> loggers = new HashMap<String, WebLoggerIf>();
 
   private static WebLoggerFactoryIf webLoggerFactory;
 

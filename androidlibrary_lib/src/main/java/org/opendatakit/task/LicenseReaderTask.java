@@ -56,7 +56,7 @@ public class LicenseReaderTask extends AsyncTask<Void, Integer, String> {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    result = interimResult.toString();
+    result = (interimResult == null) ? null : interimResult.toString();
     return result;
   }
 

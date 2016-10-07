@@ -26,7 +26,7 @@ public class MarshallUtil {
     throw new IllegalStateException("Never Instantiate this static class");
   }
 
-  public static final void marshallStringArray(Parcel out, String[] toMarshall) {
+  public static void marshallStringArray(Parcel out, String[] toMarshall) {
     if (toMarshall == null) {
       out.writeInt(-1);
     } else {
@@ -35,7 +35,7 @@ public class MarshallUtil {
     }
   }
 
-  public static final String[] unmarshallStringArray(Parcel in) {
+  public static String[] unmarshallStringArray(Parcel in) {
     String[] result = null;
 
     int dataCount = in.readInt();
