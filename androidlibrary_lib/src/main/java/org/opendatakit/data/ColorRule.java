@@ -53,7 +53,7 @@ public class ColorRule {
     // This is the string that represents this operation.
     private String symbol;
 
-    private RuleType(String symbol) {
+    RuleType(String symbol) {
       this.symbol = symbol;
     }
 
@@ -225,11 +225,7 @@ public class ColorRule {
     }
     ColorRule other = (ColorRule) o;
     boolean sameId = (mId == null) ? other.mId == null : mId.equals(other.mId);
-    if ( !sameId ) {
-      return false;
-    } else {
-      return equalsWithoutId(other);
-    }
+    return sameId && equalsWithoutId(other);
   }
 
   /**

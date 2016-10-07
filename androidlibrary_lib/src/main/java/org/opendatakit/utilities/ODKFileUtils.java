@@ -1092,7 +1092,6 @@ public class ODKFileUtils {
       } catch (IOException e) {
         WebLogger.getLogger(appName).e(t, "Cannot close input stream for " + file.getName());
         WebLogger.getLogger(appName).printStackTrace(e);
-        return null;
       }
     }
   }

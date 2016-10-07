@@ -23,11 +23,6 @@ import org.opendatakit.utilities.StaticStateManipulator;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-
 public class ColorRuleTest {
 
    @BeforeClass
