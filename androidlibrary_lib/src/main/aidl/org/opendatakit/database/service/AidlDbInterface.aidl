@@ -626,6 +626,35 @@ interface AidlDbInterface {
       in String rowId, in int localRowConflictType);
 
   /**
+   * SYNC ONLY
+   *
+   * A combination of:
+   *
+   * deleteServerConflictRowWithId(appName, db, tableId, rowId)
+   * getRowWithId(appname, db, tableId, rowId)
+   * if (canresolve) {
+   *    update with resolution
+   * } else {
+   *    placeRowIntoConflict(appName, db, tableId, rowId, localRowConflictType)
+   * and, for the values which are the server row changes:
+   *    insertDataIntoExistingTableWithId( appName, db, tableId, orderedColumns, values, rowId)
+   * }
+   *
+   * Change the conflictType for the given row from null (not in conflict) to
+   * the specified one.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param orderedColumns
+   * @param cvValues  server's field values for this row
+   * @param rowId
+   */
+  DbChunk privilegedPerhapsPlaceRowIntoConflictWithId(in String appName, in DbHandle dbHandleName,
+      in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues,
+      in String rowId);
+
+  /**
    * SYNC, CSV Import ONLY
    *
    * Insert the given rowId with the values in the cvValues. This is data from

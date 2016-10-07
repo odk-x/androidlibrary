@@ -1464,6 +1464,47 @@ public class UserDbInterface {
      }
    }
 
+  /**
+   * SYNC ONLY
+   *
+   * A combination of:
+   * <p/>
+   * deleteServerConflictRowWithId(appName, db, tableId, rowId)
+   * getRowWithId(appName, db, tableId, rowId)
+   * if (can resolve conflict) {
+   *   privilegedUpdateRowWithId(...);
+   * } else {
+   *   placeRowIntoConflict(appName, db, tableId, rowId, localRowConflictType)
+   * and, for the values which are the server row changes:
+   *   insertDataIntoExistingTableWithId( appName, db, tableId, orderedColumns, values, rowId)
+   * }
+   * <p/>
+   * Change the conflictType for the given row from null (not in conflict) to
+   * the specified one.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param orderedColumns
+   * @param cvValues   the field values on the server
+   * @param rowId
+   */
+  public UserTable privilegedPerhapsPlaceRowIntoConflictWithId(String appName, DbHandle
+      dbHandleName,
+      String tableId, OrderedColumns orderedColumns, ContentValues cvValues, String rowId)
+      throws ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+          .privilegedPerhapsPlaceRowIntoConflictWithId(appName, dbHandleName, tableId, orderedColumns,
+              cvValues, rowId), BaseTable.CREATOR);
+
+      return new UserTable(baseTable, orderedColumns, getAdminColumns());
+    } catch ( Exception e ) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
+
    /**
     * SYNC, CSV Import ONLY
     *
