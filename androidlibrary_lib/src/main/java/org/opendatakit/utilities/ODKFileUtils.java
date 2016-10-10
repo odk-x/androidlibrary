@@ -398,6 +398,10 @@ public class ODKFileUtils {
     assertConfiguredOdkApp(appName, "scan.version", apkVersion);
   }
 
+  public static void assertConfiguredToolApp(String appName, String toolName, String apkVersion) {
+    assertConfiguredOdkApp(appName, toolName + ".version", apkVersion);
+  }
+
   public static void assertConfiguredOdkApp(String appName, String odkAppVersionFile, String apkVersion) {
     File versionFile = new File(getDataFolder(appName), odkAppVersionFile);
 
@@ -452,6 +456,10 @@ public class ODKFileUtils {
 
   public static boolean isConfiguredScanApp(String appName, String apkVersion) {
     return isConfiguredOdkApp(appName, "scan.version", apkVersion);
+  }
+
+  public static boolean isConfiguredToolApp(String appName, String toolName, String apkVersion) {
+    return isConfiguredOdkApp(appName, toolName + ".version", apkVersion);
   }
 
   private static boolean isConfiguredOdkApp(String appName, String odkAppVersionFile, String apkVersion) {
