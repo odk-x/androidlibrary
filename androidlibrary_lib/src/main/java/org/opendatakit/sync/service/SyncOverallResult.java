@@ -28,7 +28,7 @@ import java.util.TreeMap;
  * An object for measuring the results of a synchronization call. This is
  * especially intended to see how to display the results to the user. For
  * example, imagine you wanted to synchronize three tables. The object should
- * contain three TableLevelResult objects, mapping the dbTableName to the status
+ * contain three TableLevelResult objects, mapping the tableId to the status
  * corresponding to outcome.
  * 
  * @author sudar.sam@gmail.com
@@ -38,7 +38,7 @@ public class SyncOverallResult implements Parcelable {
 
   private SyncOutcome appLevelSyncOutcome = SyncOutcome.WORKING;
 
-  private TreeMap<String, TableLevelResult> mResults = new TreeMap<String, TableLevelResult>();
+  private final TreeMap<String, TableLevelResult> mResults = new TreeMap<String, TableLevelResult>();
 
   public SyncOverallResult() {
   }
