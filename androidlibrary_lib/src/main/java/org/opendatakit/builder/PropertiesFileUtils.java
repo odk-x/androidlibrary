@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.utilities;
+package org.opendatakit.builder;
 
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
@@ -29,6 +29,7 @@ import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.ColumnDefinitionsColumns;
 import org.opendatakit.provider.KeyValueStoreColumns;
 import org.opendatakit.database.data.KeyValueStoreEntry;
+import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

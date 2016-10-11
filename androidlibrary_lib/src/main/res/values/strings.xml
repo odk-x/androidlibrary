@@ -36,4 +36,31 @@
 	<string name="credential_username_password">Username</string>
 	<string name="credential_google_account">Google Account</string>
 
+	<string name="expansion_unzipping_begins">Unzipping resources. Scanning zip directory.</string>
+	<string name="expansion_unzipping_without_detail">Unzipping resources. Extracting %1$s (%2$d of %3$d)</string>
+	<string name="expansion_create_dir_detail">Creating directory</string>
+	<string name="expansion_unzipping_detail">at byte %1$d, file %2$d</string>
+	<string name="expansion_unzipping_complete">Unzipping completed. %1$d resources unzipped.</string>
+
+	<string name="searching_for_deleted_forms">Searching for deleted forms &#8230;</string>
+	<string name="examining_form">Verifying form %2$s for table %1$s exists &#8230;</string>
+
+	<string name="scanning_for_table_definitions">Scanning for table definitions. Creating %1$s (%2$d of %3$d).</string>
+	<string name="processing_file">processing file&#8230;</string>
+	<string name="defining_tableid_error">Error processing table definition for tableId %1$s</string>
+
+	<string name="poorly_formatted_init_file">Invalid tables.init file</string>
+	<string name="csv_file_not_found">Warning: CSV File not found: %1$s - skipped</string>
+	<string name="importing_file_without_detail">Importing file (%1$d of %2$d): %3$s</string>
+	<string name="import_csv_success">Success: CSV intialization for tableId %1$s</string>
+	<string name="import_csv_failure">Failure: CSV intialization for tableId %1$s</string>
+	<string name="import_success">CSV File import was successful.</string>
+
+	<string name="searching_for_form_defs">Searching for new form definitions &#8230;</string>
+	<string name="updating_form_information">Updating form information for form %1$s (%2$d of %3$d)</string>
+	<string name="form_register_success">Success: Defining formId %2$s for tableId %1$s</string>
+	<string name="form_register_failure">Failure: Defining formId %2$s for tableId %1$s</string>
+
+	<string name="abort_error_accessing_database">Aborted: Error accessing database</string>
+
 </resources>
