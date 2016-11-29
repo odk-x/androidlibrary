@@ -17,6 +17,7 @@ package org.opendatakit.builder;
 import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import org.apache.commons.io.FileUtils;
@@ -71,8 +72,10 @@ public class InitializationUtil {
         !ODKFileUtils.isConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString())) {
       getSupervisor().publishProgress(appContext.getString(R.string.expansion_unzipping_begins), null);
 
-      extractFromRawZip(getSupervisor().getSystemZipResourceId(), true, pendingOutcome);
-      extractFromRawZip(getSupervisor().getConfigZipResourceId(), false, pendingOutcome);
+      extractFromRawZip(appContext.getResources(),
+          getSupervisor().getSystemZipResourceId(), true, pendingOutcome);
+      extractFromRawZip(appContext.getResources(),
+          getSupervisor().getConfigZipResourceId(), false, pendingOutcome);
 
       ODKFileUtils.assertConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString());
     }
@@ -107,12 +110,13 @@ public class InitializationUtil {
     public void done(int totalCount);
   }
 
-  private final void doActionOnRawZip(int resourceId, boolean overwrite, InitializationOutcome pendingOutcome,
+  private final void doActionOnRawZip(Resources resources, int resourceId, boolean overwrite,
+      InitializationOutcome pendingOutcome,
       ZipAction action) {
     String message = null;
     InputStream rawInputStream = null;
     try {
-      rawInputStream = appContext.getResources().openRawResource(resourceId);
+      rawInputStream = resources.openRawResource(resourceId);
       ZipInputStream zipInputStream = null;
       ZipEntry entry = null;
       try {
@@ -192,7 +196,7 @@ public class InitializationUtil {
 
   ;
 
-  public void extractFromRawZip(int resourceId, final boolean overwrite,
+  public void extractFromRawZip(Resources resources, int resourceId, final boolean overwrite,
       InitializationOutcome result) {
 
     final ZipEntryCounter countTotal = new ZipEntryCounter();
@@ -201,7 +205,7 @@ public class InitializationUtil {
       return;
     }
 
-    doActionOnRawZip(resourceId, overwrite, result, countTotal);
+    doActionOnRawZip(resources, resourceId, overwrite, result, countTotal);
 
     if (countTotal.totalFiles == -1) {
       return;
@@ -261,7 +265,7 @@ public class InitializationUtil {
 
     };
 
-    doActionOnRawZip(resourceId, overwrite, result, worker);
+    doActionOnRawZip(resources, resourceId, overwrite, result, worker);
   }
 
   /**

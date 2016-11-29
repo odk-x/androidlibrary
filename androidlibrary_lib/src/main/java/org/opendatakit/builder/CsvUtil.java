@@ -463,7 +463,7 @@ public class CsvUtil {
           row = cr.readNext();
           rowCount++;
           if (rowCount % 5 == 0) {
-            importListener.updateProgressDetail("Row " + rowCount);
+            importListener.updateProgressDetail("Importing Row " + rowCount);
           }
           if (row == null || countUpToLastNonNullElement(row) == 0) {
             break;
