@@ -43,22 +43,26 @@ public class WebLoggerImpl implements WebLoggerIf {
   private static final long FLUSH_INTERVAL = 12000L; // 5 times a minute
   private static final long MILLISECONDS_DAY = 86400000L;
 
-  private static final int ASSERT = 1;
-  private static final int VERBOSE = 2;
-  private static final int DEBUG = 3;
-  private static final int INFO = 4;
-  private static final int WARN = 5;
-  private static final int ERROR = 6;
-  private static final int SUCCESS = 7;
-  private static final int TIP = 8;
+  /**
+   * The value for DEFAULT_MIN_LOG_LEVEL_TO_SPEW should **NEVER** be SUCCESS or TIP.
+   * Those two values are remapped to ERROR and ASSERT, respectively, before
+   * this filter criteria is applied.
+   */
+  private static final int DEFAULT_MIN_LOG_LEVEL_TO_SPEW = INFO;
 
-  private static final int MIN_LOG_LEVEL_TO_SPEW = INFO;
   private static final String DATE_FORMAT = "yyyy-MM-dd_HH";
   private static final String LOG_LINE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
   /**
    * Instance variables
    */
+
+  /**
+   * The value for minLogLevelToSpew should **NEVER** be SUCCESS or TIP.
+   * Those two values are remapped to ERROR and ASSERT, respectively, before
+   * this filter criteria is applied.
+   */
+  private int minLogLevelToSpew = DEFAULT_MIN_LOG_LEVEL_TO_SPEW;
 
   // appName under which to write log
   private final String appName;
@@ -247,6 +251,20 @@ public class WebLoggerImpl implements WebLoggerIf {
     }
   }
 
+  public void setMinimumSystemLogLevel(int level) {
+    if ( level == SUCCESS ) {
+      level = ERROR;
+    }
+    if ( level == TIP ) {
+      level = ASSERT;
+    }
+    minLogLevelToSpew = level;
+  }
+
+  public int getMinimumSystemLogLevel() {
+    return minLogLevelToSpew;
+  }
+
   public void log(int severity, String t, String logMsg) {
     try {
 
@@ -270,7 +288,21 @@ public class WebLoggerImpl implements WebLoggerIf {
         androidTag = t.substring(periodIdx+1);
       }
 
-      if (severity >= MIN_LOG_LEVEL_TO_SPEW) {
+      /**
+       * Our severity level has to have unique values that we
+       * actually want to compress when calculating whether to
+       * emit the value to the system log or not. Do that via
+       * the remappedSeverity computation below.
+       */
+      int remappedSeverity = severity;
+      if ( severity == SUCCESS ) {
+        remappedSeverity = ERROR;
+      }
+      if ( severity == TIP ) {
+        remappedSeverity = ASSERT;
+      }
+
+      if (remappedSeverity >= minLogLevelToSpew) {
         // do logcat logging...
         if (severity == ERROR) {
           Log.e(androidTag, androidLogLine);

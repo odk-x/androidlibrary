@@ -87,6 +87,14 @@ public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
       Logger.getGlobal().throwing("unknown", "unknown", e);
     }
 
+    public void setMinimumSystemLogLevel(int level) {
+      // TODO: no-op
+    }
+
+    public int getMinimumSystemLogLevel() {
+      return WebLoggerIf.VERBOSE;
+    }
+
   }
 
   public synchronized WebLoggerIf createWebLogger(String appName) {
