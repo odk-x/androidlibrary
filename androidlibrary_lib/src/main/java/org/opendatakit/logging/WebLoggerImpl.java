@@ -48,7 +48,7 @@ public class WebLoggerImpl implements WebLoggerIf {
    * Those two values are remapped to ERROR and ASSERT, respectively, before
    * this filter criteria is applied.
    */
-  private static final int DEFAULT_MIN_LOG_LEVEL_TO_SPEW = INFO;
+  private static final int DEFAULT_MIN_LOG_LEVEL_TO_SPEW = ERROR;
 
   private static final String DATE_FORMAT = "yyyy-MM-dd_HH";
   private static final String LOG_LINE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -348,8 +348,8 @@ public class WebLoggerImpl implements WebLoggerIf {
         logMsg = "?/" + t + ": " + logMsg;
         break;
       }
-      log(logMsg);
-    } catch (IOException e) {
+      // log(logMsg);
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
