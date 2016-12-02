@@ -22,6 +22,12 @@
 
     <string name="still_reading_license_file">Sorry, the license file is still being read.</string>
  	<string name="about">About</string>
+	<string name="log_threshold_verbose">System log threshold: Verbose</string>
+	<string name="log_threshold_debug">System log threshold: Debug</string>
+	<string name="log_threshold_info">System log threshold: Info</string>
+	<string name="log_threshold_warn">System log threshold: Warn</string>
+	<string name="log_threshold_error">System log threshold: Error and/or Success</string>
+	<string name="log_threshold_assert">System log threshold: Assert and/or Tip</string>
  	<string name="waiting_for_license">Retrieving license info &#8230;</string>
 	<string name="read_license_success">Read license file successfully</string>
 	<string name="read_license_fail">Failed to read license file</string>

@@ -12,6 +12,14 @@
   	android:textColor="@color/black"
   	android:textSize="21sp"/>
   <TextView
+	android:id="@+id/logLevelText"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:paddingLeft="20dp"
+	android:paddingRight="20dp"
+	android:textColor="@color/black"
+	android:textSize="16sp"/>
+  <TextView
   	android:id="@+id/text1"
   	android:layout_width="fill_parent"
   	android:layout_height="fill_parent"

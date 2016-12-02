@@ -29,6 +29,7 @@ import org.opendatakit.androidlibrary.R;
 import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.application.AppAwareApplication;
 import org.opendatakit.listener.LicenseReaderListener;
+import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.task.LicenseReaderTask;
 import org.opendatakit.logging.WebLogger;
 
@@ -60,8 +61,39 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     View aboutMenuView = inflater.inflate(ID, container, false);
 
     TextView versionBox = (TextView) aboutMenuView.findViewById(R.id.versionText);
-    versionBox.setText(((AppAwareApplication) getActivity().getApplication())
-        .getVersionedAppName());
+    versionBox.setText(((AppAwareApplication) getActivity().getApplication()).getVersionedAppName());
+
+    {
+      IAppAwareActivity appAwareActivity = (IAppAwareActivity) getActivity();
+      int logLevel = WebLogger.getLogger(appAwareActivity.getAppName()).getMinimumSystemLogLevel();
+      String suppressLevel;
+      switch (logLevel) {
+      case WebLoggerIf.ASSERT:
+      case WebLoggerIf.TIP:
+        suppressLevel = getString(R.string.log_threshold_assert);
+        break;
+      case WebLoggerIf.ERROR:
+      case WebLoggerIf.SUCCESS:
+        suppressLevel = getString(R.string.log_threshold_error);
+        break;
+      case WebLoggerIf.WARN:
+        suppressLevel = getString(R.string.log_threshold_warn);
+        break;
+      case WebLoggerIf.INFO:
+        suppressLevel = getString(R.string.log_threshold_info);
+        break;
+      case WebLoggerIf.DEBUG:
+        suppressLevel = getString(R.string.log_threshold_debug);
+        break;
+      case WebLoggerIf.VERBOSE:
+        suppressLevel = getString(R.string.log_threshold_verbose);
+        break;
+      default:
+        throw new IllegalStateException("Unexpected log level filter value");
+      }
+      TextView logLevelBox = (TextView) aboutMenuView.findViewById(R.id.logLevelText);
+      logLevelBox.setText(suppressLevel);
+    }
 
     mTextView = (TextView) aboutMenuView.findViewById(R.id.text1);
     mTextView.setAutoLinkMask(Linkify.WEB_URLS);
