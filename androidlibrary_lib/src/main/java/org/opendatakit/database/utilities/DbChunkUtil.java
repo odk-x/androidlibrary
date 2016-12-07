@@ -32,9 +32,17 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public final class DbChunkUtil {
+
+  private static class UUIDGenerator {
+    private static Random generator = new Random();
+    static UUID randomGenerator() {
+      return new UUID(generator.nextLong(), generator.nextLong());
+    }
+  }
 
   private static final String TAG = DbChunkUtil.class.getSimpleName();
 
@@ -55,7 +63,7 @@ public final class DbChunkUtil {
   private static DbChunk createChunk(byte[] sourceData, int dataIndex, int chunkSize,
       DbChunk prevChunk) {
 
-    UUID chunkID = UUID.randomUUID();
+    UUID chunkID = UUIDGenerator.randomGenerator();
 
     byte[] chunkData = new byte[chunkSize];
     System.arraycopy(sourceData, dataIndex, chunkData, 0, chunkSize);
