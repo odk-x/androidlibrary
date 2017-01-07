@@ -26,7 +26,7 @@ android {
         targetSdkVersion(targetVersion)
         versionCode(releaseVersionCode)
         versionName(versionCodeName)
-        testInstrumentationRunner("android.support.test.runner.AndroidJUnitRunner")
+        testInstrumentationRunner(instrumentationRunner)
     }
 
     // set by command line arguments
