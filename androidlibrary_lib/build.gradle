@@ -26,7 +26,7 @@ android {
         targetSdkVersion(targetVersion)
         versionCode(releaseVersionCode)
         versionName(versionCodeName)
-        multiDexEnabled(true)
+        testInstrumentationRunner("android.support.test.runner.AndroidJUnitRunner")
     }
 
     // set by command line arguments
@@ -102,4 +102,5 @@ dependencies {
 
     // Testing dependencies
     testCompile 'junit:junit:4.12'
+    androidTestCompile 'com.android.support.test:runner:0.5'
 }
