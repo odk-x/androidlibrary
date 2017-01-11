@@ -98,7 +98,7 @@ allprojects {
 
 dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
-    compile 'com.android.support:support-v4:25.1.0'
+    compile 'com.android.support:support-annotations:25.1.0'
 
     // Testing dependencies
     testCompile 'junit:junit:4.12'
