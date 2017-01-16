@@ -191,7 +191,6 @@ public class CsvUtil {
         Row dataRow = table.getRowAtIndex(i);
         for (int j = 0; j < columns.size(); ++j) {
           row[j] = dataRow.getDataByKey(columns.get(j));
-          ;
         }
         cw.writeNext(row);
         /**

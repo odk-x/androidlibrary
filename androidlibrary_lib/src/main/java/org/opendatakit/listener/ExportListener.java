@@ -20,5 +20,5 @@ package org.opendatakit.listener;
  */
 public interface ExportListener {
 
-  public void exportComplete(boolean outcome);
+  void exportComplete(boolean outcome);
 }

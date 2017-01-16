@@ -27,7 +27,7 @@
   	android:minHeight="?android:attr/listPreferredItemHeight"
   	android:paddingLeft="20dp"
   	android:paddingRight="20dp"
-  	android:text="@+string/waiting_for_license"
+  	android:text="@string/waiting_for_license"
   	android:textColor="@color/black"
   	android:textSize="21sp"
   	android:scrollbars="vertical"/>

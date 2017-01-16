@@ -32,7 +32,7 @@ public class DataHelper {
   }
 
   public static boolean stringToBool(String bool) {
-    return (bool == null) ? true : bool.equalsIgnoreCase("true");
+    return (bool == null) || bool.equalsIgnoreCase("true");
   }
 
 }

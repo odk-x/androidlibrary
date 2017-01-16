@@ -14,7 +14,6 @@
 
 package org.opendatakit.builder;
 
-import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
@@ -104,10 +103,10 @@ public class InitializationUtil {
   }
 
   interface ZipAction {
-    public void doWorker(ZipEntry entry, ZipInputStream zipInputStream, int indexIntoZip, long size)
-        throws FileNotFoundException, IOException;
+    void doWorker(ZipEntry entry, ZipInputStream zipInputStream, int indexIntoZip, long size)
+        throws IOException;
 
-    public void done(int totalCount);
+    void done(int totalCount);
   }
 
   private final void doActionOnRawZip(Resources resources, int resourceId, boolean overwrite,
@@ -193,8 +192,6 @@ public class InitializationUtil {
       totalFiles = totalCount;
     }
   }
-
-  ;
 
   public void extractFromRawZip(Resources resources, int resourceId, final boolean overwrite,
       InitializationOutcome result) {

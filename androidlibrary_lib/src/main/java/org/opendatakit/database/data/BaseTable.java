@@ -149,7 +149,7 @@ public class BaseTable implements Parcelable {
 
     try {
       byte eacr = in.readByte();
-      mEffectiveAccessCreateRow = (eacr == 0) ? false : true;
+      mEffectiveAccessCreateRow = eacr != 0;
       mPrimaryKey = MarshallUtil.unmarshallStringArray(in);
       mElementKeyForIndex = MarshallUtil.unmarshallStringArray(in);
       mElementKeyToIndex = generateElementKeyToIndex();

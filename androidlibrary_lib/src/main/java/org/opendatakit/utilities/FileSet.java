@@ -15,8 +15,6 @@
 package org.opendatakit.utilities;
 
 import android.content.Context;
-
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -60,7 +58,7 @@ public class FileSet {
     attachmentFiles.add(f);
   }
 
-  public String serializeUriFragmentList(Context context) throws JsonGenerationException, JsonMappingException, IOException {
+  public String serializeUriFragmentList(Context context) throws IOException {
     ArrayList<HashMap<String, String>> str = new ArrayList<HashMap<String, String>>();
 
     HashMap<String, String> map;
@@ -79,8 +77,7 @@ public class FileSet {
     return serializedString;
   }
 
-  public static FileSet parse(Context context, String appName, InputStream src) throws JsonParseException,
-      JsonMappingException, IOException {
+  public static FileSet parse(Context context, String appName, InputStream src) throws IOException {
     CollectionType javaType =
         ODKFileUtils.mapper.getTypeFactory().constructCollectionType(ArrayList.class, Map.class);
     ArrayList<Map> mapArrayList = null;

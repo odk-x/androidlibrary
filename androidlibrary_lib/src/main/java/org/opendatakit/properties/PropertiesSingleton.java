@@ -121,8 +121,7 @@ public class PropertiesSingleton {
     if (isSecureProperty(propertyName)) {
       // this needs to be stored in a protected area
       SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-      return (sharedPreferences == null) ? false :
-        sharedPreferences.contains(mAppName + "_" + propertyName);
+      return sharedPreferences != null && sharedPreferences.contains(mAppName + "_" + propertyName);
     } else if (isDeviceProperty(propertyName) ) {
       return mDeviceProps.containsKey(propertyName);
     } else {

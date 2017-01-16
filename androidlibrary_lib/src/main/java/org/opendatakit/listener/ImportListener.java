@@ -19,7 +19,7 @@ package org.opendatakit.listener;
  * Extracted from CsvUtil class.
  */
 public interface ImportListener {
-  public void updateProgressDetail(String progressDetailString);
+  void updateProgressDetail(String progressDetailString);
 
-  public void importComplete(boolean outcome);
+  void importComplete(boolean outcome);
 }
