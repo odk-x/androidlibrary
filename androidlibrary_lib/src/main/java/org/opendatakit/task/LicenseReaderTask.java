@@ -20,7 +20,7 @@ import android.app.Application;
 import android.os.AsyncTask;
 
 import org.opendatakit.androidlibrary.R;
-import org.opendatakit.application.AppAwareApplication;
+import org.opendatakit.application.ToolAwareApplication;
 import org.opendatakit.listener.LicenseReaderListener;
 
 import java.io.BufferedReader;
@@ -29,7 +29,7 @@ import java.io.InputStreamReader;
 
 public class LicenseReaderTask extends AsyncTask<Void, Integer, String> {
 
-  private AppAwareApplication appContext;
+  private ToolAwareApplication appContext;
   private LicenseReaderListener lrl;
   private String appName;
   private String mResult;
@@ -111,7 +111,7 @@ public class LicenseReaderTask extends AsyncTask<Void, Integer, String> {
     return appName;
   }
 
-  public void setApplication(AppAwareApplication appContext) {
+  public void setApplication(ToolAwareApplication appContext) {
     synchronized (this) {
       this.appContext = appContext;
     }

@@ -15,6 +15,7 @@
 package org.opendatakit.properties;
 
 import android.content.Context;
+import android.app.Application;
 
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.utilities.StaticStateManipulator;
@@ -197,6 +198,13 @@ public class CommonToolProperties {
       factory = new CommonPropertiesSingletonFactory(generalProperties, deviceProperties, secureProperties);
     }
     return factory.getSingleton(context, appName);
+  }
+
+  public static int getQuestionFontsize(Context context, String appName) {
+    PropertiesSingleton props = CommonToolProperties.get(context, appName);
+    Integer question_font = props.getIntegerProperty(CommonToolProperties.KEY_FONT_SIZE);
+    int questionFontsize = (question_font == null) ? CommonToolProperties.DEFAULT_FONT_SIZE : question_font;
+    return questionFontsize;
   }
 
 }
