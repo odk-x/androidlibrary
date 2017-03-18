@@ -28,17 +28,17 @@ import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.SyncState;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.database.data.ColumnDefinition;
+import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.database.data.OrderedColumns;
+import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.UserTable;
+import org.opendatakit.database.service.DbHandle;
 import org.opendatakit.database.utilities.CursorUtils;
 import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.listener.ExportListener;
 import org.opendatakit.listener.ImportListener;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.DataTableColumns;
-import org.opendatakit.database.data.KeyValueStoreEntry;
-import org.opendatakit.database.service.DbHandle;
-import org.opendatakit.database.data.Row;
 import org.opendatakit.utilities.LocalizationUtils;
 import org.opendatakit.utilities.ODKFileUtils;
 
@@ -453,6 +453,9 @@ public class CsvUtil {
         String v_row_etag;
         String v_filter_type;
         String v_filter_value;
+        String v_groups_list;
+        String v_group_type;
+        String v_filter_ext;
 
         Map<String, String> valueMap = new HashMap<String, String>();
 
@@ -479,13 +482,16 @@ public class CsvUtil {
           v_row_etag = null;
           v_filter_type = DataTableColumns.DEFAULT_FILTER_TYPE;
           v_filter_value = DataTableColumns.DEFAULT_FILTER_VALUE;
+          v_group_type = DataTableColumns.DEFAULT_GROUP_TYPE;
+          v_groups_list = DataTableColumns.DEFAULT_GROUPS_LIST;
+          v_filter_ext = DataTableColumns.DEFAULT_FILTER_EXT;
 
           // clear value map
           valueMap.clear();
 
           boolean foundId = false;
           for (int i = 0; i < columnsInFileLength; ++i) {
-            if (i > rowLength)
+            if (i >= rowLength)
               break;
             String column = columnsInFile[i];
             String tmp = row[i];
@@ -544,6 +550,25 @@ public class CsvUtil {
               }
               continue;
             }
+            if (DataTableColumns.GROUP_TYPE.equals(column)) {
+              if (tmp != null && tmp.length() != 0) {
+                v_group_type = tmp;
+              }
+              continue;
+            }
+            if (DataTableColumns.GROUPS_LIST.equals(column)) {
+              if (tmp != null && tmp.length() != 0) {
+                v_groups_list = tmp;
+              }
+              continue;
+            }
+            if (DataTableColumns.FILTER_EXT.equals(column)) {
+              if (tmp != null && tmp.length() != 0) {
+                v_filter_ext = tmp;
+              }
+              continue;
+            }
+
             try {
               orderedDefns.find(column);
               valueMap.put(column, tmp);
@@ -602,6 +627,9 @@ public class CsvUtil {
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
             cv.put(DataTableColumns.FILTER_TYPE, v_filter_type);
             cv.put(DataTableColumns.FILTER_VALUE, v_filter_value);
+            cv.put(DataTableColumns.GROUP_TYPE, v_group_type);
+            cv.put(DataTableColumns.GROUPS_LIST, v_groups_list);
+            cv.put(DataTableColumns.FILTER_EXT, v_filter_ext);
 
             cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
             cv.putNull(DataTableColumns.CONFLICT_TYPE);
@@ -639,6 +667,9 @@ public class CsvUtil {
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
             cv.put(DataTableColumns.FILTER_TYPE, v_filter_type);
             cv.put(DataTableColumns.FILTER_VALUE, v_filter_value);
+            cv.put(DataTableColumns.GROUP_TYPE, v_group_type);
+            cv.put(DataTableColumns.GROUPS_LIST, v_groups_list);
+            cv.put(DataTableColumns.FILTER_EXT, v_filter_ext);
 
             cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
             cv.putNull(DataTableColumns.CONFLICT_TYPE);

@@ -39,6 +39,10 @@ public class DataTableColumns implements BaseColumns {
   public static final String FILTER_TYPE = TableConstants.FILTER_TYPE;
   public static final String FILTER_VALUE = TableConstants.FILTER_VALUE;
 
+  public static final String GROUP_TYPE = TableConstants.GROUP_TYPE;
+  public static final String GROUPS_LIST = TableConstants.GROUPS_LIST;
+  public static final String FILTER_EXT = TableConstants.FILTER_EXT;
+
   /**
    * (_savepoint_timestamp, _savepoint_type)
    * are managed by the database layer based upon the AidlDbInterface methods being
@@ -73,6 +77,9 @@ public class DataTableColumns implements BaseColumns {
   public static final String DEFAULT_ROW_ETAG = null;
   public static final String DEFAULT_FILTER_TYPE = RowFilterScope.EMPTY_ROW_FILTER.getType().name();
   public static final String DEFAULT_FILTER_VALUE = RowFilterScope.EMPTY_ROW_FILTER.getValue();
+  public static final String DEFAULT_GROUP_TYPE = RowFilterScope.EMPTY_ROW_FILTER.getGroupType().name();
+  public static final String DEFAULT_GROUPS_LIST = RowFilterScope.EMPTY_ROW_FILTER.getGroupsList();
+  public static final String DEFAULT_FILTER_EXT = RowFilterScope.EMPTY_ROW_FILTER.getExt();
   // the default _savepoint_creator is: PropertiesSingleton.getActiveUser()
   // the default _locale is: PropertiesSingleton.getLocale()
 

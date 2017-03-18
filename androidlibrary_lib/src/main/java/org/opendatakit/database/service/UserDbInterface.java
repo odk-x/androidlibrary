@@ -1775,7 +1775,7 @@ public class UserDbInterface {
    */
    public UserTable changeRowFilterWithId(String appName, DbHandle dbHandleName, String tableId,
        OrderedColumns orderedColumns, String filterType, String filterValue,
-       String rowId) throws IllegalArgumentException,
+       String groupType, String groupsList, String filterExt, String rowId) throws IllegalArgumentException,
        ActionNotAuthorizedException, ServicesAvailabilityException {
 
       if ( filterType == null ) {
@@ -1791,6 +1791,19 @@ public class UserDbInterface {
       } else {
          cvValues.put(DataTableColumns.FILTER_VALUE, filterValue);
       }
+
+     cvValues.put(DataTableColumns.GROUP_TYPE, groupType);
+     if (groupsList == null) {
+       cvValues.putNull(DataTableColumns.GROUPS_LIST);
+     } else {
+       cvValues.put(DataTableColumns.GROUPS_LIST, groupsList);
+     }
+
+     if (filterExt == null) {
+       cvValues.putNull(DataTableColumns.FILTER_EXT);
+     } else {
+       cvValues.put(DataTableColumns.FILTER_EXT, filterExt);
+     }
 
      try {
        BaseTable baseTable = fetchAndRebuildChunks(dbInterface
