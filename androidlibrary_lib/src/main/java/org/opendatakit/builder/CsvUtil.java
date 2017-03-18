@@ -16,6 +16,7 @@
 package org.opendatakit.builder;
 
 import android.content.ContentValues;
+import android.provider.ContactsContract;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.CharEncoding;
@@ -453,6 +454,9 @@ public class CsvUtil {
         String v_row_etag;
         String v_filter_type;
         String v_filter_value;
+        String v_groups_list;
+        String v_group_type;
+        String v_filter_ext;
 
         Map<String, String> valueMap = new HashMap<String, String>();
 
@@ -479,6 +483,9 @@ public class CsvUtil {
           v_row_etag = null;
           v_filter_type = DataTableColumns.DEFAULT_FILTER_TYPE;
           v_filter_value = DataTableColumns.DEFAULT_FILTER_VALUE;
+          v_group_type = DataTableColumns.DEFAULT_GROUP_TYPE;
+          v_groups_list = DataTableColumns.DEFAULT_GROUPS_LIST;
+          v_filter_ext = DataTableColumns.DEFAULT_FILTER_EXT;
 
           // clear value map
           valueMap.clear();
@@ -544,6 +551,22 @@ public class CsvUtil {
               }
               continue;
             }
+            if (DataTableColumns.GROUP_TYPE.equals(column)) {
+              if (tmp != null && tmp.length() != 0) {
+                v_group_type = tmp;
+              }
+            }
+            if (DataTableColumns.GROUPS_LIST.equals(column)) {
+              if (tmp != null && tmp.length() != 0) {
+                v_groups_list = tmp;
+              }
+            }
+            if (DataTableColumns.FILTER_EXT.equals(column)) {
+              if (tmp != null && tmp.length() != 0) {
+                v_filter_ext = tmp;
+              }
+            }
+
             try {
               orderedDefns.find(column);
               valueMap.put(column, tmp);
@@ -602,6 +625,9 @@ public class CsvUtil {
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
             cv.put(DataTableColumns.FILTER_TYPE, v_filter_type);
             cv.put(DataTableColumns.FILTER_VALUE, v_filter_value);
+            cv.put(DataTableColumns.GROUP_TYPE, v_group_type);
+            cv.put(DataTableColumns.GROUPS_LIST, v_groups_list);
+            cv.put(DataTableColumns.FILTER_EXT, v_filter_ext);
 
             cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
             cv.putNull(DataTableColumns.CONFLICT_TYPE);
@@ -639,6 +665,9 @@ public class CsvUtil {
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
             cv.put(DataTableColumns.FILTER_TYPE, v_filter_type);
             cv.put(DataTableColumns.FILTER_VALUE, v_filter_value);
+            cv.put(DataTableColumns.GROUP_TYPE, v_group_type);
+            cv.put(DataTableColumns.GROUPS_LIST, v_groups_list);
+            cv.put(DataTableColumns.FILTER_EXT, v_filter_ext);
 
             cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
             cv.putNull(DataTableColumns.CONFLICT_TYPE);

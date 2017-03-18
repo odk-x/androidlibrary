@@ -77,6 +77,9 @@ public class DataTableColumns implements BaseColumns {
   public static final String DEFAULT_ROW_ETAG = null;
   public static final String DEFAULT_FILTER_TYPE = RowFilterScope.EMPTY_ROW_FILTER.getType().name();
   public static final String DEFAULT_FILTER_VALUE = RowFilterScope.EMPTY_ROW_FILTER.getValue();
+  public static final String DEFAULT_GROUP_TYPE = RowFilterScope.EMPTY_ROW_FILTER.getGroupType().name();
+  public static final String DEFAULT_GROUPS_LIST = RowFilterScope.EMPTY_ROW_FILTER.getGroupsList();
+  public static final String DEFAULT_FILTER_EXT = RowFilterScope.EMPTY_ROW_FILTER.getExt();
   // the default _savepoint_creator is: PropertiesSingleton.getActiveUser()
   // the default _locale is: PropertiesSingleton.getLocale()
 
