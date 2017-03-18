@@ -39,6 +39,10 @@ public class DataTableColumns implements BaseColumns {
   public static final String FILTER_TYPE = TableConstants.FILTER_TYPE;
   public static final String FILTER_VALUE = TableConstants.FILTER_VALUE;
 
+  public static final String GROUP_TYPE = TableConstants.GROUP_TYPE;
+  public static final String GROUPS_LIST = TableConstants.GROUPS_LIST;
+  public static final String FILTER_EXT = TableConstants.FILTER_EXT;
+
   /**
    * (_savepoint_timestamp, _savepoint_type)
    * are managed by the database layer based upon the AidlDbInterface methods being
