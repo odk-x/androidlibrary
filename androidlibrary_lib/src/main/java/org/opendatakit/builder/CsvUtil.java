@@ -16,7 +16,6 @@
 package org.opendatakit.builder;
 
 import android.content.ContentValues;
-import android.provider.ContactsContract;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.CharEncoding;
@@ -29,17 +28,17 @@ import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.SyncState;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.database.data.ColumnDefinition;
+import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.database.data.OrderedColumns;
+import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.UserTable;
+import org.opendatakit.database.service.DbHandle;
 import org.opendatakit.database.utilities.CursorUtils;
 import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.listener.ExportListener;
 import org.opendatakit.listener.ImportListener;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.DataTableColumns;
-import org.opendatakit.database.data.KeyValueStoreEntry;
-import org.opendatakit.database.service.DbHandle;
-import org.opendatakit.database.data.Row;
 import org.opendatakit.utilities.LocalizationUtils;
 import org.opendatakit.utilities.ODKFileUtils;
 
@@ -492,7 +491,7 @@ public class CsvUtil {
 
           boolean foundId = false;
           for (int i = 0; i < columnsInFileLength; ++i) {
-            if (i > rowLength)
+            if (i >= rowLength)
               break;
             String column = columnsInFile[i];
             String tmp = row[i];
@@ -555,16 +554,19 @@ public class CsvUtil {
               if (tmp != null && tmp.length() != 0) {
                 v_group_type = tmp;
               }
+              continue;
             }
             if (DataTableColumns.GROUPS_LIST.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
                 v_groups_list = tmp;
               }
+              continue;
             }
             if (DataTableColumns.FILTER_EXT.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
                 v_filter_ext = tmp;
               }
+              continue;
             }
 
             try {
