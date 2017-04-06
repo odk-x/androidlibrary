@@ -332,6 +332,10 @@ public class PropertiesSingleton {
     writeProperties();
   }
 
+  public void clearActiveUser() {
+    removeProperty(CommonToolProperties.KEY_ROLES_LIST);
+  }
+
   public String getActiveUser() {
     final String CREDENTIAL_TYPE_NONE = mBaseContext.getString(R.string.credential_type_none);
     final String CREDENTIAL_TYPE_USERNAME_PASSWORD = mBaseContext.getString(R.string.credential_type_username_password);
@@ -342,14 +346,16 @@ public class PropertiesSingleton {
       return "anonymous";
     } else if (authType.equals(CREDENTIAL_TYPE_USERNAME_PASSWORD)) {
       String name = getProperty(CommonToolProperties.KEY_USERNAME);
-      if (name != null) {
+      String roles = getProperty(CommonToolProperties.KEY_ROLES_LIST);
+      if (name != null && roles != null && roles.length() != 0) {
         return "username:" + name;
       } else {
         return "anonymous";
       }
     } else if (authType.equals(CREDENTIAL_TYPE_GOOGLE_ACCOUNT)) {
       String name = getProperty(CommonToolProperties.KEY_ACCOUNT);
-      if (name != null) {
+      String roles = getProperty(CommonToolProperties.KEY_ROLES_LIST);
+      if (name != null && roles != null && roles.length() != 0) {
         return "mailto:" + name;
       } else {
         return "anonymous";
