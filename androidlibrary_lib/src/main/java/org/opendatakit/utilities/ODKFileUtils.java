@@ -133,6 +133,8 @@ public class ODKFileUtils {
    * Miscellaneous well-known file names
    */
 
+  private static final String COMMON_TRANSLATIONS_JS = "commonTranslations.js";
+
   /** Filename for the top-level configuration file (in assets) */
   private static final String ODK_TABLES_INIT_FILENAME =
       "tables.init";
@@ -152,6 +154,11 @@ public class ODKFileUtils {
    * that holds the table schema for this tableId.
    */
   private static final String DEFINITION_CSV = "definition.csv";
+
+  /**
+   * Filename holding table-specific translations.
+   */
+  private static final String TABLE_SPECIFIC_TRANSLATIONS_JS = "tableSpecificTranslations.js";
 
   /**
    *
@@ -643,7 +650,18 @@ public class ODKFileUtils {
     String result = assetsFolder + File.separator + ODK_TABLES_INIT_FILENAME;
     return result;
   }
-  
+
+  /**
+   * Get the path to the common translations file for the given app.
+   * @param appName
+   * @return
+   */
+  public static String getCommonTranslationsFile(String appName) {
+    String assetsFolder = getAssetsFolder(appName);
+    String result = assetsFolder + File.separator + COMMON_TRANSLATIONS_JS;
+    return result;
+  }
+
   /**
    * Get the path to the user-defined home screen file.
    * @param appName
@@ -688,6 +706,10 @@ public class ODKFileUtils {
 
   public static String getTablePropertiesCsvFile(String appName, String tableId) {
     return getTablesFolder(appName, tableId) + File.separator + PROPERTIES_CSV;
+  }
+
+  public static String getTableSpecificTranslationsFile(String appName, String tableId) {
+    return getTablesFolder(appName, tableId) + File.separator + TABLE_SPECIFIC_TRANSLATIONS_JS;
   }
 
   public static String getFormsFolder(String appName, String tableId) {
