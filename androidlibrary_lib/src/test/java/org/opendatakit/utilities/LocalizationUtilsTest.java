@@ -58,7 +58,9 @@ public class LocalizationUtilsTest {
     langMap.put("en", "Huh Test");
     langMap.put("fr", "Je suis");
     langMap.put("default", "No way!");
-    String value = ODKFileUtils.mapper.writeValueAsString(langMap);
+    Map<String,Object> topMap = new TreeMap<String,Object>();
+    topMap.put("text", langMap);
+    String value = ODKFileUtils.mapper.writeValueAsString(topMap);
 
     String match;
 
