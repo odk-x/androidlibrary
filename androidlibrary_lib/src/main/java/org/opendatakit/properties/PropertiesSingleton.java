@@ -365,8 +365,21 @@ public class PropertiesSingleton {
     }
   }
 
-  public String getLocale() {
-    return Locale.getDefault().toString();
+  /**
+   * This may either be the device locale or the locale that the user has selected from the
+   * common_translations list of locales (as specified on the framework settings sheet).
+   *
+   * @return
+   */
+  public String getUserSelectedDefaultLocale() {
+    // this is dependent upon whether the user wants to use the device locale or a
+    // locale specified in the common translations file.
+    String value = this.getProperty(CommonToolProperties.KEY_COMMON_TRANSLATIONS_LOCALE);
+    if ( value != null && !value.equalsIgnoreCase("_")) {
+      return value;
+    } else {
+      return Locale.getDefault().toString();
+    }
   }
 
   private static final String TOOL_INITIALIZATION_SUFFIX = ".tool_last_initialization_start_time";

@@ -40,13 +40,15 @@ public class LocalizationUtilsTest {
 
   @Test
   public void testHackedName() {
-    assertEquals("aname", LocalizationUtils.getLocalizedDisplayName(appName, tableId,
+    Locale defaultLocale = Locale.getDefault();
+    String full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    assertEquals("aname", LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale,
         NameUtil.normalizeDisplayName(NameUtil.constructSimpleDisplayName("aname"))));
-    assertEquals("a name", LocalizationUtils.getLocalizedDisplayName(appName, tableId,
+    assertEquals("a name", LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale,
         NameUtil.normalizeDisplayName(NameUtil.constructSimpleDisplayName("a_name"))));
-    assertEquals("_ an am e", LocalizationUtils.getLocalizedDisplayName(appName, tableId,
+    assertEquals("_ an am e", LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale,
         NameUtil.normalizeDisplayName(NameUtil.constructSimpleDisplayName("_an_am_e"))));
-    assertEquals("an ame _", LocalizationUtils.getLocalizedDisplayName(appName, tableId,
+    assertEquals("an ame _", LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale,
         NameUtil.normalizeDisplayName(NameUtil.constructSimpleDisplayName("an_ame_"))));
   }
 
@@ -62,26 +64,38 @@ public class LocalizationUtilsTest {
     topMap.put("text", langMap);
     String value = ODKFileUtils.mapper.writeValueAsString(topMap);
 
+    Locale defaultLocale;
+    String full_locale;
     String match;
 
     Locale.setDefault(Locale.US);
-    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, value);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("This is a test", match);
 
     Locale.setDefault(Locale.UK);
-    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, value);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("Test is This", match);
 
     Locale.setDefault(Locale.CANADA);
-    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, value);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("Huh Test", match);
 
     Locale.setDefault(Locale.CANADA_FRENCH);
-    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, value);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("Je suis", match);
 
     Locale.setDefault(Locale.GERMANY);
-    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, value);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("No way!", match);
 
     Locale.setDefault(Locale.US);
