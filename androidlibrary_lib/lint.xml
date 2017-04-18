@@ -2,6 +2,6 @@
 <lint>
     <issue id="InvalidPackage">
 	<!-- See https://github.com/FasterXML/jackson-databind/issues/1192 -->
-        <ignore path="../../libs/jackson-databind-2.8.8.jar" />
+        <ignore path="libs/jackson-databind-2.8.8.jar" />
     </issue>
 </lint>
