@@ -375,7 +375,7 @@ public class PropertiesSingleton {
     // this is dependent upon whether the user wants to use the device locale or a
     // locale specified in the common translations file.
     String value = this.getProperty(CommonToolProperties.KEY_COMMON_TRANSLATIONS_LOCALE);
-    if ( value != null && !value.equalsIgnoreCase("_")) {
+    if ( value != null && value.length() != 0 && !value.equalsIgnoreCase("_")) {
       return value;
     } else {
       return Locale.getDefault().toString();
