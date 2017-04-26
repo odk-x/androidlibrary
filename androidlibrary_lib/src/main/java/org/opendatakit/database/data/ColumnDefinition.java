@@ -428,22 +428,22 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.CONFLICT_TYPE);
     //
     jsonSchema = new TreeMap<String, Object>();
-    model.put(DataTableColumns.FILTER_TYPE, jsonSchema);
+    model.put(DataTableColumns.DEFAULT_ACCESS, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
-    jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.FILTER_TYPE);
-    jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.FILTER_TYPE);
-    jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.FILTER_TYPE);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.DEFAULT_ACCESS);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.DEFAULT_ACCESS);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.DEFAULT_ACCESS);
     //
     jsonSchema = new TreeMap<String, Object>();
-    model.put(DataTableColumns.FILTER_VALUE, jsonSchema);
+    model.put(DataTableColumns.OWNER, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
-    jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.FILTER_VALUE);
-    jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.FILTER_VALUE);
-    jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.FILTER_VALUE);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.OWNER);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.OWNER);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.OWNER);
     //
     jsonSchema = new TreeMap<String, Object>();
     model.put(DataTableColumns.FORM_ID, jsonSchema);

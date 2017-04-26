@@ -480,11 +480,11 @@ public class CsvUtil {
           v_savepoint_creator = CursorUtils.DEFAULT_CREATOR;
           v_savepoint_timestamp = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
           v_row_etag = null;
-          v_filter_type = DataTableColumns.DEFAULT_FILTER_TYPE;
-          v_filter_value = DataTableColumns.DEFAULT_FILTER_VALUE;
-          v_group_type = DataTableColumns.DEFAULT_GROUP_TYPE;
-          v_groups_list = DataTableColumns.DEFAULT_GROUPS_LIST;
-          v_filter_ext = DataTableColumns.DEFAULT_FILTER_EXT;
+          v_filter_type = DataTableColumns.DEFAULT_DEFAULT_ACCESS;
+          v_filter_value = DataTableColumns.DEFAULT_OWNER;
+          v_group_type = DataTableColumns.DEFAULT_GROUP_READ_ONLY;
+          v_groups_list = DataTableColumns.DEFAULT_GROUP_MODDIFY;
+          v_filter_ext = DataTableColumns.DEFAULT_GROUP_PRIVILEGED;
 
           // clear value map
           valueMap.clear();
@@ -538,31 +538,31 @@ public class CsvUtil {
               }
               continue;
             }
-            if (DataTableColumns.FILTER_TYPE.equals(column)) {
+            if (DataTableColumns.DEFAULT_ACCESS.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
                 v_filter_type = tmp;
               }
               continue;
             }
-            if (DataTableColumns.FILTER_VALUE.equals(column)) {
+            if (DataTableColumns.OWNER.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
                 v_filter_value = tmp;
               }
               continue;
             }
-            if (DataTableColumns.GROUP_TYPE.equals(column)) {
+            if (DataTableColumns.GROUP_READ_ONLY.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
                 v_group_type = tmp;
               }
               continue;
             }
-            if (DataTableColumns.GROUPS_LIST.equals(column)) {
+            if (DataTableColumns.GROUP_MODIFY.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
                 v_groups_list = tmp;
               }
               continue;
             }
-            if (DataTableColumns.FILTER_EXT.equals(column)) {
+            if (DataTableColumns.GROUP_PRIVILEGED.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
                 v_filter_ext = tmp;
               }
@@ -625,11 +625,11 @@ public class CsvUtil {
             cv.put(DataTableColumns.SAVEPOINT_TIMESTAMP, v_savepoint_timestamp);
             cv.put(DataTableColumns.SAVEPOINT_CREATOR, v_savepoint_creator);
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
-            cv.put(DataTableColumns.FILTER_TYPE, v_filter_type);
-            cv.put(DataTableColumns.FILTER_VALUE, v_filter_value);
-            cv.put(DataTableColumns.GROUP_TYPE, v_group_type);
-            cv.put(DataTableColumns.GROUPS_LIST, v_groups_list);
-            cv.put(DataTableColumns.FILTER_EXT, v_filter_ext);
+            cv.put(DataTableColumns.DEFAULT_ACCESS, v_filter_type);
+            cv.put(DataTableColumns.OWNER, v_filter_value);
+            cv.put(DataTableColumns.GROUP_READ_ONLY, v_group_type);
+            cv.put(DataTableColumns.GROUP_MODIFY, v_groups_list);
+            cv.put(DataTableColumns.GROUP_PRIVILEGED, v_filter_ext);
 
             cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
             cv.putNull(DataTableColumns.CONFLICT_TYPE);
@@ -665,11 +665,11 @@ public class CsvUtil {
             cv.put(DataTableColumns.SAVEPOINT_TIMESTAMP, v_savepoint_timestamp);
             cv.put(DataTableColumns.SAVEPOINT_CREATOR, v_savepoint_creator);
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
-            cv.put(DataTableColumns.FILTER_TYPE, v_filter_type);
-            cv.put(DataTableColumns.FILTER_VALUE, v_filter_value);
-            cv.put(DataTableColumns.GROUP_TYPE, v_group_type);
-            cv.put(DataTableColumns.GROUPS_LIST, v_groups_list);
-            cv.put(DataTableColumns.FILTER_EXT, v_filter_ext);
+            cv.put(DataTableColumns.DEFAULT_ACCESS, v_filter_type);
+            cv.put(DataTableColumns.OWNER, v_filter_value);
+            cv.put(DataTableColumns.GROUP_READ_ONLY, v_group_type);
+            cv.put(DataTableColumns.GROUP_MODIFY, v_groups_list);
+            cv.put(DataTableColumns.GROUP_PRIVILEGED, v_filter_ext);
 
             cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
             cv.putNull(DataTableColumns.CONFLICT_TYPE);

@@ -36,12 +36,12 @@ public class DataTableColumns implements BaseColumns {
   public static final String ROW_ETAG = TableConstants.ROW_ETAG;
   public static final String SYNC_STATE = TableConstants.SYNC_STATE;
   public static final String CONFLICT_TYPE = TableConstants.CONFLICT_TYPE;
-  public static final String FILTER_TYPE = TableConstants.FILTER_TYPE;
-  public static final String FILTER_VALUE = TableConstants.FILTER_VALUE;
+  public static final String DEFAULT_ACCESS = TableConstants.DEFAULT_ACCESS;
+  public static final String OWNER = TableConstants.OWNER;
 
-  public static final String GROUP_TYPE = TableConstants.GROUP_TYPE;
-  public static final String GROUPS_LIST = TableConstants.GROUPS_LIST;
-  public static final String FILTER_EXT = TableConstants.FILTER_EXT;
+  public static final String GROUP_READ_ONLY = TableConstants.GROUP_READ_ONLY;
+  public static final String GROUP_MODIFY = TableConstants.GROUP_MODIFY;
+  public static final String GROUP_PRIVILEGED = TableConstants.GROUP_PRIVILEGED;
 
   /**
    * (_savepoint_timestamp, _savepoint_type)
@@ -75,11 +75,11 @@ public class DataTableColumns implements BaseColumns {
   // there is nothing included. This has been a problem when downloading a
   // table from the server.
   public static final String DEFAULT_ROW_ETAG = null;
-  public static final String DEFAULT_FILTER_TYPE = RowFilterScope.EMPTY_ROW_FILTER.getType().name();
-  public static final String DEFAULT_FILTER_VALUE = RowFilterScope.EMPTY_ROW_FILTER.getValue();
-  public static final String DEFAULT_GROUP_TYPE = RowFilterScope.EMPTY_ROW_FILTER.getGroupType().name();
-  public static final String DEFAULT_GROUPS_LIST = RowFilterScope.EMPTY_ROW_FILTER.getGroupsList();
-  public static final String DEFAULT_FILTER_EXT = RowFilterScope.EMPTY_ROW_FILTER.getExt();
+  public static final String DEFAULT_DEFAULT_ACCESS = RowFilterScope.EMPTY_ROW_FILTER.getAccess().name();
+  public static final String DEFAULT_OWNER = RowFilterScope.EMPTY_ROW_FILTER.getOwner();
+  public static final String DEFAULT_GROUP_READ_ONLY = RowFilterScope.EMPTY_ROW_FILTER.getGroupReadOnly();
+  public static final String DEFAULT_GROUP_MODDIFY = RowFilterScope.EMPTY_ROW_FILTER.getGroupModify();
+  public static final String DEFAULT_GROUP_PRIVILEGED = RowFilterScope.EMPTY_ROW_FILTER.getGroupPrivileged();
   // the default _savepoint_creator is: PropertiesSingleton.getActiveUser()
   // the default _locale is: PropertiesSingleton.getLocale()
 
