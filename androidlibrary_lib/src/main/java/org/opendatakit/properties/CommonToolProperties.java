@@ -64,6 +64,10 @@ public class CommonToolProperties {
   public static final String KEY_USERNAME = "common.username";
 
   // general settings
+
+  // null if we should use Android system locale
+  public static final String KEY_COMMON_TRANSLATIONS_LOCALE = "common.common_translations_locale";
+
   public static final String KEY_FONT_SIZE = "common.font_size";
 
   public static final String KEY_SHOW_SPLASH = "common.show_splash";

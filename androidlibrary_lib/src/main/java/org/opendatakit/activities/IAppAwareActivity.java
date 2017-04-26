@@ -14,6 +14,10 @@
 
 package org.opendatakit.activities;
 
+import android.content.Context;
+
 public interface IAppAwareActivity {
+  Context getApplicationContext();
+
   String getAppName();
 }

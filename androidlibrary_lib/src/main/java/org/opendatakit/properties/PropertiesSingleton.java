@@ -332,6 +332,10 @@ public class PropertiesSingleton {
     writeProperties();
   }
 
+  public void clearActiveUser() {
+    removeProperty(CommonToolProperties.KEY_ROLES_LIST);
+  }
+
   public String getActiveUser() {
     final String CREDENTIAL_TYPE_NONE = mBaseContext.getString(R.string.credential_type_none);
     final String CREDENTIAL_TYPE_USERNAME_PASSWORD = mBaseContext.getString(R.string.credential_type_username_password);
@@ -342,14 +346,16 @@ public class PropertiesSingleton {
       return "anonymous";
     } else if (authType.equals(CREDENTIAL_TYPE_USERNAME_PASSWORD)) {
       String name = getProperty(CommonToolProperties.KEY_USERNAME);
-      if (name != null) {
+      String roles = getProperty(CommonToolProperties.KEY_ROLES_LIST);
+      if (name != null && roles != null && roles.length() != 0) {
         return "username:" + name;
       } else {
         return "anonymous";
       }
     } else if (authType.equals(CREDENTIAL_TYPE_GOOGLE_ACCOUNT)) {
       String name = getProperty(CommonToolProperties.KEY_ACCOUNT);
-      if (name != null) {
+      String roles = getProperty(CommonToolProperties.KEY_ROLES_LIST);
+      if (name != null && roles != null && roles.length() != 0) {
         return "mailto:" + name;
       } else {
         return "anonymous";
@@ -359,8 +365,21 @@ public class PropertiesSingleton {
     }
   }
 
-  public String getLocale() {
-    return Locale.getDefault().toString();
+  /**
+   * This may either be the device locale or the locale that the user has selected from the
+   * common_translations list of locales (as specified on the framework settings sheet).
+   *
+   * @return
+   */
+  public String getUserSelectedDefaultLocale() {
+    // this is dependent upon whether the user wants to use the device locale or a
+    // locale specified in the common translations file.
+    String value = this.getProperty(CommonToolProperties.KEY_COMMON_TRANSLATIONS_LOCALE);
+    if ( value != null && value.length() != 0 && !value.equalsIgnoreCase("_")) {
+      return value;
+    } else {
+      return Locale.getDefault().toString();
+    }
   }
 
   private static final String TOOL_INITIALIZATION_SUFFIX = ".tool_last_initialization_start_time";

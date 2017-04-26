@@ -40,17 +40,17 @@ public class NameUtilTest {
 
   @Test
   public void testDisplayName() {
-    assertEquals("aname", NameUtil.constructSimpleDisplayName("aname"));
-    assertEquals("a name", NameUtil.constructSimpleDisplayName("a_name"));
-    assertEquals("_ an am e", NameUtil.constructSimpleDisplayName("_an_am_e"));
-    assertEquals("an ame _", NameUtil.constructSimpleDisplayName("an_ame_"));
+    assertEquals("{\"text\":\"aname\"}", NameUtil.constructSimpleDisplayName("aname"));
+    assertEquals("{\"text\":\"a name\"}", NameUtil.constructSimpleDisplayName("a_name"));
+    assertEquals("{\"text\":\"_ an am e\"}", NameUtil.constructSimpleDisplayName("_an_am_e"));
+    assertEquals("{\"text\":\"an ame _\"}", NameUtil.constructSimpleDisplayName("an_ame_"));
   }
 
   @Test
   public void testNormalizeDisplayName() {
     assertEquals("\"aname\"", NameUtil.normalizeDisplayName("aname"));
     assertEquals("\"a name\"", NameUtil.normalizeDisplayName("\"a name\""));
-    assertEquals("{\"default\":\"_an_am_e\"}",
-        NameUtil.normalizeDisplayName("{\"default\":\"_an_am_e\"}"));
+    assertEquals("{\"text\":{\"default\":\"_an_am_e\"}\"}",
+        NameUtil.normalizeDisplayName("{\"text\":{\"default\":\"_an_am_e\"}\"}"));
   }
 }

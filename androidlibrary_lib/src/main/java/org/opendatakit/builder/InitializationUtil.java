@@ -256,7 +256,7 @@ public class InitializationUtil {
       @Override
       public void done(int totalCount) {
         String completionString = appContext
-            .getString(R.string.expansion_unzipping_complete, totalCount);
+            .getString(R.string.expansion_unzipping_complete);
         getSupervisor().publishProgress(completionString, null);
       }
 

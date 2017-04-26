@@ -17,9 +17,7 @@ package org.opendatakit.utilities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Locale;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -232,7 +230,14 @@ public class NameUtil {
     if ( displayName.endsWith(" ") ) {
       displayName = displayName + "_";
     }
-    return displayName;
+    Map<String, Object> displayEntry = new HashMap<String, Object>();
+    displayEntry.put("text", displayName);
+    try {
+      return ODKFileUtils.mapper.writeValueAsString(displayEntry);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+      throw new IllegalStateException("constructSimpleDisplayName: " + displayName);
+    }
   }
   
   public static String normalizeDisplayName(String displayName) {

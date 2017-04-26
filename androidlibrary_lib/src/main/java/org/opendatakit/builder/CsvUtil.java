@@ -68,6 +68,7 @@ public class CsvUtil {
   private static final String TAG = CsvUtil.class.getSimpleName();
 
   private final String appName;
+
   private final CsvUtilSupervisor supervisor;
 
   public CsvUtil(CsvUtilSupervisor supervisor, String appName ) {
