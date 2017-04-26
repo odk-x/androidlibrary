@@ -1782,27 +1782,27 @@ public class UserDbInterface {
          throw new IllegalArgumentException("filterType is null");
       }
       // verify that filterType is a known type
-      RowFilterScope.Type.valueOf(filterType);
+      RowFilterScope.Access.valueOf(filterType);
 
       ContentValues cvValues = new ContentValues();
-      cvValues.put(DataTableColumns.FILTER_TYPE, filterType);
+      cvValues.put(DataTableColumns.DEFAULT_ACCESS, filterType);
       if ( filterValue == null ) {
-         cvValues.putNull(DataTableColumns.FILTER_VALUE);
+         cvValues.putNull(DataTableColumns.OWNER);
       } else {
-         cvValues.put(DataTableColumns.FILTER_VALUE, filterValue);
+         cvValues.put(DataTableColumns.OWNER, filterValue);
       }
 
-     cvValues.put(DataTableColumns.GROUP_TYPE, groupType);
+     cvValues.put(DataTableColumns.GROUP_READ_ONLY, groupType);
      if (groupsList == null) {
-       cvValues.putNull(DataTableColumns.GROUPS_LIST);
+       cvValues.putNull(DataTableColumns.GROUP_MODIFY);
      } else {
-       cvValues.put(DataTableColumns.GROUPS_LIST, groupsList);
+       cvValues.put(DataTableColumns.GROUP_MODIFY, groupsList);
      }
 
      if (filterExt == null) {
-       cvValues.putNull(DataTableColumns.FILTER_EXT);
+       cvValues.putNull(DataTableColumns.GROUP_PRIVILEGED);
      } else {
-       cvValues.put(DataTableColumns.FILTER_EXT, filterExt);
+       cvValues.put(DataTableColumns.GROUP_PRIVILEGED, filterExt);
      }
 
      try {
