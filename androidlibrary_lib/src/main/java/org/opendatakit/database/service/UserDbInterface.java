@@ -1768,29 +1768,48 @@ public class UserDbInterface {
    * @param dbHandleName
    * @param tableId
    * @param orderedColumns
-   * @param filterType
-   * @param filterValue
+   * @param defaultAccess
+   * @param owner
    * @param rowId
    * @return
    */
    public UserTable changeRowFilterWithId(String appName, DbHandle dbHandleName, String tableId,
-       OrderedColumns orderedColumns, String filterType, String filterValue,
-       String rowId) throws IllegalArgumentException,
+       OrderedColumns orderedColumns, String defaultAccess, String owner,
+       String groupReadOnly, String groupModify, String groupPrivileged, String rowId) throws IllegalArgumentException,
        ActionNotAuthorizedException, ServicesAvailabilityException {
 
-      if ( filterType == null ) {
-         throw new IllegalArgumentException("filterType is null");
+      if ( defaultAccess == null ) {
+         throw new IllegalArgumentException("defaultAccess is null");
       }
-      // verify that filterType is a known type
-      RowFilterScope.Type.valueOf(filterType);
+      // verify that defaultAccess is a known type
+      RowFilterScope.Access.valueOf(defaultAccess);
 
       ContentValues cvValues = new ContentValues();
-      cvValues.put(DataTableColumns.FILTER_TYPE, filterType);
-      if ( filterValue == null ) {
-         cvValues.putNull(DataTableColumns.FILTER_VALUE);
+      cvValues.put(DataTableColumns.DEFAULT_ACCESS, defaultAccess);
+
+      if ( owner == null ) {
+         cvValues.putNull(DataTableColumns.OWNER);
       } else {
-         cvValues.put(DataTableColumns.FILTER_VALUE, filterValue);
+         cvValues.put(DataTableColumns.OWNER, owner);
       }
+
+     if (groupReadOnly == null) {
+       cvValues.putNull(DataTableColumns.GROUP_READ_ONLY);
+     } else {
+       cvValues.put(DataTableColumns.GROUP_READ_ONLY, groupReadOnly);
+     }
+
+     if (groupModify == null) {
+       cvValues.putNull(DataTableColumns.GROUP_MODIFY);
+     } else {
+       cvValues.put(DataTableColumns.GROUP_MODIFY, groupModify);
+     }
+
+     if (groupPrivileged == null) {
+       cvValues.putNull(DataTableColumns.GROUP_PRIVILEGED);
+     } else {
+       cvValues.put(DataTableColumns.GROUP_PRIVILEGED, groupPrivileged);
+     }
 
      try {
        BaseTable baseTable = fetchAndRebuildChunks(dbInterface
