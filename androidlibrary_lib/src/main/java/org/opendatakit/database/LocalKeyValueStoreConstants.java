@@ -110,4 +110,15 @@ public final class LocalKeyValueStoreConstants {
 
   }
 
+  /**
+   * specify the default survey formId for a given tableId
+   */
+  public static final class DefaultSurveyForm {
+    public static final String PARTITION = "SurveyUtil";
+    public static final String ASPECT = "default";
+
+    public static final String KEY_FORM_ID = "SurveyUtil.formId";
+
+  }
+
 }
