@@ -59,8 +59,8 @@ public class UserTableTest extends AndroidTestCase {
     adminColumns.add(DataTableColumns.ROW_ETAG);
     adminColumns.add(DataTableColumns.SYNC_STATE); // not exportable
     adminColumns.add(DataTableColumns.CONFLICT_TYPE); // not exportable
-    adminColumns.add(DataTableColumns.FILTER_TYPE);
-    adminColumns.add(DataTableColumns.FILTER_VALUE);
+    adminColumns.add(DataTableColumns.DEFAULT_ACCESS);
+    adminColumns.add(DataTableColumns.OWNER);
     adminColumns.add(DataTableColumns.FORM_ID);
     adminColumns.add(DataTableColumns.LOCALE);
     adminColumns.add(DataTableColumns.SAVEPOINT_TYPE);
@@ -72,8 +72,8 @@ public class UserTableTest extends AndroidTestCase {
     ArrayList<String> exportColumns = new ArrayList<String>();
     exportColumns.add(DataTableColumns.ID);
     exportColumns.add(DataTableColumns.ROW_ETAG);
-    exportColumns.add(DataTableColumns.FILTER_TYPE);
-    exportColumns.add(DataTableColumns.FILTER_VALUE);
+    exportColumns.add(DataTableColumns.DEFAULT_ACCESS);
+    exportColumns.add(DataTableColumns.OWNER);
     exportColumns.add(DataTableColumns.FORM_ID);
     exportColumns.add(DataTableColumns.LOCALE);
     exportColumns.add(DataTableColumns.SAVEPOINT_TYPE);
@@ -354,12 +354,12 @@ public class UserTableTest extends AndroidTestCase {
     elementKeyToIndex.put(DataTableColumns.CONFLICT_TYPE, i++); // not exportable
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_TYPE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_TYPE, i++);
+    elementKeyForIndex[i] = DataTableColumns.DEFAULT_ACCESS;
+    elementKeyToIndex.put(DataTableColumns.DEFAULT_ACCESS, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_VALUE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_VALUE, i++);
+    elementKeyForIndex[i] = DataTableColumns.OWNER;
+    elementKeyToIndex.put(DataTableColumns.OWNER, i++);
     rowValues1[i] = "myform_1";
     rowValues2[i] = "myform_2";
     elementKeyForIndex[i] = DataTableColumns.FORM_ID;
@@ -580,12 +580,12 @@ public class UserTableTest extends AndroidTestCase {
     elementKeyToIndex.put(DataTableColumns.CONFLICT_TYPE, i++); // not exportable
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_TYPE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_TYPE, i++);
+    elementKeyForIndex[i] = DataTableColumns.DEFAULT_ACCESS;
+    elementKeyToIndex.put(DataTableColumns.DEFAULT_ACCESS, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_VALUE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_VALUE, i++);
+    elementKeyForIndex[i] = DataTableColumns.OWNER;
+    elementKeyToIndex.put(DataTableColumns.OWNER, i++);
     rowValues1[i] = "myform_1";
     rowValues2[i] = "myform_2";
     elementKeyForIndex[i] = DataTableColumns.FORM_ID;
@@ -760,12 +760,12 @@ public class UserTableTest extends AndroidTestCase {
     elementKeyToIndex.put(DataTableColumns.CONFLICT_TYPE, i++); // not exportable
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_TYPE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_TYPE, i++);
+    elementKeyForIndex[i] = DataTableColumns.DEFAULT_ACCESS;
+    elementKeyToIndex.put(DataTableColumns.DEFAULT_ACCESS, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_VALUE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_VALUE, i++);
+    elementKeyForIndex[i] = DataTableColumns.OWNER;
+    elementKeyToIndex.put(DataTableColumns.OWNER, i++);
     rowValues1[i] = "myform_1";
     rowValues2[i] = "myform_2";
     elementKeyForIndex[i] = DataTableColumns.FORM_ID;

@@ -28,17 +28,17 @@ import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.SyncState;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.database.data.ColumnDefinition;
+import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.database.data.OrderedColumns;
+import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.UserTable;
+import org.opendatakit.database.service.DbHandle;
 import org.opendatakit.database.utilities.CursorUtils;
 import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.listener.ExportListener;
 import org.opendatakit.listener.ImportListener;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.DataTableColumns;
-import org.opendatakit.database.data.KeyValueStoreEntry;
-import org.opendatakit.database.service.DbHandle;
-import org.opendatakit.database.data.Row;
 import org.opendatakit.utilities.LocalizationUtils;
 import org.opendatakit.utilities.ODKFileUtils;
 
@@ -452,8 +452,11 @@ public class CsvUtil {
         String v_savepoint_creator;
         String v_savepoint_timestamp;
         String v_row_etag;
-        String v_filter_type;
-        String v_filter_value;
+        String v_default_access;
+        String v_owner;
+        String v_group_read_only;
+        String v_group_modify;
+        String v_group_privileged;
 
         Map<String, String> valueMap = new HashMap<String, String>();
 
@@ -478,15 +481,18 @@ public class CsvUtil {
           v_savepoint_creator = CursorUtils.DEFAULT_CREATOR;
           v_savepoint_timestamp = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
           v_row_etag = null;
-          v_filter_type = DataTableColumns.DEFAULT_FILTER_TYPE;
-          v_filter_value = DataTableColumns.DEFAULT_FILTER_VALUE;
+          v_default_access = DataTableColumns.DEFAULT_DEFAULT_ACCESS;
+          v_owner = DataTableColumns.DEFAULT_OWNER;
+          v_group_read_only = DataTableColumns.DEFAULT_GROUP_READ_ONLY;
+          v_group_modify = DataTableColumns.DEFAULT_GROUP_MODDIFY;
+          v_group_privileged = DataTableColumns.DEFAULT_GROUP_PRIVILEGED;
 
           // clear value map
           valueMap.clear();
 
           boolean foundId = false;
           for (int i = 0; i < columnsInFileLength; ++i) {
-            if (i > rowLength)
+            if (i >= rowLength)
               break;
             String column = columnsInFile[i];
             String tmp = row[i];
@@ -533,18 +539,37 @@ public class CsvUtil {
               }
               continue;
             }
-            if (DataTableColumns.FILTER_TYPE.equals(column)) {
+            if (DataTableColumns.DEFAULT_ACCESS.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
-                v_filter_type = tmp;
+                v_default_access = tmp;
               }
               continue;
             }
-            if (DataTableColumns.FILTER_VALUE.equals(column)) {
+            if (DataTableColumns.OWNER.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
-                v_filter_value = tmp;
+                v_owner = tmp;
               }
               continue;
             }
+            if (DataTableColumns.GROUP_READ_ONLY.equals(column)) {
+              if (tmp != null && tmp.length() != 0) {
+                v_group_read_only = tmp;
+              }
+              continue;
+            }
+            if (DataTableColumns.GROUP_MODIFY.equals(column)) {
+              if (tmp != null && tmp.length() != 0) {
+                v_group_modify = tmp;
+              }
+              continue;
+            }
+            if (DataTableColumns.GROUP_PRIVILEGED.equals(column)) {
+              if (tmp != null && tmp.length() != 0) {
+                v_group_privileged = tmp;
+              }
+              continue;
+            }
+
             try {
               orderedDefns.find(column);
               valueMap.put(column, tmp);
@@ -601,8 +626,11 @@ public class CsvUtil {
             cv.put(DataTableColumns.SAVEPOINT_TIMESTAMP, v_savepoint_timestamp);
             cv.put(DataTableColumns.SAVEPOINT_CREATOR, v_savepoint_creator);
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
-            cv.put(DataTableColumns.FILTER_TYPE, v_filter_type);
-            cv.put(DataTableColumns.FILTER_VALUE, v_filter_value);
+            cv.put(DataTableColumns.DEFAULT_ACCESS, v_default_access);
+            cv.put(DataTableColumns.OWNER, v_owner);
+            cv.put(DataTableColumns.GROUP_READ_ONLY, v_group_read_only);
+            cv.put(DataTableColumns.GROUP_MODIFY, v_group_modify);
+            cv.put(DataTableColumns.GROUP_PRIVILEGED, v_group_privileged);
 
             cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
             cv.putNull(DataTableColumns.CONFLICT_TYPE);
@@ -638,8 +666,11 @@ public class CsvUtil {
             cv.put(DataTableColumns.SAVEPOINT_TIMESTAMP, v_savepoint_timestamp);
             cv.put(DataTableColumns.SAVEPOINT_CREATOR, v_savepoint_creator);
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
-            cv.put(DataTableColumns.FILTER_TYPE, v_filter_type);
-            cv.put(DataTableColumns.FILTER_VALUE, v_filter_value);
+            cv.put(DataTableColumns.DEFAULT_ACCESS, v_default_access);
+            cv.put(DataTableColumns.OWNER, v_owner);
+            cv.put(DataTableColumns.GROUP_READ_ONLY, v_group_read_only);
+            cv.put(DataTableColumns.GROUP_MODIFY, v_group_modify);
+            cv.put(DataTableColumns.GROUP_PRIVILEGED, v_group_privileged);
 
             cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
             cv.putNull(DataTableColumns.CONFLICT_TYPE);

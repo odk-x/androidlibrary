@@ -402,7 +402,7 @@ interface AidlDbInterface {
    * @param dbHandleName
    * @param sqlCommand
    * @param sqlBindArgs
-   * @param tableId -- optional. If not null and _filter_type, _filter_value and _sync_state are
+   * @param tableId -- optional. If not null and _default_access, _owner and _sync_state are
    *       present in the result cursor, append an _effective_access column with r, rw, or rwd
    *       values.
    * @return
@@ -424,7 +424,7 @@ interface AidlDbInterface {
    * @param dbHandleName
    * @param sqlCommand
    * @param sqlBindArgs
-   * @param tableId -- optional. If not null and _filter_type, _filter_value and _sync_state are
+   * @param tableId -- optional. If not null and _default_access, _owner and _sync_state are
    *       present in the result cursor, append an _effective_access column with r, rw, or rwd
    *       values.
    * @return
