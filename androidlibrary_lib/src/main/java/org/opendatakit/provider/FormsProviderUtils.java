@@ -17,15 +17,12 @@ package org.opendatakit.provider;
 
 import android.net.Uri;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
-import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.ODKFileUtils;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Map;
 
@@ -38,19 +35,56 @@ import java.util.Map;
 public class FormsProviderUtils {
    private static final String TAG = "FormsProviderUtils";
 
-   public static final String URL_ENCODED_SPACE = "%20";
+   public static class ParsedFragment {
+      public final String instanceId;
+      public final String screenPath;
+      public final String auxillaryHash;
+
+      ParsedFragment(String instanceId, String screenPath, String auxillaryHash) {
+         this.instanceId = instanceId;
+         this.screenPath = screenPath;
+         this.auxillaryHash = auxillaryHash;
+      }
+   }
+
+   static final String URL_ENCODED_SPACE = "%20";
 
    /**
     * A url-style query param that is used when constructing a survey intent.
     * It specifies the instance id that should be opened. An unrecognized
     * instanceId will add a new instance with that id.
     */
-   private static final String URI_SURVEY_QUERY_PARAM_INSTANCE_ID = "instanceId";
+   static final String URI_SURVEY_QUERY_PARAM_INSTANCE_ID = "instanceId";
    /**
     * A url-style query param that encodes to what position within a form Survey
     * should open. Can be ignored.
     */
-   private static final String URI_SURVEY_QUERY_PARAM_SCREEN_PATH = "screenPath";
+   static final String URI_SURVEY_QUERY_PARAM_SCREEN_PATH = "screenPath";
+
+   /**
+    * Safely encode a value known to be a string for inclusion in the auxillaryHash
+    * @param unquotedStringValue
+    * @return
+    */
+   public static String encodeFragmentUnquotedStringValue(String unquotedStringValue)
+       throws JsonProcessingException, UnsupportedEncodingException {
+
+      return URLEncoder.encode(unquotedStringValue, ApiConstants.UTF8_ENCODE).replace("+",
+          URL_ENCODED_SPACE);
+   }
+
+   /**
+    * Safely encode an object value for inclusion in the auxillaryHash
+    * @param value
+    * @return
+    */
+   public static String encodeFragmentObjectValue(Object value)
+       throws JsonProcessingException, UnsupportedEncodingException {
+
+      String jsonValue = ODKFileUtils.mapper.writeValueAsString(value);
+
+      return encodeFragmentUnquotedStringValue(jsonValue);
+   }
 
    /**
     * @param appName required.
@@ -98,13 +132,13 @@ public class FormsProviderUtils {
          String continueStr = "";
 
          if ( instanceId != null && instanceId.length() != 0) {
-            uriStr += URI_SURVEY_QUERY_PARAM_INSTANCE_ID + "=" + URLEncoder
-                .encode(instanceId, ApiConstants.UTF8_ENCODE);
+            uriStr += URI_SURVEY_QUERY_PARAM_INSTANCE_ID + "=" +
+                encodeFragmentUnquotedStringValue(instanceId);
             continueStr = "&";
          }
          if (screenPath != null && screenPath.length() != 0) {
             uriStr += continueStr + URI_SURVEY_QUERY_PARAM_SCREEN_PATH + "="
-                + URLEncoder.encode(screenPath, ApiConstants.UTF8_ENCODE);
+                + encodeFragmentUnquotedStringValue(screenPath);
             continueStr = "&";
          }
          if (elementKeyToValueMap != null && !elementKeyToValueMap.isEmpty()) {
@@ -119,15 +153,12 @@ public class FormsProviderUtils {
                // First add the ampersand
                stringBuilder.append(continueStr);
                continueStr = "&";
-               stringBuilder.append(URLEncoder.encode(objEntry.getKey(), ApiConstants.UTF8_ENCODE));
+               stringBuilder.append(encodeFragmentUnquotedStringValue(objEntry.getKey()));
                stringBuilder.append("=");
                // JSON stringify the value then URL encode it.
                // We've got to replace the plus with %20, which is what js's
                // decodeURIComponent expects.
-               String escapedValue = URLEncoder.encode(
-                   ODKFileUtils.mapper.writeValueAsString(objEntry.getValue()),
-                   ApiConstants.UTF8_ENCODE)
-                   .replace("+", URL_ENCODED_SPACE);
+               String escapedValue = encodeFragmentObjectValue(objEntry.getValue());
                stringBuilder.append(escapedValue);
             }
             uriStr = stringBuilder.toString();
@@ -141,5 +172,54 @@ public class FormsProviderUtils {
       }
       WebLogger.getLogger(appName).d(TAG, "constructSurveyUri: " + uriStr);
       return uriStr;
+   }
+
+   public static ParsedFragment parseUri(Uri uri) throws UnsupportedEncodingException {
+      String instanceId = null;
+      String screenPath = null;
+      String auxillaryHash = null;
+
+      // NOTE: uri.getFragment() un-escapes everything before returning the string
+      // which is EXACTLY the wrong thing to do.
+      String uriString = uri.toString();
+      String fragment = "";
+      int idxHash = uriString.indexOf("#");
+      if ( idxHash >= 0 ) {
+         fragment = uriString.substring(idxHash + 1);
+      }
+      if (fragment != null && fragment.length() != 0) {
+         // and process the fragment to find the instanceId, screenPath and other
+         // kv pairs
+         String[] pargs = fragment.split("&");
+         boolean first = true;
+         StringBuilder b = new StringBuilder();
+         int i;
+         for (i = 0; i < pargs.length; ++i) {
+            String[] keyValue = pargs[i].split("=");
+            if ("instanceId".equals(keyValue[0])) {
+               if (keyValue.length == 2) {
+                  instanceId = URLDecoder.decode(keyValue[1], ApiConstants.UTF8_ENCODE);
+               }
+            } else if ("screenPath".equals(keyValue[0])) {
+               if (keyValue.length == 2) {
+                  screenPath = URLDecoder.decode(keyValue[1], ApiConstants.UTF8_ENCODE);
+               }
+            } else if ("refId".equals(keyValue[0]) || "formPath".equals(keyValue[0])) {
+               // ignore
+            } else {
+               if (!first) {
+                  b.append("&");
+               }
+               first = false;
+               b.append(pargs[i]);
+            }
+         }
+         String aux = b.toString();
+         if (aux.length() != 0) {
+            auxillaryHash = aux;
+         }
+      }
+
+      return new ParsedFragment(instanceId, screenPath, auxillaryHash);
    }
 }
