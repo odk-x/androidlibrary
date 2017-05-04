@@ -14,8 +14,13 @@
 
 package org.opendatakit.utilities;
 
-import android.test.AndroidTestCase;
+import android.content.Context;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 
@@ -24,7 +29,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-public class FileSetTest extends AndroidTestCase {
+import static org.junit.Assert.assertEquals;
+
+@RunWith(AndroidJUnit4.class)
+public class FileSetTest {
   private static final String APP_NAME = "fileSetTest";
   private static final String TABLE_ID_1 = "myTableId_1";
   private static final String TABLE_ID_2 = "myTableId_2";
@@ -37,14 +45,16 @@ public class FileSetTest extends AndroidTestCase {
   private static final String MIME_1 = "image/jpg";
   private static final String MIME_2 = "audio/wav";
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
 
+  @Test
   public void testFileSetSerialization() throws IOException {
+    Context context = InstrumentationRegistry.getContext();
+
     FileSet fileSet = new FileSet("fileSetTest");
 
     String firstDir = ODKFileUtils.getInstanceFolder(APP_NAME, TABLE_ID_1, INSTANCE_ID_1);
@@ -56,10 +66,10 @@ public class FileSetTest extends AndroidTestCase {
     fileSet.addAttachmentFile(attachment1, MIME_1);
     fileSet.addAttachmentFile(attachment2, MIME_2);
 
-    String value = fileSet.serializeUriFragmentList(getContext());
+    String value = fileSet.serializeUriFragmentList(context);
 
     ByteArrayInputStream bis = new ByteArrayInputStream(value.getBytes(Charset.forName("UTF-8")));
-    FileSet outSet = FileSet.parse(getContext(), APP_NAME, bis);
+    FileSet outSet = FileSet.parse(context, APP_NAME, bis);
 
     assertEquals( fileSet.instanceFile, outSet.instanceFile);
     assertEquals( fileSet.attachmentFiles.size(), outSet.attachmentFiles.size());
