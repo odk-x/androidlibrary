@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
-import org.apache.commons.io.FileUtils;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.database.service.DbHandle;
 import org.opendatakit.database.utilities.CursorUtils;
@@ -371,7 +370,7 @@ public class InitializationUtil {
       tempMediaPath = new File(
           baseStaleMediaPath + mediaPath.getName() + "_" + Integer.toString(i));
     }
-    FileUtils.moveDirectory(mediaPath, tempMediaPath);
+    ODKFileUtils.moveDirectory(mediaPath, tempMediaPath);
     return tempMediaPath;
   }
 
@@ -495,7 +494,7 @@ public class InitializationUtil {
     // recycle if there is an error during the processing of the
     // file.
     try {
-      FileUtils.copyFile(init, completedFile);
+      ODKFileUtils.copyFile(init, completedFile);
     } catch (IOException e) {
       WebLogger.getLogger(appName).printStackTrace(e);
       // ignore this.
@@ -725,7 +724,7 @@ public class InitializationUtil {
             .delete(Uri.withAppendedPath(formsProviderContentUri, appName), selection,
                 selectionArgs);
 
-        FileUtils.moveDirectory(tempMediaPath, formDir);
+        ODKFileUtils.moveDirectory(tempMediaPath, formDir);
 
         ContentValues cv = new ContentValues();
         cv.put(FormsColumns.TABLE_ID, tableId);
@@ -759,7 +758,7 @@ public class InitializationUtil {
       WebLogger.getLogger(appName)
           .e(t, "updateFormDir: " + formDirectoryPath + " exception: " + e.toString());
       try {
-        FileUtils.deleteDirectory(formDir);
+        ODKFileUtils.deleteDirectory(formDir);
         WebLogger.getLogger(appName).i(t,
             "updateFormDir: " + formDirectoryPath + " Removing -- unable to parse formDef file: "
                 + e.toString());

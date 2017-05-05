@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.FormsColumns;
@@ -46,6 +47,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -1143,7 +1145,7 @@ public class ODKFileUtils {
    */
   public static long getMostRecentlyModifiedDate(File formDir) {
     long lastModifiedDate = formDir.lastModified();
-    Iterator<File> allFiles = FileUtils.iterateFiles(formDir, null, true);
+    Iterator<File> allFiles = ODKFileUtils.iterateFiles(formDir, null, true);
     while (allFiles.hasNext()) {
       File f = allFiles.next();
       if (f.lastModified() > lastModifiedDate) {
@@ -1320,5 +1322,41 @@ public class ODKFileUtils {
       text = text.trim();
 
     return text;
+  }
+
+  public static void copyDirectory(File sourceFolder, File destinationFolder) throws IOException {
+    FileUtils.copyDirectory(sourceFolder, destinationFolder);
+  }
+
+  public static void moveDirectory(File sourceFolder, File destinationFolder) throws IOException {
+    FileUtils.moveFile(sourceFolder, destinationFolder);
+  }
+
+  public static boolean directoryContains(File folder, File file) throws IOException {
+    return FileUtils.directoryContains(folder, file);
+  }
+
+  public static void deleteDirectory(File folder) throws IOException {
+    FileUtils.deleteDirectory(folder);
+  }
+
+  public static void copyFile(File sourceFile, File destinationFile) throws IOException {
+    FileUtils.copyFile(sourceFile, destinationFile);
+  }
+
+  public static void moveFile(File sourceFile, File destinationFile) throws IOException {
+    FileUtils.moveFile(sourceFile, destinationFile);
+  }
+
+  public static Iterator<File> iterateFiles(File directory, String[] extensions, boolean recursive)  {
+    return FileUtils.iterateFiles(directory, extensions, recursive );
+  }
+
+  public static Collection<File> listFiles(File directory, IOFileFilter fileFileFilter,
+      IOFileFilter directoryFilter) {
+    return FileUtils.listFiles(directory, fileFileFilter, directoryFilter);
+  }
+  public static void deleteQuietly(File file) {
+    FileUtils.deleteQuietly(file);
   }
 }

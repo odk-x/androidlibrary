@@ -17,7 +17,6 @@ package org.opendatakit.builder;
 
 import android.content.ContentValues;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.ConflictType;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
@@ -205,7 +204,7 @@ public class CsvUtil {
         if ( instancesWithData.contains(tableInstanceFolder) ) {
           File outputInstanceFolder = new File(ODKFileUtils.getOutputCsvInstanceFolder(appName, tableId, instanceId));
           outputInstanceFolder.mkdirs();
-          FileUtils.copyDirectory(tableInstanceFolder, outputInstanceFolder);
+          ODKFileUtils.copyDirectory(tableInstanceFolder, outputInstanceFolder);
           instancesWithData.remove(tableInstanceFolder);
         }
 
@@ -218,8 +217,8 @@ public class CsvUtil {
       if (outputCsv != null) {
         try {
           File outputCsvFolder = new File(ODKFileUtils.getOutputCsvFolder(appName));
-          while (FileUtils.directoryContains(outputCsvFolder, outputCsv)) {
-            FileUtils.deleteDirectory(outputCsv);
+          while (ODKFileUtils.directoryContains(outputCsvFolder, outputCsv)) {
+            ODKFileUtils.deleteDirectory(outputCsv);
             outputCsv = outputCsv.getParentFile();
           }
         } catch (IOException e1) {
@@ -698,7 +697,7 @@ public class CsvUtil {
           if ( instancesHavingData.contains(assetsInstanceFolder) ) {
             File tableInstanceFolder = new File(ODKFileUtils.getInstanceFolder(appName, tableId, v_id));
             tableInstanceFolder.mkdirs();
-            FileUtils.copyDirectory(assetsInstanceFolder, tableInstanceFolder);
+            ODKFileUtils.copyDirectory(assetsInstanceFolder, tableInstanceFolder);
             instancesHavingData.remove(assetsInstanceFolder);
           }
 
