@@ -145,14 +145,14 @@ public class UserDbInterface {
    }
 
    /**
-    * Return the roles of a verified username or google account.
+    * Return the roles and groups of a verified username or google account.
     * If the username or google account have not been verified,
     * or if the server settings specify to use an anonymous user,
     * then return an empty string.
     *
     * @param appName
     *
-    * @return empty string or JSON serialization of an array of ROLES. See RoleConsts for possible values.
+    * @return null or JSON serialization of an array of ROLES. See RoleConsts for possible values.
     */
    public String getRolesList(String appName) throws ServicesAvailabilityException {
       try {
@@ -160,6 +160,23 @@ public class UserDbInterface {
       } catch ( Exception e ) {
          rethrowAlwaysAllowedRemoteException(e);
         throw new IllegalStateException("unreachable - keep IDE happy");
+      }
+   }
+
+   /**
+    * Return the default group of the current user.
+    *
+    * @param appName
+    * @return null or the name of the default group for this user.
+    *
+    * @throws ServicesAvailabilityException
+    */
+   public String getDefaultGroup(String appName) throws ServicesAvailabilityException {
+      try {
+         return dbInterface.getDefaultGroup(appName);
+      } catch ( Exception e ) {
+         rethrowAlwaysAllowedRemoteException(e);
+         throw new IllegalStateException("unreachable - keep IDE happy");
       }
    }
 
@@ -172,7 +189,7 @@ public class UserDbInterface {
     *
     * @param appName
     *
-    * @return empty string or JSON serialization of an array of objects
+    * @return null or JSON serialization of an array of objects
     * structured as { "user_id": "...", "full_name": "...", "roles": ["...",...] }
     */
    public String getUsersList(String appName) throws ServicesAvailabilityException {

@@ -334,6 +334,7 @@ public class PropertiesSingleton {
 
   public void clearActiveUser() {
     removeProperty(CommonToolProperties.KEY_ROLES_LIST);
+    removeProperty(CommonToolProperties.KEY_DEFAULT_GROUP);
   }
 
   public String getActiveUser() {

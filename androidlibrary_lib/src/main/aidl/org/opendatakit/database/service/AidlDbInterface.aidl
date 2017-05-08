@@ -40,16 +40,26 @@ import org.opendatakit.database.data.KeyValueStoreEntry;
 interface AidlDbInterface {
 
   /**
-   * Return the roles of a verified username or google account.
+   * Return the roles and groups of a verified username or google account.
    * If the username or google account have not been verified,
    * or if the server settings specify to use an anonymous user,
    * then return an empty string.
    *
    * @param appName
    *
-   * @return empty string or JSON serialization of an array of ROLES. See RoleConsts for possible values.
+   * @return null or JSON serialization of an array of ROLES and GROUPS.
+   *
+   * See RoleConsts for possible values.
    */
   String getRolesList(in String appName);
+
+  /**
+   * Return the current user's default group.
+   * This will be an empty string if the server does not support user-defined groups.
+   *
+   * @return null or the name of the default group.
+   */
+  String getDefaultGroup(in String appName);
 
   /**
    * Return the users configured on the server if the current
@@ -60,7 +70,7 @@ interface AidlDbInterface {
    *
    * @param appName
    *
-   * @return empty string or JSON serialization of an array of objects
+   * @return null or JSON serialization of an array of objects
    * structured as { "user_id": "...", "full_name": "...", "roles": ["...",...] }
    */
   String getUsersList(in String appName);

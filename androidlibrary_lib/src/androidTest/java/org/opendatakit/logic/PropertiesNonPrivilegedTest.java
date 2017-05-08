@@ -88,6 +88,7 @@ public class PropertiesNonPrivilegedTest {
                 CommonToolProperties.KEY_AUTH,
                 CommonToolProperties.KEY_PASSWORD,
                 CommonToolProperties.KEY_ROLES_LIST,
+                CommonToolProperties.KEY_DEFAULT_GROUP,
                 CommonToolProperties.KEY_USERS_LIST,
                 CommonToolProperties.KEY_ADMIN_PW
         };
@@ -131,6 +132,7 @@ public class PropertiesNonPrivilegedTest {
         assertEquals(props.getProperty(CommonToolProperties.KEY_AUTH), null);
         assertEquals(props.getProperty(CommonToolProperties.KEY_PASSWORD), null);
         assertEquals(props.getProperty(CommonToolProperties.KEY_ROLES_LIST), null);
+        assertEquals(props.getProperty(CommonToolProperties.KEY_DEFAULT_GROUP), null);
         assertEquals(props.getProperty(CommonToolProperties.KEY_USERS_LIST), null);
         assertEquals(props.getProperty(CommonToolProperties.KEY_ADMIN_PW), null);
     }
