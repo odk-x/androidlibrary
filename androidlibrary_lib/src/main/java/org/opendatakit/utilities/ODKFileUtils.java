@@ -1332,7 +1332,7 @@ public class ODKFileUtils {
   }
 
   public static void moveDirectory(File sourceFolder, File destinationFolder) throws IOException {
-    FileUtils.moveFile(sourceFolder, destinationFolder);
+    FileUtils.moveDirectory(sourceFolder, destinationFolder);
   }
 
   public static boolean directoryContains(File folder, File file) throws IOException {
@@ -1359,6 +1359,7 @@ public class ODKFileUtils {
       IOFileFilter directoryFilter) {
     return FileUtils.listFiles(directory, fileFileFilter, directoryFilter);
   }
+
   public static void deleteQuietly(File file) {
     FileUtils.deleteQuietly(file);
   }
