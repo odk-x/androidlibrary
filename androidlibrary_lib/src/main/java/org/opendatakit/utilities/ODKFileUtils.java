@@ -135,7 +135,10 @@ public class ODKFileUtils {
    * Miscellaneous well-known file names
    */
 
-  private static final String COMMON_TRANSLATIONS_JS = "commonTranslations.js";
+  /**
+   * Filename holding app-wide definitions (just translations for now).
+   */
+  private static final String COMMON_DEFINITIONS_JS = "commonDefinitions.js";
 
   /** Filename for the top-level configuration file (in assets) */
   private static final String ODK_TABLES_INIT_FILENAME =
@@ -158,9 +161,9 @@ public class ODKFileUtils {
   private static final String DEFINITION_CSV = "definition.csv";
 
   /**
-   * Filename holding table-specific translations.
+   * Filename holding table-specific definitions (just translations for now).
    */
-  private static final String TABLE_SPECIFIC_TRANSLATIONS_JS = "tableSpecificTranslations.js";
+  private static final String TABLE_SPECIFIC_DEFINITIONS_JS = "tableSpecificDefinitions.js";
 
   /**
    *
@@ -654,13 +657,13 @@ public class ODKFileUtils {
   }
 
   /**
-   * Get the path to the common translations file for the given app.
+   * Get the path to the common definitions file for the given app.
    * @param appName
    * @return
    */
-  public static String getCommonTranslationsFile(String appName) {
+  public static String getCommonDefinitionsFile(String appName) {
     String assetsFolder = getAssetsFolder(appName);
-    String result = assetsFolder + File.separator + COMMON_TRANSLATIONS_JS;
+    String result = assetsFolder + File.separator + COMMON_DEFINITIONS_JS;
     return result;
   }
 
@@ -710,8 +713,8 @@ public class ODKFileUtils {
     return getTablesFolder(appName, tableId) + File.separator + PROPERTIES_CSV;
   }
 
-  public static String getTableSpecificTranslationsFile(String appName, String tableId) {
-    return getTablesFolder(appName, tableId) + File.separator + TABLE_SPECIFIC_TRANSLATIONS_JS;
+  public static String getTableSpecificDefinitionsFile(String appName, String tableId) {
+    return getTablesFolder(appName, tableId) + File.separator + TABLE_SPECIFIC_DEFINITIONS_JS;
   }
 
   public static String getFormsFolder(String appName, String tableId) {

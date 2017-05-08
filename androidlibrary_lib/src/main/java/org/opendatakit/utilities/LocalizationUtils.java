@@ -30,13 +30,13 @@ public class LocalizationUtils {
   }
 
   private static String savedAppName;
-  private static Map<String, Object> commonTranslations;
-  private static Map<String, Map<String, Object>> tableSpecificTranslationMap =
+  private static Map<String, Object> commonDefinitions;
+  private static Map<String, Map<String, Object>> tableSpecificDefinitionsMap =
       new HashMap<String, Map<String, Object>>();
 
   public synchronized static void clearTranslations() {
-    commonTranslations = null;
-    tableSpecificTranslationMap.clear();
+    commonDefinitions = null;
+    tableSpecificDefinitionsMap.clear();
   }
 
   private synchronized static void loadTranslations(String appName, String tableId)
@@ -46,8 +46,8 @@ public class LocalizationUtils {
     }
     savedAppName = appName;
     TypeReference<HashMap<String,Object>> ref = new TypeReference<HashMap<String,Object>>() {};
-    if ( commonTranslations == null ) {
-      File commonFile = new File(ODKFileUtils.getCommonTranslationsFile(appName));
+    if ( commonDefinitions == null ) {
+      File commonFile = new File(ODKFileUtils.getCommonDefinitionsFile(appName));
       if ( commonFile.exists() && commonFile.isFile() ) {
         InputStream stream = null;
         BufferedReader reader = null;
@@ -83,21 +83,21 @@ public class LocalizationUtils {
         }
 
         try {
-          commonTranslations = ODKFileUtils.mapper.readValue(value, ref);
+          commonDefinitions = ODKFileUtils.mapper.readValue(value, ref);
         } catch (IOException e) {
           e.printStackTrace();
-          throw new IllegalStateException("Unable to read commonTranslations.js file");
+          throw new IllegalStateException("Unable to read commonDefinitions.js file");
         }
       }
     }
 
     if ( tableId != null) {
-      File tableFile = new File(ODKFileUtils.getTableSpecificTranslationsFile(appName, tableId));
+      File tableFile = new File(ODKFileUtils.getTableSpecificDefinitionsFile(appName, tableId));
       if (!tableFile.exists()) {
-        tableSpecificTranslationMap.remove(tableId);
+        tableSpecificDefinitionsMap.remove(tableId);
       } else {
         // assume it is current if it exists
-        if (tableSpecificTranslationMap.containsKey(tableId)) {
+        if (tableSpecificDefinitionsMap.containsKey(tableId)) {
           return;
         }
         InputStream stream = null;
@@ -114,7 +114,7 @@ public class LocalizationUtils {
           reader.reset();
           Map<String, Object> tableSpecificTranslations = ODKFileUtils.mapper.readValue(reader, ref);
           if (tableSpecificTranslations != null) {
-            tableSpecificTranslationMap.put(tableId, tableSpecificTranslations);
+            tableSpecificDefinitionsMap.put(tableId, tableSpecificTranslations);
           }
         } finally {
           if (reader != null) {
@@ -128,12 +128,12 @@ public class LocalizationUtils {
   }
 
   public static List<Map<String, Object>> getCommonLocales(String appName) throws IOException {
-    if ( commonTranslations == null ) {
+    if ( commonDefinitions == null ) {
       loadTranslations(appName, null);
     }
 
-    if ( commonTranslations != null && commonTranslations.containsKey("_locales")) {
-      Map<String, Object> localesObject = (Map<String, Object>) commonTranslations.get("_locales");
+    if ( commonDefinitions != null && commonDefinitions.containsKey("_locales")) {
+      Map<String, Object> localesObject = (Map<String, Object>) commonDefinitions.get("_locales");
       if ( localesObject != null && localesObject.containsKey("value")) {
         return (List<Map<String, Object>>) localesObject.get("value");
       }
@@ -143,12 +143,12 @@ public class LocalizationUtils {
 
   public static String getCommonLocaleDefault(String appName) throws
       IOException {
-    if ( commonTranslations == null ) {
+    if ( commonDefinitions == null ) {
       loadTranslations(appName, null);
     }
 
-    if ( commonTranslations != null && commonTranslations.containsKey("_default_locale")) {
-      Map<String,Object> default_locale =  (Map<String, Object>) commonTranslations.get("_default_locale");
+    if ( commonDefinitions != null && commonDefinitions.containsKey("_default_locale")) {
+      Map<String,Object> default_locale =  (Map<String, Object>) commonDefinitions.get("_default_locale");
       String value = (String) default_locale.get("value");
       if ( value != null && value.length() != 0 ) {
         return value;
@@ -171,21 +171,21 @@ public class LocalizationUtils {
     if ( savedAppName == null || !savedAppName.equals(appName) ) {
       clearTranslations();
     }
-    if ( commonTranslations == null ||
-        (tableId != null && !tableSpecificTranslationMap.containsKey(tableId)) ) {
+    if ( commonDefinitions == null ||
+        (tableId != null && !tableSpecificDefinitionsMap.containsKey(tableId)) ) {
       loadTranslations(appName, tableId);
     }
 
     Map<String, Object>  value = null;
     if ( tableId != null) {
-      Map<String, Object> tableSpecificTranslations = tableSpecificTranslationMap.get(tableId);
-      if (tableSpecificTranslations != null) {
-        Map<String, Object> tokens = (Map<String, Object>) tableSpecificTranslations.get("_tokens");
+      Map<String, Object> tableSpecificDefinitions = tableSpecificDefinitionsMap.get(tableId);
+      if (tableSpecificDefinitions != null) {
+        Map<String, Object> tokens = (Map<String, Object>) tableSpecificDefinitions.get("_tokens");
         value = (Map<String, Object>) tokens.get(translationToken);
       }
     }
-    if ( commonTranslations != null && value == null ) {
-      Map<String, Object> tokens = (Map<String, Object>) commonTranslations.get("_tokens");
+    if ( commonDefinitions != null && value == null ) {
+      Map<String, Object> tokens = (Map<String, Object>) commonDefinitions.get("_tokens");
       value = (Map<String, Object>) tokens.get(translationToken);
     }
     return value;
