@@ -1327,40 +1327,103 @@ public class ODKFileUtils {
     return text;
   }
 
+  private static class ContextClassLoaderWrapper {
+    boolean wrapped = false;
+
+    ContextClassLoaderWrapper() {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      if ( loader == null ) {
+        wrapped = true;
+        Thread.currentThread().setContextClassLoader(ODKFileUtils.class.getClassLoader());
+      }
+    }
+
+    void release() {
+      if ( wrapped ) {
+        Thread.currentThread().setContextClassLoader(null);
+      }
+    }
+  }
+
   public static void copyDirectory(File sourceFolder, File destinationFolder) throws IOException {
-    FileUtils.copyDirectory(sourceFolder, destinationFolder);
+    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
+    try {
+      FileUtils.copyDirectory(sourceFolder, destinationFolder);
+    } finally {
+      wrapper.release();
+    }
   }
 
   public static void moveDirectory(File sourceFolder, File destinationFolder) throws IOException {
-    FileUtils.moveDirectory(sourceFolder, destinationFolder);
+    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
+    try {
+      FileUtils.moveDirectory(sourceFolder, destinationFolder);
+    } finally {
+      wrapper.release();
+    }
   }
 
   public static boolean directoryContains(File folder, File file) throws IOException {
-    return FileUtils.directoryContains(folder, file);
+    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
+    try {
+      return FileUtils.directoryContains(folder, file);
+    } finally {
+      wrapper.release();
+    }
   }
 
   public static void deleteDirectory(File folder) throws IOException {
-    FileUtils.deleteDirectory(folder);
+    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
+    try {
+      FileUtils.deleteDirectory(folder);
+    } finally {
+      wrapper.release();
+    }
   }
 
   public static void copyFile(File sourceFile, File destinationFile) throws IOException {
-    FileUtils.copyFile(sourceFile, destinationFile);
+    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
+    try {
+      FileUtils.copyFile(sourceFile, destinationFile);
+    } finally {
+      wrapper.release();
+    }
   }
 
   public static void moveFile(File sourceFile, File destinationFile) throws IOException {
-    FileUtils.moveFile(sourceFile, destinationFile);
+    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
+    try {
+      FileUtils.moveFile(sourceFile, destinationFile);
+    } finally {
+      wrapper.release();
+    }
   }
 
   public static Iterator<File> iterateFiles(File directory, String[] extensions, boolean recursive)  {
-    return FileUtils.iterateFiles(directory, extensions, recursive );
+      ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
+    try {
+      return FileUtils.iterateFiles(directory, extensions, recursive );
+    } finally {
+      wrapper.release();
+    }
   }
 
   public static Collection<File> listFiles(File directory, IOFileFilter fileFileFilter,
       IOFileFilter directoryFilter) {
-    return FileUtils.listFiles(directory, fileFileFilter, directoryFilter);
+    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
+    try {
+      return FileUtils.listFiles(directory, fileFileFilter, directoryFilter);
+    } finally {
+      wrapper.release();
+    }
   }
 
   public static void deleteQuietly(File file) {
-    FileUtils.deleteQuietly(file);
+    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
+    try {
+      FileUtils.deleteQuietly(file);
+    } finally {
+      wrapper.release();
+    }
   }
 }
