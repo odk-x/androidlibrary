@@ -37,7 +37,7 @@ public class DataTableColumns implements BaseColumns {
   public static final String SYNC_STATE = TableConstants.SYNC_STATE;
   public static final String CONFLICT_TYPE = TableConstants.CONFLICT_TYPE;
   public static final String DEFAULT_ACCESS = TableConstants.DEFAULT_ACCESS;
-  public static final String OWNER = TableConstants.OWNER;
+  public static final String ROW_OWNER = TableConstants.ROW_OWNER;
 
   public static final String GROUP_READ_ONLY = TableConstants.GROUP_READ_ONLY;
   public static final String GROUP_MODIFY = TableConstants.GROUP_MODIFY;
@@ -75,8 +75,8 @@ public class DataTableColumns implements BaseColumns {
   // there is nothing included. This has been a problem when downloading a
   // table from the server.
   public static final String DEFAULT_ROW_ETAG = null;
-  public static final String DEFAULT_DEFAULT_ACCESS = RowFilterScope.EMPTY_ROW_FILTER.getAccess().name();
-  public static final String DEFAULT_OWNER = RowFilterScope.EMPTY_ROW_FILTER.getOwner();
+  public static final String DEFAULT_DEFAULT_ACCESS = RowFilterScope.EMPTY_ROW_FILTER.getDefaultAccess().name();
+  public static final String DEFAULT_ROW_OWNER = RowFilterScope.EMPTY_ROW_FILTER.getRowOwner();
   public static final String DEFAULT_GROUP_READ_ONLY = RowFilterScope.EMPTY_ROW_FILTER.getGroupReadOnly();
   public static final String DEFAULT_GROUP_MODDIFY = RowFilterScope.EMPTY_ROW_FILTER.getGroupModify();
   public static final String DEFAULT_GROUP_PRIVILEGED = RowFilterScope.EMPTY_ROW_FILTER.getGroupPrivileged();
