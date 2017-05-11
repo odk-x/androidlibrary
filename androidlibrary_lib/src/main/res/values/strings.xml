@@ -6,8 +6,8 @@
 
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-
     <string name="services_permission_tree">Open Data Kit Services</string>
+	<string name="services_permissions_description">Open Data Kit Services access permissions</string>
 	<string name="webkit_launch_permission">Launch WebServer</string>
 	<string name="database_launch_permission">Launch Database</string>
     <string name="sync_launch_permission">Launch Sync</string>
