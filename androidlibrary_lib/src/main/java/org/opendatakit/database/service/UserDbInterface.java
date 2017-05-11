@@ -1786,12 +1786,12 @@ public class UserDbInterface {
    * @param tableId
    * @param orderedColumns
    * @param defaultAccess
-   * @param owner
+   * @param rowOwner
    * @param rowId
    * @return
    */
    public UserTable changeRowFilterWithId(String appName, DbHandle dbHandleName, String tableId,
-       OrderedColumns orderedColumns, String defaultAccess, String owner,
+       OrderedColumns orderedColumns, String defaultAccess, String rowOwner,
        String groupReadOnly, String groupModify, String groupPrivileged, String rowId) throws IllegalArgumentException,
        ActionNotAuthorizedException, ServicesAvailabilityException {
 
@@ -1804,10 +1804,10 @@ public class UserDbInterface {
       ContentValues cvValues = new ContentValues();
       cvValues.put(DataTableColumns.DEFAULT_ACCESS, defaultAccess);
 
-      if ( owner == null ) {
-         cvValues.putNull(DataTableColumns.OWNER);
+      if ( rowOwner == null ) {
+         cvValues.putNull(DataTableColumns.ROW_OWNER);
       } else {
-         cvValues.put(DataTableColumns.OWNER, owner);
+         cvValues.put(DataTableColumns.ROW_OWNER, rowOwner);
       }
 
      if (groupReadOnly == null) {

@@ -68,7 +68,7 @@ public class UserTableTest {
     adminColumns.add(DataTableColumns.SYNC_STATE); // not exportable
     adminColumns.add(DataTableColumns.CONFLICT_TYPE); // not exportable
     adminColumns.add(DataTableColumns.DEFAULT_ACCESS);
-    adminColumns.add(DataTableColumns.OWNER);
+    adminColumns.add(DataTableColumns.ROW_OWNER);
     adminColumns.add(DataTableColumns.FORM_ID);
     adminColumns.add(DataTableColumns.LOCALE);
     adminColumns.add(DataTableColumns.SAVEPOINT_TYPE);
@@ -81,7 +81,7 @@ public class UserTableTest {
     exportColumns.add(DataTableColumns.ID);
     exportColumns.add(DataTableColumns.ROW_ETAG);
     exportColumns.add(DataTableColumns.DEFAULT_ACCESS);
-    exportColumns.add(DataTableColumns.OWNER);
+    exportColumns.add(DataTableColumns.ROW_OWNER);
     exportColumns.add(DataTableColumns.FORM_ID);
     exportColumns.add(DataTableColumns.LOCALE);
     exportColumns.add(DataTableColumns.SAVEPOINT_TYPE);
@@ -368,8 +368,8 @@ public class UserTableTest {
     elementKeyToIndex.put(DataTableColumns.DEFAULT_ACCESS, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.OWNER;
-    elementKeyToIndex.put(DataTableColumns.OWNER, i++);
+    elementKeyForIndex[i] = DataTableColumns.ROW_OWNER;
+    elementKeyToIndex.put(DataTableColumns.ROW_OWNER, i++);
     rowValues1[i] = "myform_1";
     rowValues2[i] = "myform_2";
     elementKeyForIndex[i] = DataTableColumns.FORM_ID;
@@ -595,8 +595,8 @@ public class UserTableTest {
     elementKeyToIndex.put(DataTableColumns.DEFAULT_ACCESS, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.OWNER;
-    elementKeyToIndex.put(DataTableColumns.OWNER, i++);
+    elementKeyForIndex[i] = DataTableColumns.ROW_OWNER;
+    elementKeyToIndex.put(DataTableColumns.ROW_OWNER, i++);
     rowValues1[i] = "myform_1";
     rowValues2[i] = "myform_2";
     elementKeyForIndex[i] = DataTableColumns.FORM_ID;
@@ -776,8 +776,8 @@ public class UserTableTest {
     elementKeyToIndex.put(DataTableColumns.DEFAULT_ACCESS, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.OWNER;
-    elementKeyToIndex.put(DataTableColumns.OWNER, i++);
+    elementKeyForIndex[i] = DataTableColumns.ROW_OWNER;
+    elementKeyToIndex.put(DataTableColumns.ROW_OWNER, i++);
     rowValues1[i] = "myform_1";
     rowValues2[i] = "myform_2";
     elementKeyForIndex[i] = DataTableColumns.FORM_ID;

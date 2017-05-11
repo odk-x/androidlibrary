@@ -452,7 +452,7 @@ public class CsvUtil {
         String v_savepoint_timestamp;
         String v_row_etag;
         String v_default_access;
-        String v_owner;
+        String v_row_owner;
         String v_group_read_only;
         String v_group_modify;
         String v_group_privileged;
@@ -481,7 +481,7 @@ public class CsvUtil {
           v_savepoint_timestamp = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
           v_row_etag = null;
           v_default_access = DataTableColumns.DEFAULT_DEFAULT_ACCESS;
-          v_owner = DataTableColumns.DEFAULT_OWNER;
+          v_row_owner = DataTableColumns.DEFAULT_ROW_OWNER;
           v_group_read_only = DataTableColumns.DEFAULT_GROUP_READ_ONLY;
           v_group_modify = DataTableColumns.DEFAULT_GROUP_MODDIFY;
           v_group_privileged = DataTableColumns.DEFAULT_GROUP_PRIVILEGED;
@@ -544,9 +544,9 @@ public class CsvUtil {
               }
               continue;
             }
-            if (DataTableColumns.OWNER.equals(column)) {
+            if (DataTableColumns.ROW_OWNER.equals(column)) {
               if (tmp != null && tmp.length() != 0) {
-                v_owner = tmp;
+                v_row_owner = tmp;
               }
               continue;
             }
@@ -626,7 +626,7 @@ public class CsvUtil {
             cv.put(DataTableColumns.SAVEPOINT_CREATOR, v_savepoint_creator);
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
             cv.put(DataTableColumns.DEFAULT_ACCESS, v_default_access);
-            cv.put(DataTableColumns.OWNER, v_owner);
+            cv.put(DataTableColumns.ROW_OWNER, v_row_owner);
             cv.put(DataTableColumns.GROUP_READ_ONLY, v_group_read_only);
             cv.put(DataTableColumns.GROUP_MODIFY, v_group_modify);
             cv.put(DataTableColumns.GROUP_PRIVILEGED, v_group_privileged);
@@ -666,7 +666,7 @@ public class CsvUtil {
             cv.put(DataTableColumns.SAVEPOINT_CREATOR, v_savepoint_creator);
             cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
             cv.put(DataTableColumns.DEFAULT_ACCESS, v_default_access);
-            cv.put(DataTableColumns.OWNER, v_owner);
+            cv.put(DataTableColumns.ROW_OWNER, v_row_owner);
             cv.put(DataTableColumns.GROUP_READ_ONLY, v_group_read_only);
             cv.put(DataTableColumns.GROUP_MODIFY, v_group_modify);
             cv.put(DataTableColumns.GROUP_PRIVILEGED, v_group_privileged);

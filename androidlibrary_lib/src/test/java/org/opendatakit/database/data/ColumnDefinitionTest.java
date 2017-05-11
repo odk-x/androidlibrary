@@ -1123,13 +1123,13 @@ public class ColumnDefinitionTest {
               "\"elementSet\": \"instanceMetadata\"," +
               "\"elementPath\": \"_default_access\"" +
               "}," +
-              "\"_owner\": {" +
+              "\"_row_owner\": {" +
               "\"type\": \"string\"," +
               "\"isNotNullable\": false," +
-              "\"elementKey\": \"_owner\"," +
-              "\"elementName\": \"_owner\"," +
+              "\"elementKey\": \"_row_owner\"," +
+              "\"elementName\": \"_row_owner\"," +
               "\"elementSet\": \"instanceMetadata\"," +
-              "\"elementPath\": \"_owner\"" +
+              "\"elementPath\": \"_row_owner\"" +
               "}," +
               "\"_group_read_only\": {" +
               "\"type\": \"string\"," +
@@ -1260,7 +1260,7 @@ public class ColumnDefinitionTest {
                metaCount++;
                assertEquals(value.get("type"), "string");
                assertEquals(value.get("isNotNullable"), false);
-            } else if ( elementKey.equals(TableConstants.OWNER)) {
+            } else if ( elementKey.equals(TableConstants.ROW_OWNER)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
                assertEquals(value.get("isNotNullable"), false);
