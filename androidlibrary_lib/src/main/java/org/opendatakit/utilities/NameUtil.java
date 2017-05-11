@@ -69,7 +69,7 @@ public class NameUtil {
     reservedNames.add("SAVEPOINT_CREATOR");
     reservedNames.add("SAVEPOINT_TYPE");
     reservedNames.add("DEFAULT_ACCESS");
-    reservedNames.add("OWNER");
+    reservedNames.add("ROW_OWNER");
     reservedNames.add("GROUP_READ_ONLY");
     reservedNames.add("GROUP_MODIFY");
     reservedNames.add("GROUP_PRIVILEGED");
