@@ -113,7 +113,7 @@ public class PropertyManager {
     if (deviceId == null) {
       // no SIM -- WiFi only
       // Retrieve WiFiManager
-      WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+      WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
       // Get WiFi status
       WifiInfo info = wifi.getConnectionInfo();
