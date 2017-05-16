@@ -326,7 +326,6 @@ public class PropertiesSingleton {
     } else {
       throw new IllegalStateException("unexpected authentication type!");
     }
-    Log.e("PropertiesSingleton", "getActiveUser: " + activeUserName);
     return activeUserName;
   }
 
