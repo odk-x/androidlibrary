@@ -44,17 +44,16 @@ public abstract class PropertiesSingletonFactory {
    * @param appName
    * @return
     */
-  public synchronized PropertiesSingleton getSingleton(Context context, String appName) {
+  synchronized PropertiesSingleton getSingleton(Context context, String appName) {
     if (appName == null || appName.length() == 0) {
       throw new IllegalArgumentException("Unexpectedly null or empty appName");
     }
 
     if ( gSingleton == null || gAppName == null || !gAppName.equals(appName) ) {
       gSingleton = new PropertiesSingleton(context, appName, mGeneralDefaults, mDeviceDefaults,
-          mSecureDefaults);
+        mSecureDefaults);
       gAppName = appName;
     }
-    gSingleton.setCurrentContext(context);
     return gSingleton;
   }
 

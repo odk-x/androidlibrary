@@ -30,6 +30,10 @@ import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 import org.opendatakit.properties.CommonToolProperties;
 import org.opendatakit.properties.PropertiesSingleton;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -56,12 +60,15 @@ public class PropertiesNonPrivilegedTest {
         Context context = InstrumentationRegistry.getContext();
 
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
+        Map<String,String> properties = new HashMap<String,String>();
         // non-default value for font size
-        props.setProperty(CommonToolProperties.KEY_FONT_SIZE, "29");
+        properties.put(CommonToolProperties.KEY_FONT_SIZE, "29");
         // these are stored in devices
-        props.setProperty(CommonToolProperties.KEY_AUTHENTICATION_TYPE,
+        properties.put(CommonToolProperties.KEY_AUTHENTICATION_TYPE,
             context.getString(R.string.credential_type_google_account));
-        props.setProperty(CommonToolProperties.KEY_ACCOUNT, "mitchs.test@gmail.com");
+        properties.put(CommonToolProperties.KEY_ACCOUNT, "mitchs.test@gmail.com");
+
+        props.setProperties(properties);
 
         StaticStateManipulator.get().reset();
 
@@ -97,7 +104,7 @@ public class PropertiesNonPrivilegedTest {
             // this is stored in SharedPreferences
             boolean threwError = false;
             try {
-                props.setProperty(secureKeys[i], "asdf");
+                props.setProperties(Collections.singletonMap(secureKeys[i], "asdf"));
             } catch (IllegalStateException e) {
                 threwError = true;
             }
@@ -107,7 +114,8 @@ public class PropertiesNonPrivilegedTest {
             // and verify remove doesn't do anything
             threwError = false;
             try {
-                props.removeProperty(secureKeys[i]);
+                String value = null;
+                props.setProperties(Collections.singletonMap(secureKeys[i], value));
             } catch (IllegalStateException e) {
                 threwError = true;
             }

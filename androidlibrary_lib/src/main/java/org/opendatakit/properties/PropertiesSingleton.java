@@ -15,37 +15,31 @@
 package org.opendatakit.properties;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.androidlibrary.R;
-import org.opendatakit.utilities.ODKFileUtils;
 import org.opendatakit.consts.IntentConsts;
+import org.opendatakit.utilities.ODKFileUtils;
 import org.opendatakit.logging.WebLogger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
+import java.io.*;
+import java.util.*;
 
 /**
  * Properties are in 3 classes:
  *
  * (1) general (syncable) -- the contents of config/assets/app.properties
  * (2) device -- the contents of data/device.properties
- * (3) secure -- stored in SharedPreferences (ideally only within ODK Services)
+ * (3) secure -- stored in ODK Services' (private) dataDir under mAppName
  *
  * The tools provide the different sets of these and default values for these settings.
+ * What goes into secure and device should be predefined in CommonToolProperties
  *
  * If the general (syncable) file contains values for the device and secure settings,
- * these become the default settings for those values.
+ * these become the default settings for those values. There is also a
+ * default.device.properties
  *
  * Device settings and secure settings are not overwritten by changes in the
  * general (syncable) settings. You need to Reset the device configuration to
@@ -55,13 +49,41 @@ public class PropertiesSingleton {
 
   private static final String t = "PropertiesSingleton";
 
+  private static final String PROPERTIES_REVISION_FILENAME = "properties.revision";
   private static final String GENERAL_PROPERTIES_FILENAME = "app.properties";
   private static final String DEFAULT_DEVICE_PROPERTIES_FILENAME = "default.device.properties";
   private static final String DEVICE_PROPERTIES_FILENAME = "device.properties";
+  private static final String SECURE_PROPERTIES_FILENAME = "secure.properties";
+
+  private static int invalidRevision() {
+    return -1;
+  }
+
+  private static final String TOOL_INITIALIZATION_SUFFIX = ".tool_last_initialization_start_time";
+  private static String toolInitializationPropertyName(String toolName) {
+    return toolName + TOOL_INITIALIZATION_SUFFIX;
+  }
+
+  private static boolean isToolInitializationPropertyName(String toolName) {
+    return toolName.endsWith(TOOL_INITIALIZATION_SUFFIX);
+  }
+
+  public static String toolVersionPropertyName(String toolName) {
+    return toolName + ".tool_version_code";
+  }
+
+  public static String toolFirstRunPropertyName(String toolName) {
+    return toolName + ".tool_first_run";
+  }
 
   private final String mAppName;
-  private long lastGeneralModified = 0L;
-  private long lastDeviceModified = 0L;
+  private final boolean mHasSecureStorage;
+  private final File mSecureStorageDir;
+  private final String CREDENTIAL_TYPE_NONE;
+  private final String CREDENTIAL_TYPE_USERNAME_PASSWORD;
+  private final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT;
+
+  private int currentRevision = invalidRevision();
 
   private final TreeMap<String, String> mGeneralDefaults;
   private final TreeMap<String, String> mDeviceDefaults;
@@ -70,7 +92,7 @@ public class PropertiesSingleton {
   private final Properties mGeneralProps;
   private final Properties mGlobalDeviceProps;
   private final Properties mDeviceProps;
-  private Context mBaseContext;
+  private final Properties mSecureProps;
 
   public String getAppName() {
     return mAppName;
@@ -84,44 +106,10 @@ public class PropertiesSingleton {
     return mDeviceDefaults.containsKey(propertyName);
   }
 
-  void setCurrentContext(Context context) {
-    try {
-      mBaseContext = context;
-      // if we are re-using the existing one, pick up any changes by other apps
-      // including, e.g., the reset of the configuration by ODK Services.
-      if ( isModified() ) {
-        init();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new IllegalStateException("ODK Services must be installed!");
-    }
-  }
-
-  /**
-   * SharedPreferences are ONLY available from within ODK Services.
-   *
-   * @param context
-   * @return
-    */
-  private static SharedPreferences getSharedPreferences(Context context) {
-    try {
-      if ( !context.getPackageName().equals(IntentConsts.AppProperties.APPLICATION_NAME) ) {
-        return null;
-      }
-      return context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE
-            | Context.MODE_MULTI_PROCESS);
-    } catch ( Exception e ) {
-     Log.e("PropertiesSingleton", "Unable to access SharedPreferences!");
-     return null;
-    }
-  }
-
   public boolean containsKey(String propertyName) {
+    readPropertiesIfModified();
     if (isSecureProperty(propertyName)) {
-      // this needs to be stored in a protected area
-      SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-      return sharedPreferences != null && sharedPreferences.contains(mAppName + "_" + propertyName);
+      return mSecureProps.containsKey(propertyName);
     } else if (isDeviceProperty(propertyName) ) {
       return mDeviceProps.containsKey(propertyName);
     } else {
@@ -130,18 +118,18 @@ public class PropertiesSingleton {
   }
 
   /**
-   * Accesses the given propertyName. This may be stored in SharedPreferences or
-   * in the PROPERTIES_FILENAME in the config/assets directory.
+   * Accesses the given propertyName.
    * 
    * @param propertyName
    * @return null or the string value
    */
   public String getProperty(String propertyName) {
+    readPropertiesIfModified();
     if (isSecureProperty(propertyName)) {
-      // this needs to be stored in a protected area
-      SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-      return (sharedPreferences == null) ? null : 
-        sharedPreferences.getString(mAppName + "_" + propertyName, null);
+      if ( !mHasSecureStorage ) {
+        return null;
+      }
+      return mSecureProps.getProperty(propertyName);
     } else if (isDeviceProperty(propertyName) ) {
       return mDeviceProps.getProperty(propertyName);
     } else {
@@ -150,8 +138,7 @@ public class PropertiesSingleton {
   }
 
   /**
-   * Accesses the given propertyName. This may be stored in SharedPreferences or
-   * in the PROPERTIES_FILENAME in the config/assets directory.
+   * Accesses the given propertyName.
    * 
    * If the value is not specified, null or an empty string, a null value is
    * returned. Boolean.TRUE is returned if the value is "true", otherwise
@@ -174,13 +161,8 @@ public class PropertiesSingleton {
     return booleanSetting;
   }
 
-  public void setBooleanProperty(String propertyName, boolean value) {
-    setProperty(propertyName, Boolean.toString(value));
-  }
-
   /**
-   * Accesses the given propertyName. This may be stored in SharedPreferences or
-   * in the PROPERTIES_FILENAME in the config/assets directory.
+   * Accesses the given propertyName.
    * 
    * If the value is not specified, null or an empty string, or if the value
    * cannot be parsed as an integer, then null is return. Otherwise, the integer
@@ -202,59 +184,50 @@ public class PropertiesSingleton {
     }
   }
 
-  public void setIntegerProperty(String propertyName, int value) {
-    setProperty(propertyName, Integer.toString(value));
-  }
-
-  /**
-   * Caller is responsible for calling writeProperties() to persist this value
-   * to disk.
-   * 
-   * @param propertyName
-   */
-  public void removeProperty(String propertyName) {
-    if (isSecureProperty(propertyName)) {
-      // this needs to be stored in a protected area
-      SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-      if ( sharedPreferences != null ) {
-        sharedPreferences.edit().remove(mAppName + "_" + propertyName).commit();
-      } else {
-        throw new IllegalStateException("Unable to remove SharedPreferences");
+  public void setProperties( Map<String,String> properties) {
+    readPropertiesIfModified();
+    if ( !mHasSecureStorage ) {
+      for (String propertyName : properties.keySet()) {
+        if (isSecureProperty(propertyName)) {
+          throw new IllegalStateException("Attempted to set or clear a secure property outside "
+              + "ODK Services");
+        }
       }
-    } else if (isDeviceProperty(propertyName) ) {
-      mDeviceProps.remove(propertyName);
-    } else {
-      mGeneralProps.remove(propertyName);
     }
-  }
 
-  /**
-   * Caller is responsible for calling writeProperties() to persist this value
-   * to disk.
-   * 
-   * @param propertyName
-   * @param value
-   */
-  public void setProperty(String propertyName, String value) {
-    if (isSecureProperty(propertyName)) {
-      // this needs to be stored in a protected area
-      SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-      if ( sharedPreferences != null ) {
-        sharedPreferences.edit().putString(mAppName + "_" + propertyName, value).commit();
+    boolean updatedSecureProps = false;
+    boolean updatedDeviceProps = false;
+    boolean updatedGeneralProps = false;
+
+    for ( String propertyName : properties.keySet() ) {
+      String value = properties.get(propertyName);
+      if ( value == null ) {
+        // remove from map
+        if (isSecureProperty(propertyName)) {
+          mSecureProps.remove(propertyName);
+          updatedSecureProps = true;
+        } else if (isDeviceProperty(propertyName) ) {
+          mDeviceProps.remove(propertyName);
+          updatedDeviceProps = true;
+        } else {
+          mGeneralProps.remove(propertyName);
+          updatedGeneralProps = true;
+        }
       } else {
-        throw new IllegalStateException("Unable to write SharedPreferences");
+        // set into map
+        if (isSecureProperty(propertyName)) {
+          mSecureProps.setProperty(propertyName, value);
+          updatedSecureProps = true;
+        } else if (isDeviceProperty(propertyName) ) {
+          mDeviceProps.setProperty(propertyName, value);
+          updatedDeviceProps = true;
+        } else {
+          mGeneralProps.setProperty(propertyName, value);
+          updatedGeneralProps = true;
+        }
       }
-    } else {
-      if (isModified()) {
-        readProperties(false);
-      }
-      if (isDeviceProperty(propertyName) ) {
-        mDeviceProps.setProperty(propertyName, value);
-      } else {
-        mGeneralProps.setProperty(propertyName, value);
-      }
-      writeProperties();
     }
+    writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
   }
 
   /**
@@ -266,10 +239,7 @@ public class PropertiesSingleton {
    */
   public boolean shouldRunInitializationTask(String toolName) {
     // this is stored in the device properties
-    if (isModified()) {
-      readProperties(false);
-    }
-
+    readPropertiesIfModified();
     String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
     if (value == null || value.length() == 0) {
       return Boolean.TRUE;
@@ -285,13 +255,10 @@ public class PropertiesSingleton {
    */
   public void clearRunInitializationTask(String toolName) {
     // this is stored in the device properties
-    if (isModified()) {
-      readProperties(false);
-    }
-
+    readPropertiesIfModified();
     mDeviceProps.setProperty(toolInitializationPropertyName(toolName),
             TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()));
-    writeProperties();
+    writeProperties(false, true, false);
   }
 
   /**
@@ -302,12 +269,9 @@ public class PropertiesSingleton {
    */
   public void setRunInitializationTask(String toolName) {
     // this is stored in the device properties
-    if (isModified()) {
-      readProperties(false);
-    }
-
+    readPropertiesIfModified();
     mDeviceProps.remove(toolInitializationPropertyName(toolName));
-    writeProperties();
+    writeProperties(false, true, false);
   }
 
   /**
@@ -315,10 +279,7 @@ public class PropertiesSingleton {
    */
   public void setAllRunInitializationTasks() {
     // this is stored in the device properties
-    if (isModified()) {
-      readProperties(false);
-    }
-
+    readPropertiesIfModified();
     ArrayList<Object> keysToRemove = new ArrayList<Object>();
 
     for ( Object okey : mDeviceProps.keySet() ) {
@@ -329,41 +290,44 @@ public class PropertiesSingleton {
     for ( Object okey : keysToRemove ) {
       mDeviceProps.remove(okey);
     }
-    writeProperties();
+    writeProperties(false, true, false);
   }
 
   public void clearActiveUser() {
-    removeProperty(CommonToolProperties.KEY_ROLES_LIST);
-    removeProperty(CommonToolProperties.KEY_DEFAULT_GROUP);
+    Map<String,String> properties = new HashMap<String,String>();
+    properties.put(CommonToolProperties.KEY_ROLES_LIST, "");
+    properties.put(CommonToolProperties.KEY_DEFAULT_GROUP, "");
+
+    setProperties(properties);
   }
 
   public String getActiveUser() {
-    final String CREDENTIAL_TYPE_NONE = mBaseContext.getString(R.string.credential_type_none);
-    final String CREDENTIAL_TYPE_USERNAME_PASSWORD = mBaseContext.getString(R.string.credential_type_username_password);
-    final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT = mBaseContext.getString(R.string.credential_type_google_account);
 
+    String activeUserName = null;
     String authType = getProperty(CommonToolProperties.KEY_AUTHENTICATION_TYPE);
     if (authType.equals(CREDENTIAL_TYPE_NONE)) {
-      return "anonymous";
+      activeUserName = "anonymous";
     } else if (authType.equals(CREDENTIAL_TYPE_USERNAME_PASSWORD)) {
       String name = getProperty(CommonToolProperties.KEY_USERNAME);
       String roles = getProperty(CommonToolProperties.KEY_ROLES_LIST);
       if (name != null && roles != null && roles.length() != 0) {
-        return "username:" + name;
+        activeUserName = "username:" + name;
       } else {
-        return "anonymous";
+        activeUserName = "anonymous";
       }
     } else if (authType.equals(CREDENTIAL_TYPE_GOOGLE_ACCOUNT)) {
       String name = getProperty(CommonToolProperties.KEY_ACCOUNT);
       String roles = getProperty(CommonToolProperties.KEY_ROLES_LIST);
       if (name != null && roles != null && roles.length() != 0) {
-        return "mailto:" + name;
+        activeUserName = "mailto:" + name;
       } else {
-        return "anonymous";
+        activeUserName = "anonymous";
       }
     } else {
       throw new IllegalStateException("unexpected authentication type!");
     }
+    Log.e("PropertiesSingleton", "getActiveUser: " + activeUserName);
+    return activeUserName;
   }
 
   /**
@@ -383,26 +347,19 @@ public class PropertiesSingleton {
     }
   }
 
-  private static final String TOOL_INITIALIZATION_SUFFIX = ".tool_last_initialization_start_time";
-  private static String toolInitializationPropertyName(String toolName) {
-    return toolName + TOOL_INITIALIZATION_SUFFIX;
-  }
-
-  private static boolean isToolInitializationPropertyName(String toolName) {
-    return toolName.endsWith(TOOL_INITIALIZATION_SUFFIX);
-  }
-
-  public static String toolVersionPropertyName(String toolName) {
-    return toolName + ".tool_version_code";
-  }
-
-  public static String toolFirstRunPropertyName(String toolName) {
-    return toolName + ".tool_first_run";
-  }
-
   PropertiesSingleton(Context context, String appName, TreeMap<String, String> plainDefaults,
       TreeMap<String, String> deviceDefaults, TreeMap<String, String> secureDefaults) {
     mAppName = appName;
+    mHasSecureStorage = context.getPackageName().equals(IntentConsts.AppProperties.APPLICATION_NAME);
+    if ( mHasSecureStorage ) {
+      mSecureStorageDir = context.getDir(mAppName, 0);
+    } else {
+      mSecureStorageDir = null;
+    }
+    CREDENTIAL_TYPE_NONE = context.getString(R.string.credential_type_none);
+    CREDENTIAL_TYPE_USERNAME_PASSWORD = context.getString(R.string.credential_type_username_password);
+    CREDENTIAL_TYPE_GOOGLE_ACCOUNT = context.getString(R.string.credential_type_google_account);
+
     mGeneralDefaults = plainDefaults;
     mDeviceDefaults = deviceDefaults;
     mSecureDefaults = secureDefaults;
@@ -411,33 +368,35 @@ public class PropertiesSingleton {
     mGeneralProps = new Properties();
     mGlobalDeviceProps = new Properties();
     mDeviceProps = new Properties();
+    mSecureProps = new Properties();
 
-    // set our context
-    // this will automatically call init();
-    setCurrentContext(context);
+    // call init
+    init();
   }
 
-  void init() {
+  private void init() {
     // (re)set values to defaults
 
-    lastGeneralModified = 0L;
-    lastDeviceModified = 0L;
+    currentRevision = invalidRevision();
 
     mGeneralProps.clear();
     mGlobalDeviceProps.clear();
     mDeviceProps.clear();
+    mSecureProps.clear();
 
     // populate the caches from disk...
     readProperties(true);
 
-    boolean dirtyProps = false;
+    boolean updatedSecureProps = false;
+    boolean updatedDeviceProps = false;
+    boolean updatedGeneralProps = false;
 
     // see if there are missing values in the general props
     // and update them from the mGeneralDefaults map.
     for (TreeMap.Entry<String, String> entry : mGeneralDefaults.entrySet()) {
       if (!mGeneralProps.containsKey(entry.getKey())) {
         mGeneralProps.setProperty(entry.getKey(), entry.getValue());
-        dirtyProps = true;
+        updatedGeneralProps = true;
       }
     }
 
@@ -454,36 +413,24 @@ public class PropertiesSingleton {
     for (TreeMap.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
       if (!mDeviceProps.containsKey(entry.getKey())) {
         mDeviceProps.setProperty(entry.getKey(), entry.getValue());
-        dirtyProps = true;
+        updatedDeviceProps = true;
       }
     }
 
-    // scan for secure properties in the (syncable) app properties file.
-    // remove these and do not propagate them into SharedPreferences.
-    for (TreeMap.Entry<String, String> entry : mSecureDefaults.entrySet()) {
-      if (mGeneralProps.containsKey(entry.getKey())) {
-        mGeneralProps.remove(entry.getKey());
-        dirtyProps = true;
-      }
-    }
-
-    // Now, scan through the shared preferences.  These will only be available
-    // from within ODK Services. If we try to access them outside of that
-    // application, this will be a no-op.
-    SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-    if ( sharedPreferences != null ) {
+    // Now, scan through the secure defaults and assign them.  These will only be
+    // available from within ODK Services. If we try to access them outside of that
+    // application, this will be a skipped and all values return null.
+    if ( mHasSecureStorage ) {
       for (TreeMap.Entry<String, String> entry : mSecureDefaults.entrySet()) {
-        // NOTE: can't use the methods because this object is not yet fully created
-        if ( !sharedPreferences.contains(mAppName + "_" + entry.getKey()) ) {
-          sharedPreferences.edit()
-              .putString(mAppName + "_" + entry.getKey(), entry.getValue())
-              .commit();
+        if (!mSecureProps.containsKey(entry.getKey())) {
+          mSecureProps.setProperty(entry.getKey(), entry.getValue());
+          updatedSecureProps = true;
         }
       }
     }
 
-    if (dirtyProps) {
-      writeProperties();
+    if (updatedSecureProps || updatedDeviceProps || updatedSecureProps) {
+      writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
     }
   }
 
@@ -497,70 +444,116 @@ public class PropertiesSingleton {
     }
   }
 
-  public boolean isModified() {
-    File configFile;
-
-    configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), GENERAL_PROPERTIES_FILENAME);
-
-    if (configFile.exists()) {
-      if (lastGeneralModified != configFile.lastModified()) {
-        return true;
+  private int getCurrentRevision() {
+    int noResult = 0;
+    try {
+      File dataFolder = new File(ODKFileUtils.getDataFolder(mAppName));
+      String[] timestampNames = dataFolder.list(new FilenameFilter() {
+        @Override public boolean accept(File file, String s) {
+          return s.startsWith(PROPERTIES_REVISION_FILENAME);
+        }
+      });
+      if ( timestampNames == null ) {
+        return noResult;
       }
-    } else {
-      // doesn't exist -- ergo, it has changed.
-      return true;
-    }
+      int bestResult = noResult;
+      for ( String timestampName : timestampNames ) {
+        String suffix = timestampNames[timestampNames.length - 1].substring(PROPERTIES_REVISION_FILENAME.length());
+        if (suffix.length() <= 1) {
+          continue;
+        }
 
-    configFile = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
+        try {
+          // try to convert suffix to an int value
+          int result = Integer.valueOf(suffix.substring(1), 16);
 
-    if (configFile.exists()) {
-      if (lastDeviceModified != configFile.lastModified()) {
-        return true;
+          // is this value greater than all others?
+          if (result > bestResult) {
+            bestResult = result;
+          }
+        } catch ( NumberFormatException e) {
+          // ignore
+        }
       }
-    } else {
-      // doesn't exist -- ergo, it has changed.
-      return true;
+      // NOTE: If files cannot be deleted, we may pin at unchanged.
+      return bestResult;
+    } catch (Exception e) {
+      WebLogger.getLogger(mAppName).printStackTrace(e);
     }
-
-    return false;
+    return noResult;
   }
 
-  public void readProperties(boolean includingGlobalDeviceProps) {
-    verifyDirectories();
+  private int incrementAndWriteRevision(int oldRevision) {
+    ++oldRevision;
 
-    FileInputStream configFileInputStream = null;
+    String suffix = "." + Integer.toString(oldRevision, 16);
+    // write that file
+    FileOutputStream timestampOutputStream = null;
     try {
-      File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), GENERAL_PROPERTIES_FILENAME);
 
-      if (configFile.exists()) {
-        configFileInputStream = new FileInputStream(configFile);
-
-        mGeneralProps.loadFromXML(configFileInputStream);
-        lastGeneralModified = configFile.lastModified();
-      }
+      File timestampFile = new File(ODKFileUtils.getDataFolder(mAppName),
+          PROPERTIES_REVISION_FILENAME + suffix);
+      timestampOutputStream = new FileOutputStream(timestampFile);
+      timestampOutputStream.write(oldRevision);
+      timestampOutputStream.flush();
+      timestampOutputStream.close();
+      timestampOutputStream = null;
     } catch (Exception e) {
       WebLogger.getLogger(mAppName).printStackTrace(e);
     } finally {
-      if (configFileInputStream != null) {
+      if (timestampOutputStream != null) {
         try {
-          configFileInputStream.close();
+          timestampOutputStream.close();
         } catch (IOException e) {
           // ignore
           WebLogger.getLogger(mAppName).printStackTrace(e);
         }
       }
     }
+    // remove files other than the one we wrote
+    File dataFolder = new File(ODKFileUtils.getDataFolder(mAppName));
+    String[] timestampNames = dataFolder.list(new FilenameFilter() {
+      @Override public boolean accept(File file, String s) {
+        return s.startsWith(PROPERTIES_REVISION_FILENAME);
+      }
+    });
+    if ( timestampNames != null ) {
+      for ( String name : timestampNames ) {
+        if ( !name.equals(PROPERTIES_REVISION_FILENAME + suffix) ) {
+          File timestampFile = new File(dataFolder, name);
+          timestampFile.delete();
+        }
+      }
+    }
+    return oldRevision;
+  }
 
-    // read-only values
-    if ( includingGlobalDeviceProps ) {
-      configFileInputStream = null;
+  private void readPropertiesIfModified() {
+
+    int newRevision = getCurrentRevision();
+    if ( newRevision != currentRevision ) {
+      readProperties(false);
+    }
+
+  }
+
+  private void readProperties(boolean includingGlobalDeviceProps) {
+    verifyDirectories();
+
+    WebLogger.getLogger(mAppName).i("PropertiesSingleton",
+        "readProperties(" + includingGlobalDeviceProps + ")");
+
+    GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+    try {
+      // OK. Now access files...
+      FileInputStream configFileInputStream = null;
       try {
-        File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), DEFAULT_DEVICE_PROPERTIES_FILENAME);
+        File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), GENERAL_PROPERTIES_FILENAME);
 
         if (configFile.exists()) {
           configFileInputStream = new FileInputStream(configFile);
 
-          mGlobalDeviceProps.loadFromXML(configFileInputStream);
+          mGeneralProps.loadFromXML(configFileInputStream);
         }
       } catch (Exception e) {
         WebLogger.getLogger(mAppName).printStackTrace(e);
@@ -574,100 +567,185 @@ public class PropertiesSingleton {
           }
         }
       }
-    }
 
-    configFileInputStream = null;
-    try {
-      File configFile = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
-
-      if (configFile.exists()) {
-        configFileInputStream = new FileInputStream(configFile);
-
-        mDeviceProps.loadFromXML(configFileInputStream);
-        lastDeviceModified = configFile.lastModified();
-      }
-    } catch (Exception e) {
-      WebLogger.getLogger(mAppName).printStackTrace(e);
-    } finally {
-      if (configFileInputStream != null) {
+      // read-only values
+      if ( includingGlobalDeviceProps ) {
+        configFileInputStream = null;
         try {
-          configFileInputStream.close();
-        } catch (IOException e) {
-          // ignore
+          File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), DEFAULT_DEVICE_PROPERTIES_FILENAME);
+
+          if (configFile.exists()) {
+            configFileInputStream = new FileInputStream(configFile);
+
+            mGlobalDeviceProps.loadFromXML(configFileInputStream);
+          }
+        } catch (Exception e) {
           WebLogger.getLogger(mAppName).printStackTrace(e);
+        } finally {
+          if (configFileInputStream != null) {
+            try {
+              configFileInputStream.close();
+            } catch (IOException e) {
+              // ignore
+              WebLogger.getLogger(mAppName).printStackTrace(e);
+            }
+          }
         }
       }
+
+      configFileInputStream = null;
+      try {
+        File configFile = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
+
+        if (configFile.exists()) {
+          configFileInputStream = new FileInputStream(configFile);
+
+          mDeviceProps.loadFromXML(configFileInputStream);
+        }
+      } catch (Exception e) {
+        WebLogger.getLogger(mAppName).printStackTrace(e);
+      } finally {
+        if (configFileInputStream != null) {
+          try {
+            configFileInputStream.close();
+          } catch (IOException e) {
+            // ignore
+            WebLogger.getLogger(mAppName).printStackTrace(e);
+          }
+        }
+      }
+
+      configFileInputStream = null;
+      try {
+        File configFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME);
+
+        if (configFile.exists()) {
+          configFileInputStream = new FileInputStream(configFile);
+
+          mSecureProps.loadFromXML(configFileInputStream);
+        }
+      } catch (Exception e) {
+        WebLogger.getLogger(mAppName).printStackTrace(e);
+      } finally {
+        if (configFileInputStream != null) {
+          try {
+            configFileInputStream.close();
+          } catch (IOException e) {
+            // ignore
+            WebLogger.getLogger(mAppName).printStackTrace(e);
+          }
+        }
+      }
+
+      currentRevision = getCurrentRevision();
+
+    } finally {
+      theLock.release();
     }
   }
 
-  public void writeProperties() {
+  private void writeProperties(boolean updatedSecureProps, boolean updatedDeviceProps, boolean
+      updatedGeneralProps) {
     verifyDirectories();
 
+    GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
     try {
-      File tempConfigFile = new File(ODKFileUtils.getAssetsFolder(mAppName), GENERAL_PROPERTIES_FILENAME
-          + ".temp");
-      FileOutputStream configFileOutputStream = new FileOutputStream(tempConfigFile, false);
+      currentRevision = incrementAndWriteRevision(currentRevision);
 
-      mGeneralProps.storeToXML(configFileOutputStream, null, CharEncoding.UTF_8);
-      configFileOutputStream.close();
+      if ( updatedGeneralProps ) {
+        try {
+          File tempConfigFile = new File(ODKFileUtils.getAssetsFolder(mAppName),
+              GENERAL_PROPERTIES_FILENAME + ".temp");
+          FileOutputStream configFileOutputStream = new FileOutputStream(tempConfigFile, false);
 
-      File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), GENERAL_PROPERTIES_FILENAME);
+          mGeneralProps.storeToXML(configFileOutputStream, null, CharEncoding.UTF_8);
+          configFileOutputStream.close();
 
-      boolean fileSuccess = tempConfigFile.renameTo(configFile);
+          File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName),
+              GENERAL_PROPERTIES_FILENAME);
 
-      if (!fileSuccess) {
-        WebLogger.getLogger(mAppName).i(t, "Temporary General Config File Rename Failed!");
-      } else {
-        lastGeneralModified = configFile.lastModified();
+          boolean fileSuccess = tempConfigFile.renameTo(configFile);
+
+          if (!fileSuccess) {
+            WebLogger.getLogger(mAppName).i(t, "Temporary General Config File Rename Failed!");
+          }
+
+        } catch (Exception e) {
+          WebLogger.getLogger(mAppName).printStackTrace(e);
+        }
       }
 
-    } catch (Exception e) {
-      WebLogger.getLogger(mAppName).printStackTrace(e);
-    }
+      if ( updatedDeviceProps ) {
+        try {
+          File tempConfigFile = new File(ODKFileUtils.getDataFolder(mAppName),
+              DEVICE_PROPERTIES_FILENAME + ".temp");
+          FileOutputStream configFileOutputStream = new FileOutputStream(tempConfigFile, false);
 
-    try {
-      File tempConfigFile = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME
-          + ".temp");
-      FileOutputStream configFileOutputStream = new FileOutputStream(tempConfigFile, false);
+          mDeviceProps.storeToXML(configFileOutputStream, null, CharEncoding.UTF_8);
+          configFileOutputStream.close();
 
-      mDeviceProps.storeToXML(configFileOutputStream, null, CharEncoding.UTF_8);
-      configFileOutputStream.close();
+          File configFile = new File(ODKFileUtils.getDataFolder(mAppName),
+              DEVICE_PROPERTIES_FILENAME);
 
-      File configFile = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
+          boolean fileSuccess = tempConfigFile.renameTo(configFile);
 
-      boolean fileSuccess = tempConfigFile.renameTo(configFile);
+          if (!fileSuccess) {
+            WebLogger.getLogger(mAppName).i(t, "Temporary Device Config File Rename Failed!");
+          }
 
-      if (!fileSuccess) {
-        WebLogger.getLogger(mAppName).i(t, "Temporary Device Config File Rename Failed!");
-      } else {
-        lastDeviceModified = configFile.lastModified();
+        } catch (Exception e) {
+          WebLogger.getLogger(mAppName).printStackTrace(e);
+        }
       }
 
-    } catch (Exception e) {
-      WebLogger.getLogger(mAppName).printStackTrace(e);
+      if ( updatedSecureProps && mHasSecureStorage ) {
+        try {
+          File tempConfigFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME + ".temp");
+          FileOutputStream configFileOutputStream = new FileOutputStream(tempConfigFile, false);
+
+          mSecureProps.storeToXML(configFileOutputStream, null, CharEncoding.UTF_8);
+          configFileOutputStream.close();
+
+          File configFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME);
+
+          boolean fileSuccess = tempConfigFile.renameTo(configFile);
+
+          if (!fileSuccess) {
+            WebLogger.getLogger(mAppName).i(t, "Temporary Secure Config File Rename Failed!");
+          }
+
+        } catch (Exception e) {
+          WebLogger.getLogger(mAppName).printStackTrace(e);
+        }
+      }
+    } finally {
+      theLock.release();
     }
   }
 
   public void clearSettings() {
-    try {
-      File f;
-      f = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
-      if (f.exists()) {
-        f.delete();
-      }
 
-      // and now go through the shared preferences and delete any that pertain to this appName
-      SharedPreferences sharedPreferences = getSharedPreferences(mBaseContext);
-      if (sharedPreferences != null) {
-        Map<String, ?> allPreferences = sharedPreferences.getAll();
-        for (String key : allPreferences.keySet()) {
-          if (key.startsWith(mAppName + "_")) {
-            sharedPreferences.edit().remove(key).commit();
+    try {
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+      currentRevision = incrementAndWriteRevision(currentRevision);
+
+      try {
+        File f;
+        f = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
+        if (f.exists()) {
+          f.delete();
+        }
+
+        if ( mHasSecureStorage ) {
+          f = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME);
+          if (f.exists()) {
+            f.delete();
           }
         }
-      } else {
-        throw new IllegalStateException("Clearing settings should only be done within ODK Services");
+      } finally {
+        theLock.release();
       }
+
     } finally {
       init();
     }
