@@ -145,6 +145,24 @@ public class UserDbInterface {
       }
    }
 
+ /**
+   * Return the active user or "anonymous" if the user
+   * has not been authenticated against the server.
+   *
+   * @param appName
+   *
+   * @return the user reported from the server or "anonymous" if
+   * server authentication has not been completed.
+   */
+   public String getActiveUser(String appName) throws ServicesAvailabilityException {
+      try {
+         return dbInterface.getActiveUser(appName);
+      } catch ( Exception e ) {
+         rethrowAlwaysAllowedRemoteException(e);
+        throw new IllegalStateException("unreachable - keep IDE happy");
+      }
+   }
+
    /**
     * Return the roles and groups of a verified username or google account.
     * If the username or google account have not been verified,

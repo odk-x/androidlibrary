@@ -39,6 +39,17 @@ import org.opendatakit.database.data.KeyValueStoreEntry;
 */
 interface AidlDbInterface {
 
+ /**
+   * Return the active user or "anonymous" if the user
+   * has not been authenticated against the server.
+   *
+   * @param appName
+   *
+   * @return the user reported from the server or "anonymous" if
+   * server authentication has not been completed.
+   */
+  String getActiveUser(in String appName);
+
   /**
    * Return the roles and groups of a verified username or google account.
    * If the username or google account have not been verified,

@@ -29,6 +29,8 @@ public class CommonToolProperties {
    * CommonToolPropertiesSingletonFactory (opendatakit.properties)
    */
 
+  public static final String ANONYMOUS_USER = "anonymous";
+
    /*******************
     * Garbage 'properties' to control PreferencesCategories and PreferencesScreens
     */

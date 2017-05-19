@@ -303,17 +303,21 @@ public class PropertiesSingleton {
 
   public String getActiveUser() {
 
+    if ( !mHasSecureStorage ) {
+      throw new IllegalStateException("Unable to getActiveUser() outside of ODK Services -- "
+          + "Call UserDbbInterface.getActiveUser() to obtain this value");
+    }
     String activeUserName = null;
     String authType = getProperty(CommonToolProperties.KEY_AUTHENTICATION_TYPE);
     if (authType.equals(CREDENTIAL_TYPE_NONE)) {
-      activeUserName = "anonymous";
+      activeUserName = CommonToolProperties.ANONYMOUS_USER;
     } else if (authType.equals(CREDENTIAL_TYPE_USERNAME_PASSWORD)) {
       String name = getProperty(CommonToolProperties.KEY_USERNAME);
       String roles = getProperty(CommonToolProperties.KEY_ROLES_LIST);
       if (name != null && roles != null && roles.length() != 0) {
         activeUserName = "username:" + name;
       } else {
-        activeUserName = "anonymous";
+        activeUserName = CommonToolProperties.ANONYMOUS_USER;
       }
     } else if (authType.equals(CREDENTIAL_TYPE_GOOGLE_ACCOUNT)) {
       String name = getProperty(CommonToolProperties.KEY_ACCOUNT);
@@ -321,7 +325,7 @@ public class PropertiesSingleton {
       if (name != null && roles != null && roles.length() != 0) {
         activeUserName = "mailto:" + name;
       } else {
-        activeUserName = "anonymous";
+        activeUserName = CommonToolProperties.ANONYMOUS_USER;
       }
     } else {
       throw new IllegalStateException("unexpected authentication type!");
