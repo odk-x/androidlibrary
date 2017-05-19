@@ -17,11 +17,11 @@ package org.opendatakit.database.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import org.opendatakit.database.queries.BindArgs;
 import org.opendatakit.database.queries.ResumableQuery;
 import org.opendatakit.database.queries.QueryBounds;
 import org.opendatakit.database.utilities.MarshallUtil;
+import org.opendatakit.logging.WebLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -154,8 +154,8 @@ public class BaseTable implements Parcelable {
       mElementKeyForIndex = MarshallUtil.unmarshallStringArray(in);
       mElementKeyToIndex = generateElementKeyToIndex();
     } catch (Throwable t) {
-      Log.e(TAG, t.getMessage());
-      Log.e(TAG, Log.getStackTraceString(t));
+      WebLogger.getContextLogger().e(TAG, t.getMessage());
+      WebLogger.getContextLogger().printStackTrace(t);
       throw t;
     }
 
@@ -377,8 +377,8 @@ public class BaseTable implements Parcelable {
       MarshallUtil.marshallStringArray(out, mPrimaryKey);
       MarshallUtil.marshallStringArray(out, mElementKeyForIndex);
     } catch (Throwable t) {
-      Log.e(TAG, t.getMessage());
-      Log.e(TAG, Log.getStackTraceString(t));
+      WebLogger.getContextLogger().e(TAG, t.getMessage());
+      WebLogger.getContextLogger().printStackTrace(t);
       throw t;
     }
 

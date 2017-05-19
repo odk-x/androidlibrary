@@ -15,10 +15,7 @@
 
 package org.opendatakit.utilities;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -286,6 +283,17 @@ public class ODKFileUtils {
     }
   }
 
+  public static String getOdkFolder() {
+    String path = Environment.getExternalStorageDirectory() + File.separator + ODK_FOLDER_NAME;
+    return path;
+  }
+
+  public static String getAndroidObbFolder(String packageName) {
+    String path = Environment.getExternalStorageDirectory() + File.separator + "Android"
+        + File.separator + "obb" + File.separator + packageName;
+    return path;
+  }
+
   public static boolean createFolder(String path) {
     boolean made = true;
     File dir = new File(path);
@@ -293,11 +301,6 @@ public class ODKFileUtils {
       made = dir.mkdirs();
     }
     return made;
-  }
-
-  public static String getOdkFolder() {
-    String path = Environment.getExternalStorageDirectory() + File.separator + ODK_FOLDER_NAME;
-    return path;
   }
 
   public static String getOdkDefaultAppName() {
@@ -541,7 +544,8 @@ public class ODKFileUtils {
       String partialPath = fullpath.substring(path.length());
       String[] app = partialPath.split(File.separator);
       if (app == null || app.length < 1) {
-        Log.w(t, "Missing file path (nothing under '" + ODK_FOLDER_NAME + "'): " + fullpath);
+        WebLogger.getContextLogger().w(t, "Missing file path (nothing under '" + ODK_FOLDER_NAME + "'): " +
+            fullpath);
         return null;
       }
       return partialPath;
@@ -553,7 +557,7 @@ public class ODKFileUtils {
         ++i;
       }
       if (i == parts.length) {
-        Log.w(t, "File path is not under expected '" + ODK_FOLDER_NAME +
+        WebLogger.getContextLogger().w(t, "File path is not under expected '" + ODK_FOLDER_NAME +
             "' Folder (" + path + ") conversion failed for: " + fullpath);
         return null;
       }
@@ -566,13 +570,13 @@ public class ODKFileUtils {
       String partialPath = fullpath.substring(len);
       String[] app = partialPath.split(File.separator);
       if (app == null || app.length < 1) {
-        Log.w(t, "File path is not under expected '" + ODK_FOLDER_NAME +
+        WebLogger.getContextLogger().w(t, "File path is not under expected '" + ODK_FOLDER_NAME +
             "' Folder (" + path + ") missing file path (nothing under '" +
             ODK_FOLDER_NAME + "'): " + fullpath);
         return null;
       }
 
-      Log.w(t, "File path is not under expected '" + ODK_FOLDER_NAME +
+      WebLogger.getContextLogger().w(t, "File path is not under expected '" + ODK_FOLDER_NAME +
             "' Folder -- remapped " + fullpath + " as: " + path + partialPath);
       return partialPath;
     }
@@ -580,12 +584,6 @@ public class ODKFileUtils {
 
   public static String getAppFolder(String appName) {
     String path = getOdkFolder() + File.separator + appName;
-    return path;
-  }
-
-  public static String getAndroidObbFolder(String packageName) {
-    String path = Environment.getExternalStorageDirectory() + File.separator + "Android"
-        + File.separator + "obb" + File.separator + packageName;
     return path;
   }
 
@@ -1268,31 +1266,6 @@ public class ODKFileUtils {
       return null;
     }
 
-  }
-
-  public static Bitmap getBitmapScaledToDisplay(String appName, File f, int screenHeight, int screenWidth) {
-    // Determine image size of f
-    BitmapFactory.Options o = new BitmapFactory.Options();
-    o.inJustDecodeBounds = true;
-    BitmapFactory.decodeFile(f.getAbsolutePath(), o);
-
-    int heightScale = o.outHeight / screenHeight;
-    int widthScale = o.outWidth / screenWidth;
-
-    // Powers of 2 work faster, sometimes, according to the doc.
-    // We're just doing closest size that still fills the screen.
-    int scale = Math.max(widthScale, heightScale);
-
-    // get bitmap with scale ( < 1 is the same as 1)
-    BitmapFactory.Options options = new BitmapFactory.Options();
-    options.inSampleSize = scale;
-    Bitmap b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
-    if (b != null) {
-      WebLogger.getLogger(appName).i(t,
-          "Screen is " + screenHeight + "x" + screenWidth + ".  Image has been scaled down by "
-              + scale + " to " + b.getHeight() + "x" + b.getWidth());
-    }
-    return b;
   }
 
   public static String getXMLText(Node n, boolean trim) {

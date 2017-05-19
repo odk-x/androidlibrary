@@ -15,11 +15,9 @@
 package org.opendatakit.database.service;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteException;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.util.Log;
 
 import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.database.data.ColumnList;
@@ -31,12 +29,15 @@ import org.opendatakit.database.data.UserTable;
 import org.opendatakit.database.queries.BindArgs;
 import org.opendatakit.exception.ActionNotAuthorizedException;
 import org.opendatakit.exception.ServicesAvailabilityException;
+import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.database.data.BaseTable;
 import org.opendatakit.database.queries.ArbitraryQuery;
 import org.opendatakit.database.queries.ResumableQuery;
 import org.opendatakit.database.queries.SimpleQuery;
 import org.opendatakit.database.utilities.DbChunkUtil;
+
+import org.sqlite.database.sqlite.SQLiteException;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -2123,7 +2124,7 @@ public class UserDbInterface {
       try {
          return DbChunkUtil.rebuildFromChunks(aggregatedChunks, serializable);
       } catch (Exception e) {
-         Log.e(TAG, "Failed to rebuild serialized object from chunks");
+         WebLogger.getContextLogger().e(TAG, "Failed to rebuild serialized object from chunks");
          return null;
       }
    }

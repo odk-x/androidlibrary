@@ -392,7 +392,7 @@ public class PropertiesSingleton {
 
     // see if there are missing values in the general props
     // and update them from the mGeneralDefaults map.
-    for (TreeMap.Entry<String, String> entry : mGeneralDefaults.entrySet()) {
+    for (Map.Entry<String, String> entry : mGeneralDefaults.entrySet()) {
       if (!mGeneralProps.containsKey(entry.getKey())) {
         mGeneralProps.setProperty(entry.getKey(), entry.getValue());
         updatedGeneralProps = true;
@@ -401,7 +401,7 @@ public class PropertiesSingleton {
 
     // scan for device properties in the (syncable) device properties file.
     // update the provided mDeviceDefaults with these new default values.
-    for (TreeMap.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
+    for (Map.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
       if (mGlobalDeviceProps.containsKey(entry.getKey())) {
         entry.setValue(mGlobalDeviceProps.getProperty(entry.getKey()));
       }
@@ -409,7 +409,7 @@ public class PropertiesSingleton {
 
     // see if there are missing values in the device props
     // and update them from the mDeviceDefaults map.
-    for (TreeMap.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
+    for (Map.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
       if (!mDeviceProps.containsKey(entry.getKey())) {
         mDeviceProps.setProperty(entry.getKey(), entry.getValue());
         updatedDeviceProps = true;
@@ -420,7 +420,7 @@ public class PropertiesSingleton {
     // available from within ODK Services. If we try to access them outside of that
     // application, this will be a skipped and all values return null.
     if ( mHasSecureStorage ) {
-      for (TreeMap.Entry<String, String> entry : mSecureDefaults.entrySet()) {
+      for (Map.Entry<String, String> entry : mSecureDefaults.entrySet()) {
         if (!mSecureProps.containsKey(entry.getKey())) {
           mSecureProps.setProperty(entry.getKey(), entry.getValue());
           updatedSecureProps = true;
