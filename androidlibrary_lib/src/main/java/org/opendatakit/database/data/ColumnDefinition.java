@@ -446,6 +446,33 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.ROW_OWNER);
     //
     jsonSchema = new TreeMap<String, Object>();
+    model.put(DataTableColumns.GROUP_READ_ONLY, jsonSchema);
+    jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.GROUP_READ_ONLY);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.GROUP_READ_ONLY);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.GROUP_READ_ONLY);
+    //
+    jsonSchema = new TreeMap<String, Object>();
+    model.put(DataTableColumns.GROUP_MODIFY, jsonSchema);
+    jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.GROUP_MODIFY);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.GROUP_MODIFY);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.GROUP_MODIFY);
+    //
+    jsonSchema = new TreeMap<String, Object>();
+    model.put(DataTableColumns.GROUP_PRIVILEGED, jsonSchema);
+    jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
+    jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, DataTableColumns.GROUP_PRIVILEGED);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.GROUP_PRIVILEGED);
+    jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.GROUP_PRIVILEGED);
+    //
+    jsonSchema = new TreeMap<String, Object>();
     model.put(DataTableColumns.FORM_ID, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
