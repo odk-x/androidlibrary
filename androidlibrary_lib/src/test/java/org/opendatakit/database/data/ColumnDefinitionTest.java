@@ -1311,7 +1311,7 @@ public class ColumnDefinitionTest {
             assertEquals(value.containsKey("isNotNullable"), false);
          }
       }
-      assertEquals(metaCount, 11);
+      assertEquals(metaCount, 14);
    }
 
    @SuppressWarnings("unchecked")
