@@ -268,15 +268,16 @@ public class PropertiesSingleton {
   public void setAllRunInitializationTasks() {
     // this is stored in the device properties
     readPropertiesIfModified();
-    ArrayList<Object> keysToRemove = new ArrayList<Object>();
+    ArrayList<String> keysToRemove = new ArrayList<String>();
 
     for ( Object okey : mDeviceProps.keySet() ) {
-      if ( isToolInitializationPropertyName((String) okey) ) {
-        keysToRemove.add(okey);
+      String theKey = (String) okey;
+      if ( isToolInitializationPropertyName(theKey) ) {
+        keysToRemove.add(theKey);
       }
     }
-    for ( Object okey : keysToRemove ) {
-      mDeviceProps.remove(okey);
+    for ( String theKey : keysToRemove ) {
+      mDeviceProps.remove(theKey);
     }
     writeProperties(false, true, false);
   }
