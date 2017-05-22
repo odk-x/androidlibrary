@@ -33,6 +33,7 @@ import org.opendatakit.properties.PropertiesSingleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -90,37 +91,31 @@ public class PropertiesNonPrivilegedTest {
         StaticStateManipulator.get().reset();
         Context context = InstrumentationRegistry.getContext();
 
+        TreeMap<String,String> secureProperties = new TreeMap<String,String>();
+        CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
-        String[] secureKeys = {
-                CommonToolProperties.KEY_AUTH,
-                CommonToolProperties.KEY_PASSWORD,
-                CommonToolProperties.KEY_ROLES_LIST,
-                CommonToolProperties.KEY_DEFAULT_GROUP,
-                CommonToolProperties.KEY_USERS_LIST,
-                CommonToolProperties.KEY_ADMIN_PW
-        };
 
-        for ( int i = 0 ; i < secureKeys.length ; ++i ) {
+        for ( String secureKey : secureProperties.keySet() ) {
             // this is stored in SharedPreferences
             boolean threwError = false;
             try {
-                props.setProperties(Collections.singletonMap(secureKeys[i], "asdf"));
+                props.setProperties(Collections.singletonMap(secureKey, "asdf"));
             } catch (IllegalStateException e) {
                 threwError = true;
             }
 
-            assertTrue("set: " + secureKeys[i], threwError);
+            assertTrue("set: " + secureKey, threwError);
 
             // and verify remove doesn't do anything
             threwError = false;
             try {
                 String value = null;
-                props.setProperties(Collections.singletonMap(secureKeys[i], value));
+                props.setProperties(Collections.singletonMap(secureKey, value));
             } catch (IllegalStateException e) {
                 threwError = true;
             }
 
-            assertTrue("remove: " + secureKeys[i], threwError);
+            assertTrue("remove: " + secureKey, threwError);
 
         }
     }
@@ -134,15 +129,22 @@ public class PropertiesNonPrivilegedTest {
         StaticStateManipulator.get().reset();
         Context context = InstrumentationRegistry.getContext();
 
+        TreeMap<String,String> secureProperties = new TreeMap<String,String>();
+        CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
-        // this is stored in SharedPreferences
-        // always return null
-        assertEquals(props.getProperty(CommonToolProperties.KEY_AUTH), null);
-        assertEquals(props.getProperty(CommonToolProperties.KEY_PASSWORD), null);
-        assertEquals(props.getProperty(CommonToolProperties.KEY_ROLES_LIST), null);
-        assertEquals(props.getProperty(CommonToolProperties.KEY_DEFAULT_GROUP), null);
-        assertEquals(props.getProperty(CommonToolProperties.KEY_USERS_LIST), null);
-        assertEquals(props.getProperty(CommonToolProperties.KEY_ADMIN_PW), null);
+
+        for ( String secureKey : secureProperties.keySet() ) {
+            // this is stored in SharedPreferences
+            // always throws an exception
+            boolean threwError = false;
+            try {
+                props.getProperty(secureKey);
+            } catch (IllegalStateException e) {
+                threwError = true;
+            }
+
+            assertTrue("get: " + secureKey, threwError);
+        }
     }
 
 }

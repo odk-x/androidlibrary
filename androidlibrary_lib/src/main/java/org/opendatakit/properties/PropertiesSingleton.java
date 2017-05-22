@@ -79,9 +79,9 @@ public class PropertiesSingleton {
   private final String mAppName;
   private final boolean mHasSecureStorage;
   private final File mSecureStorageDir;
-  private final String CREDENTIAL_TYPE_NONE;
-  private final String CREDENTIAL_TYPE_USERNAME_PASSWORD;
-  private final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT;
+  public final String CREDENTIAL_TYPE_NONE;
+  public final String CREDENTIAL_TYPE_USERNAME_PASSWORD;
+  public final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT;
 
   private int currentRevision = invalidRevision();
 
@@ -127,7 +127,8 @@ public class PropertiesSingleton {
     readPropertiesIfModified();
     if (isSecureProperty(propertyName)) {
       if ( !mHasSecureStorage ) {
-        return null;
+        throw new IllegalStateException("Attempt to retrieve secured property " + propertyName +
+           " outside of ODK Services");
       }
       return mSecureProps.getProperty(propertyName);
     } else if (isDeviceProperty(propertyName) ) {
@@ -262,19 +263,6 @@ public class PropertiesSingleton {
   }
 
   /**
-   * Indicate that the initialization task for this given tool should be run
-   * (again).
-   *
-   * @param toolName
-   */
-  public void setRunInitializationTask(String toolName) {
-    // this is stored in the device properties
-    readPropertiesIfModified();
-    mDeviceProps.remove(toolInitializationPropertyName(toolName));
-    writeProperties(false, true, false);
-  }
-
-  /**
    * Indicate that all initialization tasks for all tools should be run (again).
    */
   public void setAllRunInitializationTasks() {
@@ -291,46 +279,6 @@ public class PropertiesSingleton {
       mDeviceProps.remove(okey);
     }
     writeProperties(false, true, false);
-  }
-
-  public void clearActiveUser() {
-    Map<String,String> properties = new HashMap<String,String>();
-    properties.put(CommonToolProperties.KEY_ROLES_LIST, "");
-    properties.put(CommonToolProperties.KEY_DEFAULT_GROUP, "");
-
-    setProperties(properties);
-  }
-
-  public String getActiveUser() {
-
-    if ( !mHasSecureStorage ) {
-      throw new IllegalStateException("Unable to getActiveUser() outside of ODK Services -- "
-          + "Call UserDbbInterface.getActiveUser() to obtain this value");
-    }
-    String activeUserName = null;
-    String authType = getProperty(CommonToolProperties.KEY_AUTHENTICATION_TYPE);
-    if (authType.equals(CREDENTIAL_TYPE_NONE)) {
-      activeUserName = CommonToolProperties.ANONYMOUS_USER;
-    } else if (authType.equals(CREDENTIAL_TYPE_USERNAME_PASSWORD)) {
-      String name = getProperty(CommonToolProperties.KEY_USERNAME);
-      String roles = getProperty(CommonToolProperties.KEY_ROLES_LIST);
-      if (name != null && roles != null && roles.length() != 0) {
-        activeUserName = "username:" + name;
-      } else {
-        activeUserName = CommonToolProperties.ANONYMOUS_USER;
-      }
-    } else if (authType.equals(CREDENTIAL_TYPE_GOOGLE_ACCOUNT)) {
-      String name = getProperty(CommonToolProperties.KEY_ACCOUNT);
-      String roles = getProperty(CommonToolProperties.KEY_ROLES_LIST);
-      if (name != null && roles != null && roles.length() != 0) {
-        activeUserName = "mailto:" + name;
-      } else {
-        activeUserName = CommonToolProperties.ANONYMOUS_USER;
-      }
-    } else {
-      throw new IllegalStateException("unexpected authentication type!");
-    }
-    return activeUserName;
   }
 
   /**

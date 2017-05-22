@@ -125,54 +125,55 @@ public class CommonToolProperties {
     // Set default values as necessary
     
     // the properties managed through the general settings pages.
+    if ( generalProperties != null ) {
+      generalProperties.put(KEY_SYNC_SERVER_URL, context.getString(R.string.default_sync_server_url));
 
-    generalProperties.put(KEY_SYNC_SERVER_URL,
-       context.getString(R.string.default_sync_server_url));
+      generalProperties.put(KEY_FONT_SIZE, Integer.toString(DEFAULT_FONT_SIZE));
+      generalProperties.put(KEY_SHOW_SPLASH, "true");
+      generalProperties.put(KEY_SPLASH_PATH, "ODK Default");
 
-    generalProperties.put(KEY_FONT_SIZE, Integer.toString(DEFAULT_FONT_SIZE));
-    generalProperties.put(KEY_SHOW_SPLASH, "true");
-    generalProperties.put(KEY_SPLASH_PATH, "ODK Default");
+      // the properties that are managed through the admin settings pages.
 
-    // the properties that are managed through the admin settings pages.
+      generalProperties.put(KEY_CHANGE_SYNC_SERVER, "true");
 
-    generalProperties.put(KEY_CHANGE_SYNC_SERVER, "true");
+      generalProperties.put(KEY_CHANGE_AUTHENTICATION_TYPE, "true");
+      generalProperties.put(KEY_CHANGE_GOOGLE_ACCOUNT, "true");
+      generalProperties.put(KEY_CHANGE_USERNAME_PASSWORD, "true");
 
-    generalProperties.put(KEY_CHANGE_AUTHENTICATION_TYPE, "true");
-    generalProperties.put(KEY_CHANGE_GOOGLE_ACCOUNT, "true");
-    generalProperties.put(KEY_CHANGE_USERNAME_PASSWORD, "true");
-
-    generalProperties.put(KEY_CHANGE_FONT_SIZE, "true");
-    generalProperties.put(KEY_CHANGE_SPLASH_SETTINGS, "true");
-
+      generalProperties.put(KEY_CHANGE_FONT_SIZE, "true");
+      generalProperties.put(KEY_CHANGE_SPLASH_SETTINGS, "true");
+    }
     // device properties can be set on a per-device basis and are not
     // over-written by the server configuration. Admins can manually set
     // these via the generalProperties; that is not secure as these values
     // will be left in the syncable file.
-
-    deviceProperties.put(KEY_AUTHENTICATION_TYPE, "none");
-    deviceProperties.put(KEY_ACCOUNT, "");
-    deviceProperties.put(KEY_USERNAME, "");
-    deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("survey"), "");
-    deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("scan"), "");
-    deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("tables"), "");
-    deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("sensors"), "");
-    deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("survey"), "");
-    deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("scan"), "");
-    deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("tables"), "");
-    deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("sensors"), "");
-
+    if ( deviceProperties != null ) {
+      deviceProperties.put(KEY_AUTHENTICATION_TYPE, "none");
+      deviceProperties.put(KEY_ACCOUNT, "");
+      deviceProperties.put(KEY_USERNAME, "");
+      deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("survey"), "");
+      deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("scan"), "");
+      deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("tables"), "");
+      deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("sensors"), "");
+      deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("survey"), "");
+      deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("scan"), "");
+      deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("tables"), "");
+      deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("sensors"), "");
+    }
     // handle the secure properties. If these are in the incoming syncable general
     // property file, those values will be used to initialize these fields (if there is not an
     // existing value set for them). BUT: they won't be removed from that syncable file.
     //
     // I.e., that is a lazy way to distribute these values, but it is not robustly secure.
     //
-    secureProperties.put(KEY_AUTH, "");
-    secureProperties.put(KEY_PASSWORD, "");
-    secureProperties.put(KEY_DEFAULT_GROUP, "");
-    secureProperties.put(KEY_ROLES_LIST, "");
-    secureProperties.put(KEY_USERS_LIST, "");
-    secureProperties.put(KEY_ADMIN_PW, "");
+    if ( secureProperties != null ) {
+      secureProperties.put(KEY_AUTH, "");
+      secureProperties.put(KEY_PASSWORD, "");
+      secureProperties.put(KEY_DEFAULT_GROUP, "");
+      secureProperties.put(KEY_ROLES_LIST, "");
+      secureProperties.put(KEY_USERS_LIST, "");
+      secureProperties.put(KEY_ADMIN_PW, "");
+    }
   }
 
   private static class CommonPropertiesSingletonFactory extends PropertiesSingletonFactory {
