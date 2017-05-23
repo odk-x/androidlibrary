@@ -410,7 +410,7 @@ public class PropertiesSingleton {
       }
       int bestResult = noResult;
       for ( String timestampName : timestampNames ) {
-        String suffix = timestampNames[timestampNames.length - 1].substring(PROPERTIES_REVISION_FILENAME.length());
+        String suffix = timestampName.substring(PROPERTIES_REVISION_FILENAME.length());
         if (suffix.length() <= 1) {
           continue;
         }
