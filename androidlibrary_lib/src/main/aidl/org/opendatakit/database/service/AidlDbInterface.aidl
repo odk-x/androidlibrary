@@ -640,12 +640,11 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues  server's field values for this row
    * @param rowId
    */
   DbChunk privilegedPerhapsPlaceRowIntoConflictWithId(in String appName, in DbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues,
+      in String tableId, in ContentValues cvValues,
       in String rowId);
 
   /**
@@ -659,13 +658,12 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the inserted row
    */
   DbChunk privilegedInsertRowWithId(in String appName, in DbHandle dbHandleName,
-  	  in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId,
+  	  in String tableId, in ContentValues cvValues, in String rowId,
   	  boolean asCsvRequestedChange);
 
 
@@ -678,13 +676,12 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the inserted checkpoint
    */
   DbChunk insertCheckpointRowWithId(in String appName, in DbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+      in String tableId, in ContentValues cvValues, in String rowId);
 
   /**
    * Insert the given rowId with the values in the cvValues. If certain metadata
@@ -697,13 +694,12 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the inserted row
    */
   DbChunk insertRowWithId(in String appName, in DbHandle dbHandleName,
-  	  in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+  	  in String tableId, in ContentValues cvValues, in String rowId);
 
 
   /**
@@ -715,7 +711,6 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    */
   DbChunk deleteAllCheckpointRowsWithId(in String appName, in DbHandle dbHandleName,
@@ -817,14 +812,13 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
   DbChunk updateRowWithId(in String appName, in DbHandle dbHandleName,
       in String tableId,
-      in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+      in ContentValues cvValues, in String rowId);
 
   /**
    * Delete the local and server conflict records to resolve a server conflict

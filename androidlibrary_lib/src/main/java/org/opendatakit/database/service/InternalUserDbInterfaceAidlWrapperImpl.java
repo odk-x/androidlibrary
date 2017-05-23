@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 University of Washington
+ * Copyright (C) 2017 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -15,49 +15,121 @@
 package org.opendatakit.database.service;
 
 import android.content.ContentValues;
-import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
+import android.os.ParcelUuid;
+import android.os.Parcelable;
+import android.os.RemoteException;
 import org.opendatakit.database.data.*;
-import org.opendatakit.database.queries.ArbitraryQuery;
-import org.opendatakit.database.queries.BindArgs;
-import org.opendatakit.database.queries.ResumableQuery;
-import org.opendatakit.database.queries.SimpleQuery;
+import org.opendatakit.database.queries.*;
+import org.opendatakit.database.utilities.DbChunkUtil;
 import org.opendatakit.exception.ActionNotAuthorizedException;
 import org.opendatakit.exception.ServicesAvailabilityException;
-import org.opendatakit.provider.DataTableColumns;
+import org.opendatakit.logging.WebLogger;
+import org.sqlite.database.sqlite.SQLiteException;
 
-import java.util.HashMap;
+import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-public class UserDbInterfaceImpl implements UserDbInterface {
+/**
+ * Wrapper for the Aidl DbChunk and Exception pass-through interface that presents
+ * an InternalUserDbInterface to the client-side database API wrapper which exposes
+ * the more useable UserDbInterface.
+ *
+ * @author mitchellsundt@gmail.com
+ */
+public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInterface {
 
-  private static final String TAG = UserDbInterfaceImpl.class.getSimpleName();
+  private static final String TAG = InternalUserDbInterfaceAidlWrapperImpl.class.getSimpleName();
 
-  private final InternalUserDbInterface internalUserDbInterface;
+  private AidlDbInterface dbInterface;
 
-  private Map<String, TableMetaDataEntries> metaDataCache;
-
-  private String[] internalAdminColumns;
-
-  public UserDbInterfaceImpl(InternalUserDbInterface internalUserDbInterface) throws IllegalArgumentException {
-    if (internalUserDbInterface == null) {
+  public InternalUserDbInterfaceAidlWrapperImpl(AidlDbInterface dbInterface) throws IllegalArgumentException {
+    if (dbInterface == null) {
       throw new IllegalArgumentException("Database Interface must not be null");
     }
 
-    this.internalUserDbInterface = internalUserDbInterface;
-    this.metaDataCache = new HashMap<>();
+    this.dbInterface = dbInterface;
   }
 
-  public InternalUserDbInterface getInternalUserDbInterface() {
-    return internalUserDbInterface;
+  public AidlDbInterface getDbInterface() {
+    return dbInterface;
   }
 
-  private String[] internalGetAdminColumns() throws ServicesAvailabilityException {
-    if ( internalAdminColumns != null ) {
-      return internalAdminColumns;
+  public void setDbInterface(AidlDbInterface dbInterface) {
+    if (dbInterface == null) {
+      throw new IllegalArgumentException("Database Interface must not be null");
+    }
+
+    this.dbInterface = dbInterface;
+  }
+
+  private void rethrowNotAuthorizedRemoteException(Exception e)
+      throws IllegalArgumentException, IllegalStateException, SQLiteException,
+      ActionNotAuthorizedException, ServicesAvailabilityException {
+    if ((e instanceof IllegalStateException) || (e instanceof RemoteException)) {
+      String prefix = "via RemoteException on AidlDbInterface: ";
+      String msg = e.getMessage();
+      int idx = msg.indexOf(':');
+      if (idx == -1) {
+        throw new ServicesAvailabilityException(prefix + msg);
+      }
+      String exceptionName = msg.substring(0, idx);
+      String message = msg.substring(idx + 2);
+      if (!exceptionName.startsWith("org.opendatakit|")) {
+        throw new ServicesAvailabilityException(prefix + msg);
+      }
+      exceptionName = exceptionName.substring(exceptionName.indexOf('|') + 1);
+      if (exceptionName.equals(ActionNotAuthorizedException.class.getName())) {
+        throw new ActionNotAuthorizedException(prefix + message);
+      }
+      if (exceptionName.equals(IllegalArgumentException.class.getName())) {
+        throw new IllegalArgumentException(prefix + message);
+      }
+      if (exceptionName.equals(SQLiteException.class.getName())) {
+        throw new SQLiteException(prefix + message);
+      }
+      // should only throw illegal argument exceptions.
+      // anything else is not properly detected in the server layer
+      throw new IllegalStateException(prefix + msg);
     } else {
-      internalAdminColumns = getAdminColumns();
-      return internalAdminColumns;
+      throw new IllegalStateException(
+          "not IllegalStateException or RemoteException on AidlDbInterface: " + e.getClass()
+              .getName() + ": " + e.toString());
+    }
+  }
+
+  private void rethrowAlwaysAllowedRemoteException(Exception e)
+      throws IllegalArgumentException, IllegalStateException, SQLiteException,
+      ServicesAvailabilityException {
+    if ((e instanceof IllegalStateException) || (e instanceof RemoteException)) {
+      String prefix = "via RemoteException on AidlDbInterface: ";
+      String msg = e.getMessage();
+      if (msg == null) {
+        throw new IllegalStateException(prefix + e.toString());
+      }
+      int idx = msg.indexOf(':');
+      if (idx == -1) {
+        throw new ServicesAvailabilityException(prefix + msg);
+      }
+      String exceptionName = msg.substring(0, idx);
+      String message = msg.substring(idx + 2);
+      if (!exceptionName.startsWith("org.opendatakit|")) {
+        throw new ServicesAvailabilityException(prefix + msg);
+      }
+      exceptionName = exceptionName.substring(exceptionName.indexOf('|') + 1);
+      if (exceptionName.equals(IllegalArgumentException.class.getName())) {
+        throw new IllegalArgumentException(prefix + message);
+      }
+      if (exceptionName.equals(SQLiteException.class.getName())) {
+        throw new SQLiteException(prefix + message);
+      }
+      // should only throw illegal argument exceptions.
+      // anything else is not properly detected in the server layer
+      throw new IllegalStateException(prefix + msg);
+    } else {
+      throw new IllegalStateException(
+          "not IllegalStateException or RemoteException on AidlDbInterface: " + e.getClass()
+              .getName() + ": " + e.toString());
     }
   }
 
@@ -71,8 +143,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public String getActiveUser(String appName) throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getActiveUser(appName);
+    try {
+      return dbInterface.getActiveUser(appName);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -86,8 +162,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public String getRolesList(String appName) throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getRolesList(appName);
+    try {
+      return dbInterface.getRolesList(appName);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -99,8 +179,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public String getDefaultGroup(String appName) throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getDefaultGroup(appName);
+    try {
+      return dbInterface.getDefaultGroup(appName);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -116,8 +200,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public String getUsersList(String appName) throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getUsersList(appName);
+    try {
+      return dbInterface.getUsersList(appName);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -128,8 +216,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public DbHandle openDatabase(String appName) throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.openDatabase(appName);
+    try {
+      return dbInterface.openDatabase(appName);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -142,8 +234,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public void closeDatabase(String appName, DbHandle dbHandleName)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface.closeDatabase(appName, dbHandleName);
+    try {
+      dbInterface.closeDatabase(appName, dbHandleName);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -165,8 +261,14 @@ public class UserDbInterfaceImpl implements UserDbInterface {
       tableId = "L_" + tableId;
     }
 
-    return internalUserDbInterface
-        .createLocalOnlyTableWithColumns(appName, dbHandleName, tableId, columns);
+    try {
+      return fetchAndRebuildChunks(
+          dbInterface.createLocalOnlyTableWithColumns(appName, dbHandleName, tableId, columns),
+          OrderedColumns.CREATOR);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -185,8 +287,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
       tableId = "L_" + tableId;
     }
 
-    internalUserDbInterface
-        .deleteLocalOnlyTable(appName, dbHandleName, tableId);
+    try {
+      dbInterface.deleteLocalOnlyTable(appName, dbHandleName, tableId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -206,8 +312,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
       tableId = "L_" + tableId;
     }
 
-    internalUserDbInterface
-        .insertLocalOnlyRow(appName, dbHandleName, tableId, rowValues);
+    try {
+      dbInterface.insertLocalOnlyRow(appName, dbHandleName, tableId, rowValues);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -223,16 +333,20 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public void updateLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
-                                 ContentValues rowValues, String whereClause, Object[] bindArgs)
+                                 ContentValues rowValues, String whereClause, BindArgs bindArgs)
       throws ServicesAvailabilityException {
 
     if (!tableId.startsWith("L_")) {
       tableId = "L_" + tableId;
     }
 
-    internalUserDbInterface
-        .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause,
-          new BindArgs(bindArgs));
+    try {
+      dbInterface.updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause,
+          bindArgs);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -247,105 +361,20 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public void deleteLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
-                                 String whereClause, Object[] bindArgs)
+                                 String whereClause, BindArgs bindArgs)
       throws ServicesAvailabilityException {
 
     if (!tableId.startsWith("L_")) {
       tableId = "L_" + tableId;
     }
 
-    internalUserDbInterface
-          .deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, new BindArgs(bindArgs));
-  }
-
-  /**
-   * Get a {@link BaseTable} for this local only table based on the given SQL command. All
-   * columns from the table are returned.
-   * <p>
-   * If any of the clause parts are omitted (null), then the appropriate
-   * simplified SQL statement is constructed.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param whereClause       the whereClause for the selection, beginning with "WHERE". Must
-   *                          include "?" instead of actual values, which are instead passed in
-   *                          the selectionArgs.
-   * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
-   *                          bind parameters
-   * @param groupBy           an array of elementKeys
-   * @param having
-   * @param orderByColNames   array of columns to order the results by
-   * @param orderByDirections either "ASC" or "DESC", corresponding to each column name
-   * @param limit             the maximum number of rows to return
-   * @param offset            the index to start counting the limit from
-   * @return A {@link UserTable} containing the results of the query
-   * @throws ServicesAvailabilityException
-   */
-  @Override
-  public BaseTable simpleQueryLocalOnlyTables(String appName, DbHandle dbHandleName, String tableId,
-                                              String whereClause, Object[] bindArgs,
-                                              String[] groupBy, String having,
-                                              String[] orderByColNames, String[] orderByDirections,
-                                              Integer limit, Integer offset)
-      throws ServicesAvailabilityException {
-
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
+    try {
+      dbInterface
+          .deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, bindArgs);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
     }
-
-    return simpleQuery(appName, dbHandleName, tableId, whereClause, bindArgs, groupBy, having,
-        orderByColNames, orderByDirections, limit, offset);
-  }
-
-  /**
-   * Get a {@link BaseTable} for the result set of an arbitrary sql query
-   * and bind parameters on this local only table.
-   * <p>
-   * The sql query can be arbitrarily complex and can include joins, unions, etc.
-   * The data are returned as string values.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param sqlCommand
-   * @param bindArgs     an array of primitive values (String, Boolean, int, double) for
-   *                     bind parameters
-   * @param limit        the maximum number of rows to return (optional)
-   * @param offset       the index to start counting the limit from (optional)
-   * @return An  {@link BaseTable}. Containing the results of the query
-   * @throws ServicesAvailabilityException
-   */
-  @Override
-  public BaseTable arbitrarySqlQueryLocalOnlyTables(String appName, DbHandle dbHandleName,
-                                                    String tableId, String sqlCommand,
-                                                    Object[] bindArgs, Integer limit,
-                                                    Integer offset)
-      throws ServicesAvailabilityException {
-
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
-
-    return arbitrarySqlQuery(appName, dbHandleName, tableId, sqlCommand, bindArgs, limit, offset);
-  }
-
-  /**
-   * Get a {@link BaseTable} that holds the results from the continued query. Note that this is
-   * just a wrapper of resumeSimpleQuery, which could successfully be used instead.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param query        The original query with the bounds adjusted
-   * @return
-   * @throws ServicesAvailabilityException
-   */
-  @Override
-  public BaseTable resumeSimpleQueryLocalOnlyTables(String appName, DbHandle dbHandleName,
-                                                    ResumableQuery query)
-      throws ServicesAvailabilityException {
-
-    return resumeSimpleQuery(appName, dbHandleName, query);
   }
 
   /**
@@ -394,10 +423,13 @@ public class UserDbInterfaceImpl implements UserDbInterface {
                                                      String tableId, String schemaETag,
                                                      String tableInstanceFilesUri)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface
-        .privilegedServerTableSchemaETagChanged(appName, dbHandleName, tableId, schemaETag,
+    try {
+      dbInterface.privilegedServerTableSchemaETagChanged(appName, dbHandleName, tableId, schemaETag,
           tableInstanceFilesUri);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -413,9 +445,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public String setChoiceList(String appName, DbHandle dbHandleName, String choiceListJSON)
       throws ServicesAvailabilityException {
-
-    return internalUserDbInterface
-        .setChoiceList(appName, dbHandleName, choiceListJSON);
+    try {
+      return dbInterface.setChoiceList(appName, dbHandleName, choiceListJSON);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -429,9 +464,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public String getChoiceList(String appName, DbHandle dbHandleName, String choiceListId)
       throws ServicesAvailabilityException {
-
-    return internalUserDbInterface
-        .getChoiceList(appName, dbHandleName, choiceListId);
+    try {
+      return dbInterface.getChoiceList(appName, dbHandleName, choiceListId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -451,9 +489,14 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public OrderedColumns createOrOpenTableWithColumns(String appName, DbHandle dbHandleName,
                                                      String tableId, ColumnList columns)
       throws ServicesAvailabilityException {
-
-    return internalUserDbInterface
-        .createOrOpenTableWithColumns(appName, dbHandleName, tableId, columns);
+    try {
+      return fetchAndRebuildChunks(
+          dbInterface.createOrOpenTableWithColumns(appName, dbHandleName, tableId, columns),
+          OrderedColumns.CREATOR);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -482,11 +525,14 @@ public class UserDbInterfaceImpl implements UserDbInterface {
                                                                   List<KeyValueStoreEntry> metaData,
                                                                   boolean clear)
       throws ServicesAvailabilityException {
-
-
-    return internalUserDbInterface
+    try {
+      return fetchAndRebuildChunks(dbInterface
           .createOrOpenTableWithColumnsAndProperties(appName, dbHandleName, tableId, columns,
-              metaData, clear);
+              metaData, clear), OrderedColumns.CREATOR);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -500,8 +546,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public void deleteTableAndAllData(String appName, DbHandle dbHandleName, String tableId)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface.deleteTableAndAllData(appName, dbHandleName, tableId);
+    try {
+      dbInterface.deleteTableAndAllData(appName, dbHandleName, tableId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -519,8 +569,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void deleteTableMetadata(String appName, DbHandle dbHandleName, String tableId,
                                   String partition, String aspect, String key)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface.deleteTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
+    try {
+      dbInterface.deleteTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -531,8 +585,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public String[] getAdminColumns() throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getAdminColumns();
+    try {
+      return fetchAndRebuildChunks(dbInterface.getAdminColumns(), String[].class);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -549,8 +607,13 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public String[] getAllColumnNames(String appName, DbHandle dbHandleName, String tableId)
       throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getAllColumnNames(appName, dbHandleName, tableId);
+    try {
+      return fetchAndRebuildChunks(dbInterface.getAllColumnNames(appName, dbHandleName, tableId),
+          String[].class);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -564,8 +627,14 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @SuppressWarnings("unchecked")
   public List<String> getAllTableIds(String appName, DbHandle dbHandleName)
       throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getAllTableIds(appName, dbHandleName);
+    try {
+      Serializable result = fetchAndRebuildChunks(dbInterface.getAllTableIds(appName, dbHandleName),
+          Serializable.class);
+      return (List<String>) result;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -579,35 +648,20 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public TableMetaDataEntries getTableMetadata(String appName, DbHandle dbHandleName,
-                                               String tableId, String partition, String aspect,
-                                               String key, String revId)
+  public TableMetaDataEntries getTableMetadata(String appName, DbHandle dbHandleName, String tableId,
+                                               String partition, String aspect, String key)
       throws ServicesAvailabilityException {
 
     TableMetaDataEntries entries = null;
 
-    if (tableId == null) {
-      // Ignore the cache, as it only caches table specific metadata
-      entries = internalUserDbInterface.getTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
-    } else {
-      TableMetaDataEntries allEntries = metaDataCache.get(tableId);
-
-      if (allEntries == null) {
-        // If there is no cache hit, fetch from the database
-        allEntries = internalUserDbInterface.getTableMetadata(appName, dbHandleName, tableId, null, null, null);
-        metaDataCache.put(tableId, allEntries);
-      } else {
-        // If there is a cache hit, check if it is stale
-        TableMetaDataEntries newEntries = internalUserDbInterface
-                .getTableMetadataIfChanged(appName, dbHandleName, tableId, allEntries.getRevId());
-        if (!newEntries.getRevId().equals(allEntries.getRevId())) {
-          metaDataCache.put(tableId, newEntries);
-          allEntries = newEntries;
-        }
-      }
-
-      // Filter the requested entries from the full list
-      entries = filterEntries(allEntries, partition, aspect, key);
+    try {
+      entries = fetchAndRebuildChunks(
+          dbInterface.getTableMetadata(appName, dbHandleName, tableId, partition, aspect, key),
+          TableMetaDataEntries.CREATOR);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      WebLogger.getLogger(appName).printStackTrace(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
     }
 
     if (entries == null) {
@@ -616,6 +670,38 @@ public class UserDbInterfaceImpl implements UserDbInterface {
     }
     return entries;
 
+  }
+
+  /**
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @param revId
+   * @return list of KeyValueStoreEntry values if changed
+   */
+  @Override
+  public TableMetaDataEntries getTableMetadataIfChanged(String appName, DbHandle dbHandleName,
+                                                        String tableId, String revId)
+      throws ServicesAvailabilityException {
+
+    TableMetaDataEntries entries = null;
+
+    try {
+      // If there is a cache hit, check if it is stale
+      entries = fetchAndRebuildChunks(dbInterface
+              .getTableMetadataIfChanged(appName, dbHandleName, tableId, revId),
+          TableMetaDataEntries.CREATOR);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      WebLogger.getLogger(appName).printStackTrace(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+
+    if (entries == null) {
+      // Do not return null. API is expected to return an empty list if no results are found.
+      entries = new TableMetaDataEntries(tableId, null);
+    }
+    return entries;
   }
 
   private TableMetaDataEntries filterEntries(TableMetaDataEntries allEntries, String partition,
@@ -644,8 +730,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public String[] getExportColumns() throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getExportColumns();
+    try {
+      return fetchAndRebuildChunks(dbInterface.getExportColumns(), String[].class);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -662,8 +752,14 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public TableDefinitionEntry getTableDefinitionEntry(String appName, DbHandle dbHandleName,
                                                       String tableId)
       throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getTableDefinitionEntry(appName, dbHandleName, tableId);
+    try {
+      return fetchAndRebuildChunks(
+          dbInterface.getTableDefinitionEntry(appName, dbHandleName, tableId),
+          TableDefinitionEntry.CREATOR);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -677,8 +773,15 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @SuppressWarnings("unchecked")
   public List<TableHealthInfo> getTableHealthStatuses(String appName, DbHandle dbHandleName)
       throws ServicesAvailabilityException {
+    try {
+      Serializable results = fetchAndRebuildChunks(
+          dbInterface.getTableHealthStatuses(appName, dbHandleName), Serializable.class);
 
-    return internalUserDbInterface.getTableHealthStatuses(appName, dbHandleName);
+      return (List<TableHealthInfo>) results;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -694,8 +797,14 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public OrderedColumns getUserDefinedColumns(String appName, DbHandle dbHandleName, String tableId)
       throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getUserDefinedColumns(appName, dbHandleName, tableId);
+    try {
+      return fetchAndRebuildChunks(
+          dbInterface.getUserDefinedColumns(appName, dbHandleName, tableId),
+          OrderedColumns.CREATOR);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -709,179 +818,78 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public boolean hasTableId(String appName, DbHandle dbHandleName, String tableId)
       throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.hasTableId(appName, dbHandleName, tableId);
+    try {
+      return dbInterface.hasTableId(appName, dbHandleName, tableId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /********** RAW GENERIC QUERIES **********/
 
   /**
-   * Get a {@link BaseTable} for this table based on the given SQL command. All
-   * columns from the table are returned.
-   * <p>
-   * If any of the clause parts are omitted (null), then the appropriate
-   * simplified SQL statement is constructed.
+   * Get a {@link BaseTable} for this table based on the given SQL command.
    *
    * @param appName
    * @param dbHandleName
-   * @param tableId
-   * @param whereClause       the whereClause for the selection, beginning with "WHERE". Must
-   *                          include "?" instead of actual values, which are instead passed in
-   *                          the selectionArgs.
-   * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
-   *                          bind parameters
-   * @param groupBy           an array of elementKeys
-   * @param having
-   * @param orderByColNames   array of columns to order the results by
-   * @param orderByDirections either "ASC" or "DESC", corresponding to each column name
-   * @param limit             the maximum number of rows to return
-   * @param offset            the index to start counting the limit from
-   * @return A {@link UserTable} containing the results of the query
-   */
-  @Override
-  public BaseTable simpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                               String whereClause, Object[] bindArgs, String[] groupBy,
-                               String having, String[] orderByColNames, String[] orderByDirections,
-                               Integer limit, Integer offset)
-      throws ServicesAvailabilityException {
-
-    SimpleQuery query = new SimpleQuery(tableId, new BindArgs(bindArgs), whereClause, groupBy,
-        having, orderByColNames, orderByDirections, limit, offset);
-
-    BaseTable baseTable = internalUserDbInterface
-        .simpleQuery(appName, dbHandleName, query.getSqlCommand(), query.getSqlBindArgs(),
-            query.getSqlQueryBounds(), query.getTableId());
-
-    baseTable.setQuery(query);
-
-    return baseTable;
-  }
-
-  /**
-   * SYNC ONLY
-   * <p>
-   * Privileged version of above query.
-   * <p>
-   * Get a {@link BaseTable} for this table based on the given SQL command. All
-   * columns from the table are returned.
-   * <p>
-   * If any of the clause parts are omitted (null), then the appropriate
-   * simplified SQL statement is constructed.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param whereClause       the whereClause for the selection, beginning with "WHERE". Must
-   *                          include "?" instead of actual values, which are instead passed in
-   *                          the selectionArgs.
-   * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
-   *                          bind parameters
-   * @param groupBy           an array of elementKeys
-   * @param having
-   * @param orderByColNames   array of columns to order the results by
-   * @param orderByDirections either "ASC" or "DESC", corresponding to each column name
-   * @param limit             the maximum number of rows to return
-   * @param offset            the index to start counting the limit from
-   * @return A {@link UserTable} containing the results of the query
-   */
-  @Override
-  public BaseTable privilegedSimpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                                         String whereClause, Object[] bindArgs, String[] groupBy,
-                                         String having, String[] orderByColNames,
-                                         String[] orderByDirections, Integer limit, Integer offset)
-      throws ServicesAvailabilityException {
-
-    SimpleQuery query = new SimpleQuery(tableId, new BindArgs(bindArgs), whereClause, groupBy,
-        having, orderByColNames, orderByDirections, limit, offset);
-
-    BaseTable baseTable = internalUserDbInterface
-            .privilegedSimpleQuery(appName, dbHandleName, query.getSqlCommand(),
-                query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId());
-
-    baseTable.setQuery(query);
-
-    return baseTable;
-  }
-
-  /**
-   * Get a {@link BaseTable} for the result set of an arbitrary sql query
-   * and bind parameters.
-   * <p>
-   * The sql query can be arbitrarily complex and can include joins, unions, etc.
-   * The data are returned as string values.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
    * @param sqlCommand
-   * @param bindArgs     an array of primitive values (String, Boolean, int, double) for
-   *                     bind parameters
-   * @param limit        the maximum number of rows to return (optional)
-   * @param offset       the index to start counting the limit from (optional)
-   * @return An  {@link BaseTable}. Containing the results of the query
-   */
-  @Override
-  public BaseTable arbitrarySqlQuery(String appName, DbHandle dbHandleName, String tableId,
-                                     String sqlCommand, Object[] bindArgs, Integer limit,
-                                     Integer offset)
-      throws ServicesAvailabilityException {
-
-    ArbitraryQuery query = new ArbitraryQuery(tableId, new BindArgs(bindArgs), sqlCommand, limit,
-        offset);
-
-    BaseTable baseTable = internalUserDbInterface
-        .simpleQuery(appName, dbHandleName, query.getSqlCommand(), query.getSqlBindArgs(),
-            query.getSqlQueryBounds(), query.getTableId());
-
-    baseTable.setQuery(query);
-
-    return baseTable;
-  }
-
-  /**
-   * Get a {@link BaseTable} that holds the results from the continued query.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param query        The original query with the bounds adjusted
+   * @param bindArgs       (effectively a typed array of values)
+   * @param sqlQueryBounds bounds for query (offset and limit)
+   * @param tableId        if supplied, resolve column data types based upon columns in this table
    * @return
+   * @throws ServicesAvailabilityException
    */
   @Override
-  public BaseTable resumeSimpleQuery(String appName, DbHandle dbHandleName, ResumableQuery query)
+  public BaseTable simpleQuery(String appName, DbHandle dbHandleName, String sqlCommand,
+                               BindArgs bindArgs, QueryBounds sqlQueryBounds, String tableId)
       throws ServicesAvailabilityException {
 
-    BaseTable baseTable = internalUserDbInterface
-        .simpleQuery(appName, dbHandleName, query.getSqlCommand(), query.getSqlBindArgs(),
-            query.getSqlQueryBounds(), query.getTableId());
+    try {
 
-    baseTable.setQuery(query);
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+          .simpleQuery(appName, dbHandleName, sqlCommand, bindArgs,
+              sqlQueryBounds, tableId), BaseTable.CREATOR);
 
-    return baseTable;
+      return baseTable;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
    * SYNC ONLY
    * <p>
    * Privileged version of above query.
-   * Get a {@link BaseTable} that holds the results from the continued query.
+   * <p>
+   * Get a {@link BaseTable} for this table based on the given SQL command.
    *
    * @param appName
    * @param dbHandleName
-   * @param query        The original query with the bounds adjusted
+   * @param sqlCommand
+   * @param bindArgs       (effectively a typed array of values)
+   * @param sqlQueryBounds bounds for query (offset and limit)
+   * @param tableId        if supplied, resolve column data types based upon columns in this table
    * @return
+   * @throws ServicesAvailabilityException
    */
   @Override
-  public BaseTable resumePrivilegedSimpleQuery(String appName, DbHandle dbHandleName,
-                                               ResumableQuery query)
+  public BaseTable privilegedSimpleQuery(String appName, DbHandle dbHandleName, String sqlCommand,
+                                         BindArgs bindArgs, QueryBounds sqlQueryBounds, String
+                                               tableId)
       throws ServicesAvailabilityException {
 
-    BaseTable baseTable = internalUserDbInterface
-            .privilegedSimpleQuery(appName, dbHandleName, query.getSqlCommand(),
-                query.getSqlBindArgs(), query.getSqlQueryBounds(), query.getTableId());
-
-    baseTable.setQuery(query);
-
-    return baseTable;
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+              .privilegedSimpleQuery(appName, dbHandleName, sqlCommand,
+                  bindArgs, sqlQueryBounds, tableId),
+          BaseTable.CREATOR);
+      return baseTable;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -895,160 +903,13 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public void privilegedExecute(String appName, DbHandle dbHandleName, String sqlCommand,
-                                Object[] bindArgs) throws ServicesAvailabilityException {
-
-    internalUserDbInterface
-        .privilegedExecute(appName, dbHandleName, sqlCommand, new BindArgs(bindArgs));
-  }
-
-  /********** USERTABLE QUERY WRAPPERS **********/
-
-  /**
-   * Get a {@link UserTable} for this table based on the given SQL command. All
-   * columns from the table are returned.
-   * <p>
-   * If any of the clause parts are omitted (null), then the appropriate
-   * simplified SQL statement is constructed.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param columnDefns
-   * @param whereClause       the whereClause for the selection, beginning with "WHERE". Must
-   *                          include "?" instead of actual values, which are instead passed in
-   *                          the selectionArgs.
-   * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
-   *                          bind parameters
-   * @param groupBy           an array of elementKeys
-   * @param having
-   * @param orderByColNames   array of columns to order the results by
-   * @param orderByDirections either "ASC" or "DESC", corresponding to each column name
-   * @param limit             the maximum number of rows to return
-   * @param offset            the index to start counting the limit from
-   * @return A {@link UserTable} containing the results of the query
-   */
-  @Override
-  public UserTable simpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                               OrderedColumns columnDefns, String whereClause, Object[] bindArgs,
-                               String[] groupBy, String having, String[] orderByColNames,
-                               String[] orderByDirections, Integer limit, Integer offset)
-      throws ServicesAvailabilityException {
-
-    BaseTable baseTable = simpleQuery(appName, dbHandleName, tableId, whereClause, bindArgs,
-        groupBy, having, orderByColNames, orderByDirections, limit, offset);
-
-    return new UserTable(baseTable, columnDefns, internalGetAdminColumns());
-  }
-
-  /**
-   * SYNC ONLY
-   * <p>
-   * Privileged version of the above query.
-   * Get a {@link UserTable} for this table based on the given SQL command. All
-   * columns from the table are returned.
-   * <p>
-   * If any of the clause parts are omitted (null), then the appropriate
-   * simplified SQL statement is constructed.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param columnDefns
-   * @param whereClause       the whereClause for the selection, beginning with "WHERE". Must
-   *                          include "?" instead of actual values, which are instead passed in
-   *                          the selectionArgs.
-   * @param bindArgs          an array of primitive values (String, Boolean, int, double) for
-   *                          bind parameters
-   * @param groupBy           an array of elementKeys
-   * @param having
-   * @param orderByColNames   array of columns to order the results by
-   * @param orderByDirections either "ASC" or "DESC", corresponding to each column name
-   * @param limit             the maximum number of rows to return
-   * @param offset            the index to start counting the limit from
-   * @return A {@link UserTable} containing the results of the query
-   */
-  @Override
-  public UserTable privilegedSimpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                                         OrderedColumns columnDefns, String whereClause,
-                                         Object[] bindArgs, String[] groupBy, String having,
-                                         String[] orderByColNames, String[] orderByDirections,
-                                         Integer limit, Integer offset)
-      throws ServicesAvailabilityException {
-
-    BaseTable baseTable = privilegedSimpleQuery(appName, dbHandleName, tableId, whereClause,
-        bindArgs, groupBy, having, orderByColNames, orderByDirections, limit, offset);
-
-    return new UserTable(baseTable, columnDefns, internalGetAdminColumns());
-  }
-
-  /**
-   * Get a {@link UserTable} for the result set of an arbitrary sql query
-   * and bind parameters.
-   * <p>
-   * The sql query can be arbitrarily complex and can include joins, unions, etc.
-   * The data are returned as string values.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param sqlCommand
-   * @param bindArgs     an array of primitive values (String, Boolean, int, double) for
-   *                     bind parameters
-   * @param limit        the maximum number of rows to return
-   * @param offset       the index to start counting the limit from
-   * @return An  {@link BaseTable}. Containing the results of the query
-   */
-  @Override
-  public UserTable arbitrarySqlQuery(String appName, DbHandle dbHandleName, String tableId,
-                                     OrderedColumns columnDefns, String sqlCommand,
-                                     Object[] bindArgs, Integer limit, Integer offset)
-      throws ServicesAvailabilityException {
-
-    BaseTable baseTable = arbitrarySqlQuery(appName, dbHandleName, tableId, sqlCommand, bindArgs,
-        limit, offset);
-
-    return new UserTable(baseTable, columnDefns, internalGetAdminColumns());
-  }
-
-  /**
-   * Get a {@link UserTable} that holds the results from the continued query.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param columnDefns
-   * @param query        The original query with the bounds adjusted
-   * @return
-   */
-  @Override
-  public UserTable resumeSimpleQuery(String appName, DbHandle dbHandleName,
-                                     OrderedColumns columnDefns, ResumableQuery query)
-      throws ServicesAvailabilityException {
-
-    BaseTable baseTable = resumeSimpleQuery(appName, dbHandleName, query);
-
-    return new UserTable(baseTable, columnDefns, internalGetAdminColumns());
-  }
-
-  /**
-   * SYNC ONLY
-   * <p>
-   * Privileged version of the above.
-   * Get a {@link UserTable} that holds the results from the continued query.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param columnDefns
-   * @param query        The original query with the bounds adjusted
-   * @return
-   */
-  @Override
-  public UserTable resumePrivilegedSimpleQuery(String appName, DbHandle dbHandleName,
-                                               OrderedColumns columnDefns, ResumableQuery query)
-      throws ServicesAvailabilityException {
-
-    BaseTable baseTable = resumePrivilegedSimpleQuery(appName, dbHandleName, query);
-
-    return new UserTable(baseTable, columnDefns, internalGetAdminColumns());
+                                BindArgs bindArgs) throws ServicesAvailabilityException {
+    try {
+      dbInterface.privilegedExecute(appName, dbHandleName, sqlCommand, bindArgs);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1061,8 +922,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public void replaceTableMetadata(String appName, DbHandle dbHandleName, KeyValueStoreEntry entry)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface.replaceTableMetadata(appName, dbHandleName, entry);
+    try {
+      dbInterface.replaceTableMetadata(appName, dbHandleName, entry);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1081,9 +946,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void replaceTableMetadataList(String appName, DbHandle dbHandleName, String tableId,
                                        List<KeyValueStoreEntry> entries, boolean clear)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface
-        .replaceTableMetadataList(appName, dbHandleName, tableId, entries, clear);
+    try {
+      dbInterface.replaceTableMetadataList(appName, dbHandleName, tableId, entries, clear);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1102,9 +970,13 @@ public class UserDbInterfaceImpl implements UserDbInterface {
                                           String partition, String aspect,
                                           List<KeyValueStoreEntry> entries)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface
-        .replaceTableMetadataSubList(appName, dbHandleName, tableId, partition, aspect, entries);
+    try {
+      dbInterface
+          .replaceTableMetadataSubList(appName, dbHandleName, tableId, partition, aspect, entries);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1122,9 +994,13 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void privilegedUpdateTableETags(String appName, DbHandle dbHandleName, String tableId,
                                          String schemaETag, String lastDataETag)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface
-        .privilegedUpdateTableETags(appName, dbHandleName, tableId, schemaETag, lastDataETag);
+    try {
+      dbInterface
+          .privilegedUpdateTableETags(appName, dbHandleName, tableId, schemaETag, lastDataETag);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1141,8 +1017,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void privilegedUpdateTableLastSyncTime(String appName, DbHandle dbHandleName,
                                                 String tableId)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface.privilegedUpdateTableLastSyncTime(appName, dbHandleName, tableId);
+    try {
+      dbInterface.privilegedUpdateTableLastSyncTime(appName, dbHandleName, tableId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1156,8 +1036,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public String getSyncState(String appName, DbHandle dbHandleName, String tableId, String rowId)
       throws ServicesAvailabilityException {
-
-    return internalUserDbInterface.getSyncState(appName, dbHandleName, tableId, rowId);
+    try {
+      return dbInterface.getSyncState(appName, dbHandleName, tableId, rowId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1178,10 +1062,14 @@ public class UserDbInterfaceImpl implements UserDbInterface {
                                                   String tableId, String rowId, String rowETag,
                                                   String syncState)
       throws ServicesAvailabilityException {
-
-    internalUserDbInterface
-        .privilegedUpdateRowETagAndSyncState(appName, dbHandleName, tableId, rowId, rowETag,
+    try {
+      dbInterface
+          .privilegedUpdateRowETagAndSyncState(appName, dbHandleName, tableId, rowId, rowETag,
               syncState);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1192,19 +1080,22 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    * @return
    */
   @Override
-  public UserTable getRowsWithId(String appName, DbHandle dbHandleName, String tableId,
-                                 OrderedColumns orderedColumns, String rowId)
+  public BaseTable getRowsWithId(String appName, DbHandle dbHandleName, String tableId,
+                                 String rowId)
       throws ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(
+          dbInterface.getRowsWithId(appName, dbHandleName, tableId, rowId), BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-      .getRowsWithId(appName, dbHandleName, tableId, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1215,19 +1106,23 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    * @return
    */
   @Override
-  public UserTable privilegedGetRowsWithId(String appName, DbHandle dbHandleName, String tableId,
-                                           OrderedColumns orderedColumns, String rowId)
+  public BaseTable privilegedGetRowsWithId(String appName, DbHandle dbHandleName, String tableId,
+                                           String rowId)
       throws ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(
+          dbInterface.privilegedGetRowsWithId(appName, dbHandleName, tableId, rowId),
+          BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-        .privilegedGetRowsWithId(appName, dbHandleName, tableId, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1238,19 +1133,23 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    * @return
    */
   @Override
-  public UserTable getMostRecentRowWithId(String appName, DbHandle dbHandleName, String tableId,
-                                          OrderedColumns orderedColumns, String rowId)
+  public BaseTable getMostRecentRowWithId(String appName, DbHandle dbHandleName, String tableId,
+                                          String rowId)
       throws ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(
+          dbInterface.getMostRecentRowWithId(appName, dbHandleName, tableId, rowId),
+          BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-        .getMostRecentRowWithId(appName, dbHandleName, tableId, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1266,24 +1165,26 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues       the field values on the server
    * @param rowId
    * @return The rows in the database matching the rowId (may be 0, 1 or 2 rows).
    */
   @Override
-  public UserTable privilegedPerhapsPlaceRowIntoConflictWithId(String appName,
+  public BaseTable privilegedPerhapsPlaceRowIntoConflictWithId(String appName,
                                                                DbHandle dbHandleName,
                                                                String tableId,
-                                                               OrderedColumns orderedColumns,
                                                                ContentValues cvValues, String rowId)
       throws ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+          .privilegedPerhapsPlaceRowIntoConflictWithId(appName, dbHandleName, tableId,
+              cvValues, rowId), BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-        .privilegedPerhapsPlaceRowIntoConflictWithId(appName, dbHandleName, tableId,
-            cvValues, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1297,23 +1198,26 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @param asCsvRequestedChange
    * @return single-row table with the content of the inserted row
    */
   @Override
-  public UserTable privilegedInsertRowWithId(String appName, DbHandle dbHandleName, String tableId,
-                                             OrderedColumns orderedColumns, ContentValues cvValues,
+  public BaseTable privilegedInsertRowWithId(String appName, DbHandle dbHandleName, String tableId,
+                                             ContentValues cvValues,
                                              String rowId, boolean asCsvRequestedChange)
       throws ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+          .privilegedInsertRowWithId(appName, dbHandleName, tableId, cvValues,
+              rowId, asCsvRequestedChange), BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-        .privilegedInsertRowWithId(appName, dbHandleName, tableId, cvValues,
-            rowId, asCsvRequestedChange);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1325,21 +1229,25 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the inserted checkpoint
    */
   @Override
-  public UserTable insertCheckpointRowWithId(String appName, DbHandle dbHandleName, String tableId,
-                                             OrderedColumns orderedColumns, ContentValues cvValues,
+  public BaseTable insertCheckpointRowWithId(String appName, DbHandle dbHandleName, String tableId,
+                                             ContentValues cvValues,
                                              String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+          .insertCheckpointRowWithId(appName, dbHandleName, tableId, cvValues,
+              rowId), BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-        .insertCheckpointRowWithId(appName, dbHandleName, tableId, cvValues, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1353,21 +1261,24 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the inserted row
    */
   @Override
-  public UserTable insertRowWithId(String appName, DbHandle dbHandleName, String tableId,
-                                   OrderedColumns orderedColumns, ContentValues cvValues,
-                                   String rowId)
+  public BaseTable insertRowWithId(String appName, DbHandle dbHandleName, String tableId,
+                                   ContentValues cvValues, String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+              .insertRowWithId(appName, dbHandleName, tableId, cvValues, rowId),
+          BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-            .insertRowWithId(appName, dbHandleName, tableId, cvValues, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1383,15 +1294,20 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @return table with the content for this rowId. May be empty.
    */
   @Override
-  public UserTable deleteAllCheckpointRowsWithId(String appName, DbHandle dbHandleName,
-                                                 String tableId, OrderedColumns orderedColumns,
+  public BaseTable deleteAllCheckpointRowsWithId(String appName, DbHandle dbHandleName,
+                                                 String tableId,
                                                  String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(
+          dbInterface.deleteAllCheckpointRowsWithId(appName, dbHandleName, tableId, rowId),
+          BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-        .deleteAllCheckpointRowsWithId(appName, dbHandleName, tableId, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1403,20 +1319,24 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    * @return table with the content for this rowId. May be empty.
    */
   @Override
-  public UserTable deleteLastCheckpointRowWithId(String appName, DbHandle dbHandleName,
-                                                 String tableId, OrderedColumns orderedColumns,
+  public BaseTable deleteLastCheckpointRowWithId(String appName, DbHandle dbHandleName,
+                                                 String tableId,
                                                  String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(
+          dbInterface.deleteLastCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
+          BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-        .deleteLastCheckpointRowWithId(appName, dbHandleName, tableId, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1429,19 +1349,23 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    * @return table with the content for this rowId. May be empty. May be marked as deleted and awaiting sync
    */
   @Override
-  public UserTable privilegedDeleteRowWithId(String appName, DbHandle dbHandleName, String tableId,
-                                             OrderedColumns orderedColumns, String rowId)
+  public BaseTable privilegedDeleteRowWithId(String appName, DbHandle dbHandleName, String tableId,
+                                             String rowId)
       throws ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(
+          dbInterface.privilegedDeleteRowWithId(appName, dbHandleName, tableId, rowId),
+          BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-        .privilegedDeleteRowWithId(appName, dbHandleName, tableId, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1460,19 +1384,22 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    * @return table with the content for this rowId. May be empty. May be marked as deleted and awaiting sync
    */
   @Override
-  public UserTable deleteRowWithId(String appName, DbHandle dbHandleName, String tableId,
-                                   OrderedColumns orderedColumns, String rowId)
+  public BaseTable deleteRowWithId(String appName, DbHandle dbHandleName, String tableId,
+                                   String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(
+          dbInterface.deleteRowWithId(appName, dbHandleName, tableId, rowId), BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-        .deleteRowWithId(appName, dbHandleName, tableId, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1485,22 +1412,25 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    * @return single-row table with the content of the row as specified
    */
   @Override
-  public UserTable saveAsIncompleteMostRecentCheckpointRowWithId(String appName,
+  public BaseTable saveAsIncompleteMostRecentCheckpointRowWithId(String appName,
                                                                  DbHandle dbHandleName,
                                                                  String tableId,
-                                                                 OrderedColumns orderedColumns,
                                                                  String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+              .saveAsIncompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
+          BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-            .saveAsIncompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1513,22 +1443,25 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
   @Override
-  public UserTable saveAsCompleteMostRecentCheckpointRowWithId(String appName,
+  public BaseTable saveAsCompleteMostRecentCheckpointRowWithId(String appName,
                                                                DbHandle dbHandleName,
                                                                String tableId,
-                                                               OrderedColumns orderedColumns,
                                                                String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+              .saveAsCompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId),
+          BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-            .saveAsCompleteMostRecentCheckpointRowWithId(appName, dbHandleName, tableId, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
+      return baseTable;
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1541,78 +1474,25 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
   @Override
-  public UserTable updateRowWithId(String appName, DbHandle dbHandleName, String tableId,
-                                   OrderedColumns orderedColumns, ContentValues cvValues,
+  public BaseTable updateRowWithId(String appName, DbHandle dbHandleName, String tableId,
+                                   ContentValues cvValues,
                                    String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
+    try {
+      BaseTable baseTable = fetchAndRebuildChunks(dbInterface
+              .updateRowWithId(appName, dbHandleName, tableId, cvValues, rowId),
+          BaseTable.CREATOR);
 
-    BaseTable baseTable = internalUserDbInterface
-            .updateRowWithId(appName, dbHandleName, tableId, cvValues, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
-  }
-
-  /**
-   * Client-side wrapper to make changing the row filter easier.
-   *
-   * @param appName
-   * @param dbHandleName
-   * @param tableId
-   * @param orderedColumns
-   * @param defaultAccess
-   * @param rowOwner
-   * @param rowId
-   * @return
-   */
-  @Override
-  public UserTable changeRowFilterWithId(String appName, DbHandle dbHandleName, String tableId,
-                                         OrderedColumns orderedColumns, String defaultAccess,
-                                         String rowOwner, String groupReadOnly, String groupModify,
-                                         String groupPrivileged, String rowId)
-      throws IllegalArgumentException, ActionNotAuthorizedException, ServicesAvailabilityException {
-
-    if (defaultAccess == null) {
-      throw new IllegalArgumentException("defaultAccess is null");
+      return baseTable;
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
     }
-    // verify that defaultAccess is a known type
-    RowFilterScope.Access.valueOf(defaultAccess);
-
-    ContentValues cvValues = new ContentValues();
-    cvValues.put(DataTableColumns.DEFAULT_ACCESS, defaultAccess);
-
-    if (rowOwner == null) {
-      cvValues.putNull(DataTableColumns.ROW_OWNER);
-    } else {
-      cvValues.put(DataTableColumns.ROW_OWNER, rowOwner);
-    }
-
-    if (groupReadOnly == null) {
-      cvValues.putNull(DataTableColumns.GROUP_READ_ONLY);
-    } else {
-      cvValues.put(DataTableColumns.GROUP_READ_ONLY, groupReadOnly);
-    }
-
-    if (groupModify == null) {
-      cvValues.putNull(DataTableColumns.GROUP_MODIFY);
-    } else {
-      cvValues.put(DataTableColumns.GROUP_MODIFY, groupModify);
-    }
-
-    if (groupPrivileged == null) {
-      cvValues.putNull(DataTableColumns.GROUP_PRIVILEGED);
-    } else {
-      cvValues.put(DataTableColumns.GROUP_PRIVILEGED, groupPrivileged);
-    }
-
-    BaseTable baseTable = internalUserDbInterface.updateRowWithId(appName, dbHandleName, tableId, cvValues, rowId);
-
-    return new UserTable(baseTable, orderedColumns, internalGetAdminColumns());
   }
 
   /**
@@ -1639,8 +1519,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void resolveServerConflictWithDeleteRowWithId(String appName, DbHandle dbHandleName,
                                                        String tableId, String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
-    internalUserDbInterface.resolveServerConflictWithDeleteRowWithId(appName, dbHandleName,
-        tableId, rowId);
+    try {
+      dbInterface.resolveServerConflictWithDeleteRowWithId(appName, dbHandleName, tableId, rowId);
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1657,8 +1541,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void resolveServerConflictTakeLocalRowWithId(String appName, DbHandle dbHandleName,
                                                       String tableId, String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
-    internalUserDbInterface.resolveServerConflictTakeLocalRowWithId(appName, dbHandleName,
-        tableId, rowId);
+    try {
+      dbInterface.resolveServerConflictTakeLocalRowWithId(appName, dbHandleName, tableId, rowId);
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1681,8 +1569,14 @@ public class UserDbInterfaceImpl implements UserDbInterface {
                                                                       ContentValues cvValues,
                                                                       String rowId)
       throws ActionNotAuthorizedException, ServicesAvailabilityException {
-    internalUserDbInterface.resolveServerConflictTakeLocalRowPlusServerDeltasWithId(appName,
-        dbHandleName, tableId, cvValues, rowId);
+    try {
+      dbInterface
+          .resolveServerConflictTakeLocalRowPlusServerDeltasWithId(appName, dbHandleName, tableId,
+              cvValues, rowId);
+    } catch (Exception e) {
+      rethrowNotAuthorizedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1697,8 +1591,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void resolveServerConflictTakeServerRowWithId(String appName, DbHandle dbHandleName,
                                                        String tableId, String rowId)
       throws ServicesAvailabilityException {
-    internalUserDbInterface.resolveServerConflictTakeServerRowWithId(appName, dbHandleName,
-        tableId, rowId);
+    try {
+      dbInterface.resolveServerConflictTakeServerRowWithId(appName, dbHandleName, tableId, rowId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1711,7 +1609,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public void deleteAppAndTableLevelManifestSyncETags(String appName, DbHandle dbHandleName)
       throws ServicesAvailabilityException {
-    internalUserDbInterface.deleteAppAndTableLevelManifestSyncETags(appName, dbHandleName);
+    try {
+      dbInterface.deleteAppAndTableLevelManifestSyncETags(appName, dbHandleName);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1725,7 +1628,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public void deleteAllSyncETagsForTableId(String appName, DbHandle dbHandleName, String tableId)
       throws ServicesAvailabilityException {
-    internalUserDbInterface.deleteAllSyncETagsForTableId(appName, dbHandleName, tableId);
+    try {
+      dbInterface.deleteAllSyncETagsForTableId(appName, dbHandleName, tableId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1740,7 +1648,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void deleteAllSyncETagsExceptForServer(String appName, DbHandle dbHandleName,
                                                 String verifiedUri)
       throws ServicesAvailabilityException {
-    internalUserDbInterface.deleteAllSyncETagsExceptForServer(appName, dbHandleName, verifiedUri);
+    try {
+      dbInterface.deleteAllSyncETagsExceptForServer(appName, dbHandleName, verifiedUri);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1754,7 +1667,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void deleteAllSyncETagsUnderServer(String appName, DbHandle dbHandleName,
                                             String verifiedUri)
       throws ServicesAvailabilityException {
-    internalUserDbInterface.deleteAllSyncETagsUnderServer(appName, dbHandleName, verifiedUri);
+    try {
+      dbInterface.deleteAllSyncETagsUnderServer(appName, dbHandleName, verifiedUri);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1773,8 +1691,13 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public String getFileSyncETag(String appName, DbHandle dbHandleName, String verifiedUri,
                                 String tableId, long modificationTimestamp)
       throws ServicesAvailabilityException {
-    return internalUserDbInterface.getFileSyncETag(appName, dbHandleName, verifiedUri, tableId,
-        modificationTimestamp);
+    try {
+      return dbInterface
+          .getFileSyncETag(appName, dbHandleName, verifiedUri, tableId, modificationTimestamp);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1788,7 +1711,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public String getManifestSyncETag(String appName, DbHandle dbHandleName, String verifiedUri,
                                     String tableId) throws ServicesAvailabilityException {
-    return internalUserDbInterface.getManifestSyncETag(appName, dbHandleName, verifiedUri, tableId);
+    try {
+      return dbInterface.getManifestSyncETag(appName, dbHandleName, verifiedUri, tableId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1808,8 +1736,14 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void updateFileSyncETag(String appName, DbHandle dbHandleName, String verifiedUri,
                                  String tableId, long modificationTimestamp, String eTag)
       throws ServicesAvailabilityException {
-    internalUserDbInterface.updateFileSyncETag(appName, dbHandleName, verifiedUri, tableId,
-        modificationTimestamp, eTag);
+    try {
+      dbInterface
+          .updateFileSyncETag(appName, dbHandleName, verifiedUri, tableId, modificationTimestamp,
+              eTag);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
   }
 
   /**
@@ -1825,6 +1759,71 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void updateManifestSyncETag(String appName, DbHandle dbHandleName, String verifiedUri,
                                      String tableId, String eTag)
       throws ServicesAvailabilityException {
-    internalUserDbInterface.updateManifestSyncETag(appName, dbHandleName, verifiedUri, tableId, eTag);
+    try {
+      dbInterface.updateManifestSyncETag(appName, dbHandleName, verifiedUri, tableId, eTag);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
+
+  /**
+   * Retrieve all the pieces of the data across the wire and rebuild them into their original type
+   *
+   * @param firstChunk The first chunk, which contains a pointer to the next
+   * @param creator    The parcelable reconstructor
+   * @param <T>        The type to reconstruct into
+   * @return The original object
+   * @throws RemoteException
+   */
+  private <T> T fetchAndRebuildChunks(DbChunk firstChunk, Parcelable.Creator<T> creator)
+      throws RemoteException {
+
+    List<DbChunk> aggregatedChunks = retrieveChunks(firstChunk);
+
+    return DbChunkUtil.rebuildFromChunks(aggregatedChunks, creator);
+  }
+
+  /**
+   * Retrieve all the pieces of the data across the wire and rebuild them into their original type
+   *
+   * @param firstChunk   The first chunk, which contains a pointer to the next
+   * @param serializable
+   * @param <T>          The type to reconstruct into
+   * @return The original object
+   * @throws RemoteException
+   */
+  private <T> T fetchAndRebuildChunks(DbChunk firstChunk, Class<T> serializable)
+      throws RemoteException {
+
+    List<DbChunk> aggregatedChunks = retrieveChunks(firstChunk);
+
+    try {
+      return DbChunkUtil.rebuildFromChunks(aggregatedChunks, serializable);
+    } catch (Exception e) {
+      WebLogger.getContextLogger().e(TAG, "Failed to rebuild serialized object from chunks");
+      return null;
+    }
+  }
+
+  /**
+   * Iterate through the chunks like a linked list, retrieving them one by one from the service
+   *
+   * @param firstChunk
+   * @return
+   * @throws RemoteException
+   */
+  private List<DbChunk> retrieveChunks(DbChunk firstChunk) throws RemoteException {
+    List<DbChunk> aggregatedChunks = new LinkedList<>();
+    aggregatedChunks.add(firstChunk);
+
+    DbChunk currChunk = firstChunk;
+    while (currChunk.hasNextID()) {
+      ParcelUuid parcelUuid = new ParcelUuid(currChunk.getNextID());
+      currChunk = dbInterface.getChunk(parcelUuid);
+      aggregatedChunks.add(currChunk);
+    }
+
+    return aggregatedChunks;
   }
 }

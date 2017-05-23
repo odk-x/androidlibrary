@@ -199,7 +199,8 @@ public interface UserDbInterface {
    */
   BaseTable arbitrarySqlQueryLocalOnlyTables(String appName, DbHandle dbHandleName, String tableId,
                                              String sqlCommand, Object[] bindArgs, Integer limit,
-                                             Integer offset) throws ServicesAvailabilityException;
+                                             Integer offset)
+      throws ServicesAvailabilityException;
 
   /**
    * Get a {@link BaseTable} that holds the results from the continued query. Note that this is
@@ -476,7 +477,8 @@ public interface UserDbInterface {
   BaseTable simpleQuery(String appName, DbHandle dbHandleName, String tableId, String whereClause,
                         Object[] bindArgs, String[] groupBy, String having,
                         String[] orderByColNames, String[] orderByDirections, Integer limit,
-                        Integer offset) throws ServicesAvailabilityException;
+                        Integer offset)
+      throws ServicesAvailabilityException;
 
   /**
    * SYNC ONLY
@@ -651,7 +653,8 @@ public interface UserDbInterface {
    */
   UserTable arbitrarySqlQuery(String appName, DbHandle dbHandleName, String tableId,
                               OrderedColumns columnDefns, String sqlCommand, Object[] bindArgs,
-                              Integer limit, Integer offset) throws ServicesAvailabilityException;
+                              Integer limit, Integer offset)
+      throws ServicesAvailabilityException;
 
   /**
    * Get a {@link UserTable} that holds the results from the continued query.
@@ -663,7 +666,8 @@ public interface UserDbInterface {
    * @return
    */
   UserTable resumeSimpleQuery(String appName, DbHandle dbHandleName, OrderedColumns columnDefns,
-                              ResumableQuery query) throws ServicesAvailabilityException;
+                              ResumableQuery query)
+      throws ServicesAvailabilityException;
 
   /**
    * SYNC ONLY
@@ -825,7 +829,7 @@ public interface UserDbInterface {
    */
   UserTable getMostRecentRowWithId(String appName, DbHandle dbHandleName, String tableId,
                                    OrderedColumns orderedColumns, String rowId)
-      throws ActionNotAuthorizedException, ServicesAvailabilityException;
+      throws ServicesAvailabilityException;
 
   /**
    * SYNC ONLY
