@@ -22,6 +22,7 @@ package org.opendatakit.exception;
  *
  * @author mitchellsundt@gmail.com
  */
+@SuppressWarnings("serial")
 public class ServicesAvailabilityException extends Exception {
 
   public ServicesAvailabilityException(String detailMessage) {

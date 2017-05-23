@@ -42,7 +42,8 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
   private static final String JSON_SCHEMA_ELEMENT_SET = "elementSet";
   private static final String JSON_SCHEMA_INSTANCE_METADATA_VALUE = "instanceMetadata";
   private static final String JSON_SCHEMA_INSTANCE_DATA_VALUE = "data";
-  private static final String JSON_SCHEMA_DEFAULT = "default";
+  // not currently tracking the default value for a data field...
+  // private static final String JSON_SCHEMA_DEFAULT = "default";
   // the database column under which this data is persisted (e.g., myPoint_latitude)
   private static final String JSON_SCHEMA_ELEMENT_KEY = "elementKey";
   // the Javascript path to this data if reconstructed into JS object (e.g., myPoint.latitude)

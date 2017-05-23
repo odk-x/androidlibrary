@@ -31,8 +31,6 @@ import java.util.Map;
 
 public class UserDbInterfaceImpl implements UserDbInterface {
 
-  private static final String TAG = UserDbInterfaceImpl.class.getSimpleName();
-
   private final InternalUserDbInterface internalUserDbInterface;
 
   private Map<String, TableMetaDataEntries> metaDataCache;
@@ -561,7 +559,6 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @return List<String> of tableIds
    */
   @Override
-  @SuppressWarnings("unchecked")
   public List<String> getAllTableIds(String appName, DbHandle dbHandleName)
       throws ServicesAvailabilityException {
 
@@ -578,7 +575,6 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @return list of KeyValueStoreEntry values matching the filter criteria
    */
   @Override
-  @SuppressWarnings("unchecked")
   public TableMetaDataEntries getTableMetadata(String appName, DbHandle dbHandleName,
                                                String tableId, String partition, String aspect,
                                                String key, String revId)
@@ -674,7 +670,6 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @return the list of TableHealthInfo records for this appName
    */
   @Override
-  @SuppressWarnings("unchecked")
   public List<TableHealthInfo> getTableHealthStatuses(String appName, DbHandle dbHandleName)
       throws ServicesAvailabilityException {
 

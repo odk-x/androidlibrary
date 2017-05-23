@@ -28,8 +28,6 @@ import java.util.HashMap;
 
 public class CursorUtils {
 
-  private static final String t = "CursorUtils";
-
   /**
    * values that can be returned from getTableHealth()
    */

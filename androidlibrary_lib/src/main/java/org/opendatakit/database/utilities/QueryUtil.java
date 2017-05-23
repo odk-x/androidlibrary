@@ -19,8 +19,6 @@ import org.opendatakit.provider.DataTableColumns;
 
 public class QueryUtil {
 
-   private static final String TAG = QueryUtil.class.getSimpleName();
-
    private QueryUtil() {
       // This class should never be instantiated
       throw new IllegalStateException("Never Instantiate this static class");

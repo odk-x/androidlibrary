@@ -19,8 +19,6 @@ import android.os.Parcel;
 
 public class MarshallUtil {
 
-  private static final String TAG = MarshallUtil.class.getSimpleName();
-
   private MarshallUtil() {
     // This class should never be instantiated
     throw new IllegalStateException("Never Instantiate this static class");

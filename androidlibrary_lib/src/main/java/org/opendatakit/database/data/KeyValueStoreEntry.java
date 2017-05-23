@@ -31,6 +31,7 @@ import java.io.Serializable;
  * @author sudar.sam@gmail.com
  *
  */
+@SuppressWarnings("serial")
 public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreEntry>,
     Serializable {
 

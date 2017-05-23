@@ -27,8 +27,6 @@ import java.util.regex.Pattern;
  */
 public class NameUtil {
 
-  private static final String TAG = NameUtil.class.getSimpleName();
-
   /**
    * Because Android content provider internals do not quote the
    * column field names when constructing SQLite queries, we need

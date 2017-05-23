@@ -20,6 +20,7 @@
 
 package org.sqlite.database.sqlite;
 
+@SuppressWarnings("serial")
 public class SQLiteBlobTooBigException extends SQLiteException {
     public SQLiteBlobTooBigException() {}
 

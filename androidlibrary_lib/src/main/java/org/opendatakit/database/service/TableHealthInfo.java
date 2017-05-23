@@ -20,6 +20,7 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class TableHealthInfo implements Parcelable, Serializable {
 
   private final String tableId;

@@ -21,6 +21,7 @@ package org.opendatakit.exception;
  *
  * @author mitchellsundt@gmail.com
  */
+@SuppressWarnings("serial")
 public class ActionNotAuthorizedException extends Exception {
 
   public ActionNotAuthorizedException(String detailMessage) {

@@ -25,7 +25,9 @@ import java.io.Serializable;
  * This holds the list of objects that are bind arguments to the SQLite database.
  * The objects are primitive objects (String, Integer, Long, Float, Double, Boolean)
  */
+@SuppressWarnings("serial")
 public class BindArgs implements Parcelable, Serializable {
+
   public final Object[] bindArgs;
 
   public BindArgs() {

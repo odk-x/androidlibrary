@@ -15,7 +15,6 @@
 package org.opendatakit.properties;
 
 import android.content.Context;
-import android.app.Application;
 
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.utilities.StaticStateManipulator;

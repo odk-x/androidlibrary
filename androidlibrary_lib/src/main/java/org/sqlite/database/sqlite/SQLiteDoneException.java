@@ -24,6 +24,7 @@ package org.sqlite.database.sqlite;
  * An exception that indicates that the SQLite program is done.
  * Thrown when an operation that expects a row and does not get one.
  */
+@SuppressWarnings("serial")
 public class SQLiteDoneException extends SQLiteException {
     public SQLiteDoneException() {}
 
