@@ -123,13 +123,13 @@ public final class Row implements Parcelable {
   /**
    * Return the index of the "key" column.
    * <p>
-   * Null values are returned as nulls.
+   * If there is no matching key then null is returned.
    *
    * @param key
    *         The name of the column
-   * @return int index of the column
+   * @return Integer index of the column or null
    */
-  public int getCellIndexByKey(String key) {
+  public Integer getCellIndexByKey(String key) {
     return mOwnerTable.getColumnIndexOfElementKey(key);
   }
 
@@ -221,7 +221,11 @@ public final class Row implements Parcelable {
 
 
   public final <T> T getDataType(String elementKey, Class<T> clazz) {
-    return getDataType(getCellIndexByKey(elementKey), clazz);
+    Integer cell = getCellIndexByKey(elementKey);
+    if (cell == null) {
+      return null;
+    }
+    return getDataType(cell, clazz);
   }
 
   @Override
