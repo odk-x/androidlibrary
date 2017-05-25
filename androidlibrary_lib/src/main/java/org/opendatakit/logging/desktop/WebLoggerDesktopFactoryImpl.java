@@ -84,7 +84,7 @@ public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
     }
 
     public void printStackTrace(Throwable e) {
-      Logger.getGlobal().throwing("unknown", "unknown", e);
+      Logger.getGlobal().log(Level.SEVERE, e.getMessage(), e);
     }
 
     public void setMinimumSystemLogLevel(int level) {
