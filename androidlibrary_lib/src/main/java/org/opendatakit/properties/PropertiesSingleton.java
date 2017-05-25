@@ -15,7 +15,6 @@
 package org.opendatakit.properties;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
@@ -391,7 +390,6 @@ public class PropertiesSingleton {
       ODKFileUtils.verifyExternalStorageAvailability();
       ODKFileUtils.assertDirectoryStructure(mAppName);
     } catch (Exception e) {
-      Log.e(t, "External storage not available");
       throw new IllegalArgumentException("External storage not available");
     }
   }
