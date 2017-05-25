@@ -43,7 +43,7 @@ import java.util.Map;
  * @author sudar.sam@gmail.com
  *
  */
-public class UserTable implements Parcelable, ParentTable {
+public class UserTable implements Parcelable, WrapperTable {
 
   static final String TAG = UserTable.class.getSimpleName();
 
@@ -57,13 +57,15 @@ public class UserTable implements Parcelable, ParentTable {
 
   public UserTable(UserTable table, List<Integer> indexes) {
     this.mBaseTable = new BaseTable(table.mBaseTable, indexes);
+    this.mBaseTable.registerWrapperTable(this);
+
     this.mColumnDefns = table.mColumnDefns;
     this.mAdminColumnOrder = table.mAdminColumnOrder;
   }
 
   public UserTable(BaseTable baseTable, OrderedColumns columnDefns, String[] adminColumnOrder) {
     this.mBaseTable = baseTable;
-    baseTable.registerParentTable(this);
+    baseTable.registerWrapperTable(this);
 
     this.mColumnDefns = columnDefns;
     this.mAdminColumnOrder = adminColumnOrder;
@@ -80,6 +82,7 @@ public class UserTable implements Parcelable, ParentTable {
 
     this.mBaseTable = new BaseTable(query, elementKeyForIndex, elementKeyToIndex, primaryKey,
         rowCount);
+    this.mBaseTable.registerWrapperTable(this);
 
     this.mColumnDefns = columnDefns;
     this.mAdminColumnOrder = adminColumnOrder;
@@ -243,7 +246,7 @@ public class UserTable implements Parcelable, ParentTable {
     return -1;
   }
 
-  public ParentTable getParentTable() {
+  public WrapperTable getWrapperTable() {
     return this;
   }
 
@@ -263,7 +266,7 @@ public class UserTable implements Parcelable, ParentTable {
     this.mColumnDefns = new OrderedColumns(in);
     this.mAdminColumnOrder = MarshallUtil.unmarshallStringArray(in);
     this.mBaseTable = new BaseTable(in);
-    this.mBaseTable.registerParentTable(this);
+    this.mBaseTable.registerWrapperTable(this);
   }
 
   public static final Parcelable.Creator<UserTable> CREATOR = new Parcelable.Creator<UserTable>() {

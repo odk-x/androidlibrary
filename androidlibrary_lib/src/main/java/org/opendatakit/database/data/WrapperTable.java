@@ -16,6 +16,6 @@
 package org.opendatakit.database.data;
 
 
-public interface ParentTable {
-  ParentTable getParentTable();
+public interface WrapperTable {
+  WrapperTable getWrapperTable();
 }

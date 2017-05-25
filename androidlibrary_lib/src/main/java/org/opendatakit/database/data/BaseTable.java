@@ -45,7 +45,7 @@ public class BaseTable implements Parcelable {
   /**
    * The parent/container table
    */
-  protected ParentTable mParent;
+  protected WrapperTable mWrapper;
 
   /**
    * Table metadata rev_id. If this differs from your cached value, you need to requery the
@@ -89,7 +89,7 @@ public class BaseTable implements Parcelable {
    */
   public BaseTable(ResumableQuery query, String[] elementKeyForIndex,
       Map<String, Integer> elementKeyToIndex, String[] primaryKey, Integer rowCount) {
-    this.mParent = null;
+    this.mWrapper = null;
 
     this.mEffectiveAccessCreateRow = false;
 
@@ -139,7 +139,7 @@ public class BaseTable implements Parcelable {
     this.mPrimaryKey = table.mPrimaryKey;
     this.mElementKeyForIndex = table.mElementKeyForIndex;
     this.mElementKeyToIndex = table.mElementKeyToIndex;
-    this.mParent = null; // Set this with register
+    this.mWrapper = null; // Set this with register
     this.mMetaDataRev = null;
   }
 
@@ -167,7 +167,7 @@ public class BaseTable implements Parcelable {
     }
 
     // The parent and the query are not parceled
-    this.mParent = null;
+    this.mWrapper = null;
     this.mQuery = null;
     this.mMetaDataRev = null;
   }
@@ -359,8 +359,12 @@ public class BaseTable implements Parcelable {
     return this.mRows.size();
   }
 
-  public void registerParentTable(ParentTable table) {
-    this.mParent = table;
+  public void registerWrapperTable(WrapperTable table) {
+    this.mWrapper = table;
+  }
+
+  public WrapperTable getWrapperTable() {
+    return this.mWrapper;
   }
 
   @Override
