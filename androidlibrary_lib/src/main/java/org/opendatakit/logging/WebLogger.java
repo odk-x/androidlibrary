@@ -75,13 +75,17 @@ public class WebLogger {
 
   public static WebLoggerIf getContextLogger() {
     String appNameOfThread = contextLogger.get();
-    if (appNameOfThread != null) {
-      return getLogger(appNameOfThread);
-    }
-    return null;
+    return getLogger(appNameOfThread);
   }
 
   public synchronized static WebLoggerIf getLogger(String appName) {
+    if ( appName == null ) {
+      // create a one-off logger to handle this case
+      // factory will create a logger that doesn't care
+      // about the appName (e.g., log to just system log)
+      return webLoggerFactory.createWebLogger(null);
+    }
+
     WebLoggerIf logger = loggers.get(appName);
     if (logger == null) {
       logger = webLoggerFactory.createWebLogger(appName);

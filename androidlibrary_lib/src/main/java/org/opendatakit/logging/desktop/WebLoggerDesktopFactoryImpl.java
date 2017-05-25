@@ -33,10 +33,7 @@ public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
 
   public class WebLoggerDesktopImpl implements WebLoggerIf {
 
-    // private final String appName;
-
-    public WebLoggerDesktopImpl(String appName) {
-      // this.appName = appName;
+    public WebLoggerDesktopImpl() {
     }
 
     public void staleFileScan(long now) {
@@ -98,7 +95,7 @@ public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
   }
 
   public synchronized WebLoggerIf createWebLogger(String appName) {
-    WebLoggerIf logger = new WebLoggerDesktopImpl(appName);
+    WebLoggerIf logger = new WebLoggerDesktopImpl();
     return logger;
   }
 

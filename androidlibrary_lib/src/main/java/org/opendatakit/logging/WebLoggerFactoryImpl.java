@@ -23,7 +23,13 @@ package org.opendatakit.logging;
 public class WebLoggerFactoryImpl implements WebLoggerFactoryIf {
 
   public synchronized WebLoggerIf createWebLogger(String appName) {
-    WebLoggerIf logger = new WebLoggerImpl(appName);
-    return logger;
+    if ( appName == null ) {
+      // log to just the system log...
+      WebLoggerIf logger = new WebLoggerAppNameUnknownImpl();
+      return logger;
+    } else {
+      WebLoggerIf logger = new WebLoggerImpl(appName);
+      return logger;
+    }
   }
 }
