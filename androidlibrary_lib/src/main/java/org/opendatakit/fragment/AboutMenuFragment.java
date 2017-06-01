@@ -16,8 +16,10 @@ package org.opendatakit.fragment;
 
 import android.app.Fragment;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.Spanned;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -101,7 +103,13 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
 
     if (savedInstanceState != null && savedInstanceState.containsKey(LICENSE_TEXT)) {
       mLicenseText = savedInstanceState.getString(LICENSE_TEXT);
-      mTextView.setText(Html.fromHtml(mLicenseText));
+      Spanned html;
+      if (Build.VERSION.SDK_INT >= 24) {
+        html = Html.fromHtml(mLicenseText, Html.FROM_HTML_MODE_LEGACY);
+      } else {
+        html = Html.fromHtml(mLicenseText);
+      }
+      mTextView.setText(html);
     } else {
       readLicenseFile();
     }
@@ -122,7 +130,13 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     if (result != null) {
       // Read license file successfully
       mLicenseText = result;
-      mTextView.setText(Html.fromHtml(result));
+      Spanned html;
+      if (Build.VERSION.SDK_INT >= 24) {
+        html = Html.fromHtml(result, Html.FROM_HTML_MODE_LEGACY);
+      } else {
+        html = Html.fromHtml(result);
+      }
+      mTextView.setText(html);
     } else {
       // had some failures
       WebLogger.getLogger(activity.getAppName()).e(t, "Failed to read license file");

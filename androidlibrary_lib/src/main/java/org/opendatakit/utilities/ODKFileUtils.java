@@ -15,9 +15,12 @@
 
 package org.opendatakit.utilities;
 
+import android.os.Build;
 import android.os.Environment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -429,7 +432,11 @@ public class ODKFileUtils {
     BufferedWriter bw = null;
     try {
       fs = new FileOutputStream(versionFile, false);
-      w = new OutputStreamWriter(fs, Charsets.UTF_8);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        w = new OutputStreamWriter(fs, StandardCharsets.UTF_8);
+      } else {
+        w = new OutputStreamWriter(fs, Charsets.UTF_8);
+      }
       bw = new BufferedWriter(w);
       bw.write(apkVersion);
       bw.write("\n");
@@ -490,7 +497,11 @@ public class ODKFileUtils {
     BufferedReader br = null;
     try {
       fs = new FileInputStream(versionFile);
-      r = new InputStreamReader(fs, Charsets.UTF_8);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        r = new InputStreamReader(fs, StandardCharsets.UTF_8);
+      } else {
+        r = new InputStreamReader(fs, Charsets.UTF_8);
+      }
       br = new BufferedReader(r);
       versionLine = br.readLine();
     } catch (IOException e) {

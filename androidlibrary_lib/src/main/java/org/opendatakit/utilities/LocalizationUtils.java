@@ -15,12 +15,14 @@
  */
 package org.opendatakit.utilities;
 
+import android.os.Build;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import org.apache.commons.io.Charsets;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class LocalizationUtils {
@@ -54,7 +56,11 @@ public class LocalizationUtils {
         String value;
         try {
           stream = new FileInputStream(commonFile);
-          reader = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+          } else {
+            reader = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
+          }
           int ch = reader.read();
           while ( ch != -1 && ch != '{') {
             ch = reader.read();
@@ -104,7 +110,11 @@ public class LocalizationUtils {
         BufferedReader reader = null;
         try {
           stream = new FileInputStream(tableFile);
-          reader = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+          } else {
+            reader = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
+          }
           reader.mark(1);
           int ch = reader.read();
           while (ch != -1 && ch != '{') {
