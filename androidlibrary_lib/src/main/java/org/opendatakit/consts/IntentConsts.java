@@ -57,9 +57,19 @@ public class IntentConsts {
   public class Sync {
     public static final String APPLICATION_NAME = "org.opendatakit.services";
     public static final String ACTIVITY_NAME =
-        "org.opendatakit.services.sync.activities.SyncActivity";
+        "org.opendatakit.services.sync.actions.activities.SyncActivity";
     public static final String SYNC_SERVICE_PACKAGE = "org.opendatakit.services";
     public static final String SYNC_SERVICE_CLASS = "org.opendatakit.services.sync.service.OdkSyncService";
+  }
+
+  /**
+   * Intent Extras:
+   * <ol><li>INTENT_KEY_APP_NAME</li></ol>
+   */
+  public class Login {
+    public static final String APPLICATION_NAME = "org.opendatakit.services";
+    public static final String ACTIVITY_NAME =
+        "org.opendatakit.services.sync.actions.activities.LoginActivity";
   }
 
   /**
