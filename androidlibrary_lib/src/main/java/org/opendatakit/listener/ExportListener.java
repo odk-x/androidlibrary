@@ -19,6 +19,8 @@ package org.opendatakit.listener;
  * Extracted from CsvUtil class.
  */
 public interface ExportListener {
+  void updateProgressDetail(int progressDetailString);
 
+  // No need to suppress the unused warning here, this is actually totally unused
   void exportComplete(boolean outcome);
 }

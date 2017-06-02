@@ -50,7 +50,7 @@ public class InitializationUtil {
   private String appName;
 
   public InitializationUtil(Context appContext, String appName,
-      InitializationSupervisor supervisor  ) {
+      InitializationSupervisor supervisor) {
     this.appContext = appContext;
     this.appName = appName;
     this.supervisor = supervisor;
@@ -66,16 +66,18 @@ public class InitializationUtil {
     // ///////////////////////////////////////////////
     // check that the framework zip has been exploded
     String toolName = getSupervisor().getToolName();
-    if (toolName != null &&
-        !ODKFileUtils.isConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString())) {
-      getSupervisor().publishProgress(appContext.getString(R.string.expansion_unzipping_begins), null);
+    if (toolName != null && !ODKFileUtils
+        .isConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString())) {
+      getSupervisor()
+          .publishProgress(appContext.getString(R.string.expansion_unzipping_begins), null);
 
-      extractFromRawZip(appContext.getResources(),
-          getSupervisor().getSystemZipResourceId(), true, pendingOutcome);
-      extractFromRawZip(appContext.getResources(),
-          getSupervisor().getConfigZipResourceId(), false, pendingOutcome);
+      extractFromRawZip(appContext.getResources(), getSupervisor().getSystemZipResourceId(), true,
+          pendingOutcome);
+      extractFromRawZip(appContext.getResources(), getSupervisor().getConfigZipResourceId(), false,
+          pendingOutcome);
 
-      ODKFileUtils.assertConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString());
+      ODKFileUtils
+          .assertConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString());
     }
 
     try {
@@ -109,8 +111,7 @@ public class InitializationUtil {
   }
 
   private final void doActionOnRawZip(Resources resources, int resourceId, boolean overwrite,
-      InitializationOutcome pendingOutcome,
-      ZipAction action) {
+      InitializationOutcome pendingOutcome, ZipAction action) {
     String message = null;
     InputStream rawInputStream = null;
     try {
@@ -254,8 +255,7 @@ public class InitializationUtil {
 
       @Override
       public void done(int totalCount) {
-        String completionString = appContext
-            .getString(R.string.expansion_unzipping_complete);
+        String completionString = appContext.getString(R.string.expansion_unzipping_complete);
         getSupervisor().publishProgress(completionString, null);
       }
 
@@ -289,10 +289,8 @@ public class InitializationUtil {
 
       if (c.moveToFirst()) {
         do {
-          String tableId = CursorUtils
-              .getIndexAsString(c, c.getColumnIndex(FormsColumns.TABLE_ID));
-          String formId = CursorUtils
-              .getIndexAsString(c, c.getColumnIndex(FormsColumns.FORM_ID));
+          String tableId = CursorUtils.getIndexAsString(c, c.getColumnIndex(FormsColumns.TABLE_ID));
+          String formId = CursorUtils.getIndexAsString(c, c.getColumnIndex(FormsColumns.FORM_ID));
           Uri otherUri = Uri.withAppendedPath(
               Uri.withAppendedPath(Uri.withAppendedPath(formsProviderContentUri, appName), tableId),
               formId);
@@ -378,7 +376,8 @@ public class InitializationUtil {
   private String tableIdInProgress;
   private Map<String, Boolean> importStatus = new TreeMap<String, Boolean>();
 
-  private final void updateTableDirs(InitializationOutcome pendingOutcome) throws ServicesAvailabilityException {
+  private final void updateTableDirs(InitializationOutcome pendingOutcome)
+      throws ServicesAvailabilityException {
     // /////////////////////////////////////////
     // /////////////////////////////////////////
     // /////////////////////////////////////////
@@ -430,7 +429,7 @@ public class InitializationUtil {
         }
       }
     }
-    
+
     DbHandle db = null;
     try {
       db = getSupervisor().getDatabase().openDatabase(appName);
@@ -443,8 +442,8 @@ public class InitializationUtil {
 
   }
 
-  private final void initTables(final InitializationOutcome pendingOutcome) throws
-      ServicesAvailabilityException {
+  private final void initTables(final InitializationOutcome pendingOutcome)
+      throws ServicesAvailabilityException {
 
     final String EMPTY_STRING = "";
     final String SPACE = " ";
@@ -569,22 +568,26 @@ public class InitializationUtil {
             if (request != null) {
               tableIdInProgress = request.getTableId();
               boolean success = false;
-              success = cu
-                  .importSeparable(new ImportListener() {
-                    @Override public void updateProgressDetail(String progressDetailString) {
-                      getSupervisor().publishProgress(displayTablesProgress, progressDetailString);
-                    }
+              success = cu.importSeparable(new ImportListener() {
+                @Override
+                public void updateProgressDetail(int row) {
+                  getSupervisor().publishProgress(displayTablesProgress,
+                      appContext.getString(R.string.import_in_progress, row));
+                }
 
-                    @Override public void importComplete(boolean outcome) {
-                      if (outcome) {
-                        pendingOutcome.add(appContext.getString(R.string.import_csv_success, tableIdInProgress));
-                      } else {
-                        pendingOutcome.add(appContext.getString(R.string.import_csv_failure, tableIdInProgress));
-                      }
-                      pendingOutcome.problemImportingAssetCsvContent =
-                          pendingOutcome.problemImportingAssetCsvContent || !outcome;
-                    }
-                  }, request.getTableId(), request.getFileQualifier(), true);
+                @Override
+                public void importComplete(boolean outcome) {
+                  if (outcome) {
+                    pendingOutcome
+                        .add(appContext.getString(R.string.import_csv_success, tableIdInProgress));
+                  } else {
+                    pendingOutcome
+                        .add(appContext.getString(R.string.import_csv_failure, tableIdInProgress));
+                  }
+                  pendingOutcome.problemImportingAssetCsvContent =
+                      pendingOutcome.problemImportingAssetCsvContent || !outcome;
+                }
+              }, request.getTableId(), request.getFileQualifier(), true);
               importStatus.put(key, success);
               if (success) {
                 detail = appContext.getString(R.string.import_success);
@@ -687,7 +690,7 @@ public class InitializationUtil {
    * @param baseStaleMediaPath -- path prefix to the stale forms/framework directory.
    */
   private final void updateFormDir(String tableId, String formId, File formDir,
-       String baseStaleMediaPath, InitializationOutcome pendingOutcome) {
+      String baseStaleMediaPath, InitializationOutcome pendingOutcome) {
     Uri formsProviderContentUri = Uri.parse("content://" + FormsProviderAPI.AUTHORITY);
     String formDirectoryPath = formDir.getAbsolutePath();
     WebLogger.getLogger(appName).i(t, "updateFormDir: " + formDirectoryPath);

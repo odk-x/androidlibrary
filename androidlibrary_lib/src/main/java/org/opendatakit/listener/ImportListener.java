@@ -19,7 +19,8 @@ package org.opendatakit.listener;
  * Extracted from CsvUtil class.
  */
 public interface ImportListener {
-  void updateProgressDetail(String progressDetailString);
+  void updateProgressDetail(int progressDetailString);
 
+  // Ignore the android studio warnings, InternationaizationUtil uses this
   void importComplete(boolean outcome);
 }
