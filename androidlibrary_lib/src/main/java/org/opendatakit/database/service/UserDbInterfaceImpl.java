@@ -596,7 +596,10 @@ public class UserDbInterfaceImpl implements UserDbInterface {
         // If there is a cache hit, check if it is stale
         TableMetaDataEntries newEntries = internalUserDbInterface
                 .getTableMetadataIfChanged(appName, dbHandleName, tableId, allEntries.getRevId());
-        if (!newEntries.getRevId().equals(allEntries.getRevId())) {
+        String newEntRevId = newEntries.getRevId();
+        // We want to update the cache if the condition of the revIds being the
+        // same does NOT hold
+        if (!(newEntRevId != null && newEntRevId.equals(allEntries.getRevId()))) {
           metaDataCache.put(tableId, newEntries);
           allEntries = newEntries;
         }
