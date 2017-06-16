@@ -33,7 +33,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
 
   private final InternalUserDbInterface internalUserDbInterface;
 
-  private Map<String, TableMetaDataEntries> metaDataCache;
+  private final Map<String, TableMetaDataEntries> metaDataCache;
 
   private String[] internalAdminColumns;
 
@@ -44,6 +44,11 @@ public class UserDbInterfaceImpl implements UserDbInterface {
 
     this.internalUserDbInterface = internalUserDbInterface;
     this.metaDataCache = new HashMap<>();
+  }
+  private Map<String, TableMetaDataEntries> getMdc() {
+    synchronized (metaDataCache) {
+      return metaDataCache;
+    }
   }
 
   public InternalUserDbInterface getInternalUserDbInterface() {
@@ -586,12 +591,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
       // Ignore the cache, as it only caches table specific metadata
       entries = internalUserDbInterface.getTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
     } else {
-      TableMetaDataEntries allEntries = metaDataCache.get(tableId);
+      TableMetaDataEntries allEntries = getMdc().get(tableId);
 
       if (allEntries == null) {
         // If there is no cache hit, fetch from the database
         allEntries = internalUserDbInterface.getTableMetadata(appName, dbHandleName, tableId, null, null, null);
-        metaDataCache.put(tableId, allEntries);
+        getMdc().put(tableId, allEntries);
       } else {
         // If there is a cache hit, check if it is stale
         TableMetaDataEntries newEntries = internalUserDbInterface
@@ -600,7 +605,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
         // We want to update the cache if the condition of the revIds being the
         // same does NOT hold
         if (!(newEntRevId != null && newEntRevId.equals(allEntries.getRevId()))) {
-          metaDataCache.put(tableId, newEntries);
+          getMdc().put(tableId, newEntries);
           allEntries = newEntries;
         }
       }
