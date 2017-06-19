@@ -33,8 +33,16 @@ public class UserDbInterfaceImpl implements UserDbInterface {
 
   private final InternalUserDbInterface internalUserDbInterface;
 
-  private final Map<String, TableMetaDataEntries> metaDataCache;
+  /**
+   * Access this ONLY through getMetadata(tableId) and putMetadata(tableId, entries).
+   * Multiple threads may be accessing this.
+   */
+  private final Map<String, TableMetaDataEntries> privateMetaDataCache = new HashMap<>();
 
+  /**
+   * Access this ONLY through internalGetAdminColumns()
+   * Multiple threads may be accessing this.
+   */
   private String[] internalAdminColumns;
 
   public UserDbInterfaceImpl(InternalUserDbInterface internalUserDbInterface) throws IllegalArgumentException {
@@ -43,11 +51,17 @@ public class UserDbInterfaceImpl implements UserDbInterface {
     }
 
     this.internalUserDbInterface = internalUserDbInterface;
-    this.metaDataCache = new HashMap<>();
   }
-  private Map<String, TableMetaDataEntries> getMdc() {
-    synchronized (metaDataCache) {
-      return metaDataCache;
+
+  private TableMetaDataEntries getMetadata(String tableId) {
+    synchronized (privateMetaDataCache) {
+      return privateMetaDataCache.get(tableId);
+    }
+  }
+
+  private void putMetadata(String tableId, TableMetaDataEntries entries) {
+    synchronized (privateMetaDataCache) {
+      privateMetaDataCache.put(tableId, entries);
     }
   }
 
@@ -55,7 +69,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
     return internalUserDbInterface;
   }
 
-  private String[] internalGetAdminColumns() throws ServicesAvailabilityException {
+  private synchronized String[] internalGetAdminColumns() throws ServicesAvailabilityException {
     if ( internalAdminColumns != null ) {
       return internalAdminColumns;
     } else {
@@ -591,12 +605,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
       // Ignore the cache, as it only caches table specific metadata
       entries = internalUserDbInterface.getTableMetadata(appName, dbHandleName, tableId, partition, aspect, key);
     } else {
-      TableMetaDataEntries allEntries = getMdc().get(tableId);
+      TableMetaDataEntries allEntries = getMetadata(tableId);
 
       if (allEntries == null) {
         // If there is no cache hit, fetch from the database
         allEntries = internalUserDbInterface.getTableMetadata(appName, dbHandleName, tableId, null, null, null);
-        getMdc().put(tableId, allEntries);
+        putMetadata(tableId, allEntries);
       } else {
         // If there is a cache hit, check if it is stale
         TableMetaDataEntries newEntries = internalUserDbInterface
@@ -605,7 +619,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
         // We want to update the cache if the condition of the revIds being the
         // same does NOT hold
         if (!(newEntRevId != null && newEntRevId.equals(allEntries.getRevId()))) {
-          getMdc().put(tableId, newEntries);
+          putMetadata(tableId, newEntries);
           allEntries = newEntries;
         }
       }
