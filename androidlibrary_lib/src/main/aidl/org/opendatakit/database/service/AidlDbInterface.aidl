@@ -81,10 +81,10 @@ interface AidlDbInterface {
    *
    * @param appName
    *
-   * @return null or JSON serialization of an array of objects
+   * @return null or DbChunk of JSON serialization of an array of objects
    * structured as { "user_id": "...", "full_name": "...", "roles": ["...",...] }
    */
-  String getUsersList(in String appName);
+  DbChunk getUsersList(in String appName);
 
   /**
    * Obtain a databaseHandleName
@@ -228,9 +228,9 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param choiceListId -- the md5 hash of the choiceListJSON
-   * @return choiceListJSON -- the actual JSON choice list text.
+   * @return null or DbChunk of choiceListJSON -- the actual JSON choice list text.
    */
-  String getChoiceList(in String appName, in DbHandle dbHandleName, in String choiceListId );
+  DbChunk getChoiceList(in String appName, in DbHandle dbHandleName, in String choiceListId );
 
   /**
    * If the tableId is not recorded in the TableDefinition metadata table, then

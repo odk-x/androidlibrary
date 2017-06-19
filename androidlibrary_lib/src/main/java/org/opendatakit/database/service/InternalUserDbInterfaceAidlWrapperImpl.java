@@ -201,7 +201,7 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
   @Override
   public String getUsersList(String appName) throws ServicesAvailabilityException {
     try {
-      return dbInterface.getUsersList(appName);
+      return fetchAndRebuildChunksAllowNull(dbInterface.getUsersList(appName), String.class);
     } catch (Exception e) {
       rethrowAlwaysAllowedRemoteException(e);
       throw new IllegalStateException("unreachable - keep IDE happy");
@@ -459,13 +459,15 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
    * @param appName
    * @param dbHandleName
    * @param choiceListId -- the md5 hash of the choiceListJSON
-   * @return choiceListJSON -- the actual JSON choice list text.
+   * @return null or choiceListJSON -- the actual JSON choice list text.
    */
   @Override
   public String getChoiceList(String appName, DbHandle dbHandleName, String choiceListId)
       throws ServicesAvailabilityException {
     try {
-      return dbInterface.getChoiceList(appName, dbHandleName, choiceListId);
+      return fetchAndRebuildChunksAllowNull(dbInterface.getChoiceList(appName, dbHandleName,
+          choiceListId),
+          String.class);
     } catch (Exception e) {
       rethrowAlwaysAllowedRemoteException(e);
       throw new IllegalStateException("unreachable - keep IDE happy");
@@ -1804,6 +1806,25 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
       WebLogger.getContextLogger().e(TAG, "Failed to rebuild serialized object from chunks");
       return null;
     }
+  }
+
+  /**
+   * Retrieve all the pieces of the data across the wire and rebuild them into their original type
+   *
+   * @param firstChunk   The first chunk, which contains a pointer to the next. May be null.
+   * @param serializable
+   * @param <T>          The type to reconstruct into
+   * @return The original object
+   * @throws RemoteException
+   */
+  private <T> T fetchAndRebuildChunksAllowNull(DbChunk firstChunk, Class<T> serializable)
+      throws RemoteException {
+
+    if ( firstChunk == null ) {
+      return null;
+    }
+
+    return fetchAndRebuildChunks(firstChunk, serializable);
   }
 
   /**
