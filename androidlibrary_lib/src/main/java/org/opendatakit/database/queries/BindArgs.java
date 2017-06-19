@@ -18,8 +18,13 @@ package org.opendatakit.database.queries;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.opendatakit.utilities.ODKFileUtils;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * This holds the list of objects that are bind arguments to the SQLite database.
@@ -48,6 +53,31 @@ public class BindArgs implements Parcelable, Serializable {
         if ( o instanceof Long ) continue;
         throw new IllegalArgumentException("bind args must be a primitive type");
       }
+    }
+  }
+
+  public BindArgs(String fromJSON) {
+    if ( fromJSON == null ) {
+      bindArgs = new Object[0];
+      return;
+    }
+
+    TypeReference<ArrayList<Object>> type = new TypeReference<ArrayList<Object>>() {};
+    try {
+      ArrayList<Object> values = ODKFileUtils.mapper.readValue(fromJSON, type);
+      bindArgs = values.toArray(new Object[values.size()]);
+    } catch (IOException e) {
+      // not expected
+      throw new IllegalStateException("Unable to deserialize bindArgs");
+    }
+  }
+
+  public String asJSON() {
+    try {
+      return ODKFileUtils.mapper.writeValueAsString(bindArgs);
+    } catch (JsonProcessingException e) {
+      // not expected
+      throw new IllegalStateException("Unable to serialize bindArgs");
     }
   }
 
