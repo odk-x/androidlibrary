@@ -353,6 +353,10 @@ public class ODKFileUtils {
 
     for (String dirName : dirs) {
       File dir = new File(dirName);
+      File badDir = new File(dir.getParent(), dir.getName() + ".bad");
+      if ( badDir.exists() ) {
+        badDir.delete();
+      }
       if (!dir.exists()) {
         if (!dir.mkdirs()) {
           RuntimeException e = new RuntimeException("Cannot create directory: " + dirName);
@@ -360,8 +364,16 @@ public class ODKFileUtils {
         }
       } else {
         if (!dir.isDirectory()) {
-          RuntimeException e = new RuntimeException(dirName + " exists, but is not a directory");
-          throw e;
+          File retryDir = new File(dir.getParent(), dir.getName());
+          if ( dir.renameTo(badDir) ) {
+            if ( !retryDir.mkdirs() ) {
+              RuntimeException e = new RuntimeException("Cannot create directory: " + dirName);
+              throw e;
+            }
+          } else {
+            RuntimeException e = new RuntimeException(dirName + " exists, but is not a directory");
+            throw e;
+          }
         }
       }
     }
