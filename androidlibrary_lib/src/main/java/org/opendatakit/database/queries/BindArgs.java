@@ -57,7 +57,7 @@ public class BindArgs implements Parcelable, Serializable {
   }
 
   public BindArgs(String fromJSON) {
-    if ( fromJSON == null ) {
+    if ( fromJSON == null || fromJSON.length() == 0) {
       bindArgs = new Object[0];
       return;
     }
@@ -65,7 +65,12 @@ public class BindArgs implements Parcelable, Serializable {
     TypeReference<ArrayList<Object>> type = new TypeReference<ArrayList<Object>>() {};
     try {
       ArrayList<Object> values = ODKFileUtils.mapper.readValue(fromJSON, type);
-      bindArgs = values.toArray(new Object[values.size()]);
+      if ( values == null ) {
+        bindArgs = new Object[0];
+        return;
+      } else {
+        bindArgs = values.toArray(new Object[values.size()]);
+      }
     } catch (IOException e) {
       // not expected
       throw new IllegalStateException("Unable to deserialize bindArgs");
