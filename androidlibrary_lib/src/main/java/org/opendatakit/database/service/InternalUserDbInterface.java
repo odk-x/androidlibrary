@@ -146,6 +146,10 @@ public interface InternalUserDbInterface {
        throws IllegalStateException, IllegalArgumentException, SQLiteException,
        ServicesAvailabilityException;
 
+   TableHealthInfo getTableHealthStatus(String appName, DbHandle dbHandleName, String tableId)
+       throws IllegalStateException, IllegalArgumentException, SQLiteException,
+       ServicesAvailabilityException;
+
    List<TableHealthInfo> getTableHealthStatuses(String appName, DbHandle dbHandleName)
        throws IllegalStateException, IllegalArgumentException, SQLiteException,
        ServicesAvailabilityException;

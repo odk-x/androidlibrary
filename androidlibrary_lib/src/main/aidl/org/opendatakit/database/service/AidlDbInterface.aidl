@@ -377,6 +377,17 @@ interface AidlDbInterface {
       in String tableId);
 
   /**
+   * Return the a table's health status.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   *
+   * @return the first chunk of the TableHealthInfo record for this appName and tableId
+   */
+  DbChunk getTableHealthStatus(in String appName, in DbHandle dbHandleName, in String tableId);
+
+  /**
    * Return the list of all tables and their health status.
    *
    * @param appName

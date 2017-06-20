@@ -765,6 +765,29 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
   }
 
   /**
+   * Return a table's health status.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @return the TableHealthInfo record for this appName and tableId
+   */
+  @Override
+  @SuppressWarnings("unchecked")
+  public TableHealthInfo getTableHealthStatus(String appName, DbHandle dbHandleName, String tableId)
+      throws ServicesAvailabilityException {
+    try {
+      Parcelable results = fetchAndRebuildChunks(
+          dbInterface.getTableHealthStatus(appName, dbHandleName, tableId), Parcelable.class);
+
+      return (TableHealthInfo) results;
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
+
+  /**
    * Return the list of all tables and their health status.
    *
    * @param appName
