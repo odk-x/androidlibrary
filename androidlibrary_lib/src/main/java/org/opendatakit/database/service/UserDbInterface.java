@@ -16,6 +16,7 @@ package org.opendatakit.database.service;
 
 import android.content.ContentValues;
 import org.opendatakit.database.data.*;
+import org.opendatakit.database.queries.BindArgs;
 import org.opendatakit.database.queries.ResumableQuery;
 import org.opendatakit.exception.ActionNotAuthorizedException;
 import org.opendatakit.exception.ServicesAvailabilityException;
@@ -133,7 +134,7 @@ public interface UserDbInterface {
    * @throws ServicesAvailabilityException
    */
   void updateLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
-                          ContentValues rowValues, String whereClause, Object[] bindArgs)
+                          ContentValues rowValues, String whereClause, BindArgs bindArgs)
       throws ServicesAvailabilityException;
 
   /**
@@ -147,7 +148,7 @@ public interface UserDbInterface {
    * @throws ServicesAvailabilityException
    */
   void deleteLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId, String whereClause,
-                          Object[] bindArgs) throws ServicesAvailabilityException;
+                          BindArgs bindArgs) throws ServicesAvailabilityException;
 
   /**
    * Get a {@link BaseTable} for this local only table based on the given SQL command. All
@@ -174,7 +175,7 @@ public interface UserDbInterface {
    * @throws ServicesAvailabilityException
    */
   BaseTable simpleQueryLocalOnlyTables(String appName, DbHandle dbHandleName, String tableId,
-                                       String whereClause, Object[] bindArgs, String[] groupBy,
+                                       String whereClause, BindArgs bindArgs, String[] groupBy,
                                        String having, String[] orderByColNames,
                                        String[] orderByDirections, Integer limit, Integer offset)
       throws ServicesAvailabilityException;
@@ -198,7 +199,7 @@ public interface UserDbInterface {
    * @throws ServicesAvailabilityException
    */
   BaseTable arbitrarySqlQueryLocalOnlyTables(String appName, DbHandle dbHandleName, String tableId,
-                                             String sqlCommand, Object[] bindArgs, Integer limit,
+                                             String sqlCommand, BindArgs bindArgs, Integer limit,
                                              Integer offset)
       throws ServicesAvailabilityException;
 
@@ -475,7 +476,7 @@ public interface UserDbInterface {
    * @return A {@link UserTable} containing the results of the query
    */
   BaseTable simpleQuery(String appName, DbHandle dbHandleName, String tableId, String whereClause,
-                        Object[] bindArgs, String[] groupBy, String having,
+                        BindArgs bindArgs, String[] groupBy, String having,
                         String[] orderByColNames, String[] orderByDirections, Integer limit,
                         Integer offset)
       throws ServicesAvailabilityException;
@@ -508,7 +509,7 @@ public interface UserDbInterface {
    * @return A {@link UserTable} containing the results of the query
    */
   BaseTable privilegedSimpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                                  String whereClause, Object[] bindArgs, String[] groupBy,
+                                  String whereClause, BindArgs bindArgs, String[] groupBy,
                                   String having, String[] orderByColNames,
                                   String[] orderByDirections, Integer limit, Integer offset)
       throws ServicesAvailabilityException;
@@ -531,7 +532,7 @@ public interface UserDbInterface {
    * @return An  {@link BaseTable}. Containing the results of the query
    */
   BaseTable arbitrarySqlQuery(String appName, DbHandle dbHandleName, String tableId,
-                              String sqlCommand, Object[] bindArgs, Integer limit, Integer offset)
+                              String sqlCommand, BindArgs bindArgs, Integer limit, Integer offset)
       throws ServicesAvailabilityException;
 
   /**
@@ -569,7 +570,7 @@ public interface UserDbInterface {
    *                     bind parameters
    */
   void privilegedExecute(String appName, DbHandle dbHandleName, String sqlCommand,
-                         Object[] bindArgs) throws ServicesAvailabilityException;
+                         BindArgs bindArgs) throws ServicesAvailabilityException;
 
   /**
    * Get a {@link UserTable} for this table based on the given SQL command. All
@@ -596,7 +597,7 @@ public interface UserDbInterface {
    * @return A {@link UserTable} containing the results of the query
    */
   UserTable simpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                        OrderedColumns columnDefns, String whereClause, Object[] bindArgs,
+                        OrderedColumns columnDefns, String whereClause, BindArgs bindArgs,
                         String[] groupBy, String having, String[] orderByColNames,
                         String[] orderByDirections, Integer limit, Integer offset)
       throws ServicesAvailabilityException;
@@ -629,7 +630,7 @@ public interface UserDbInterface {
    * @return A {@link UserTable} containing the results of the query
    */
   UserTable privilegedSimpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                                  OrderedColumns columnDefns, String whereClause, Object[] bindArgs,
+                                  OrderedColumns columnDefns, String whereClause, BindArgs bindArgs,
                                   String[] groupBy, String having, String[] orderByColNames,
                                   String[] orderByDirections, Integer limit, Integer offset)
       throws ServicesAvailabilityException;
@@ -652,7 +653,7 @@ public interface UserDbInterface {
    * @return An  {@link BaseTable}. Containing the results of the query
    */
   UserTable arbitrarySqlQuery(String appName, DbHandle dbHandleName, String tableId,
-                              OrderedColumns columnDefns, String sqlCommand, Object[] bindArgs,
+                              OrderedColumns columnDefns, String sqlCommand, BindArgs bindArgs,
                               Integer limit, Integer offset)
       throws ServicesAvailabilityException;
 

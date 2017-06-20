@@ -240,7 +240,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public void updateLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
-                                 ContentValues rowValues, String whereClause, Object[] bindArgs)
+                                 ContentValues rowValues, String whereClause, BindArgs bindArgs)
       throws ServicesAvailabilityException {
 
     if (!tableId.startsWith("L_")) {
@@ -249,7 +249,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
 
     internalUserDbInterface
         .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause,
-          new BindArgs(bindArgs));
+         bindArgs);
   }
 
   /**
@@ -264,7 +264,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public void deleteLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
-                                 String whereClause, Object[] bindArgs)
+                                 String whereClause, BindArgs bindArgs)
       throws ServicesAvailabilityException {
 
     if (!tableId.startsWith("L_")) {
@@ -272,7 +272,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
     }
 
     internalUserDbInterface
-          .deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, new BindArgs(bindArgs));
+          .deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, bindArgs);
   }
 
   /**
@@ -301,7 +301,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public BaseTable simpleQueryLocalOnlyTables(String appName, DbHandle dbHandleName, String tableId,
-                                              String whereClause, Object[] bindArgs,
+                                              String whereClause, BindArgs bindArgs,
                                               String[] groupBy, String having,
                                               String[] orderByColNames, String[] orderByDirections,
                                               Integer limit, Integer offset)
@@ -336,7 +336,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public BaseTable arbitrarySqlQueryLocalOnlyTables(String appName, DbHandle dbHandleName,
                                                     String tableId, String sqlCommand,
-                                                    Object[] bindArgs, Integer limit,
+                                                    BindArgs bindArgs, Integer limit,
                                                     Integer offset)
       throws ServicesAvailabilityException {
 
@@ -757,12 +757,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public BaseTable simpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                               String whereClause, Object[] bindArgs, String[] groupBy,
+                               String whereClause, BindArgs bindArgs, String[] groupBy,
                                String having, String[] orderByColNames, String[] orderByDirections,
                                Integer limit, Integer offset)
       throws ServicesAvailabilityException {
 
-    SimpleQuery query = new SimpleQuery(tableId, new BindArgs(bindArgs), whereClause, groupBy,
+    SimpleQuery query = new SimpleQuery(tableId, bindArgs, whereClause, groupBy,
         having, orderByColNames, orderByDirections, limit, offset);
 
     BaseTable baseTable = internalUserDbInterface
@@ -803,12 +803,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public BaseTable privilegedSimpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                                         String whereClause, Object[] bindArgs, String[] groupBy,
+                                         String whereClause, BindArgs bindArgs, String[] groupBy,
                                          String having, String[] orderByColNames,
                                          String[] orderByDirections, Integer limit, Integer offset)
       throws ServicesAvailabilityException {
 
-    SimpleQuery query = new SimpleQuery(tableId, new BindArgs(bindArgs), whereClause, groupBy,
+    SimpleQuery query = new SimpleQuery(tableId, bindArgs, whereClause, groupBy,
         having, orderByColNames, orderByDirections, limit, offset);
 
     BaseTable baseTable = internalUserDbInterface
@@ -839,11 +839,11 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public BaseTable arbitrarySqlQuery(String appName, DbHandle dbHandleName, String tableId,
-                                     String sqlCommand, Object[] bindArgs, Integer limit,
+                                     String sqlCommand, BindArgs bindArgs, Integer limit,
                                      Integer offset)
       throws ServicesAvailabilityException {
 
-    ArbitraryQuery query = new ArbitraryQuery(tableId, new BindArgs(bindArgs), sqlCommand, limit,
+    ArbitraryQuery query = new ArbitraryQuery(tableId, bindArgs, sqlCommand, limit,
         offset);
 
     BaseTable baseTable = internalUserDbInterface
@@ -912,10 +912,10 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public void privilegedExecute(String appName, DbHandle dbHandleName, String sqlCommand,
-                                Object[] bindArgs) throws ServicesAvailabilityException {
+                                BindArgs bindArgs) throws ServicesAvailabilityException {
 
     internalUserDbInterface
-        .privilegedExecute(appName, dbHandleName, sqlCommand, new BindArgs(bindArgs));
+        .privilegedExecute(appName, dbHandleName, sqlCommand, bindArgs);
   }
 
   /********** USERTABLE QUERY WRAPPERS **********/
@@ -946,7 +946,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    */
   @Override
   public UserTable simpleQuery(String appName, DbHandle dbHandleName, String tableId,
-                               OrderedColumns columnDefns, String whereClause, Object[] bindArgs,
+                               OrderedColumns columnDefns, String whereClause, BindArgs bindArgs,
                                String[] groupBy, String having, String[] orderByColNames,
                                String[] orderByDirections, Integer limit, Integer offset)
       throws ServicesAvailabilityException {
@@ -987,7 +987,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public UserTable privilegedSimpleQuery(String appName, DbHandle dbHandleName, String tableId,
                                          OrderedColumns columnDefns, String whereClause,
-                                         Object[] bindArgs, String[] groupBy, String having,
+                                         BindArgs bindArgs, String[] groupBy, String having,
                                          String[] orderByColNames, String[] orderByDirections,
                                          Integer limit, Integer offset)
       throws ServicesAvailabilityException {
@@ -1018,7 +1018,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public UserTable arbitrarySqlQuery(String appName, DbHandle dbHandleName, String tableId,
                                      OrderedColumns columnDefns, String sqlCommand,
-                                     Object[] bindArgs, Integer limit, Integer offset)
+                                     BindArgs bindArgs, Integer limit, Integer offset)
       throws ServicesAvailabilityException {
 
     BaseTable baseTable = arbitrarySqlQuery(appName, dbHandleName, tableId, sqlCommand, bindArgs,

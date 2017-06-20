@@ -19,6 +19,7 @@ import android.content.ContentValues;
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.*;
 import org.opendatakit.database.data.*;
+import org.opendatakit.database.queries.BindArgs;
 import org.opendatakit.database.service.DbHandle;
 import org.opendatakit.database.utilities.CursorUtils;
 import org.opendatakit.exception.ServicesAvailabilityException;
@@ -149,10 +150,11 @@ public class CsvUtil {
               + " IS NULL OR " + DataTableColumns.CONFLICT_TYPE + " = " + Integer
               .toString(ConflictType.LOCAL_UPDATED_UPDATED_VALUES) + ")";
 
-      String[] emptyArray = {};
+      BindArgs emptyArgs = new BindArgs(new Object[0]);
+      String[] emptyArray = new String[0];
 
       UserTable table = supervisor.getDatabase()
-          .simpleQuery(appName, db, tableId, orderedDefns, whereString, emptyArray, emptyArray,
+          .simpleQuery(appName, db, tableId, orderedDefns, whereString, emptyArgs, emptyArray,
               null, null, null, null, null);
 
       // emit data table...
