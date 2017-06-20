@@ -39,9 +39,9 @@ public abstract class ResumableQuery implements Query {
 
    public ResumableQuery(String tableId, BindArgs bindArgs, Integer limit, Integer offset) {
       this.mTableId = tableId;
-      this.mBindArgs = bindArgs;
-      this.mLimit = limit != null ? limit.intValue() : -1;
-      this.mOffset = offset != null ? offset.intValue() : -1;
+      this.mBindArgs = (bindArgs != null) ? bindArgs : new BindArgs(new Object[0]);
+      this.mLimit = (limit != null) ? limit.intValue() : -1;
+      this.mOffset = (offset != null) ? offset.intValue() : -1;
    }
 
    public ResumableQuery(String tableId, BindArgs bindArgs, QueryBounds bounds) {
