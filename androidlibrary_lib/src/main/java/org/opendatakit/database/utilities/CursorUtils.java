@@ -34,10 +34,38 @@ public class CursorUtils {
   public static final int TABLE_HEALTH_IS_CLEAN = 0;
   public static final int TABLE_HEALTH_HAS_CONFLICTS = 1;
   public static final int TABLE_HEALTH_HAS_CHECKPOINTS = 2;
-  public static final int TABLE_HEALTH_HAS_CHECKPOINTS_AND_CONFLICTS = 3;
+  public static final int TABLE_HEALTH_HAS_CHANGES = 4;
 
   public static final String DEFAULT_LOCALE = "default";
   public static final String DEFAULT_CREATOR = "anonymous";
+
+  public static int setTableHealthHasConflicts(int health) {
+    return health | TABLE_HEALTH_HAS_CONFLICTS;
+  }
+
+  public static int setTableHealthHasCheckpoints(int health) {
+    return health | TABLE_HEALTH_HAS_CHECKPOINTS;
+  }
+
+  public static int setTableHealthHasChanges(int health) {
+    return health | TABLE_HEALTH_HAS_CHANGES;
+  }
+
+  public static boolean getTableHealthIsClean(int health) {
+    return health == 0;
+  }
+
+  public static boolean getTableHealthHasConflicts(int health) {
+    return (health & TABLE_HEALTH_HAS_CONFLICTS) != 0;
+  }
+
+  public static boolean getTableHealthHasCheckpoints(int health) {
+    return (health & TABLE_HEALTH_HAS_CHECKPOINTS) != 0;
+  }
+
+  public static boolean getTableHealthHasChanges(int health) {
+    return (health & TABLE_HEALTH_HAS_CHANGES) != 0;
+  }
 
   /**
    * Return the data stored in the cursor at the given index and given position
