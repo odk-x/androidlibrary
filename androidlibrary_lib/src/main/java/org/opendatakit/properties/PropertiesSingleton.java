@@ -15,300 +15,80 @@
 package org.opendatakit.properties;
 
 import android.content.Context;
-
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.consts.IntentConsts;
-import org.opendatakit.utilities.ODKFileUtils;
 import org.opendatakit.logging.WebLogger;
+import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.*;
 import java.util.*;
 
 /**
  * Properties are in 3 classes:
- *
+ * <p>
  * (1) general (syncable) -- the contents of config/assets/app.properties
  * (2) device -- the contents of data/device.properties
  * (3) secure -- stored in ODK Services' (private) dataDir under mAppName
- *
+ * <p>
  * The tools provide the different sets of these and default values for these settings.
  * What goes into secure and device should be predefined in CommonToolProperties
- *
+ * <p>
  * If the general (syncable) file contains values for the device and secure settings,
  * these become the default settings for those values. There is also a
  * default.device.properties
- *
+ * <p>
  * Device settings and secure settings are not overwritten by changes in the
  * general (syncable) settings. You need to Reset the device configuration to
  * re-initialize these.
  */
 public class PropertiesSingleton {
 
-  private static final String t = "PropertiesSingleton";
+  private static final String TAG = PropertiesSingleton.class.getSimpleName();
 
   private static final String PROPERTIES_REVISION_FILENAME = "properties.revision";
   private static final String GENERAL_PROPERTIES_FILENAME = "app.properties";
   private static final String DEFAULT_DEVICE_PROPERTIES_FILENAME = "default.device.properties";
   private static final String DEVICE_PROPERTIES_FILENAME = "device.properties";
   private static final String SECURE_PROPERTIES_FILENAME = "secure.properties";
-
-  private static int invalidRevision() {
-    return -1;
-  }
-
   private static final String TOOL_INITIALIZATION_SUFFIX = ".tool_last_initialization_start_time";
-  private static String toolInitializationPropertyName(String toolName) {
-    return toolName + TOOL_INITIALIZATION_SUFFIX;
-  }
-
-  private static boolean isToolInitializationPropertyName(String toolName) {
-    return toolName.endsWith(TOOL_INITIALIZATION_SUFFIX);
-  }
-
-  public static String toolVersionPropertyName(String toolName) {
-    return toolName + ".tool_version_code";
-  }
-
-  public static String toolFirstRunPropertyName(String toolName) {
-    return toolName + ".tool_first_run";
-  }
+  /**
+   * These three are used in services.utilities.ODKServicePropertyUtils
+   */
+  @SuppressWarnings("WeakerAccess")
+  public final String CREDENTIAL_TYPE_NONE;
+  @SuppressWarnings("WeakerAccess")
+  public final String CREDENTIAL_TYPE_USERNAME_PASSWORD;
+  @SuppressWarnings("WeakerAccess")
+  public final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT;
 
   private final String mAppName;
   private final boolean mHasSecureStorage;
   private final File mSecureStorageDir;
-  public final String CREDENTIAL_TYPE_NONE;
-  public final String CREDENTIAL_TYPE_USERNAME_PASSWORD;
-  public final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT;
-
-  private int currentRevision = invalidRevision();
-
   private final TreeMap<String, String> mGeneralDefaults;
   private final TreeMap<String, String> mDeviceDefaults;
   private final TreeMap<String, String> mSecureDefaults;
-
   private final Properties mGeneralProps;
   private final Properties mGlobalDeviceProps;
   private final Properties mDeviceProps;
   private final Properties mSecureProps;
-
-  public String getAppName() {
-    return mAppName;
-  }
-
-  private boolean isSecureProperty(String propertyName) {
-    return mSecureDefaults.containsKey(propertyName);
-  }
-
-  private boolean isDeviceProperty(String propertyName) {
-    return mDeviceDefaults.containsKey(propertyName);
-  }
-
-  public boolean containsKey(String propertyName) {
-    readPropertiesIfModified();
-    if (isSecureProperty(propertyName)) {
-      return mSecureProps.containsKey(propertyName);
-    } else if (isDeviceProperty(propertyName) ) {
-      return mDeviceProps.containsKey(propertyName);
-    } else {
-      return mGeneralProps.containsKey(propertyName);
-    }
-  }
-
-  /**
-   * Accesses the given propertyName.
-   * 
-   * @param propertyName
-   * @return null or the string value
-   */
-  public String getProperty(String propertyName) {
-    readPropertiesIfModified();
-    if (isSecureProperty(propertyName)) {
-      if ( !mHasSecureStorage ) {
-        throw new IllegalStateException("Attempt to retrieve secured property " + propertyName +
-           " outside of ODK Services");
-      }
-      return mSecureProps.getProperty(propertyName);
-    } else if (isDeviceProperty(propertyName) ) {
-      return mDeviceProps.getProperty(propertyName);
-    } else {
-      return mGeneralProps.getProperty(propertyName);
-    }
-  }
-
-  /**
-   * Accesses the given propertyName.
-   * 
-   * If the value is not specified, null or an empty string, a null value is
-   * returned. Boolean.TRUE is returned if the value is "true", otherwise
-   * Boolean.FALSE is returned.
-   * 
-   * @param propertyName
-   * @return null or boolean true/false
-   */
-  public Boolean getBooleanProperty(String propertyName) {
-    Boolean booleanSetting = Boolean.TRUE;
-    String value = getProperty(propertyName);
-    if (value == null || value.length() == 0) {
-      return null;
-    }
-
-    if (!"true".equalsIgnoreCase(value)) {
-      booleanSetting = Boolean.FALSE;
-    }
-
-    return booleanSetting;
-  }
-
-  /**
-   * Accesses the given propertyName.
-   * 
-   * If the value is not specified, null or an empty string, or if the value
-   * cannot be parsed as an integer, then null is return. Otherwise, the integer
-   * value is returned.
-   * 
-   * @param propertyName
-   * @return
-   */
-  public Integer getIntegerProperty(String propertyName) {
-    String value = getProperty(propertyName);
-    if (value == null) {
-      return null;
-    }
-    try {
-      int v = Integer.parseInt(value);
-      return v;
-    } catch (NumberFormatException e) {
-      return null;
-    }
-  }
-
-  public void setProperties( Map<String,String> properties) {
-    readPropertiesIfModified();
-    if ( !mHasSecureStorage ) {
-      for (String propertyName : properties.keySet()) {
-        if (isSecureProperty(propertyName)) {
-          throw new IllegalStateException("Attempted to set or clear a secure property outside "
-              + "ODK Services");
-        }
-      }
-    }
-
-    boolean updatedSecureProps = false;
-    boolean updatedDeviceProps = false;
-    boolean updatedGeneralProps = false;
-
-    for ( String propertyName : properties.keySet() ) {
-      String value = properties.get(propertyName);
-      if ( value == null ) {
-        // remove from map
-        if (isSecureProperty(propertyName)) {
-          mSecureProps.remove(propertyName);
-          updatedSecureProps = true;
-        } else if (isDeviceProperty(propertyName) ) {
-          mDeviceProps.remove(propertyName);
-          updatedDeviceProps = true;
-        } else {
-          mGeneralProps.remove(propertyName);
-          updatedGeneralProps = true;
-        }
-      } else {
-        // set into map
-        if (isSecureProperty(propertyName)) {
-          mSecureProps.setProperty(propertyName, value);
-          updatedSecureProps = true;
-        } else if (isDeviceProperty(propertyName) ) {
-          mDeviceProps.setProperty(propertyName, value);
-          updatedDeviceProps = true;
-        } else {
-          mGeneralProps.setProperty(propertyName, value);
-          updatedGeneralProps = true;
-        }
-      }
-    }
-    writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
-  }
-
-  /**
-   * Determine whether or not the initialization task for the given toolName
-   * should be run.
-   *
-   * @param toolName
-   *          (e.g., survey, tables, scan, etc.)
-   */
-  public boolean shouldRunInitializationTask(String toolName) {
-    // this is stored in the device properties
-    readPropertiesIfModified();
-    String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
-    if (value == null || value.length() == 0) {
-      return Boolean.TRUE;
-    }
-
-    return Boolean.FALSE;
-  }
-
-  /**
-   * Indicate that the initialization task for this given tool has been run.
-   *
-   * @param toolName
-   */
-  public void clearRunInitializationTask(String toolName) {
-    // this is stored in the device properties
-    readPropertiesIfModified();
-    mDeviceProps.setProperty(toolInitializationPropertyName(toolName),
-            TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()));
-    writeProperties(false, true, false);
-  }
-
-  /**
-   * Indicate that all initialization tasks for all tools should be run (again).
-   */
-  public void setAllRunInitializationTasks() {
-    // this is stored in the device properties
-    readPropertiesIfModified();
-    ArrayList<String> keysToRemove = new ArrayList<String>();
-
-    for ( Object okey : mDeviceProps.keySet() ) {
-      String theKey = (String) okey;
-      if ( isToolInitializationPropertyName(theKey) ) {
-        keysToRemove.add(theKey);
-      }
-    }
-    for ( String theKey : keysToRemove ) {
-      mDeviceProps.remove(theKey);
-    }
-    writeProperties(false, true, false);
-  }
-
-  /**
-   * This may either be the device locale or the locale that the user has selected from the
-   * common_translations list of locales (as specified on the framework settings sheet).
-   *
-   * @return
-   */
-  public String getUserSelectedDefaultLocale() {
-    // this is dependent upon whether the user wants to use the device locale or a
-    // locale specified in the common translations file.
-    String value = this.getProperty(CommonToolProperties.KEY_COMMON_TRANSLATIONS_LOCALE);
-    if ( value != null && value.length() != 0 && !value.equalsIgnoreCase("_")) {
-      return value;
-    } else {
-      return Locale.getDefault().toString();
-    }
-  }
+  private int currentRevision = invalidRevision();
 
   PropertiesSingleton(Context context, String appName, TreeMap<String, String> plainDefaults,
       TreeMap<String, String> deviceDefaults, TreeMap<String, String> secureDefaults) {
     mAppName = appName;
-    mHasSecureStorage = context.getPackageName().equals(IntentConsts.AppProperties.APPLICATION_NAME);
-    if ( mHasSecureStorage ) {
+    mHasSecureStorage = context.getPackageName()
+        .equals(IntentConsts.AppProperties.APPLICATION_NAME);
+    if (mHasSecureStorage) {
       mSecureStorageDir = context.getDir(mAppName, 0);
     } else {
       mSecureStorageDir = null;
     }
+    // these strings are set as untranslateable
     CREDENTIAL_TYPE_NONE = context.getString(R.string.credential_type_none);
-    CREDENTIAL_TYPE_USERNAME_PASSWORD = context.getString(R.string.credential_type_username_password);
+    CREDENTIAL_TYPE_USERNAME_PASSWORD = context
+        .getString(R.string.credential_type_username_password);
     CREDENTIAL_TYPE_GOOGLE_ACCOUNT = context.getString(R.string.credential_type_google_account);
 
     mGeneralDefaults = plainDefaults;
@@ -323,6 +103,264 @@ public class PropertiesSingleton {
 
     // call init
     init();
+  }
+
+  private static int invalidRevision() {
+    return -1;
+  }
+
+  private static String toolInitializationPropertyName(String toolName) {
+    return toolName + TOOL_INITIALIZATION_SUFFIX;
+  }
+
+  private static boolean isToolInitializationPropertyName(String toolName) {
+    return toolName.endsWith(TOOL_INITIALIZATION_SUFFIX);
+  }
+
+  /**
+   * Used in CommonToolProperties and survey's SplashScreenActivity.
+   *
+   * @param toolName the name of an app
+   * @return the name of a property associated with the version of that app
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static String toolVersionPropertyName(String toolName) {
+    return toolName + ".tool_version_code";
+  }
+
+  /**
+   * Used in CommonToolProperties and survey's SplashScreenActivity.
+   *
+   * @param toolName the name of an app
+   * @return the name of a property associated with whether the app has run before or not
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static String toolFirstRunPropertyName(String toolName) {
+    return toolName + ".tool_first_run";
+  }
+
+  public String getAppName() {
+    return mAppName;
+  }
+
+  private boolean isSecureProperty(String propertyName) {
+    return mSecureDefaults.containsKey(propertyName);
+  }
+
+  private boolean isDeviceProperty(String propertyName) {
+    return mDeviceDefaults.containsKey(propertyName);
+  }
+
+  /**
+   * Hard to tell where this is used, it's used in at least DeviceSettingsFragment,
+   * AdminConfigurableDeviceSettingsFragment, TablesSettingsFragment and ServerSettingsFragment
+   *
+   * @param propertyName the name that may or may not exist in the props object
+   * @return whether the key exists
+   */
+  @SuppressWarnings("unused")
+  public boolean containsKey(String propertyName) {
+    readPropertiesIfModified();
+    if (isSecureProperty(propertyName)) {
+      return mSecureProps.containsKey(propertyName);
+    } else if (isDeviceProperty(propertyName)) {
+      return mDeviceProps.containsKey(propertyName);
+    } else {
+      return mGeneralProps.containsKey(propertyName);
+    }
+  }
+
+  /**
+   * Accesses the given propertyName.
+   *
+   * @param propertyName the key to get
+   * @return null or the string value
+   */
+  public String getProperty(String propertyName) {
+    readPropertiesIfModified();
+    if (isSecureProperty(propertyName)) {
+      if (!mHasSecureStorage) {
+        throw new IllegalStateException(
+            "Attempt to retrieve secured property " + propertyName + " outside of ODK Services");
+      }
+      return mSecureProps.getProperty(propertyName);
+    } else if (isDeviceProperty(propertyName)) {
+      return mDeviceProps.getProperty(propertyName);
+    } else {
+      return mGeneralProps.getProperty(propertyName);
+    }
+  }
+
+  /**
+   * Accesses the given propertyName.
+   * <p>
+   * If the value is not specified, null or an empty string, a null value is
+   * returned. Boolean.TRUE is returned if the value is "true", otherwise
+   * Boolean.FALSE is returned.
+   * <p>
+   * Used in mostly the same places as containsKey
+   *
+   * @param propertyName the key to get
+   * @return null or boolean true/false
+   */
+  @SuppressWarnings("unused")
+  public Boolean getBooleanProperty(String propertyName) {
+    String value = getProperty(propertyName);
+    if (value == null || value.length() == 0) {
+      return null;
+    }
+    return "true".equalsIgnoreCase(value);
+  }
+
+  /**
+   * Accesses the given propertyName.
+   * <p>
+   * If the value is not specified, null or an empty string, or if the value
+   * cannot be parsed as an integer, then null is return. Otherwise, the integer
+   * value is returned.
+   * <p>
+   * Used in CommonToolProperties, TableUtil and
+   * services.preferences.fragments.PasswordDialogFragment
+   *
+   * @param propertyName the key to get
+   * @return an Integer with the value for the requested key or null
+   */
+  @SuppressWarnings("WeakerAccess")
+  public Integer getIntegerProperty(String propertyName) {
+    String value = getProperty(propertyName);
+    if (value == null) {
+      return null;
+    }
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
+
+  public void setProperties(Map<String, String> properties) {
+    readPropertiesIfModified();
+    if (!mHasSecureStorage) {
+      for (String propertyName : properties.keySet()) {
+        if (isSecureProperty(propertyName)) {
+          throw new IllegalStateException(
+              "Attempted to set or clear a secure property outside " + "ODK Services");
+        }
+      }
+    }
+
+    boolean updatedSecureProps = false;
+    boolean updatedDeviceProps = false;
+    boolean updatedGeneralProps = false;
+
+    for (String propertyName : properties.keySet()) {
+      String value = properties.get(propertyName);
+      if (value == null) {
+        // remove from map
+        if (isSecureProperty(propertyName)) {
+          mSecureProps.remove(propertyName);
+          updatedSecureProps = true;
+        } else if (isDeviceProperty(propertyName)) {
+          mDeviceProps.remove(propertyName);
+          updatedDeviceProps = true;
+        } else {
+          mGeneralProps.remove(propertyName);
+          updatedGeneralProps = true;
+        }
+      } else {
+        // set into map
+        if (isSecureProperty(propertyName)) {
+          mSecureProps.setProperty(propertyName, value);
+          updatedSecureProps = true;
+        } else if (isDeviceProperty(propertyName)) {
+          mDeviceProps.setProperty(propertyName, value);
+          updatedDeviceProps = true;
+        } else {
+          mGeneralProps.setProperty(propertyName, value);
+          updatedGeneralProps = true;
+        }
+      }
+    }
+    writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
+  }
+
+  /**
+   * Determine whether or not the initialization task for the given toolName
+   * should be run.
+   * <p>
+   * Used in survey's MainMenuActivity, scan's MainActivity, androidcommon's CommonActivity and
+   * tables' MainActivity
+   *
+   * @param toolName (e.g., survey, tables, scan, etc.)
+   */
+  @SuppressWarnings("unused")
+  public boolean shouldRunInitializationTask(String toolName) {
+    // this is stored in the device properties
+    readPropertiesIfModified();
+    String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
+    return value == null || value.length() == 0;
+  }
+
+  /**
+   * Indicate that the initialization task for this given tool has been run.
+   * Used mostly in the same places as shouldRunInitializationTask
+   *
+   * @param toolName (e.g., survey, tables, scan, etc.)
+   */
+  @SuppressWarnings("unused")
+  public void clearRunInitializationTask(String toolName) {
+    // this is stored in the device properties
+    readPropertiesIfModified();
+    mDeviceProps.setProperty(toolInitializationPropertyName(toolName),
+        TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()));
+    writeProperties(false, true, false);
+  }
+
+  /**
+   * Indicate that all initialization tasks for all tools should be run (again).
+   * Used in services.sync.service.SyncExecutionContext
+   */
+  @SuppressWarnings("unused")
+  public void setAllRunInitializationTasks() {
+    // this is stored in the device properties
+    readPropertiesIfModified();
+    ArrayList<String> keysToRemove = new ArrayList<>();
+
+    for (Object okey : mDeviceProps.keySet()) {
+      String theKey = (String) okey;
+      if (isToolInitializationPropertyName(theKey)) {
+        keysToRemove.add(theKey);
+      }
+    }
+    for (String theKey : keysToRemove) {
+      mDeviceProps.remove(theKey);
+    }
+    writeProperties(false, true, false);
+  }
+
+  /**
+   * This may either be the device locale or the locale that the user has selected from the
+   * common_translations list of locales (as specified on the framework settings sheet).
+   * <p>
+   * Used in (survey) AndroidShortcuts, MainMenuActivity, FormListLoader, (androidcommon)
+   * DoActionUtils, OdkCommon, (services) OdkDatabaseServiceImpl, OdkResolveCheckpointRowLoader,
+   * SyncExecutionContext, ActiveUserAndLocale, (tables) OutputUtil, MultipleChoiceSettingDialog,
+   * SpreadsheetUserTable, AbsBaseWebActivity, ExportCSVActivity, ColumnListFragment,
+   * EditColorRuleFragment, StatusColorRuleListFragment, ColumnPreferenceFragment,
+   * TablePreferenceFragment, TableManagerFragment, ColorRuleListFragment
+   *
+   * @return The user's selected locale or the device's default if they didn't specify one
+   */
+  @SuppressWarnings("unused")
+  public String getUserSelectedDefaultLocale() {
+    // this is dependent upon whether the user wants to use the device locale or a
+    // locale specified in the common translations file.
+    String value = this.getProperty(CommonToolProperties.KEY_COMMON_TRANSLATIONS_LOCALE);
+    if (value != null && value.length() != 0 && !value.equalsIgnoreCase("_")) {
+      return value;
+    } else {
+      return Locale.getDefault().toString();
+    }
   }
 
   private void init() {
@@ -371,7 +409,7 @@ public class PropertiesSingleton {
     // Now, scan through the secure defaults and assign them.  These will only be
     // available from within ODK Services. If we try to access them outside of that
     // application, this will be a skipped and all values return null.
-    if ( mHasSecureStorage ) {
+    if (mHasSecureStorage) {
       for (Map.Entry<String, String> entry : mSecureDefaults.entrySet()) {
         if (!mSecureProps.containsKey(entry.getKey())) {
           mSecureProps.setProperty(entry.getKey(), entry.getValue());
@@ -380,7 +418,7 @@ public class PropertiesSingleton {
       }
     }
 
-    if (updatedSecureProps || updatedDeviceProps || updatedSecureProps) {
+    if (updatedSecureProps || updatedDeviceProps || updatedGeneralProps) {
       writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
     }
   }
@@ -399,15 +437,16 @@ public class PropertiesSingleton {
     try {
       File dataFolder = new File(ODKFileUtils.getDataFolder(mAppName));
       String[] timestampNames = dataFolder.list(new FilenameFilter() {
-        @Override public boolean accept(File file, String s) {
+        @Override
+        public boolean accept(File file, String s) {
           return s.startsWith(PROPERTIES_REVISION_FILENAME);
         }
       });
-      if ( timestampNames == null ) {
+      if (timestampNames == null) {
         return noResult;
       }
       int bestResult = noResult;
-      for ( String timestampName : timestampNames ) {
+      for (String timestampName : timestampNames) {
         String suffix = timestampName.substring(PROPERTIES_REVISION_FILENAME.length());
         if (suffix.length() <= 1) {
           continue;
@@ -421,7 +460,7 @@ public class PropertiesSingleton {
           if (result > bestResult) {
             bestResult = result;
           }
-        } catch ( NumberFormatException e) {
+        } catch (NumberFormatException e) {
           // ignore
         }
       }
@@ -463,15 +502,18 @@ public class PropertiesSingleton {
     // remove files other than the one we wrote
     File dataFolder = new File(ODKFileUtils.getDataFolder(mAppName));
     String[] timestampNames = dataFolder.list(new FilenameFilter() {
-      @Override public boolean accept(File file, String s) {
+      @Override
+      public boolean accept(File file, String s) {
         return s.startsWith(PROPERTIES_REVISION_FILENAME);
       }
     });
-    if ( timestampNames != null ) {
-      for ( String name : timestampNames ) {
-        if ( !name.equals(PROPERTIES_REVISION_FILENAME + suffix) ) {
+    if (timestampNames != null) {
+      for (String name : timestampNames) {
+        if (!name.equals(PROPERTIES_REVISION_FILENAME + suffix)) {
           File timestampFile = new File(dataFolder, name);
-          timestampFile.delete();
+          if (!timestampFile.delete()) {
+            throw new RuntimeException("Could not delete timestamp " + timestampFile.getName());
+          }
         }
       }
     }
@@ -481,7 +523,7 @@ public class PropertiesSingleton {
   private void readPropertiesIfModified() {
 
     int newRevision = getCurrentRevision();
-    if ( newRevision != currentRevision ) {
+    if (newRevision != currentRevision) {
       readProperties(false);
     }
 
@@ -490,15 +532,16 @@ public class PropertiesSingleton {
   private void readProperties(boolean includingGlobalDeviceProps) {
     verifyDirectories();
 
-    WebLogger.getLogger(mAppName).i("PropertiesSingleton",
-        "readProperties(" + includingGlobalDeviceProps + ")");
+    WebLogger.getLogger(mAppName)
+        .i("PropertiesSingleton", "readProperties(" + includingGlobalDeviceProps + ")");
 
     GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
     try {
       // OK. Now access files...
       FileInputStream configFileInputStream = null;
       try {
-        File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), GENERAL_PROPERTIES_FILENAME);
+        File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName),
+            GENERAL_PROPERTIES_FILENAME);
 
         if (configFile.exists()) {
           configFileInputStream = new FileInputStream(configFile);
@@ -519,10 +562,11 @@ public class PropertiesSingleton {
       }
 
       // read-only values
-      if ( includingGlobalDeviceProps ) {
+      if (includingGlobalDeviceProps) {
         configFileInputStream = null;
         try {
-          File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName), DEFAULT_DEVICE_PROPERTIES_FILENAME);
+          File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName),
+              DEFAULT_DEVICE_PROPERTIES_FILENAME);
 
           if (configFile.exists()) {
             configFileInputStream = new FileInputStream(configFile);
@@ -545,7 +589,8 @@ public class PropertiesSingleton {
 
       configFileInputStream = null;
       try {
-        File configFile = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
+        File configFile = new File(ODKFileUtils.getDataFolder(mAppName),
+            DEVICE_PROPERTIES_FILENAME);
 
         if (configFile.exists()) {
           configFileInputStream = new FileInputStream(configFile);
@@ -594,15 +639,15 @@ public class PropertiesSingleton {
     }
   }
 
-  private void writeProperties(boolean updatedSecureProps, boolean updatedDeviceProps, boolean
-      updatedGeneralProps) {
+  private void writeProperties(boolean updatedSecureProps, boolean updatedDeviceProps,
+      boolean updatedGeneralProps) {
     verifyDirectories();
 
     GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
     try {
       currentRevision = incrementAndWriteRevision(currentRevision);
 
-      if ( updatedGeneralProps ) {
+      if (updatedGeneralProps) {
         try {
           File tempConfigFile = new File(ODKFileUtils.getAssetsFolder(mAppName),
               GENERAL_PROPERTIES_FILENAME + ".temp");
@@ -617,7 +662,7 @@ public class PropertiesSingleton {
           boolean fileSuccess = tempConfigFile.renameTo(configFile);
 
           if (!fileSuccess) {
-            WebLogger.getLogger(mAppName).i(t, "Temporary General Config File Rename Failed!");
+            WebLogger.getLogger(mAppName).i(TAG, "Temporary General Config File Rename Failed!");
           }
 
         } catch (Exception e) {
@@ -625,7 +670,7 @@ public class PropertiesSingleton {
         }
       }
 
-      if ( updatedDeviceProps ) {
+      if (updatedDeviceProps) {
         try {
           File tempConfigFile = new File(ODKFileUtils.getDataFolder(mAppName),
               DEVICE_PROPERTIES_FILENAME + ".temp");
@@ -640,7 +685,7 @@ public class PropertiesSingleton {
           boolean fileSuccess = tempConfigFile.renameTo(configFile);
 
           if (!fileSuccess) {
-            WebLogger.getLogger(mAppName).i(t, "Temporary Device Config File Rename Failed!");
+            WebLogger.getLogger(mAppName).i(TAG, "Temporary Device Config File Rename Failed!");
           }
 
         } catch (Exception e) {
@@ -648,7 +693,7 @@ public class PropertiesSingleton {
         }
       }
 
-      if ( updatedSecureProps && mHasSecureStorage ) {
+      if (updatedSecureProps && mHasSecureStorage) {
         try {
           File tempConfigFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME + ".temp");
           FileOutputStream configFileOutputStream = new FileOutputStream(tempConfigFile, false);
@@ -661,7 +706,7 @@ public class PropertiesSingleton {
           boolean fileSuccess = tempConfigFile.renameTo(configFile);
 
           if (!fileSuccess) {
-            WebLogger.getLogger(mAppName).i(t, "Temporary Secure Config File Rename Failed!");
+            WebLogger.getLogger(mAppName).i(TAG, "Temporary Secure Config File Rename Failed!");
           }
 
         } catch (Exception e) {
@@ -673,8 +718,11 @@ public class PropertiesSingleton {
     }
   }
 
+  /**
+   * Used only in services.clearAppPropertiesActivity
+   */
+  @SuppressWarnings("unused")
   public void clearSettings() {
-
     try {
       GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
       currentRevision = incrementAndWriteRevision(currentRevision);
@@ -683,13 +731,17 @@ public class PropertiesSingleton {
         File f;
         f = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
         if (f.exists()) {
-          f.delete();
+          if (!f.delete()) {
+            throw new RuntimeException("Could not delete settings file " + f.getPath());
+          }
         }
 
-        if ( mHasSecureStorage ) {
+        if (mHasSecureStorage) {
           f = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME);
           if (f.exists()) {
-            f.delete();
+            if (!f.delete()) {
+              throw new RuntimeException("Could not delete settings file " + f.getPath());
+            }
           }
         }
       } finally {

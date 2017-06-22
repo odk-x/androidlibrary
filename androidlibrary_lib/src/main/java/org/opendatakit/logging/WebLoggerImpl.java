@@ -16,20 +16,11 @@ package org.opendatakit.logging;
 
 import android.os.FileObserver;
 import android.util.Log;
-
 import org.apache.commons.lang3.CharEncoding;
 import org.joda.time.DateTime;
 import org.opendatakit.utilities.ODKFileUtils;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 /**
  * Implementation of WebLoggerIf for android that emits logs to the
@@ -39,9 +30,8 @@ import java.io.UnsupportedEncodingException;
  *
  * @author mitchellsundt@gmail.com
  */
-public class WebLoggerImpl implements WebLoggerIf {
+class WebLoggerImpl implements WebLoggerIf {
   private static final long FLUSH_INTERVAL = 12000L; // 5 times a minute
-  private static final long MILLISECONDS_DAY = 86400000L;
 
   /**
    * The value for DEFAULT_MIN_LOG_LEVEL_TO_SPEW should **NEVER** be SUCCESS or TIP.
@@ -52,63 +42,36 @@ public class WebLoggerImpl implements WebLoggerIf {
 
   private static final String DATE_FORMAT = "yyyy-MM-dd_HH";
   private static final String LOG_LINE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+  private static final String TAG = WebLoggerImpl.class.getSimpleName();
 
-  /**
-   * Instance variables
-   */
+  // appName under which to write log
+  private final String appName;
 
+  // Instance variables
   /**
    * The value for minLogLevelToSpew should **NEVER** be SUCCESS or TIP.
    * Those two values are remapped to ERROR and ASSERT, respectively, before
    * this filter criteria is applied.
    */
   private int minLogLevelToSpew = DEFAULT_MIN_LOG_LEVEL_TO_SPEW;
-
-  // appName under which to write log
-  private final String appName;
   // dateStamp (filename) of opened stream
   private String dateStamp = null;
   // opened stream
   private OutputStreamWriter logFile = null;
   // the last time we flushed our output stream
   private long lastFlush = 0L;
-
-  public String getFormattedFileDateNow() {
-    return (new DateTime()).toString(DATE_FORMAT);
-  }
-
-  public String getFormattedLogLineDateNow() {
-    return (new DateTime()).toString(LOG_LINE_DATE_FORMAT);
-  }
-
-
-  private class LoggingFileObserver extends FileObserver {
-
-    public LoggingFileObserver(String path) {
-      super(path, FileObserver.DELETE_SELF | FileObserver.MOVE_SELF);
-    }
-
-    @Override
-    public void onEvent(int event, String path) {
-      if (WebLoggerImpl.this.logFile != null) {
-        try {
-          if (event == FileObserver.MOVE_SELF) {
-            WebLoggerImpl.this.logFile.flush();
-          }
-          WebLoggerImpl.this.logFile.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-          Log.w("WebLogger", "detected delete or move of logging directory -- shutting down");
-        }
-        WebLoggerImpl.this.logFile = null;
-      }
-    }
-  }
-
   private LoggingFileObserver loggingObserver = null;
 
   WebLoggerImpl(String appName) {
     this.appName = appName;
+  }
+
+  private String getFormattedFileDateNow() {
+    return (new DateTime()).toString(DATE_FORMAT);
+  }
+
+  private String getFormattedLogLineDateNow() {
+    return (new DateTime()).toString(LOG_LINE_DATE_FORMAT);
   }
 
   public synchronized void close() {
@@ -122,8 +85,12 @@ public class WebLoggerImpl implements WebLoggerIf {
         try {
           writer.close();
         } catch (IOException e) {
+          e(TAG, "Could not close writer");
+          printStackTrace(e);
         }
-        loggingDirectory.delete();
+        if (!loggingDirectory.delete()) {
+          e(TAG, "Could not delete logging directory " + loggingPath);
+        }
       } else {
         try {
           writer.flush();
@@ -142,7 +109,7 @@ public class WebLoggerImpl implements WebLoggerIf {
       ODKFileUtils.assertDirectoryStructure(appName);
       // scan for stale logs...
       String loggingPath = ODKFileUtils.getLoggingFolder(appName);
-      final long distantPast = now - 30L * MILLISECONDS_DAY; // thirty days
+      final long distantPast = now - 30L * WebLogger.MILLISECONDS_DAY; // thirty days
       // ago...
       File loggingDirectory = new File(loggingPath);
       if (!loggingDirectory.exists()) {
@@ -166,10 +133,12 @@ public class WebLoggerImpl implements WebLoggerIf {
 
       if (stale != null) {
         for (File f : stale) {
-          f.delete();
+          if (f.exists() && !f.delete()) {
+            e(TAG, "Could not delete stale logfile " + f.getPath());
+          }
         }
       }
-    } catch (Exception e) {
+    } catch (Throwable e) {
       // no exceptions are claimed, but since we can mount/unmount
       // the SDCard, there might be an external storage unavailable
       // exception that would otherwise percolate up.
@@ -198,7 +167,7 @@ public class WebLoggerImpl implements WebLoggerIf {
       try {
         ODKFileUtils.verifyExternalStorageAvailability();
         ODKFileUtils.assertDirectoryStructure(appName);
-      } catch ( Exception e ) {
+      } catch (Exception e) {
         e.printStackTrace();
         Log.e("WebLogger", "Unable to create logging directory");
         return;
@@ -212,7 +181,7 @@ public class WebLoggerImpl implements WebLoggerIf {
         return;
       }
 
-      if ( loggingObserver == null ) {
+      if (loggingObserver == null) {
         loggingObserver = new LoggingFileObserver(loggingDirectory.getAbsolutePath());
       }
 
@@ -251,18 +220,18 @@ public class WebLoggerImpl implements WebLoggerIf {
     }
   }
 
+  public int getMinimumSystemLogLevel() {
+    return minLogLevelToSpew;
+  }
+
   public void setMinimumSystemLogLevel(int level) {
-    if ( level == SUCCESS ) {
+    if (level == SUCCESS) {
       level = ERROR;
     }
-    if ( level == TIP ) {
+    if (level == TIP) {
       level = ASSERT;
     }
     minLogLevelToSpew = level;
-  }
-
-  public int getMinimumSystemLogLevel() {
-    return minLogLevelToSpew;
   }
 
   public void log(int severity, String t, String logMsg) {
@@ -272,33 +241,31 @@ public class WebLoggerImpl implements WebLoggerIf {
 
       // insert timestamp to help with time tracking
       String curLogLineStamp = getFormattedLogLineDateNow();
-      if ( !logMsg.startsWith(curLogLineStamp.substring(0, 16))) {
+      if (!logMsg.startsWith(curLogLineStamp.substring(0, 16))) {
         logMsg = curLogLineStamp + " " + logMsg;
       } else {
         androidLogLine = (logMsg.length() > curLogLineStamp.length()) ?
-            logMsg.substring(curLogLineStamp.length()) : logMsg;
+            logMsg.substring(curLogLineStamp.length()) :
+            logMsg;
       }
-      if ( androidLogLine.length() > 128 ) {
-        androidLogLine = androidLogLine.substring(0,125) + "...";
+      if (androidLogLine.length() > 128) {
+        androidLogLine = androidLogLine.substring(0, 125) + "...";
       }
 
       String androidTag = t;
       int periodIdx = t.lastIndexOf('.');
-      if ( t.length() > 26 && periodIdx != -1 ) {
-        androidTag = t.substring(periodIdx+1);
+      if (t.length() > 26 && periodIdx != -1) {
+        androidTag = t.substring(periodIdx + 1);
       }
 
-      /**
-       * Our severity level has to have unique values that we
-       * actually want to compress when calculating whether to
-       * emit the value to the system log or not. Do that via
-       * the remappedSeverity computation below.
-       */
+      // Our severity level has to have unique values that we actually want to compress
+      // when calculating whether to emit the value to the system log or not. Do that via the
+      // remappedSeverity computation below.
       int remappedSeverity = severity;
-      if ( severity == SUCCESS ) {
+      if (severity == SUCCESS) {
         remappedSeverity = ERROR;
       }
-      if ( severity == TIP ) {
+      if (severity == TIP) {
         remappedSeverity = ASSERT;
       }
 
@@ -310,7 +277,7 @@ public class WebLoggerImpl implements WebLoggerIf {
           Log.w(androidTag, androidLogLine);
         } else if (severity == INFO || severity == SUCCESS || severity == TIP) {
           Log.i(androidTag, androidLogLine);
-        } else if (severity == DEBUG){
+        } else if (severity == DEBUG) {
           Log.d(androidTag, androidLogLine);
         } else {
           Log.v(androidTag, androidLogLine);
@@ -401,6 +368,29 @@ public class WebLoggerImpl implements WebLoggerIf {
       throw new IllegalStateException("unable to specify UTF-8 Charset!");
     } catch (IOException e1) {
       e1.printStackTrace();
+    }
+  }
+
+  private class LoggingFileObserver extends FileObserver {
+
+    private LoggingFileObserver(String path) {
+      super(path, FileObserver.DELETE_SELF | FileObserver.MOVE_SELF);
+    }
+
+    @Override
+    public void onEvent(int event, String path) {
+      if (WebLoggerImpl.this.logFile != null) {
+        try {
+          if (event == FileObserver.MOVE_SELF) {
+            WebLoggerImpl.this.logFile.flush();
+          }
+          WebLoggerImpl.this.logFile.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+          Log.w("WebLogger", "detected delete or move of logging directory -- shutting down");
+        }
+        WebLoggerImpl.this.logFile = null;
+      }
     }
   }
 

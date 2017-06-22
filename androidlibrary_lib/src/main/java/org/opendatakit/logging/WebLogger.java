@@ -28,12 +28,11 @@ import java.util.Map;
  * @author mitchellsundt@gmail.com
  */
 public class WebLogger {
-  private static final long MILLISECONDS_DAY = 86400000L;
-
+  static final long MILLISECONDS_DAY = 86400000L;
+  private static final Map<String, WebLoggerIf> loggers = new HashMap<>();
   private static long lastStaleScan = 0L;
-  private static final Map<String, WebLoggerIf> loggers = new HashMap<String, WebLoggerIf>();
-
   private static WebLoggerFactoryIf webLoggerFactory;
+  private static ThreadLogger contextLogger = new ThreadLogger();
 
   static {
     webLoggerFactory = new WebLoggerFactoryImpl();
@@ -53,17 +52,6 @@ public class WebLogger {
     webLoggerFactory = webLoggerFactoryImpl;
   }
 
-  private static class ThreadLogger extends ThreadLocal<String> {
-
-    @Override
-    protected String initialValue() {
-      return null;
-    }
-
-  }
-
-  private static ThreadLogger contextLogger = new ThreadLogger();
-
   public static synchronized void closeAll() {
     for (WebLoggerIf l : loggers.values()) {
       l.close();
@@ -79,7 +67,7 @@ public class WebLogger {
   }
 
   public synchronized static WebLoggerIf getLogger(String appName) {
-    if ( appName == null ) {
+    if (appName == null) {
       // create a one-off logger to handle this case
       // factory will create a logger that doesn't care
       // about the appName (e.g., log to just system log)
@@ -104,5 +92,14 @@ public class WebLogger {
       }
     }
     return logger;
+  }
+
+  private static class ThreadLogger extends ThreadLocal<String> {
+
+    @Override
+    protected String initialValue() {
+      return null;
+    }
+
   }
 }
