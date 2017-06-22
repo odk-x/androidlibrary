@@ -186,7 +186,7 @@ public class CommonToolProperties {
   private static CommonPropertiesSingletonFactory factory = null;
   static {
     // register a state-reset manipulator for 'commonPropertiesSingletonFactory' field.
-    StaticStateManipulator.get().register(50, new StaticStateManipulator.IStaticFieldManipulator() {
+    StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {
 
       @Override
       public void reset() {

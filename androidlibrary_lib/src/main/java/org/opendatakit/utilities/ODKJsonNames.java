@@ -16,10 +16,11 @@
 package org.opendatakit.utilities;
 
 /**
- * These are tags used by the sensor framework to define data
- * tables into which results are published.
+ * These are tags used by the sensor framework to define data tables into which results are published.
  * 
  * Pulled out of WorkerThread and ODKSensorManager
+ *
+ * Used in sensors.manager.ODKSensorManager
  * 
  * @author mitchellsundt@gmail.com
  *

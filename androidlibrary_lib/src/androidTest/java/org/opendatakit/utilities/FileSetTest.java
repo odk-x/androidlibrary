@@ -66,10 +66,10 @@ public class FileSetTest {
     fileSet.addAttachmentFile(attachment1, MIME_1);
     fileSet.addAttachmentFile(attachment2, MIME_2);
 
-    String value = fileSet.serializeUriFragmentList(context);
+    String value = fileSet.serializeUriFragmentList();
 
     ByteArrayInputStream bis = new ByteArrayInputStream(value.getBytes(Charset.forName("UTF-8")));
-    FileSet outSet = FileSet.parse(context, APP_NAME, bis);
+    FileSet outSet = FileSet.parse(APP_NAME, bis);
 
     assertEquals( fileSet.instanceFile, outSet.instanceFile);
     assertEquals( fileSet.attachmentFiles.size(), outSet.attachmentFiles.size());

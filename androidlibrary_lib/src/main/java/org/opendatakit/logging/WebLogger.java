@@ -39,7 +39,7 @@ public class WebLogger {
     webLoggerFactory = new WebLoggerFactoryImpl();
 
     // register a state-reset manipulator for 'loggers' field.
-    StaticStateManipulator.get().register(99, new IStaticFieldManipulator() {
+    StaticStateManipulator.get().register(new IStaticFieldManipulator() {
 
       @Override
       public void reset() {

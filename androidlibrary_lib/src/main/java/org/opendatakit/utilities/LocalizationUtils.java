@@ -33,9 +33,11 @@ public class LocalizationUtils {
 
   private static String savedAppName;
   private static Map<String, Object> commonDefinitions;
-  private static Map<String, Map<String, Object>> tableSpecificDefinitionsMap =
-      new HashMap<String, Map<String, Object>>();
+  private static Map<String, Map<String, Object>> tableSpecificDefinitionsMap = new HashMap<>();
 
+  /**
+   * Used in CommonApplication
+   */
   public synchronized static void clearTranslations() {
     commonDefinitions = null;
     tableSpecificDefinitionsMap.clear();
@@ -137,6 +139,12 @@ public class LocalizationUtils {
     }
   }
 
+  /**
+   * Used in commonTranslationLocaleScreen
+   * @param appName the app name
+   * @return a list of locales provided by that app
+   * @throws IOException if the file couldn't be opened
+   */
   public static List<Map<String, Object>> getCommonLocales(String appName) throws IOException {
     if ( commonDefinitions == null ) {
       loadTranslations(appName, null);
@@ -151,6 +159,12 @@ public class LocalizationUtils {
     return null;
   }
 
+  /**
+   * Used in commonTranslationLocaleScreen
+   * @param appName the app name
+   * @return a list of locales provided by that app
+   * @throws IOException if the file couldn't be opened
+   */
   public static String getCommonLocaleDefault(String appName) throws
       IOException {
     if ( commonDefinitions == null ) {
@@ -167,7 +181,7 @@ public class LocalizationUtils {
     return "default";
   }
 
-  private synchronized static Map<String, Object>  resolveTranslation(String appName,
+  private synchronized static Map<String, Object> resolveTranslation(String appName,
           String tableId, String translationToken) throws IOException  {
     if ( appName == null ) {
       throw new IllegalArgumentException("appName cannot be null");
@@ -213,8 +227,8 @@ public class LocalizationUtils {
    * case-insensitive matching of full_locale and then of just language. And if none of these
    * are present, returns the default translation or null if none is available.
    *
-   * @param localizationMap
-   * @param full_locale
+   * @param localizationMap a map of locale IDs to translations
+   * @param full_locale the locale to get the translation for
    * @return null or the translation string.
    */
   public static String processLocalizationMap( Object localizationMap, String full_locale) {
@@ -229,9 +243,7 @@ public class LocalizationUtils {
     Map<String, Object> aMap = (Map<String, Object>) localizationMap;
 
     int underscore = full_locale.indexOf('_');
-    String lang_only_locale = (underscore <= 0) ?
-        null :
-        full_locale.substring(0, underscore);
+    String lang_only_locale = (underscore <= 0) ? null : full_locale.substring(0, underscore);
 
     String langOnlyMatch = null;
     String defaultMatch = null;
@@ -284,7 +296,6 @@ public class LocalizationUtils {
     // this JSON serialization will either be a string that is a translationToken
     // that points to a translation in the common or table-specific translations
     // or it will be a localization object with { "text":..., "image":..., ... } fields.
-    //
     Map<String, Object> localizationMap = null;
     if (displayName.startsWith("\"") && displayName.endsWith("\"")) {
       String translationToken;
@@ -350,14 +361,15 @@ public class LocalizationUtils {
    * case-insensitive matching of full_locale and then of just language. And if none of these
    * are present, returns the default translation or null if none is available.
    *
+   * Used in CommonTranslationsLocaleScreen
+   *
    * @param appName
    * @param tableId
    * @param full_locale  -- of the form    language + "_" + country
    * @param candidateLocalizationMap
    * @return
    */
-  public static String getLocalizationFromMap(String appName, String tableId, String
-      full_locale,
+  public static String getLocalizationFromMap(String appName, String tableId, String full_locale,
       Object candidateLocalizationMap ) {
 
     Map<String, Object> localizationMap = null;

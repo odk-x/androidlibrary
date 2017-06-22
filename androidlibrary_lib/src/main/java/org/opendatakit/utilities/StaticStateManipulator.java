@@ -90,7 +90,7 @@ public class StaticStateManipulator {
    * Invoke this to register a class that can reset 
    * non-final static fields to their initial state.
    * 
-   * @param order The order in which to invoke this relative to
+   * @_param order The order in which to invoke this relative to
    *     other static field manipulators. Use 50 if you are not
    *     aware of a conflict or if there is no state within the 
    *     object being reset (e.g., it is only there to support
@@ -114,7 +114,7 @@ public class StaticStateManipulator {
    *     </ul>
    * @param fm a manipulator that can perform the reset.
    */
-  public void register(int order, IStaticFieldManipulator fm) {
+  public void register(IStaticFieldManipulator fm) {
     mStaticManipulators.add(fm);
   }
   

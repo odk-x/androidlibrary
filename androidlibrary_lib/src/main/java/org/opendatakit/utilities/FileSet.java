@@ -28,8 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Holds the files required for a submission to the ODK Aggregate legacy
- * interface
+ * Holds the files required for a submission to the ODK Aggregate legacy interface
  *
  * @author mitchellsundt@gmail.com
  */
@@ -45,7 +44,7 @@ public class FileSet {
     public String contentType;
   }
 
-  public ArrayList<MimeFile> attachmentFiles = new ArrayList<MimeFile>();
+  public ArrayList<MimeFile> attachmentFiles = new ArrayList<>();
 
   public FileSet(String appName) {
     this.appName = appName;
@@ -58,26 +57,25 @@ public class FileSet {
     attachmentFiles.add(f);
   }
 
-  public String serializeUriFragmentList(Context context) throws IOException {
-    ArrayList<HashMap<String, String>> str = new ArrayList<HashMap<String, String>>();
+  public String serializeUriFragmentList() throws IOException {
+    ArrayList<HashMap<String, String>> str = new ArrayList<>();
 
     HashMap<String, String> map;
-    map = new HashMap<String, String>();
+    map = new HashMap<>();
     map.put(URI_FRAGMENT, ODKFileUtils.asUriFragment(appName, instanceFile));
     map.put(CONTENT_TYPE, APPLICATION_XML);
     str.add(map);
     for (MimeFile f : attachmentFiles) {
-      map = new HashMap<String, String>();
+      map = new HashMap<>();
       map.put(URI_FRAGMENT, ODKFileUtils.asUriFragment(appName, f.file));
       map.put(CONTENT_TYPE, f.contentType);
       str.add(map);
     }
 
-    String serializedString = ODKFileUtils.mapper.writeValueAsString(str);
-    return serializedString;
+    return ODKFileUtils.mapper.writeValueAsString(str);
   }
 
-  public static FileSet parse(Context context, String appName, InputStream src) throws IOException {
+  public static FileSet parse(String appName, InputStream src) throws IOException {
     CollectionType javaType =
         ODKFileUtils.mapper.getTypeFactory().constructCollectionType(ArrayList.class, Map.class);
     ArrayList<Map> mapArrayList = null;

@@ -24,7 +24,7 @@ package org.opendatakit.utilities;
  * @version Copyright 1997-1998
  * @version http://home.hiwaay.net/~taylorc/toolbox/geography/geoutm.html
  */
-public class UTMConverter {
+class UTMConverter {
     
     /** Ellipsoid model constants (actual values here are for WGS84) */
     private static final double SM_A = 6378137.0;
@@ -251,7 +251,7 @@ public class UTMConverter {
      * @return a 2-element array storing the latitude and longitude of the given UTM
      *         point, or null if the given UTM point is invalid.
      */
-    public static double[] parseUTM(double x, double y, int zone, boolean southhemi) {
+    static double[] parseUTM(double x, double y, int zone, boolean southhemi) {
         if (x < 0 || y < 0 || zone < 1 || zone > 60) {
             return null;
         }

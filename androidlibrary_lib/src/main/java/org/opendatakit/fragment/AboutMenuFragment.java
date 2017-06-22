@@ -36,7 +36,7 @@ import org.opendatakit.task.LicenseReaderTask;
 import org.opendatakit.logging.WebLogger;
 
 public class AboutMenuFragment extends Fragment implements LicenseReaderListener {
-  private static final String t = "AboutMenuFragment";
+  private static final String TAG = AboutMenuFragment.class.getSimpleName();
 
   public static final String NAME = "About";
   public static final int ID = R.layout.about_menu_layout;
@@ -126,7 +126,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
   @Override
   public void readLicenseComplete(String result) {
     IAppAwareActivity activity = (IAppAwareActivity) getActivity();
-    WebLogger.getLogger(activity.getAppName()).i(t, "Read license complete");
+    WebLogger.getLogger(activity.getAppName()).i(TAG, "Read license complete");
     if (result != null) {
       // Read license file successfully
       mLicenseText = result;
@@ -139,7 +139,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
       mTextView.setText(html);
     } else {
       // had some failures
-      WebLogger.getLogger(activity.getAppName()).e(t, "Failed to read license file");
+      WebLogger.getLogger(activity.getAppName()).e(TAG, "Failed to read license file");
       Toast.makeText(getActivity(), R.string.read_license_fail, Toast.LENGTH_LONG).show();
     }
   }

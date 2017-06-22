@@ -26,8 +26,16 @@ import java.io.*;
  * @author mitchellsundt@gmail.com
  */
 public class BitmapUtils {
-  private final static String t = "BitmapUtils";
+  private final static String TAG = BitmapUtils.class.getSimpleName();
 
+  /**
+   * Resizes a bitmap to fit on a particular display, used in survey.activities.DrawActivity
+   * @param appName the app name, used for logging
+   * @param f the file that contains the bitmap to resize
+   * @param screenHeight the height of the screen that the bitmap needs to fit into
+   * @param screenWidth the width of the screen that the bitmap needs to fit into
+   * @return a scaled bitmap of the requested file
+   */
   public static Bitmap getBitmapScaledToDisplay(String appName, File f, int screenHeight, int screenWidth) {
     // Determine image size of f
     BitmapFactory.Options o = new BitmapFactory.Options();
@@ -46,7 +54,7 @@ public class BitmapUtils {
     options.inSampleSize = scale;
     Bitmap b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
     if (b != null) {
-      WebLogger.getLogger(appName).i(t,
+      WebLogger.getLogger(appName).i(TAG,
           "Screen is " + screenHeight + "x" + screenWidth + ".  Image has been scaled down by "
               + scale + " to " + b.getHeight() + "x" + b.getWidth());
     }

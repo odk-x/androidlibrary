@@ -25,13 +25,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class RowPathColumnUtil {
+class RowPathColumnUtil {
 
   private static RowPathColumnUtil rowPathColumnUtil = new RowPathColumnUtil();
   
   static {
     // register a state-reset manipulator for 'rowPathColumnUtil' field.
-    StaticStateManipulator.get().register(50, new StaticStateManipulator.IStaticFieldManipulator() {
+    StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {
 
       @Override
       public void reset() {
@@ -54,7 +54,7 @@ public class RowPathColumnUtil {
     rowPathColumnUtil = util;
   }
 
-  protected RowPathColumnUtil() {
+  private RowPathColumnUtil() {
   }
 
   /**
@@ -63,10 +63,10 @@ public class RowPathColumnUtil {
    * 
    * @return
    */
-  public List<ColumnDefinition> getUriColumnDefinitions(OrderedColumns orderedDefns) {
+  List<ColumnDefinition> getUriColumnDefinitions(OrderedColumns orderedDefns) {
     
-    Set<ColumnDefinition> uriFragmentList = new HashSet<ColumnDefinition>();
-    Set<ColumnDefinition> contentTypeList = new HashSet<ColumnDefinition>();
+    Set<ColumnDefinition> uriFragmentList = new HashSet<>();
+    Set<ColumnDefinition> contentTypeList = new HashSet<>();
     
     for (ColumnDefinition cd : orderedDefns.getColumnDefinitions() ) {
       ColumnDefinition cdParent = cd.getParent();
@@ -84,7 +84,7 @@ public class RowPathColumnUtil {
     }
     uriFragmentList.retainAll(contentTypeList);
     
-    List<ColumnDefinition> cdList = new ArrayList<ColumnDefinition>(uriFragmentList);
+    List<ColumnDefinition> cdList = new ArrayList<>(uriFragmentList);
     Collections.sort(cdList);
     return cdList;
   }

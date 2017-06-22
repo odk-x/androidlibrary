@@ -16,7 +16,8 @@
 package org.opendatakit.utilities;
 
 /**
- * Simple conversion utilities to interpret stored values.
+ * Simple conversion utilities to interpret stored values, used in SyncETagsUtils,
+ * OdkDatabaseImplUtils and ExecutorProcessor
  *
  * @author mitchellsundt@gmail.com
  *
