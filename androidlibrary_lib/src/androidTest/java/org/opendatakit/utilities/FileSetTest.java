@@ -53,8 +53,6 @@ public class FileSetTest {
 
   @Test
   public void testFileSetSerialization() throws IOException {
-    Context context = InstrumentationRegistry.getContext();
-
     FileSet fileSet = new FileSet("fileSetTest");
 
     String firstDir = ODKFileUtils.getInstanceFolder(APP_NAME, TABLE_ID_1, INSTANCE_ID_1);

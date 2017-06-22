@@ -17,6 +17,7 @@ package org.opendatakit.utilities;
 
 import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.CheckResult;
 import android.util.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.Charsets;
@@ -35,7 +36,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Static methods used for common file operations.
@@ -44,19 +44,13 @@ import java.util.Iterator;
  */
 public class ODKFileUtils {
   public static final ObjectMapper mapper = new ObjectMapper();
-  public static final String MD5_COLON_PREFIX = "md5:";
-  // filename of the xforms.xml instance and bind definitions if there is one.
-  // NOTE: this file may be missing if the form was not downloaded
-  // via the ODK1 compatibility path.
-  public static final String FILENAME_XFORMS_XML = "xforms.xml";
-
-  // 1st level -- appId
-
   // 2nd level -- directories
   // special filename
   public static final String FORMDEF_JSON_FILENAME = "formDef.json";
-  // Used to validate and display valid form names.
-  public static final String VALID_FILENAME = "[ _\\-A-Za-z0-9]*.x[ht]*ml";
+
+  // 1st level -- appId
+  private static final String MD5_COLON_PREFIX = "md5:";
+  // Used for logging
   private final static String TAG = ODKFileUtils.class.getSimpleName();
   // Default app name when unspecified
   private static final String ODK_DEFAULT_APP_NAME = "default";
@@ -143,7 +137,9 @@ public class ODKFileUtils {
    * <p>
    * return null if the file does not exist or is not an
    * accessible uri thru the WebServer. (i.e., the getAsFile() API).
+   * used in services/fi.iki.elonen.SimpleWebServer
    */
+  @SuppressWarnings("unused")
   public static File fileFromUriOnWebServer(String uri) {
     String appName;
     String uriFragment;
@@ -170,25 +166,37 @@ public class ODKFileUtils {
 
     String[] parts = uriFragment.split("/");
     if (parts.length > 1) {
-      if (parts[0].equals(CONFIG_FOLDER_NAME)) {
+      switch (parts[0]) {
+      case CONFIG_FOLDER_NAME:
+      case SYSTEM_FOLDER_NAME:
+      case PERMANENT_FOLDER_NAME:
         return filename;
-      } else if (parts[0].equals(SYSTEM_FOLDER_NAME)) {
-        return filename;
-      } else if (parts[0].equals(PERMANENT_FOLDER_NAME)) {
-        return filename;
-      } else if (parts[0].equals(DATA_FOLDER_NAME)) {
+      case DATA_FOLDER_NAME:
         if ((parts.length > 2) && parts[1].equals(TABLES_FOLDER_NAME)) {
           return filename;
         }
+        break;
       }
     }
     return null;
   }
 
+  /**
+   * Used in AndroidOdkConnection and OdkConnectionFactoryAbstractClass, both in services.database
+   *
+   * @return sqlite.db
+   */
+  @SuppressWarnings("unused")
   public static String getNameOfSQLiteDatabase() {
     return DATABASE_NAME;
   }
 
+  /**
+   * Used in services.database.OdkConnectionFactoryAbstractClass
+   *
+   * @return db.lock
+   */
+  @SuppressWarnings("unused")
   public static String getNameOfSQLiteDatabaseLockFile() {
     return DATABASE_LOCK_FILE_NAME;
   }
@@ -199,40 +207,62 @@ public class ODKFileUtils {
         .equals(Environment.MEDIA_UNMOUNTABLE) || cardstatus.equals(Environment.MEDIA_UNMOUNTED)
         || cardstatus.equals(Environment.MEDIA_MOUNTED_READ_ONLY) || cardstatus
         .equals(Environment.MEDIA_SHARED)) {
-      throw new RuntimeException("ODK reports :: SDCard error: " + Environment
-          .getExternalStorageState());
+      throw new RuntimeException(
+          "ODK reports :: SDCard error: " + Environment.getExternalStorageState());
     }
   }
 
+  /**
+   * Used all over the place
+   *
+   * @return /sdcard/opendatakit
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String getOdkFolder() {
     return Environment.getExternalStorageDirectory() + File.separator + ODK_FOLDER_NAME;
   }
 
+  /**
+   * Used in AggregateSynchronizer and ProcessManifestContentAndFileChanges
+   *
+   * @param path the path of the folder to create
+   * @return whether it was created successfully or not
+   */
+  @CheckResult
+  @SuppressWarnings("unused")
   public static boolean createFolder(String path) {
-    boolean made = true;
     File dir = new File(path);
-    if (!dir.exists()) {
-      made = dir.mkdirs();
+    //noinspection SimplifiableIfStatement
+    if (dir.exists()) {
+      return true;
     }
-    return made;
+    return dir.mkdirs();
   }
 
+  /**
+   * Used all over the place
+   *
+   * @return default
+   */
+  @SuppressWarnings("unused")
   public static String getOdkDefaultAppName() {
     return ODK_DEFAULT_APP_NAME;
   }
 
+  /**
+   * Used in AndroidShortcuts
+   *
+   * @return a list of all the folders in /sdcard/opendatakit
+   */
+  @SuppressWarnings("unused")
   public static File[] getAppFolders() {
-    File odk = new File(getOdkFolder());
-
-    File[] results = odk.listFiles(new FileFilter() {
+    return new File(getOdkFolder()).listFiles(new FileFilter() {
 
       @Override
       public boolean accept(File pathname) {
         return (pathname.isDirectory());
       }
     });
-
-    return results;
   }
 
   public static void assertDirectoryStructure(String appName) {
@@ -276,7 +306,7 @@ public class ODKFileUtils {
     // and create an empty .nomedia file
     File nomedia = new File(getAppFolder(appName), ".nomedia");
     try {
-      if (!nomedia.createNewFile()) {
+      if (!nomedia.exists() && !nomedia.createNewFile()) {
         throw new IOException();
       }
     } catch (IOException ex) {
@@ -284,17 +314,19 @@ public class ODKFileUtils {
       // WebLogger.getLogger calls assertDirectoryStructure, and we will end up in an infinite
       // loop of failures
       Log.e(TAG, "Cannot create .nomedia in app directory: " + ex.toString());
+      // Also, don't throw an exception or the tests will fail
     }
   }
 
   /**
    * This routine clears all the marker files used by the various tools to
    * avoid re-running the initialization task.
-   *
+   * <p>
    * Used in services.preferences.activities.ClearAppPropertiesActivity
    *
-   * @param appName
+   * @param appName the app name
    */
+  @SuppressWarnings("unused")
   public static void clearConfiguredToolFiles(String appName) {
     File dataDir = new File(ODKFileUtils.getDataFolder(appName));
     File[] filesToDelete = dataDir.listFiles(new FileFilter() {
@@ -320,15 +352,24 @@ public class ODKFileUtils {
   }
 
   public static void assertConfiguredToolApp(String appName, String toolName, String apkVersion) {
-    assertConfiguredOdkApp(appName, toolName + ".version", apkVersion);
+    writeConfiguredOdkAppVersion(appName, toolName + ".version", apkVersion);
   }
 
-  public static void assertConfiguredOdkApp(String appName, String odkAppVersionFile,
+  /**
+   * TODO this is almost identical to checkOdkAppVersion
+   *
+   * @param appName           the app name
+   * @param odkAppVersionFile the file that contains the installed version
+   * @param apkVersion        the version to overwrite odkAppVerisonFile with
+   */
+  private static void writeConfiguredOdkAppVersion(String appName, String odkAppVersionFile,
       String apkVersion) {
     File versionFile = new File(getDataFolder(appName), odkAppVersionFile);
 
     if (!versionFile.exists()) {
-      versionFile.getParentFile().mkdirs();
+      if (!versionFile.getParentFile().mkdirs()) {
+        throw new RuntimeException("Failed mkdirs on " + versionFile.getPath());
+      }
     }
 
     FileOutputStream fs = null;
@@ -339,6 +380,7 @@ public class ODKFileUtils {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         w = new OutputStreamWriter(fs, StandardCharsets.UTF_8);
       } else {
+        //noinspection deprecation
         w = new OutputStreamWriter(fs, Charsets.UTF_8);
       }
       bw = new BufferedWriter(w);
@@ -362,33 +404,37 @@ public class ODKFileUtils {
           WebLogger.getLogger(appName).printStackTrace(e);
         }
       }
-      try {
-        if (fs != null) {
+      if (fs != null) {
+        try {
           fs.close();
+        } catch (IOException e) {
+          WebLogger.getLogger(appName).printStackTrace(e);
         }
-      } catch (IOException e) {
-        WebLogger.getLogger(appName).printStackTrace(e);
       }
     }
   }
 
-  public static boolean isConfiguredSurveyApp(String appName, String apkVersion) {
-    return isConfiguredOdkApp(appName, "survey.version", apkVersion);
-  }
-
-  public static boolean isConfiguredTablesApp(String appName, String apkVersion) {
-    return isConfiguredOdkApp(appName, "tables.version", apkVersion);
-  }
-
-  public static boolean isConfiguredScanApp(String appName, String apkVersion) {
-    return isConfiguredOdkApp(appName, "scan.version", apkVersion);
-  }
-
+  /**
+   * Used in InitializationUtil
+   *
+   * @param appName    the app name
+   * @param toolName   the name of the app we want to check the version of
+   * @param apkVersion the version we want to match
+   * @return whether the passed apk version matches the version in the file
+   */
   public static boolean isConfiguredToolApp(String appName, String toolName, String apkVersion) {
-    return isConfiguredOdkApp(appName, toolName + ".version", apkVersion);
+    return checkOdkAppVersion(appName, toolName + ".version", apkVersion);
   }
 
-  private static boolean isConfiguredOdkApp(String appName, String odkAppVersionFile,
+  /**
+   * TODO this is almost identical to writeConfiguredOdkAppVersion
+   *
+   * @param appName           the app name
+   * @param odkAppVersionFile the file that contains the installed app version
+   * @param apkVersion        the version to match against
+   * @return whether the passed apk version matches the version in the file
+   */
+  private static boolean checkOdkAppVersion(String appName, String odkAppVersionFile,
       String apkVersion) {
     File versionFile = new File(getDataFolder(appName), odkAppVersionFile);
 
@@ -405,6 +451,7 @@ public class ODKFileUtils {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         r = new InputStreamReader(fs, StandardCharsets.UTF_8);
       } else {
+        //noinspection deprecation
         r = new InputStreamReader(fs, Charsets.UTF_8);
       }
       br = new BufferedReader(r);
@@ -445,163 +492,157 @@ public class ODKFileUtils {
     return false;
   }
 
-  public static File fromAppPath(String appPath) {
+  private static File fromAppPath(String appPath) {
     String[] terms = appPath.split(File.separator);
-    if (terms == null || terms.length < 1) {
+    if (terms.length < 1) {
       return null;
     }
-    File f = new File(new File(getOdkFolder()), appPath);
-    return f;
-  }
-
-  public static String toAppPath(String fullpath) {
-    String path = getOdkFolder() + File.separator;
-    if (fullpath.startsWith(path)) {
-      String partialPath = fullpath.substring(path.length());
-      String[] app = partialPath.split(File.separator);
-      if (app == null || app.length < 1) {
-        WebLogger.getContextLogger()
-            .w(TAG, "Missing file path (nothing under '" + ODK_FOLDER_NAME + "'): " + fullpath);
-        return null;
-      }
-      return partialPath;
-    } else {
-
-      String[] parts = fullpath.split(File.separator);
-      int i = 0;
-      while (parts.length > i && !parts[i].equals(ODK_FOLDER_NAME)) {
-        ++i;
-      }
-      if (i == parts.length) {
-        WebLogger.getContextLogger().w(TAG,
-            "File path is not under expected '" + ODK_FOLDER_NAME + "' Folder (" + path
-                + ") conversion failed for: " + fullpath);
-        return null;
-      }
-      int len = 0; // trailing slash
-      while (i >= 0) {
-        len += parts[i].length() + 1;
-        --i;
-      }
-
-      String partialPath = fullpath.substring(len);
-      String[] app = partialPath.split(File.separator);
-      if (app == null || app.length < 1) {
-        WebLogger.getContextLogger().w(TAG,
-            "File path is not under expected '" + ODK_FOLDER_NAME + "' Folder (" + path
-                + ") missing file path (nothing under '" + ODK_FOLDER_NAME + "'): " + fullpath);
-        return null;
-      }
-
-      WebLogger.getContextLogger().w(TAG,
-          "File path is not under expected '" + ODK_FOLDER_NAME + "' Folder -- remapped " + fullpath
-              + " as: " + path + partialPath);
-      return partialPath;
-    }
+    return new File(new File(getOdkFolder()), appPath);
   }
 
   public static String getAppFolder(String appName) {
-    String path = getOdkFolder() + File.separator + appName;
-    return path;
+    return getOdkFolder() + File.separator + appName;
   }
 
   // 1st level folders
 
+  /**
+   * Used in ScanUtils, ProcessManifestContentAndFileChanges
+   * @param appName the app name
+   * @return :app_name/config
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String getConfigFolder(String appName) {
-    String path = getAppFolder(appName) + File.separator + CONFIG_FOLDER_NAME;
-    return path;
+    return getAppFolder(appName) + File.separator + CONFIG_FOLDER_NAME;
   }
 
+  /**
+   * Used in GainPropertiesLock and PropertiesSingleton
+   *
+   * @param appName the app name
+   * @return :app_name/data
+   */
   public static String getDataFolder(String appName) {
-    String path = getAppFolder(appName) + File.separator + DATA_FOLDER_NAME;
-    return path;
+    return getAppFolder(appName) + File.separator + DATA_FOLDER_NAME;
   }
 
+  /**
+   * Used only in NanoHTTPD
+   *
+   * @param appName the app name
+   * @return :app_name/output
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String getOutputFolder(String appName) {
-    String path = getAppFolder(appName) + File.separator + OUTPUT_FOLDER_NAME;
-    return path;
+    return getAppFolder(appName) + File.separator + OUTPUT_FOLDER_NAME;
   }
 
+  /**
+   * Used in MainMenuActivity and scan.utils.ScanUtils
+   *
+   * @param appName the app name
+   * @return :app_name/system
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String getSystemFolder(String appName) {
-    String path = getAppFolder(appName) + File.separator + SYSTEM_FOLDER_NAME;
-    return path;
+    return getAppFolder(appName) + File.separator + SYSTEM_FOLDER_NAME;
   }
 
-  public static String getPermanentFolder(String appName) {
-    String path = getAppFolder(appName) + File.separator + PERMANENT_FOLDER_NAME;
-    return path;
+  private static String getPermanentFolder(String appName) {
+    return getAppFolder(appName) + File.separator + PERMANENT_FOLDER_NAME;
   }
 
   //////////////////////////////////////////////////////////
   // Everything under config folder
 
   public static String getAssetsFolder(String appName) {
-    String path = getConfigFolder(appName) + File.separator + ASSETS_FOLDER_NAME;
-    return path;
+    return getConfigFolder(appName) + File.separator + ASSETS_FOLDER_NAME;
   }
 
   public static String getAssetsCsvFolder(String appName) {
-    String assetsFolder = getAssetsFolder(appName);
-    String result = assetsFolder + File.separator + CSV_FOLDER_NAME;
-    return result;
+    return getAssetsFolder(appName) + File.separator + CSV_FOLDER_NAME;
   }
 
+  /**
+   * Used in CsvUtil
+   *
+   * @param appName the app name
+   * @param tableId the id of the table to get the csv folder for
+   * @return :app_name/assets/csv/:table_id/instances
+   */
   public static String getAssetsCsvInstancesFolder(String appName, String tableId) {
-    String assetsCsvFolder = getAssetsCsvFolder(appName);
-    String result =
-        assetsCsvFolder + File.separator + tableId + File.separator + INSTANCES_FOLDER_NAME;
-    return result;
+    return getAssetsCsvFolder(appName) + File.separator + tableId + File.separator
+        + INSTANCES_FOLDER_NAME;
   }
 
+  /**
+   * Used in CsvUtil, and AbstractPermissionsTestCase in services
+   *
+   * @param appName    the app name
+   * @param tableId    the id of the table to get the instance for
+   * @param instanceId the id of the instance to find
+   * @return :app_name/assets/csv/:table_id/instances/:instance_id
+   */
   public static String getAssetsCsvInstanceFolder(String appName, String tableId,
       String instanceId) {
-    String assetsCsvInstancesFolder = getAssetsCsvInstancesFolder(appName, tableId);
-    String result =
-        assetsCsvInstancesFolder + File.separator + safeInstanceIdFolderName(instanceId);
-    return result;
+    return getAssetsCsvInstancesFolder(appName, tableId) + File.separator
+        + safeInstanceIdFolderName(instanceId);
   }
 
   /**
    * Get the path to the tables initialization file for the given app.
+   * Used in services.sync.service.logic.ProcessManifestContentAndFileChanges, InitializationUtil
    *
-   * @param appName
-   * @return
+   * @param appName the app name
+   * @return :app_name/assets/tables.init
    */
   public static String getTablesInitializationFile(String appName) {
-    String assetsFolder = getAssetsFolder(appName);
-    String result = assetsFolder + File.separator + ODK_TABLES_INIT_FILENAME;
-    return result;
+    return getAssetsFolder(appName) + File.separator + ODK_TABLES_INIT_FILENAME;
   }
 
   /**
    * Get the path to the common definitions file for the given app.
+   * Used in LocalizationUtils
    *
-   * @param appName
-   * @return
+   * @param appName the app name
+   * @return :app_name/assets/commonDefinitions.js
    */
+  @SuppressWarnings("WeakerAccess")
   public static String getCommonDefinitionsFile(String appName) {
-    String assetsFolder = getAssetsFolder(appName);
-    String result = assetsFolder + File.separator + COMMON_DEFINITIONS_JS;
-    return result;
+    return getAssetsFolder(appName) + File.separator + COMMON_DEFINITIONS_JS;
   }
 
   /**
    * Get the path to the user-defined home screen file.
+   * Used in tables.activities.MainActivity
    *
-   * @param appName
-   * @return
+   * @param appName the app name
+   * @return :app_name/assets/index.html
    */
+  @SuppressWarnings("unused")
   public static String getTablesHomeScreenFile(String appName) {
-    String assetsFolder = getAssetsFolder(appName);
-    String result = assetsFolder + File.separator + ODK_TABLES_HOME_SCREEN_FILE_NAME;
-    return result;
+    return getAssetsFolder(appName) + File.separator + ODK_TABLES_HOME_SCREEN_FILE_NAME;
   }
 
+  /**
+   * Used in InitializationUtil, services.sync.service.logic.ProcessManifestContentAndFileChanges
+   *
+   * @param appName the app name
+   * @return :app_name/config/tables
+   */
   public static String getTablesFolder(String appName) {
-    String path = getConfigFolder(appName) + File.separator + TABLES_FOLDER_NAME;
-    return path;
+    return getConfigFolder(appName) + File.separator + TABLES_FOLDER_NAME;
   }
 
+  /**
+   * Used in AggregateSynchronizer, services.database.utilities.ODKDatabaseImplUtils,
+   * services.sync.service.logic.ProcessManifestContentAndFileChanges
+   *
+   * @param appName the app name
+   * @param tableId the id of the table to get the folder for
+   * @return :app_name/config/tables/:table_id
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String getTablesFolder(String appName, String tableId) {
     String path;
     if (tableId == null || tableId.length() == 0) {
@@ -618,27 +659,52 @@ public class ODKFileUtils {
       }
     }
     File f = new File(path);
-    f.mkdirs();
+    if (!f.exists() && !f.mkdirs()) {
+      throw new RuntimeException("Could not mkdirs on " + f.getPath());
+    }
     return f.getAbsolutePath();
   }
 
   // files under that
 
+  /**
+   * @param appName the app name
+   * @param tableId the table id
+   * @return :app_name/config/tables/:table_id/definition.csv
+   */
   public static String getTableDefinitionCsvFile(String appName, String tableId) {
     return getTablesFolder(appName, tableId) + File.separator + DEFINITION_CSV;
   }
 
+  /**
+   * @param appName the app name
+   * @param tableId the table id
+   * @return :app_name/config/tables/:table_id/properties.csv
+   */
   public static String getTablePropertiesCsvFile(String appName, String tableId) {
     return getTablesFolder(appName, tableId) + File.separator + PROPERTIES_CSV;
   }
 
-  public static String getTableSpecificDefinitionsFile(String appName, String tableId) {
+  /**
+   * Used in LocalizationUtils
+   *
+   * @param appName the app name
+   * @param tableId the id of the table to find the definitions file for
+   * @return :app_name/config/tables/:table_id/tableSpecificDefinitions.js
+   */
+  static String getTableSpecificDefinitionsFile(String appName, String tableId) {
     return getTablesFolder(appName, tableId) + File.separator + TABLE_SPECIFIC_DEFINITIONS_JS;
   }
 
+  /**
+   * Used in InitializationUtil
+   *
+   * @param appName the app name
+   * @param tableId the table id to find the forms for
+   * @return :app_name/config/tables/:table_id/forms
+   */
   public static String getFormsFolder(String appName, String tableId) {
-    String path = getTablesFolder(appName, tableId) + File.separator + FORMS_FOLDER_NAME;
-    return path;
+    return getTablesFolder(appName, tableId) + File.separator + FORMS_FOLDER_NAME;
   }
 
   public static String getFormFolder(String appName, String tableId, String formId) {
@@ -649,8 +715,7 @@ public class ODKFileUtils {
         throw new IllegalArgumentException(
             "getFormFolder: formId does not begin with a letter and contain only letters, digits or underscores!");
       }
-      String path = getFormsFolder(appName, tableId) + File.separator + formId;
-      return path;
+      return getFormsFolder(appName, tableId) + File.separator + formId;
     }
   }
 
@@ -658,47 +723,91 @@ public class ODKFileUtils {
   // Everything under data folder
 
   public static String getTablesInitializationCompleteMarkerFile(String appName) {
-    String result = getDataFolder(appName) + File.separator + ODK_TABLES_INIT_FILENAME;
-    return result;
+    return getDataFolder(appName) + File.separator + ODK_TABLES_INIT_FILENAME;
   }
 
+  /**
+   * Used in androidCommon.views.ODKWebView
+   *
+   * @param appName the app name
+   * @return :app_name/data/appCache
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String getAppCacheFolder(String appName) {
-    String path = getDataFolder(appName) + File.separator + APP_CACHE_FOLDER_NAME;
-    return path;
+    return getDataFolder(appName) + File.separator + APP_CACHE_FOLDER_NAME;
   }
 
+  /**
+   * Used in survey.activities.DrawActivity
+   *
+   * @param appName the app name
+   * @return :app_name/data/appCache/tmpDraw.jpg
+   */
+  @SuppressWarnings("unused")
   public static String getTempDrawFile(String appName) {
-    String path = getAppCacheFolder(appName) + File.separator + "tmpDraw.jpg";
-    return path;
+    return getAppCacheFolder(appName) + File.separator + "tmpDraw.jpg";
   }
 
+  /**
+   * Used in survey.activities.DrawActivity
+   *
+   * @param appName the app name
+   * @return :app_name/data/appCache/tmp.jpg
+   */
+  @SuppressWarnings("unused")
   public static String getTempFile(String appName) {
-    String path = getAppCacheFolder(appName) + File.separator + "tmp.jpg";
-    return path;
+    return getAppCacheFolder(appName) + File.separator + "tmp.jpg";
   }
 
+  /**
+   * Used in ODKWebView
+   *
+   * @param appName the app name
+   * @return :app_name/data/geoCache
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String getGeoCacheFolder(String appName) {
-    String path = getDataFolder(appName) + File.separator + GEO_CACHE_FOLDER_NAME;
-    return path;
+    return getDataFolder(appName) + File.separator + GEO_CACHE_FOLDER_NAME;
   }
 
+  /**
+   * Used in AndroidOdkConnection, OdkConnectionFactoryAbstractClass, SQLiteConnection (all in
+   * services)
+   *
+   * @param appName the app name
+   * @return :app_name/data/webDb
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String getWebDbFolder(String appName) {
-    String path = getDataFolder(appName) + File.separator + WEB_DB_FOLDER_NAME;
-    return path;
+    return getDataFolder(appName) + File.separator + WEB_DB_FOLDER_NAME;
   }
 
+  /**
+   * used only locally, but feel free to make it public if you need to use it
+   *
+   * @param appName the app name
+   * @return :app_name/data/tables
+   */
   private static String getTableDataFolder(String appName) {
-    String path = getDataFolder(appName) + File.separator + TABLES_FOLDER_NAME;
-    return path;
+    return getDataFolder(appName) + File.separator + TABLES_FOLDER_NAME;
   }
 
+  /**
+   * Used in CsvUtil, scan.utils.ScanUtil
+   *
+   * @param appName the app name
+   * @param tableId the id of the table to find the instances folder for
+   * @return :app_name/data/tables/:table_id/instances
+   */
   public static String getInstancesFolder(String appName, String tableId) {
     String path;
     path = getTableDataFolder(appName) + File.separator + tableId + File.separator
         + INSTANCES_FOLDER_NAME;
 
     File f = new File(path);
-    f.mkdirs();
+    if (!f.exists() && !f.mkdirs()) {
+      throw new RuntimeException("Could not mkdirs on " + f.getPath());
+    }
     return f.getAbsolutePath();
   }
 
@@ -707,11 +816,16 @@ public class ODKFileUtils {
       throw new IllegalArgumentException(
           "getInstanceFolder: instanceId is null or the empty string!");
     } else {
-      String instanceFolder = instanceId.replaceAll("(\\p{P}|\\p{Z})", "_");
-      return instanceFolder;
+      return instanceId.replaceAll("(\\p{P}|\\p{Z})", "_");
     }
   }
 
+  /**
+   * @param appName    the app name
+   * @param tableId    the table id
+   * @param instanceId the instance id
+   * @return :app_name/data/tables/:table_id/instances/:instance_id
+   */
   public static String getInstanceFolder(String appName, String tableId, String instanceId) {
     String path;
     String instanceFolder = safeInstanceIdFolderName(instanceId);
@@ -719,10 +833,22 @@ public class ODKFileUtils {
     path = getInstancesFolder(appName, tableId) + File.separator + instanceFolder;
 
     File f = new File(path);
-    f.mkdirs();
+    if (!f.exists() && !f.mkdirs()) {
+      throw new RuntimeException("Could not mkdirs on " + f.getPath());
+    }
     return f.getAbsolutePath();
   }
 
+  /**
+   * Used mostly in Media activities in survey, but also in AndroidSynchronizer
+   * TODO I really can't document this without knowing what a rowpath is
+   *
+   * @param appName    the app name
+   * @param tableId    the table id
+   * @param instanceId the instance id
+   * @param rowpathUri The URI to a rowpath, used to get the filename
+   * @return the filename of the rowpath
+   */
   public static File getRowpathFile(String appName, String tableId, String instanceId,
       String rowpathUri) {
     // clean up the value...
@@ -740,10 +866,20 @@ public class ODKFileUtils {
     } else {
       fileUri = instanceUri + "/" + rowpathUri;
     }
-    File theFile = ODKFileUtils.getAsFile(appName, fileUri);
-    return theFile;
+    return ODKFileUtils.getAsFile(appName, fileUri);
   }
 
+  /**
+   * Used in AggregateSynchronizer, scan.activities.JSON2SurveyJSONActivity and several of
+   * survey's Media activities
+   *
+   * @param appName    the app name
+   * @param tableId    the table id
+   * @param instanceId the instance id
+   * @param rowFile    the file that the rowpath uri will point to
+   * @return a uri that can be used for an intent and later dereferenced to get a rowpath file
+   */
+  @SuppressWarnings("unused")
   public static String asRowpathUri(String appName, String tableId, String instanceId,
       File rowFile) {
     String instanceFolder = ODKFileUtils.getInstanceFolder(appName, tableId, instanceId);
@@ -763,43 +899,84 @@ public class ODKFileUtils {
   ///////////////////////////////////////////////
   // Everything under output folder
 
+  /**
+   * Used only in WebLoggerImpl
+   *
+   * @param appName the app name
+   * @return :app_name/output/logging
+   */
   public static String getLoggingFolder(String appName) {
-    String path = getOutputFolder(appName) + File.separator + LOGGING_FOLDER_NAME;
-    return path;
+    return getOutputFolder(appName) + File.separator + LOGGING_FOLDER_NAME;
   }
 
+  /**
+   * Used in SimpleWebServer, tables.utils.OutputUtil
+   *
+   * @param appName the app name
+   * @return :app_name/output/debug
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String getTablesDebugObjectFolder(String appName) {
     String outputFolder = getOutputFolder(appName);
-    String result = outputFolder + File.separator + DEBUG_FOLDER_NAME;
-    return result;
+    return outputFolder + File.separator + DEBUG_FOLDER_NAME;
   }
 
+  /**
+   * Used only in CSVUtil
+   *
+   * @param appName the app name
+   * @return :app_name/output/csv
+   */
   public static String getOutputCsvFolder(String appName) {
-    String outputFolder = getOutputFolder(appName);
-    String result = outputFolder + File.separator + CSV_FOLDER_NAME;
-    return result;
+    return getOutputFolder(appName) + File.separator + CSV_FOLDER_NAME;
   }
 
+  /**
+   * Used only in CsvUtil
+   *
+   * @param appName    the app name
+   * @param tableId    the table id of the instance
+   * @param instanceId the instance id of the form submission
+   * @return :app_name/output/csv/:table_id/instances/:instance_id
+   */
   public static String getOutputCsvInstanceFolder(String appName, String tableId,
       String instanceId) {
-    String csvOutputFolder = getOutputCsvFolder(appName);
-    String result =
-        csvOutputFolder + File.separator + tableId + File.separator + INSTANCES_FOLDER_NAME
-            + File.separator + safeInstanceIdFolderName(instanceId);
-    return result;
+    return getOutputCsvFolder(appName) + File.separator + tableId + File.separator
+        + INSTANCES_FOLDER_NAME + File.separator + safeInstanceIdFolderName(instanceId);
   }
 
+  /**
+   * @param appName       the app name
+   * @param tableId       the id of the table to export
+   * @param fileQualifier An optional tag that is appended to the end of the four exported files
+   *                      with a dot
+   * @return :app_name/output/csv/:table_id(.:file_qualifier).csv
+   */
   public static String getOutputTableCsvFile(String appName, String tableId, String fileQualifier) {
     return getOutputCsvFolder(appName) + File.separator + tableId + ((fileQualifier != null
         && fileQualifier.length() != 0) ? ("." + fileQualifier) : "") + ".csv";
   }
 
+  /**
+   * @param appName       the app name
+   * @param tableId       the id of the table to export
+   * @param fileQualifier An optional tag that is appended to the end of the four exported files
+   *                      with a dot
+   * @return :app_name/output/csv/:table_id(.:file_qualifier).definition.csv
+   */
   public static String getOutputTableDefinitionCsvFile(String appName, String tableId,
       String fileQualifier) {
     return getOutputCsvFolder(appName) + File.separator + tableId + ((fileQualifier != null
         && fileQualifier.length() != 0) ? ("." + fileQualifier) : "") + "." + DEFINITION_CSV;
   }
 
+  /**
+   * @param appName       the app name
+   * @param tableId       the id of the table to export
+   * @param fileQualifier An optional tag that is appended to the end of the four exported files
+   *                      with a dot
+   * @return :app_name/output/csv/:table_id(.:file_qualifier).properties.csv
+   */
   public static String getOutputTablePropertiesCsvFile(String appName, String tableId,
       String fileQualifier) {
     return getOutputCsvFolder(appName) + File.separator + tableId + ((fileQualifier != null
@@ -809,20 +986,38 @@ public class ODKFileUtils {
   ////////////////////////////////////////
   // Everything under system folder
 
+  /**
+   * Used in FormsProvider, InitializationUtil
+   *
+   * @param appName the table id
+   * @return :app_name/system/tables.deleting
+   */
   public static String getPendingDeletionTablesFolder(String appName) {
-    String path = getSystemFolder(appName) + File.separator + STALE_TABLES_FOLDER_NAME;
-    return path;
+    return getSystemFolder(appName) + File.separator + STALE_TABLES_FOLDER_NAME;
   }
 
-  public static String getPendingInsertionTablesFolder(String appName) {
-    String path = getSystemFolder(appName) + File.separator + PENDING_TABLES_FOLDER_NAME;
-    return path;
+  /**
+   * used only locally, by assertDirectoryStructure
+   *
+   * @param appName the table id
+   * @return :app_name/system/tables.pending
+   */
+  private static String getPendingInsertionTablesFolder(String appName) {
+    return getSystemFolder(appName) + File.separator + PENDING_TABLES_FOLDER_NAME;
   }
 
   // 4th level config tables tableId folder
 
   // 3rd level output
 
+  /**
+   * Used in services.preferences.fragments.DeviceSettingsFragment
+   *
+   * @param appName the app name
+   * @param path    the path to check against
+   * @return whether the path is under :app_name/
+   */
+  @SuppressWarnings("unused")
   public static boolean isPathUnderAppName(String appName, File path) {
 
     File parentDir = new File(getAppFolder(appName));
@@ -834,8 +1029,14 @@ public class ODKFileUtils {
     return (path != null);
   }
 
+  /**
+   * Used in AggregateSynchronizer, services.sync.logic.ProcessManifestContentAndFileChanges
+   *
+   * @param path the path that's under an app
+   * @return the app name
+   */
+  @SuppressWarnings("unused")
   public static String extractAppNameFromPath(File path) {
-
     if (path == null) {
       return null;
     }
@@ -849,25 +1050,24 @@ public class ODKFileUtils {
 
     if (parent == null) {
       return null;
-    } else {
-      return path.getName();
     }
+    return path.getName();
   }
 
   /**
    * Returns the relative path beginning after the getAppFolder(appName) directory.
    * The relative path does not start or end with a '/'
    *
-   * @param appName
-   * @param fileUnderAppName
-   * @return
+   * @param appName          the app name
+   * @param fileUnderAppName a file that's under :app_name/
+   * @return a relative path to that file
    */
   public static String asRelativePath(String appName, File fileUnderAppName) {
     // convert fileUnderAppName to a relative path such that if
     // we just append it to the AppFolder, we have a full path.
     File parentDir = new File(getAppFolder(appName));
 
-    ArrayList<String> pathElements = new ArrayList<String>();
+    ArrayList<String> pathElements = new ArrayList<>();
 
     File f = fileUnderAppName;
     while (f != null && !f.equals(parentDir)) {
@@ -916,11 +1116,13 @@ public class ODKFileUtils {
 
   /**
    * Reconstructs the full path from the appName and uriFragment
+   * Used in AggregateSynchronizer, FileSet and services.submissions.provider.SubmissionProvider
    *
-   * @param appName
-   * @param uriFragment
-   * @return
+   * @param appName     the app name
+   * @param uriFragment a uri that represents a fully qualified path to a file
+   * @return a File object to the represented path
    */
+  @SuppressWarnings("WeakerAccess")
   public static File getAsFile(String appName, String uriFragment) {
     // forward slash always...
     if (uriFragment == null || uriFragment.length() == 0) {
@@ -935,28 +1137,45 @@ public class ODKFileUtils {
     }
 
     String[] segments = uriFragment.split("/");
-    for (int i = 0; i < segments.length; ++i) {
-      String s = segments[i];
+    for (String s : segments) {
       f = new File(f, s);
     }
     return f;
   }
 
   /**
-   * Convert a relative path into an application filename
+   * Convert a relative path into an application filename. Used all over the place
    *
-   * @param appName
-   * @param relativePath
-   * @return
+   * @param appName      the app name
+   * @param relativePath the relative path to a file
+   * @return A file object to :app_name/*:relative_path
    */
+  @SuppressWarnings("unused")
   public static File asAppFile(String appName, String relativePath) {
     return new File(getAppFolder(appName) + File.separator + relativePath);
   }
 
+  /**
+   * Used in services.preferences.fragments.DeviceSettingsFragment,
+   * services.sync.logic.ProcessManifestContentAndFileChanges
+   *
+   * @param appName      the app name
+   * @param relativePath the relative path to a config file
+   * @return a file object to :app_name/config/*:relative_path
+   */
+  @SuppressWarnings("unused")
   public static File asConfigFile(String appName, String relativePath) {
     return new File(getConfigFolder(appName) + File.separator + relativePath);
   }
 
+  /**
+   * Used in AggregateSynchronizer
+   *
+   * @param appName                the app name
+   * @param fileUnderAppConfigName a file object to a file under :app_name/config/
+   * @return the relative path to that file
+   */
+  @SuppressWarnings("unused")
   public static String asConfigRelativePath(String appName, File fileUnderAppConfigName) {
     String relativePath = asRelativePath(appName, fileUnderAppConfigName);
     if (!relativePath.startsWith(CONFIG_FOLDER_NAME + File.separator)) {
@@ -972,11 +1191,13 @@ public class ODKFileUtils {
   /**
    * The formPath is relative to the framework directory and is passed into
    * the WebKit to specify the form to display.
+   * Used in (survey) FormIdStruct, MainMenuActivity, (services) FormInfo
    *
-   * @param appName
-   * @param formDefFile
-   * @return
+   * @param appName     the app name
+   * @param formDefFile a file object to a formDef.json
+   * @return a relative path to that formDef file
    */
+  @SuppressWarnings("unused")
   public static String getRelativeFormPath(String appName, File formDefFile) {
 
     // compute FORM_PATH...
@@ -990,72 +1211,14 @@ public class ODKFileUtils {
   }
 
   /**
-   * Used as the baseUrl in the webserver.
+   * Used as the baseUrl in the webserver, exposed to the javascript interface via getBaseUrl in
+   * OdkCommon
    *
-   * @return e.g., ../system
+   * @return ../system
    */
+  @SuppressWarnings("unused")
   public static String getRelativeSystemPath() {
-    return "../" + ODKFileUtils.SYSTEM_FOLDER_NAME;
-  }
-
-  public static byte[] getFileAsBytes(String appName, File file) {
-    byte[] bytes = null;
-    InputStream is = null;
-    try {
-      is = new FileInputStream(file);
-
-      // Get the size of the file
-      long length = file.length();
-      if (length > Integer.MAX_VALUE) {
-        WebLogger.getLogger(appName).e(TAG, "File " + file.getName() + "is too large");
-        return null;
-      }
-
-      // Create the byte array to hold the data
-      bytes = new byte[(int) length];
-
-      // Read in the bytes
-      int offset = 0;
-      int read = 0;
-      try {
-        while (offset < bytes.length && read >= 0) {
-          read = is.read(bytes, offset, bytes.length - offset);
-          offset += read;
-        }
-      } catch (IOException e) {
-        WebLogger.getLogger(appName).e(TAG, "Cannot read " + file.getName());
-        e.printStackTrace();
-        return null;
-      }
-
-      // Ensure all the bytes have been read in
-      if (offset < bytes.length) {
-        try {
-          throw new IOException("Could not completely read file " + file.getName());
-        } catch (IOException e) {
-          WebLogger.getLogger(appName).printStackTrace(e);
-          return null;
-        }
-      }
-
-      return bytes;
-
-    } catch (FileNotFoundException e) {
-      WebLogger.getLogger(appName).e(TAG, "Cannot find " + file.getName());
-      WebLogger.getLogger(appName).printStackTrace(e);
-      return null;
-
-    } finally {
-      // Close the input stream
-      try {
-        if (is != null) {
-          is.close();
-        }
-      } catch (IOException e) {
-        WebLogger.getLogger(appName).e(TAG, "Cannot close input stream for " + file.getName());
-        WebLogger.getLogger(appName).printStackTrace(e);
-      }
-    }
+    return ".." + File.separator + ODKFileUtils.SYSTEM_FOLDER_NAME;
   }
 
   public static String getMd5Hash(String appName, File file) {
@@ -1063,25 +1226,14 @@ public class ODKFileUtils {
   }
 
   /**
-   * Recursively traverse the directory to find the most recently modified
-   * file within it.
+   * MD5's a file. Used in ODKDatabaseImplUtils and EncryptionUtils
    *
-   * @param formDir
-   * @return lastModifiedDate of the most recently modified file.
+   * @param appName the app name
+   * @param file    the file to hash
+   * @return the md5sum of that file
    */
-  public static long getMostRecentlyModifiedDate(File formDir) {
-    long lastModifiedDate = formDir.lastModified();
-    Iterator<File> allFiles = ODKFileUtils.iterateFiles(formDir, null, true);
-    while (allFiles.hasNext()) {
-      File f = allFiles.next();
-      if (f.lastModified() > lastModifiedDate) {
-        lastModifiedDate = f.lastModified();
-      }
-    }
-    return lastModifiedDate;
-  }
-
-  public static String getNakedMd5Hash(String appName, File file) {
+  @SuppressWarnings("WeakerAccess")
+  public static String getNakedMd5Hash(String appName, Object file) {
     try {
       // CTS (6/15/2010) : stream file through digest instead of handing
       // it the byte[]
@@ -1091,28 +1243,47 @@ public class ODKFileUtils {
       byte[] chunk = new byte[chunkSize];
 
       // Get the size of the file
-      long lLength = file.length();
+      long lLength;
+      if (file instanceof File) {
+        lLength = ((File) file).length();
+      } else if (file instanceof String) {
+        lLength = ((String) file).length();
+      } else {
+        throw new IllegalArgumentException("Bad object to md5");
+      }
 
       if (lLength > Integer.MAX_VALUE) {
-        WebLogger.getLogger(appName).e(TAG, "File " + file.getName() + "is too large");
+        if (file instanceof File) {
+          WebLogger.getLogger(appName).e(TAG, "File " + ((File) file).getName() + " is too large");
+        } else {
+          WebLogger.getLogger(appName).e(TAG, "String is too large to md5");
+        }
         return null;
       }
 
       int length = (int) lLength;
 
-      InputStream is = null;
-      is = new FileInputStream(file);
+      InputStream is;
+      if (file instanceof File) {
+        is = new FileInputStream((File) file);
+      } else {
+        is = new ByteArrayInputStream(((String) file).getBytes(CharEncoding.UTF_8));
+      }
 
-      int l = 0;
+      int l;
       for (l = 0; l + chunkSize < length; l += chunkSize) {
-        is.read(chunk, 0, chunkSize);
+        // TODO double check that this still works after the change
+        if (is.read(chunk, 0, chunkSize) == -1)
+          break;
         md.update(chunk, 0, chunkSize);
       }
 
       int remaining = length - l;
       if (remaining > 0) {
-        is.read(chunk, 0, remaining);
-        md.update(chunk, 0, remaining);
+        // TODO double check that this still works after the change
+        if (is.read(chunk, 0, remaining) != -1) {
+          md.update(chunk, 0, remaining);
+        }
       }
       byte[] messageDigest = md.digest();
 
@@ -1137,62 +1308,14 @@ public class ODKFileUtils {
 
   }
 
-  public static String getNakedMd5Hash(String appName, String contents) {
-    try {
-      // CTS (6/15/2010) : stream file through digest instead of handing
-      // it the byte[]
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      int chunkSize = 256;
-
-      byte[] chunk = new byte[chunkSize];
-
-      // Get the size of the file
-      long lLength = contents.length();
-
-      if (lLength > Integer.MAX_VALUE) {
-        WebLogger.getLogger(appName).e(TAG, "Contents is too large");
-        return null;
-      }
-
-      int length = (int) lLength;
-
-      InputStream is = null;
-      is = new ByteArrayInputStream(contents.getBytes(CharEncoding.UTF_8));
-
-      int l = 0;
-      for (l = 0; l + chunkSize < length; l += chunkSize) {
-        is.read(chunk, 0, chunkSize);
-        md.update(chunk, 0, chunkSize);
-      }
-
-      int remaining = length - l;
-      if (remaining > 0) {
-        is.read(chunk, 0, remaining);
-        md.update(chunk, 0, remaining);
-      }
-      byte[] messageDigest = md.digest();
-
-      BigInteger number = new BigInteger(1, messageDigest);
-      String md5 = number.toString(16);
-      while (md5.length() < 32)
-        md5 = "0" + md5;
-      is.close();
-      return md5;
-
-    } catch (NoSuchAlgorithmException e) {
-      WebLogger.getLogger(appName).e("MD5", e.getMessage());
-      return null;
-
-    } catch (FileNotFoundException e) {
-      WebLogger.getLogger(appName).e("No Cache File", e.getMessage());
-      return null;
-    } catch (IOException e) {
-      WebLogger.getLogger(appName).e("Problem reading from file", e.getMessage());
-      return null;
-    }
-
-  }
-
+  /**
+   * Used in WebCursorUtils
+   *
+   * @param n    the node to read text from
+   * @param trim whether to trim extra whitespace from the node
+   * @return the text in the node
+   */
+  @SuppressWarnings("unused")
   public static String getXMLText(Node n, boolean trim) {
     NodeList nl = n.getChildNodes();
     return (nl.getLength() == 0 ? null : getXMLText(nl, 0, trim));
@@ -1270,25 +1393,15 @@ public class ODKFileUtils {
     }
   }
 
-  public static void moveFile(File sourceFile, File destinationFile) throws IOException {
-    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
-    try {
-      FileUtils.moveFile(sourceFile, destinationFile);
-    } finally {
-      wrapper.release();
-    }
-  }
-
-  public static Iterator<File> iterateFiles(File directory, String[] extensions,
-      boolean recursive) {
-    ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
-    try {
-      return FileUtils.iterateFiles(directory, extensions, recursive);
-    } finally {
-      wrapper.release();
-    }
-  }
-
+  /**
+   * Used in ODKDatabaseImplUtils
+   *
+   * @param directory       a directory to scan through
+   * @param fileFileFilter  a filter used to strip unwanted files from the result
+   * @param directoryFilter a filter used to strip unwanted directories from the result
+   * @return a list of the files that matched the file filter and directory filter
+   */
+  @SuppressWarnings("unused")
   public static Collection<File> listFiles(File directory, IOFileFilter fileFileFilter,
       IOFileFilter directoryFilter) {
     ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
@@ -1299,6 +1412,12 @@ public class ODKFileUtils {
     }
   }
 
+  /**
+   * Used in ODKDatabaseImplUtils
+   *
+   * @param file the file to delete
+   */
+  @SuppressWarnings("unused")
   public static void deleteQuietly(File file) {
     ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
     try {
@@ -1308,6 +1427,13 @@ public class ODKFileUtils {
     }
   }
 
+  /**
+   * This ensures that the current thread's class loader is set, because if it isn't, things in
+   * FileUtils won't work. FileUtils uses some fancy Java 7 optimizations, but it will fallback
+   * to the slow way if you're on java 6. However the way it detects if these optimizations are
+   * present uses the current thread's class loader, and if the class loader is null, it can't
+   * tell and just dies.
+   */
   private static class ContextClassLoaderWrapper {
     boolean wrapped = false;
 
