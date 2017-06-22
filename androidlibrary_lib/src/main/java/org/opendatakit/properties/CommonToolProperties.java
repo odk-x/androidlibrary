@@ -63,6 +63,8 @@ public class CommonToolProperties {
   public static final String KEY_ACCOUNT = "common.account";
   /** ODK Aggregate username */
   public static final String KEY_USERNAME = "common.username";
+  /** User id as given by the server. This is the getActiveUser() value */
+  public static final String KEY_AUTHENTICATED_USER_ID = "common.userid";
 
   // general settings
 
@@ -170,6 +172,7 @@ public class CommonToolProperties {
     if ( secureProperties != null ) {
       secureProperties.put(KEY_AUTH, "");
       secureProperties.put(KEY_PASSWORD, "");
+      secureProperties.put(KEY_AUTHENTICATED_USER_ID, "");
       secureProperties.put(KEY_DEFAULT_GROUP, "");
       secureProperties.put(KEY_ROLES_LIST, "");
       secureProperties.put(KEY_USERS_LIST, "");
