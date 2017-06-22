@@ -69,7 +69,7 @@ public class StaticStateManipulator {
     void reset();
   }
 
-  private final ArrayList<IStaticFieldManipulator> mStaticManipulators = new ArrayList<IStaticFieldManipulator>();
+  private final ArrayList<IStaticFieldManipulator> mStaticManipulators = new ArrayList<>();
 
   protected StaticStateManipulator() {
   }

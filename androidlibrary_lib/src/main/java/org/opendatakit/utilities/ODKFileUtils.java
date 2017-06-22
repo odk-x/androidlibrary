@@ -279,7 +279,7 @@ public class ODKFileUtils {
         throw new IOException();
       }
     } catch (IOException ex) {
-      throw new RuntimeException("Cannot create .nomedia in app directory: " + ex.toString());
+      WebLogger.getLogger(appName).e(TAG, "Cannot create .nomedia in app directory: " + ex.toString());
     }
   }
 
