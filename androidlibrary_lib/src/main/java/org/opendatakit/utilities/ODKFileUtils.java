@@ -306,7 +306,7 @@ public class ODKFileUtils {
     // and create an empty .nomedia file
     File nomedia = new File(getAppFolder(appName), ".nomedia");
     try {
-      if (!nomedia.createNewFile()) {
+      if (!nomedia.exists() && !nomedia.createNewFile()) {
         throw new IOException();
       }
     } catch (IOException ex) {
@@ -659,7 +659,7 @@ public class ODKFileUtils {
       }
     }
     File f = new File(path);
-    if (!f.mkdirs()) {
+    if (!f.exists() && !f.mkdirs()) {
       throw new RuntimeException("Could not mkdirs on " + f.getPath());
     }
     return f.getAbsolutePath();
@@ -805,9 +805,8 @@ public class ODKFileUtils {
         + INSTANCES_FOLDER_NAME;
 
     File f = new File(path);
-    if (!f.mkdirs()) {
-      //throw new RuntimeException("Could not mkdirs on " + f.getPath());
-      WebLogger.getLogger(appName).e(TAG, "getInstancesFolder: Could not mkdirs on " + f.getPath());
+    if (!f.exists() && !f.mkdirs()) {
+      throw new RuntimeException("Could not mkdirs on " + f.getPath());
     }
     return f.getAbsolutePath();
   }
@@ -834,9 +833,8 @@ public class ODKFileUtils {
     path = getInstancesFolder(appName, tableId) + File.separator + instanceFolder;
 
     File f = new File(path);
-    if (!f.mkdirs()) {
-      //throw new RuntimeException("Could not mkdirs on " + f.getPath());
-      WebLogger.getLogger(appName).e(TAG, "getInstanceFolder: Could not mkdirs on " + f.getPath());
+    if (!f.exists() && !f.mkdirs()) {
+      throw new RuntimeException("Could not mkdirs on " + f.getPath());
     }
     return f.getAbsolutePath();
   }
