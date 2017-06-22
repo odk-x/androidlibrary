@@ -17,6 +17,7 @@ package org.opendatakit.utilities;
 
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -279,7 +280,10 @@ public class ODKFileUtils {
         throw new IOException();
       }
     } catch (IOException ex) {
-      WebLogger.getLogger(appName).e(TAG, "Cannot create .nomedia in app directory: " + ex.toString());
+      // DO NOT CHANGE THIS TO WebLogger
+      // WebLogger.getLogger calls assertDirectoryStructure, and we will end up in an infinite
+      // loop of failures
+      Log.e(TAG, "Cannot create .nomedia in app directory: " + ex.toString());
     }
   }
 
