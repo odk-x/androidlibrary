@@ -31,9 +31,15 @@ import java.util.Map;
  *
  * @author mitchellsundt@gmail.com
  */
+@SuppressWarnings("WeakerAccess")
+public final class FormsProviderUtils {
+   private static final String TAG = FormsProviderUtils.class.getSimpleName();
 
-public class FormsProviderUtils {
-   private static final String TAG = "FormsProviderUtils";
+   /**
+    * Do not instantiate this class
+    */
+   private FormsProviderUtils() {
+   }
 
    public static class ParsedFragment {
       public final String instanceId;
@@ -63,11 +69,11 @@ public class FormsProviderUtils {
 
    /**
     * Safely encode a value known to be a string for inclusion in the auxillaryHash
-    * @param unquotedStringValue
-    * @return
+    * @param unquotedStringValue an unencoded string
+    * @return that string but urlencoded
     */
    public static String encodeFragmentUnquotedStringValue(String unquotedStringValue)
-       throws JsonProcessingException, UnsupportedEncodingException {
+       throws UnsupportedEncodingException {
 
       return URLEncoder.encode(unquotedStringValue, ApiConstants.UTF8_ENCODE).replace("+",
           URL_ENCODED_SPACE);
@@ -75,8 +81,8 @@ public class FormsProviderUtils {
 
    /**
     * Safely encode an object value for inclusion in the auxillaryHash
-    * @param value
-    * @return
+    * @param value an object to encode
+    * @return that object but json encoded then urlencoded
     */
    public static String encodeFragmentObjectValue(Object value)
        throws JsonProcessingException, UnsupportedEncodingException {
@@ -108,9 +114,8 @@ public class FormsProviderUtils {
              + "specified if formId is null. returning.");
          return null;
       }
-      if (formId == null &&
-          (elementKeyToValueMap != null &&
-           !elementKeyToValueMap.isEmpty())) {
+      if (formId == null && elementKeyToValueMap != null &&
+       !elementKeyToValueMap.isEmpty()) {
          WebLogger.getLogger(appName).e(TAG, "constructSurveyUri: jsonMap cannot be "
              + "specified if formId is null. returning.");
          return null;
@@ -126,17 +131,17 @@ public class FormsProviderUtils {
               Uri.withAppendedPath(FormsProviderAPI.CONTENT_URI, appName),
               tableId), formId);
 
-      String uriStr = uri.toString() + "/" + "#";
+      String uriStr = uri + "/" + "#";
       // Now we need to add our fragment parameters (client-side parsing).
       try {
          String continueStr = "";
 
-         if ( instanceId != null && instanceId.length() != 0) {
+         if ( instanceId != null && !instanceId.isEmpty()) {
             uriStr += URI_SURVEY_QUERY_PARAM_INSTANCE_ID + "=" +
                 encodeFragmentUnquotedStringValue(instanceId);
             continueStr = "&";
          }
-         if (screenPath != null && screenPath.length() != 0) {
+         if (screenPath != null && !screenPath.isEmpty()) {
             uriStr += continueStr + URI_SURVEY_QUERY_PARAM_SCREEN_PATH + "="
                 + encodeFragmentUnquotedStringValue(screenPath);
             continueStr = "&";
@@ -187,7 +192,7 @@ public class FormsProviderUtils {
       if ( idxHash >= 0 ) {
          fragment = uriString.substring(idxHash + 1);
       }
-      if (fragment != null && fragment.length() != 0) {
+      if (!fragment.isEmpty()) {
          // and process the fragment to find the instanceId, screenPath and other
          // kv pairs
          String[] pargs = fragment.split("&");
@@ -204,14 +209,15 @@ public class FormsProviderUtils {
                if (keyValue.length == 2) {
                   screenPath = URLDecoder.decode(keyValue[1], ApiConstants.UTF8_ENCODE);
                }
-            } else if ("refId".equals(keyValue[0]) || "formPath".equals(keyValue[0])) {
-               // ignore
             } else {
-               if (!first) {
-                  b.append("&");
+               // Ignore it if keyValue[0] is refId or formPath
+               if (!("refId".equals(keyValue[0]) || "formPath".equals(keyValue[0]))) {
+                  if (!first) {
+                     b.append("&");
+                  }
+                  first = false;
+                  b.append(pargs[i]);
                }
-               first = false;
-               b.append(pargs[i]);
             }
          }
          String aux = b.toString();

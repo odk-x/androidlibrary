@@ -17,10 +17,13 @@ package org.opendatakit.provider;
 import android.provider.BaseColumns;
 
 /**
- * ODK Survey (only)
- *
+ * ODK Survey (only (and services))
+ * <p>
+ * Used in InstanceProvider, InstanceUploaderTask and a little bit in ODKDatabaseImplUtils
+ * <p>
  * Tracks the upload status of each row in each data table.
  */
+@SuppressWarnings("unused")
 public final class InstanceColumns implements BaseColumns {
   // saved status from row in data table:
   public static final String STATUS_INCOMPLETE = "INCOMPLETE";
@@ -28,31 +31,59 @@ public final class InstanceColumns implements BaseColumns {
   // xmlPublishStatus from instances db:
   public static final String STATUS_SUBMITTED = "submitted";
   public static final String STATUS_SUBMISSION_FAILED = "submissionFailed";
-
-  // This class cannot be instantiated
-  private InstanceColumns() {
-  }
-
   public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.opendatakit.instance";
   public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.opendatakit.instance";
-
   // These are the only things needed for an insert
   // _ID is the index on the table maintained for ODK Survey purposes
   // DATA_INSTANCE_ID holds the _id value of the data record as used
   // in the javascript and ODK Tables.
+  /**
+   * Used in InstanceUploaderTask and InstanceProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String DATA_INSTANCE_ID = "_instanceId";
+  /**
+   * Used in ODKDatabaseImplUtils and InstanceProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String DATA_TABLE_TABLE_ID = "_tableId";
+  /**
+   * Used in InstanceProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String DATA_INSTANCE_NAME = "_instanceName";
+  /**
+   * Used in InstanceUploaderTask and InstanceProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String SUBMISSION_INSTANCE_ID = "_submissionInstanceId";
+  /**
+   * Used in InstanceProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String XML_PUBLISH_TIMESTAMP = "_xmlPublishTimestamp";
+  /**
+   * Used in InstanceUploaderTask and InstanceProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String XML_PUBLISH_STATUS = "_xmlPublishStatus";
+  /**
+   * Used in InstanceUploaderTask and InstanceProvider
+   */
   public static final String DISPLAY_NAME = "_displayName";
+  /**
+   * Used in InstanceProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String DISPLAY_SUBTEXT = "_displaySubtext";
+  // This class cannot be instantiated
+  private InstanceColumns() {
+  }
 
   /**
    * Get the create sql for the forms table (ODK Survey only).
    *
-   * @return
+   * @return a db query string that will properly create the table
    */
   public static String getTableCreateSql(String tableName) {
     //@formatter:off
