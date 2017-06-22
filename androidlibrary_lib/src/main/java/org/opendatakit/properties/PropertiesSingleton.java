@@ -53,6 +53,7 @@ public class PropertiesSingleton {
   private static final String DEFAULT_DEVICE_PROPERTIES_FILENAME = "default.device.properties";
   private static final String DEVICE_PROPERTIES_FILENAME = "device.properties";
   private static final String SECURE_PROPERTIES_FILENAME = "secure.properties";
+  private static final String SECURE_INSTALLATION_ID_FILENAME_PREFIX = "secure.id.";
 
   private static int invalidRevision() {
     return -1;
@@ -93,6 +94,9 @@ public class PropertiesSingleton {
   private final Properties mDeviceProps;
   private final Properties mSecureProps;
 
+  // this is generated/read once, when the properties are first read.
+  private String mInstallationId;
+
   public String getAppName() {
     return mAppName;
   }
@@ -108,6 +112,9 @@ public class PropertiesSingleton {
   public boolean containsKey(String propertyName) {
     readPropertiesIfModified();
     if (isSecureProperty(propertyName)) {
+      if ( propertyName.equals(CommonToolProperties.KEY_INSTALLATION_ID)) {
+        return (mInstallationId != null);
+      }
       return mSecureProps.containsKey(propertyName);
     } else if (isDeviceProperty(propertyName) ) {
       return mDeviceProps.containsKey(propertyName);
@@ -128,6 +135,9 @@ public class PropertiesSingleton {
       if ( !mHasSecureStorage ) {
         throw new IllegalStateException("Attempt to retrieve secured property " + propertyName +
            " outside of ODK Services");
+      }
+      if ( propertyName.equals(CommonToolProperties.KEY_INSTALLATION_ID)) {
+        return mInstallationId;
       }
       return mSecureProps.getProperty(propertyName);
     } else if (isDeviceProperty(propertyName) ) {
@@ -200,6 +210,9 @@ public class PropertiesSingleton {
     boolean updatedGeneralProps = false;
 
     for ( String propertyName : properties.keySet() ) {
+      if ( propertyName.equals(CommonToolProperties.KEY_INSTALLATION_ID)) {
+        throw new IllegalStateException("Attempted to set or clear the installation id property");
+      }
       String value = properties.get(propertyName);
       if ( value == null ) {
         // remove from map
@@ -373,6 +386,10 @@ public class PropertiesSingleton {
     // application, this will be a skipped and all values return null.
     if ( mHasSecureStorage ) {
       for (Map.Entry<String, String> entry : mSecureDefaults.entrySet()) {
+        if ( entry.getKey().equals(CommonToolProperties.KEY_INSTALLATION_ID)) {
+          // special treatment
+          continue;
+        }
         if (!mSecureProps.containsKey(entry.getKey())) {
           mSecureProps.setProperty(entry.getKey(), entry.getValue());
           updatedSecureProps = true;
@@ -566,24 +583,52 @@ public class PropertiesSingleton {
       }
 
       configFileInputStream = null;
-      try {
-        File configFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME);
+      if ( mHasSecureStorage ) {
+        try {
+          File configFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME);
 
-        if (configFile.exists()) {
-          configFileInputStream = new FileInputStream(configFile);
+          if (configFile.exists()) {
+            configFileInputStream = new FileInputStream(configFile);
 
-          mSecureProps.loadFromXML(configFileInputStream);
-        }
-      } catch (Exception e) {
-        WebLogger.getLogger(mAppName).printStackTrace(e);
-      } finally {
-        if (configFileInputStream != null) {
-          try {
-            configFileInputStream.close();
-          } catch (IOException e) {
-            // ignore
-            WebLogger.getLogger(mAppName).printStackTrace(e);
+            mSecureProps.loadFromXML(configFileInputStream);
           }
+        } catch (Exception e) {
+          WebLogger.getLogger(mAppName).printStackTrace(e);
+        } finally {
+          if (configFileInputStream != null) {
+            try {
+              configFileInputStream.close();
+            } catch (IOException e) {
+              // ignore
+              WebLogger.getLogger(mAppName).printStackTrace(e);
+            }
+          }
+        }
+
+        // get the installation id. This is the suffix of a file.
+        // If no such file exists, create it.
+        try {
+          if ( mInstallationId == null ) {
+            String[] names = mSecureStorageDir.list(new FilenameFilter() {
+              @Override
+              public boolean accept(File file, String s) {
+                return file.getName().startsWith(SECURE_INSTALLATION_ID_FILENAME_PREFIX);
+              }
+            });
+            if ( names == null || names.length == 0 ) {
+              mInstallationId = UUID.randomUUID().toString();
+              File installationFile = new File(mSecureStorageDir, SECURE_INSTALLATION_ID_FILENAME_PREFIX
+                  + mInstallationId);
+              installationFile.createNewFile();
+            }
+            // just in case -- if some start-up paths may generate 2 or more files
+            // -- use the lexically first
+            Arrays.sort(names);
+            mInstallationId = names[0].substring(SECURE_INSTALLATION_ID_FILENAME_PREFIX.length());
+          }
+
+        } catch (Exception e) {
+          WebLogger.getLogger(mAppName).printStackTrace(e);
         }
       }
 
