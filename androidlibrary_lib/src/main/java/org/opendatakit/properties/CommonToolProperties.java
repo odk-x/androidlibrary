@@ -15,30 +15,39 @@
 package org.opendatakit.properties;
 
 import android.content.Context;
-
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.utilities.StaticStateManipulator;
 
 import java.util.TreeMap;
 
-public class CommonToolProperties {
+/****************************************************************
+ * CommonToolPropertiesSingletonFactory (opendatakit.properties)
+ */
+public final class CommonToolProperties {
 
-  public static final int DEFAULT_FONT_SIZE = 16;
-  /****************************************************************
-   * CommonToolPropertiesSingletonFactory (opendatakit.properties)
+  /**
+   * Used in CommonToolProperties, TableUtil
    */
+  @SuppressWarnings("WeakerAccess")
+  public static final int DEFAULT_FONT_SIZE = 16;
 
+  /**
+   * Used in ODKServicesPropertyUtils, AbsBaseWebActivity, MainMenuActivity
+   */
+  @SuppressWarnings("unused")
   public static final String ANONYMOUS_USER = "anonymous";
 
-   /*******************
-    * Garbage 'properties' to control PreferencesCategories and PreferencesScreens
-    */
+
+  // TODO finish linting this file
+
+  /*******************
+   * Garbage 'properties' to control PreferencesCategories and PreferencesScreens
+   */
   public static final String GROUPING_PASSWORD_SCREEN = "group.common.password_screen";
 
   public static final String GROUPING_DEVICE_CATEGORY = "group.common.device";
 
   public static final String GROUPING_SERVER_CATEGORY = "group.common.server";
-
 
   public static final String GROUPING_TOOL_TABLES_CATEGORY = "group.common.tables";
 
@@ -53,15 +62,21 @@ public class CommonToolProperties {
    */
 
   // server identity
-  /** ODK 2.0 server URL */
+  /**
+   * ODK 2.0 server URL
+   */
   public static final String KEY_SYNC_SERVER_URL = "common.sync_server_url";
 
   public static final String KEY_AUTHENTICATION_TYPE = "common.auth_credentials";
 
   // account identity
-  /** gmail account */
+  /**
+   * gmail account
+   */
   public static final String KEY_ACCOUNT = "common.account";
-  /** ODK Aggregate username */
+  /**
+   * ODK Aggregate username
+   */
   public static final String KEY_USERNAME = "common.username";
 
   // general settings
@@ -102,30 +117,62 @@ public class CommonToolProperties {
   /*******************
    * General Settings
    */
-  
-  /** gmail account OAuth 2.0 token */
+
+  /**
+   * gmail account OAuth 2.0 token
+   */
   public static final String KEY_AUTH = "common.auth";
-  /** ODK Aggregate password */
+  /**
+   * ODK Aggregate password
+   */
   public static final String KEY_PASSWORD = "common.password";
-  /** Roles that the user is known to have. JSON encoded list of strings */
+  /**
+   * Roles that the user is known to have. JSON encoded list of strings
+   */
   public static final String KEY_ROLES_LIST = "common.roles";
-  /** Default group of the current user. */
+  /**
+   * Default group of the current user.
+   */
   public static final String KEY_DEFAULT_GROUP = "common.default_group";
-  /** List of all users and their roles on the server.
-   * JSON encoded list of { "user_id": "...", "full_name": "...", "roles": ["...","...",...]} */
+  /**
+   * List of all users and their roles on the server.
+   * JSON encoded list of { "user_id": "...", "full_name": "...", "roles": ["...","...",...]}
+   */
   public static final String KEY_USERS_LIST = "common.users";
-  /** Admin Settings password */
+  /**
+   * Admin Settings password
+   */
   public static final String KEY_ADMIN_PW = "common.admin_pw";
-  
-  public static void accumulateProperties( Context context, 
-      TreeMap<String,String> generalProperties, TreeMap<String,String> deviceProperties,
-      TreeMap<String,String> secureProperties) {
-    
+  private static CommonPropertiesSingletonFactory factory = null;
+
+  static {
+    // register a state-reset manipulator for 'commonPropertiesSingletonFactory' field.
+    StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {
+
+      @Override
+      public void reset() {
+        factory = null;
+      }
+
+    });
+  }
+
+  /**
+   * Do not instantiate this class
+   */
+  private CommonToolProperties() {
+  }
+
+  public static void accumulateProperties(Context context,
+      TreeMap<String, String> generalProperties, TreeMap<String, String> deviceProperties,
+      TreeMap<String, String> secureProperties) {
+
     // Set default values as necessary
-    
+
     // the properties managed through the general settings pages.
-    if ( generalProperties != null ) {
-      generalProperties.put(KEY_SYNC_SERVER_URL, context.getString(R.string.default_sync_server_url));
+    if (generalProperties != null) {
+      generalProperties
+          .put(KEY_SYNC_SERVER_URL, context.getString(R.string.default_sync_server_url));
 
       generalProperties.put(KEY_FONT_SIZE, Integer.toString(DEFAULT_FONT_SIZE));
       generalProperties.put(KEY_SHOW_SPLASH, "true");
@@ -146,7 +193,7 @@ public class CommonToolProperties {
     // over-written by the server configuration. Admins can manually set
     // these via the generalProperties; that is not secure as these values
     // will be left in the syncable file.
-    if ( deviceProperties != null ) {
+    if (deviceProperties != null) {
       deviceProperties.put(KEY_AUTHENTICATION_TYPE, "none");
       deviceProperties.put(KEY_ACCOUNT, "");
       deviceProperties.put(KEY_USERNAME, "");
@@ -165,7 +212,7 @@ public class CommonToolProperties {
     //
     // I.e., that is a lazy way to distribute these values, but it is not robustly secure.
     //
-    if ( secureProperties != null ) {
+    if (secureProperties != null) {
       secureProperties.put(KEY_AUTH, "");
       secureProperties.put(KEY_PASSWORD, "");
       secureProperties.put(KEY_DEFAULT_GROUP, "");
@@ -175,36 +222,17 @@ public class CommonToolProperties {
     }
   }
 
-  private static class CommonPropertiesSingletonFactory extends PropertiesSingletonFactory {
-
-    private CommonPropertiesSingletonFactory(TreeMap<String,String> generalDefaults,
-        TreeMap<String,String> deviceDefaults, TreeMap<String,String> secureDefaults) {
-      super(generalDefaults, deviceDefaults, secureDefaults);
-    }
-  }
-  
-  private static CommonPropertiesSingletonFactory factory = null;
-  static {
-    // register a state-reset manipulator for 'commonPropertiesSingletonFactory' field.
-    StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {
-
-      @Override
-      public void reset() {
-        factory = null;
-      }
-
-    });
-  }
-
   public static synchronized PropertiesSingleton get(Context context, String appName) {
-    if ( factory == null ) {
-      TreeMap<String,String> generalProperties = new TreeMap<String,String>();
-      TreeMap<String,String> deviceProperties = new TreeMap<String,String>();
-      TreeMap<String,String> secureProperties = new TreeMap<String,String>();
-      
-      CommonToolProperties.accumulateProperties(context, generalProperties, deviceProperties, secureProperties);
-      
-      factory = new CommonPropertiesSingletonFactory(generalProperties, deviceProperties, secureProperties);
+    if (factory == null) {
+      TreeMap<String, String> generalProperties = new TreeMap<>();
+      TreeMap<String, String> deviceProperties = new TreeMap<>();
+      TreeMap<String, String> secureProperties = new TreeMap<>();
+
+      CommonToolProperties
+          .accumulateProperties(context, generalProperties, deviceProperties, secureProperties);
+
+      factory = new CommonPropertiesSingletonFactory(generalProperties, deviceProperties,
+          secureProperties);
     }
     return factory.getSingleton(context, appName);
   }
@@ -212,8 +240,15 @@ public class CommonToolProperties {
   public static int getQuestionFontsize(Context context, String appName) {
     PropertiesSingleton props = CommonToolProperties.get(context, appName);
     Integer question_font = props.getIntegerProperty(CommonToolProperties.KEY_FONT_SIZE);
-    int questionFontsize = (question_font == null) ? CommonToolProperties.DEFAULT_FONT_SIZE : question_font;
-    return questionFontsize;
+    return question_font == null ? CommonToolProperties.DEFAULT_FONT_SIZE : question_font;
+  }
+
+  private static final class CommonPropertiesSingletonFactory extends PropertiesSingletonFactory {
+
+    private CommonPropertiesSingletonFactory(TreeMap<String, String> generalDefaults,
+        TreeMap<String, String> deviceDefaults, TreeMap<String, String> secureDefaults) {
+      super(generalDefaults, deviceDefaults, secureDefaults);
+    }
   }
 
 }

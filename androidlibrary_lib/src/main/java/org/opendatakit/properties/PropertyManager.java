@@ -14,6 +14,7 @@
 
 package org.opendatakit.properties;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -25,75 +26,59 @@ import java.util.Locale;
 
 /**
  * Used to return device properties to JavaRosa
+ * <p>
+ * Used in SubmissionProvider, AbsBaseWebActivity, MainMenuActivity, OdkCommon,
+ * DynamicPropertiesCallback, DoActionUtils
  *
  * @author Yaw Anokwa (yanokwa@gmail.com)
  * @author mitchellsundt@gmail.com
  */
-
+@SuppressWarnings("WeakerAccess")
 public class PropertyManager {
 
-  private static final String ANDROID6_FAKE_MAC = "02:00:00:00:00:00";
-
-  public interface DynamicPropertiesInterface {
-    String getActiveUser();
-
-    String getLocale();
-
-    String getUsername();
-
-    String getUserEmail();
-
-    String getAppName();
-
-    String getInstanceDirectory();
-
-    String getUriFragmentNewInstanceFile(String uriDeviceId, String extension);
-  }
-
-  private final HashMap<String, String> mProperties;
-
-  public final static String DEVICE_ID_PROPERTY = "deviceid"; // imei
-  public final static String SUBSCRIBER_ID_PROPERTY = "subscriberid"; // imsi
-  public final static String SIM_SERIAL_PROPERTY = "simserial";
-  public final static String PHONE_NUMBER_PROPERTY = "phonenumber";
-
-  public final static String OR_DEVICE_ID_PROPERTY = "uri:deviceid"; // imei
-  public final static String OR_SUBSCRIBER_ID_PROPERTY = "uri:subscriberid"; // imsi
-  public final static String OR_SIM_SERIAL_PROPERTY = "uri:simserial";
-  public final static String OR_PHONE_NUMBER_PROPERTY = "uri:phonenumber";
-
+  private static final String DEVICE_ID_PROPERTY = "deviceid"; // imei
+  private static final String SUBSCRIBER_ID_PROPERTY = "subscriberid"; // imsi
+  private static final String SIM_SERIAL_PROPERTY = "simserial";
+  private static final String PHONE_NUMBER_PROPERTY = "phonenumber";
+  private static final String OR_DEVICE_ID_PROPERTY = "uri:deviceid"; // imei
+  private static final String OR_SUBSCRIBER_ID_PROPERTY = "uri:subscriberid"; // imsi
+  private static final String OR_SIM_SERIAL_PROPERTY = "uri:simserial";
+  private static final String OR_PHONE_NUMBER_PROPERTY = "uri:phonenumber";
   /**
    * These properties are dynamic and accessed through the
    * DynamicPropertiesInterface. As with all property names,
    * they are compared in a case-insensitive manner.
    */
 
-  public final static String LOCALE = "locale";
-
-  public final static String ACTIVE_USER = "active_user";
-
+  private static final String LOCALE = "locale";
+  private static final String ACTIVE_USER = "active_user";
   // username -- current username
-  public final static String USERNAME = "username";
-  public final static String OR_USERNAME = "uri:username";
+  private static final String USERNAME = "username";
+  private static final String OR_USERNAME = "uri:username";
   // email -- current account email
-  public final static String EMAIL = "email";
-  public final static String OR_EMAIL = "uri:email";
-  public final static String APP_NAME = "appName";
+  private static final String EMAIL = "email";
+  private static final String OR_EMAIL = "uri:email";
+  private static final String APP_NAME = "appName";
   // instanceDirectory -- directory containing media files for current instance
-  public final static String INSTANCE_DIRECTORY = "instancedirectory";
+  private static final String INSTANCE_DIRECTORY = "instancedirectory";
   // uriFragmentNewFile -- the appName-relative uri for a non-existent file with the given extension
-  public final static String URI_FRAGMENT_NEW_INSTANCE_FILE_WITHOUT_COLON = "urifragmentnewinstancefile";
-  public final static String URI_FRAGMENT_NEW_INSTANCE_FILE = URI_FRAGMENT_NEW_INSTANCE_FILE_WITHOUT_COLON + ":";
+  private static final String URI_FRAGMENT_NEW_INSTANCE_FILE_WITHOUT_COLON = "urifragmentnewinstancefile";
+  private static final String URI_FRAGMENT_NEW_INSTANCE_FILE =
+      URI_FRAGMENT_NEW_INSTANCE_FILE_WITHOUT_COLON + ":";
+  private static final String ANDROID6_FAKE_MAC = "02:00:00:00:00:00";
+  private final HashMap<String, String> mProperties;
+
   /**
    * Constructor used within the Application object to create a singleton of the
    * property manager. Access it through
    * Survey.getInstance().getPropertyManager()
    *
-   * @param context
+   * @param context the context/activity to execute in
    */
+  @SuppressLint("HardwareIds")
   public PropertyManager(Context context) {
 
-    mProperties = new HashMap<String, String>();
+    mProperties = new HashMap<>();
 
     TelephonyManager mTelephonyManager = (TelephonyManager) context
         .getSystemService(Context.TELEPHONY_SERVICE);
@@ -101,9 +86,9 @@ public class PropertyManager {
     String deviceId = mTelephonyManager.getDeviceId();
     String orDeviceId = null;
     if (deviceId != null) {
-      if ((deviceId.contains("*") || deviceId.contains("000000000000000"))) {
-        deviceId = Settings.Secure.getString(context.getContentResolver(),
-            Settings.Secure.ANDROID_ID);
+      if (deviceId.contains("*") || deviceId.contains("000000000000000")) {
+        deviceId = Settings.Secure
+            .getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         orDeviceId = Settings.Secure.ANDROID_ID + ":" + deviceId;
       } else {
         orDeviceId = "imei:" + deviceId;
@@ -113,13 +98,14 @@ public class PropertyManager {
     if (deviceId == null) {
       // no SIM -- WiFi only
       // Retrieve WiFiManager
-      WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+      WifiManager wifi = (WifiManager) context.getApplicationContext()
+          .getSystemService(Context.WIFI_SERVICE);
 
       // Get WiFi status
       WifiInfo info = wifi.getConnectionInfo();
       if (info != null) {
         String macId = info.getMacAddress();
-        if ( macId != null && !ANDROID6_FAKE_MAC.equals(macId) ) {
+        if (macId != null && !ANDROID6_FAKE_MAC.equals(macId)) {
           deviceId = macId;
           orDeviceId = "mac:" + deviceId;
         }
@@ -155,6 +141,14 @@ public class PropertyManager {
     }
   }
 
+  /**
+   * Used in SubmissionProvider, DoActionUtils, AbsBaseWebActivity, MainMenuActivity, OdkCommon
+   *
+   * @param rawPropertyName the name of the property
+   * @param callback        a callback capable of getting the requested property
+   * @return the requested property
+   */
+  @SuppressWarnings("unused")
   public String getSingularProperty(String rawPropertyName, DynamicPropertiesInterface callback) {
 
     String propertyName = rawPropertyName.toLowerCase(Locale.ENGLISH);
@@ -196,11 +190,28 @@ public class PropertyManager {
       } else {
         ext = "";
       }
-      String value = callback
-          .getUriFragmentNewInstanceFile(mProperties.get(OR_DEVICE_ID_PROPERTY), ext);
-      return value;
+      return callback.getUriFragmentNewInstanceFile(mProperties.get(OR_DEVICE_ID_PROPERTY), ext);
     } else {
       return mProperties.get(propertyName);
     }
+  }
+
+  /**
+   * Used in DynamicPropertiesCallback
+   */
+  interface DynamicPropertiesInterface {
+    String getActiveUser();
+
+    String getLocale();
+
+    String getUsername();
+
+    String getUserEmail();
+
+    String getAppName();
+
+    String getInstanceDirectory();
+
+    String getUriFragmentNewInstanceFile(String uriDeviceId, String extension);
   }
 }

@@ -206,7 +206,7 @@ public class PropertiesSingleton {
   @SuppressWarnings("unused")
   public Boolean getBooleanProperty(String propertyName) {
     String value = getProperty(propertyName);
-    if (value == null || value.length() == 0) {
+    if (value == null || value.isEmpty()) {
       return null;
     }
     return "true".equalsIgnoreCase(value);
@@ -233,7 +233,7 @@ public class PropertiesSingleton {
     }
     try {
       return Integer.parseInt(value);
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException ignored) {
       return null;
     }
   }
@@ -298,7 +298,7 @@ public class PropertiesSingleton {
     // this is stored in the device properties
     readPropertiesIfModified();
     String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
-    return value == null || value.length() == 0;
+    return value == null || value.isEmpty();
   }
 
   /**
@@ -356,7 +356,7 @@ public class PropertiesSingleton {
     // this is dependent upon whether the user wants to use the device locale or a
     // locale specified in the common translations file.
     String value = this.getProperty(CommonToolProperties.KEY_COMMON_TRANSLATIONS_LOCALE);
-    if (value != null && value.length() != 0 && !value.equalsIgnoreCase("_")) {
+    if (value != null && !value.isEmpty() && !"_".equalsIgnoreCase(value)) {
       return value;
     } else {
       return Locale.getDefault().toString();
@@ -427,7 +427,7 @@ public class PropertiesSingleton {
     try {
       ODKFileUtils.verifyExternalStorageAvailability();
       ODKFileUtils.assertDirectoryStructure(mAppName);
-    } catch (Exception e) {
+    } catch (Exception ignored) {
       throw new IllegalArgumentException("External storage not available");
     }
   }
@@ -460,7 +460,7 @@ public class PropertiesSingleton {
           if (result > bestResult) {
             bestResult = result;
           }
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException ignored) {
           // ignore
         }
       }

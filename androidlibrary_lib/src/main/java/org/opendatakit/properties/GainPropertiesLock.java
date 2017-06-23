@@ -29,14 +29,16 @@ import java.nio.channels.OverlappingFileLockException;
 /**
  * Manage a fileLock to control read and write access to the properties files.
  *
+ * Used in ODKFileUtils, PropertiesSingleton
+ *
  * @author mitchellsundt@gmail.com
  */
-public class GainPropertiesLock {
+class GainPropertiesLock {
   private static final String LOCK_FILENAME = "properties.lock";
-  String mAppName;
+  private String mAppName;
 
-  FileOutputStream lockStream = null;
-  FileLock lockFileLock = null;
+  private FileOutputStream lockStream = null;
+  private FileLock lockFileLock = null;
 
   GainPropertiesLock(String appName) {
     mAppName = appName;
@@ -44,9 +46,9 @@ public class GainPropertiesLock {
     int count = 0;
     do {
       try {
-        lockStream = new FileOutputStream(lockFile);
         ++count;
-      } catch (FileNotFoundException e) {
+        lockStream = new FileOutputStream(lockFile);
+      } catch (FileNotFoundException ignored) {
         WebLogger.getLogger(mAppName).i("PropertiesSingleton", "Unable to open lock file");
         if (count > 100) {
           throw new IllegalStateException("Unable to open properties lock file");
@@ -54,7 +56,7 @@ public class GainPropertiesLock {
         lockStream = null;
         try {
           Thread.sleep(10L);
-        } catch (InterruptedException e1) {
+        } catch (InterruptedException ignored2) {
           // ignore
         }
       }
@@ -62,26 +64,18 @@ public class GainPropertiesLock {
 
     try {
       FileChannel lockChannel = lockStream.getChannel();
+      count = 0;
       do {
         try {
+          ++count;
           lockFileLock = lockChannel.lock();
-           ++count;
-        } catch (FileLockInterruptionException e) {
+        } catch (FileLockInterruptionException | OverlappingFileLockException ignored) {
           if (count > 100) {
             throw new IllegalStateException("Unable to obtain lock on properties lock file");
           }
           try {
             Thread.sleep(10L);
-          } catch (InterruptedException e1) {
-            // ignore
-          }
-        } catch (OverlappingFileLockException e) {
-          if (count > 100) {
-            throw new IllegalStateException("Unable to obtain lock on properties lock file");
-          }
-          try {
-            Thread.sleep(10L);
-          } catch (InterruptedException e1) {
+          } catch (InterruptedException ignored2) {
             // ignore
           }
         } catch (IOException e) {

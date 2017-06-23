@@ -18,7 +18,10 @@ import android.content.Context;
 
 import java.util.TreeMap;
 
-public abstract class PropertiesSingletonFactory {
+/**
+ * Used in CommonToolProperties
+ */
+abstract class PropertiesSingletonFactory {
 
   private final TreeMap<String,String> mGeneralDefaults;
   private final TreeMap<String,String> mDeviceDefaults;
@@ -27,8 +30,8 @@ public abstract class PropertiesSingletonFactory {
   private String gAppName = null;
   private PropertiesSingleton gSingleton = null;
   
-  protected PropertiesSingletonFactory(TreeMap<String,String> generalDefaults, TreeMap<String,
-      String> deviceDefaults, TreeMap<String,String> secureDefaults) {
+  PropertiesSingletonFactory(TreeMap<String, String> generalDefaults,
+      TreeMap<String, String> deviceDefaults, TreeMap<String, String> secureDefaults) {
     
     mGeneralDefaults = generalDefaults;
     mDeviceDefaults = deviceDefaults;
@@ -40,12 +43,12 @@ public abstract class PropertiesSingletonFactory {
    * The individual get/set/contains/remove functionality does not
    * check for prior changes to properties, but this does.
    * 
-   * @param context
-   * @param appName
-   * @return
+   * @param context an activity to run in
+   * @param appName the app name
+   * @return a properties singleton for that app name
     */
   synchronized PropertiesSingleton getSingleton(Context context, String appName) {
-    if (appName == null || appName.length() == 0) {
+    if (appName == null || appName.isEmpty()) {
       throw new IllegalArgumentException("Unexpectedly null or empty appName");
     }
 
