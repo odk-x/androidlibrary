@@ -17,10 +17,7 @@ package org.opendatakit.database.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
+import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.IOException;
@@ -33,13 +30,24 @@ import java.util.TreeMap;
  */
 public final class Row implements Parcelable {
 
-  static final String TAG = Row.class.getSimpleName();
+  public static final Creator<Row> CREATOR = new Creator<Row>() {
+    public Row createFromParcel(Parcel in) {
+      return new Row(in);
+    }
 
+    public Row[] newArray(int size) {
+      return new Row[size];
+    }
+  };
+  /**
+   * Used for logging
+   */
+  @SuppressWarnings("unused")
+  static final String TAG = Row.class.getSimpleName();
   /**
    * The data held in the rows columns
    */
   private final String[] mRowData;
-
   /**
    * The table that the row belongs to
    */
@@ -48,11 +56,11 @@ public final class Row implements Parcelable {
   /**
    * Construct the row.
    *
-   * @param rowData the data in the row.
+   * @param rowData    the data in the row.
    * @param ownerTable the table that the row belongs to
    */
   public Row(String[] rowData, BaseTable ownerTable) {
-    if (ownerTable== null || rowData == null) {
+    if (ownerTable == null || rowData == null) {
       throw new IllegalArgumentException("Null arguments are not permitted");
     }
     this.mRowData = rowData;
@@ -62,11 +70,11 @@ public final class Row implements Parcelable {
   /**
    * Unmarshall the row
    *
-   * @param in the marshalled data
+   * @param in         the marshalled data
    * @param ownerTable the table that the row belongs to
    */
   public Row(Parcel in, BaseTable ownerTable) {
-    if (ownerTable== null) {
+    if (ownerTable == null) {
       throw new IllegalArgumentException("Null arguments are not permitted");
     }
     this.mOwnerTable = ownerTable;
@@ -82,6 +90,7 @@ public final class Row implements Parcelable {
    * @param in the marshalled data
    * @throws IllegalStateException always thrown
    */
+  @SuppressWarnings("UnusedParameters")
   public Row(Parcel in) {
     throw new IllegalStateException("Row invalid constructor");
   }
@@ -91,25 +100,23 @@ public final class Row implements Parcelable {
    * <p>
    * Null values are returned as nulls.
    *
-   * @param cellIndex
-   *          cellIndex of data or metadata column (0..nCol-1)
+   * @param cellIndex cellIndex of data or metadata column (0..nCol-1)
    * @return String representation of contents of column. Null values are
-   *         returned as null. Note that boolean values are reported as "1" or "0"
+   * returned as null. Note that boolean values are reported as "1" or "0"
    */
   public String getDataByIndex(int cellIndex) {
     return this.mRowData[cellIndex];
   }
 
-   /**
-    * Return the String representing the contents of the cell in the "key" column.
-    * <p>
-    * Null values are returned as nulls.
-    *
-    * @param key
-    *         The name of the column holding the desired data
-    * @return String representation of contents of column. Null values are
-    *         returned as null. Note that boolean values are reported as "1" or "0"
-    */
+  /**
+   * Return the String representing the contents of the cell in the "key" column.
+   * <p>
+   * Null values are returned as nulls.
+   *
+   * @param key The name of the column holding the desired data
+   * @return String representation of contents of column. Null values are
+   * returned as null. Note that boolean values are reported as "1" or "0"
+   */
   public String getDataByKey(String key) {
     String result;
     Integer cell = getCellIndexByKey(key);
@@ -125,25 +132,27 @@ public final class Row implements Parcelable {
    * <p>
    * If there is no matching key then null is returned.
    *
-   * @param key
-   *         The name of the column
+   * @param key The name of the column
    * @return Integer index of the column or null
    */
-  public Integer getCellIndexByKey(String key) {
+  private Integer getCellIndexByKey(String key) {
     return mOwnerTable.getColumnIndexOfElementKey(key);
   }
 
   /**
    * Return a pointer to the table this row belongs to
+   * Used in AggregateSynchronizer and BaseTable
    *
    * @return the owner table
    */
+  @SuppressWarnings("unused")
   public String[] getElementKeyForIndexMap() {
     return mOwnerTable.getElementKeyForIndex();
   }
 
   /**
    * Return a pointer to the table this row belongs to
+   * Completely unused
    *
    * @return the owner table
    */
@@ -160,13 +169,12 @@ public final class Row implements Parcelable {
    * If you specify ArrayList or HashMap, it JSON deserializes the value into
    * one of those.
    *
-   * @param cellIndex
-   *          cellIndex of data or metadata column (0..nCol-1)
-   * @param clazz
-   * @return
+   * @param cellIndex cellIndex of data or metadata column (0..nCol-1)
+   * @param clazz the class to deserialize to
+   * @return the deserialized data type
    */
   @SuppressWarnings("unchecked")
-  public final <T> T getDataType(int cellIndex, Class<T> clazz) {
+  public final <T> T getDataType(int cellIndex, Class<T> clazz) throws IllegalStateException {
     // If you add additional return types here be sure to modify the javadoc.
     try {
       String value = getDataByIndex(cellIndex);
@@ -186,7 +194,7 @@ public final class Row implements Parcelable {
         return (T) value;
       } else if (clazz == Boolean.class) {
         // booleans are stored as integer 1 or 0 in user tables.
-        Boolean b = Boolean.valueOf(!value.equals("0"));
+        Boolean b = !"0".equals(value);
         return (T) b;
       } else if (clazz == ArrayList.class) {
         // json deserialization of an array
@@ -200,25 +208,12 @@ public final class Row implements Parcelable {
       } else {
         throw new IllegalStateException("Unexpected data type in SQLite table");
       }
-    } catch (ClassCastException e) {
-      e.printStackTrace();
-      throw new IllegalStateException("Unexpected data type conversion failure " + e.toString()
-          + " in SQLite table ");
-    } catch (JsonParseException e) {
-      e.printStackTrace();
-      throw new IllegalStateException("Unexpected data type conversion failure " + e.toString()
-          + " on SQLite table");
-    } catch (JsonMappingException e) {
-      e.printStackTrace();
-      throw new IllegalStateException("Unexpected data type conversion failure " + e.toString()
-          + " on SQLite table");
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new IllegalStateException("Unexpected data type conversion failure " + e.toString()
-          + " on SQLite table");
+    } catch (ClassCastException | IOException e) {
+      // JsonParseException and JsonMappingException extends IOException and will be caught here
+      WebLogger.getLogger(null).printStackTrace(e);
+      throw new IllegalStateException("Unexpected data type conversion failure " + e + " on SQLite table");
     }
   }
-
 
   public final <T> T getDataType(String elementKey, Class<T> clazz) {
     Integer cell = getCellIndexByKey(elementKey);
@@ -245,14 +240,4 @@ public final class Row implements Parcelable {
       out.writeStringArray(mRowData);
     }
   }
-
-  public static final Creator<Row> CREATOR = new Creator<Row>() {
-    public Row createFromParcel(Parcel in) {
-      return new Row(in);
-    }
-
-    public Row[] newArray(int size) {
-      return new Row[size];
-    }
-  };
 }

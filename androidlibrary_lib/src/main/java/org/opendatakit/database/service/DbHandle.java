@@ -34,7 +34,12 @@ public class DbHandle implements Parcelable {
       throw new IllegalArgumentException("null databaseHandle");
     }
   }
-  
+
+  /**
+   * Used all over the place
+   * @return the database handle
+   */
+  @SuppressWarnings("WeakerAccess")
   public String getDatabaseHandle() {
     return this.databaseHandle;
   }

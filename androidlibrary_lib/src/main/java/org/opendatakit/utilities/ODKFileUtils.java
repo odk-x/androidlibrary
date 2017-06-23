@@ -36,6 +36,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 /**
  * Static methods used for common file operations.
@@ -130,6 +131,10 @@ public final class ODKFileUtils {
    * Filename holding table-specific definitions (just translations for now).
    */
   private static final String TABLE_SPECIFIC_DEFINITIONS_JS = "tableSpecificDefinitions.js";
+  private static final Pattern VALID_INSTANCE_ID_FOLDER_NAME_PATTERN = Pattern
+      .compile("(\\p{P}|\\p{Z})");
+  private static final Pattern VALID_FOLDER_PATTERN = Pattern
+      .compile("^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)+$");
 
   /**
    * Do not instantiate this class
@@ -657,7 +662,7 @@ public final class ODKFileUtils {
     if (tableId == null || tableId.isEmpty()) {
       throw new IllegalArgumentException("getTablesFolder: tableId is null or the empty string!");
     } else {
-      if (!tableId.matches("^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)+$")) {
+      if (!VALID_FOLDER_PATTERN.matcher(tableId).matches()) {
         throw new IllegalArgumentException(
             "getFormFolder: tableId does not begin with a letter and contain only letters, digits or underscores!");
       }
@@ -720,7 +725,7 @@ public final class ODKFileUtils {
     if (formId == null || formId.isEmpty()) {
       throw new IllegalArgumentException("getFormFolder: formId is null or the empty string!");
     } else {
-      if (!formId.matches("^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)+$")) {
+      if (!VALID_FOLDER_PATTERN.matcher(formId).matches()) {
         throw new IllegalArgumentException(
             "getFormFolder: formId does not begin with a letter and contain only letters, digits or underscores!");
       }
@@ -825,7 +830,7 @@ public final class ODKFileUtils {
       throw new IllegalArgumentException(
           "getInstanceFolder: instanceId is null or the empty string!");
     } else {
-      return instanceId.replaceAll("(\\p{P}|\\p{Z})", "_");
+      return VALID_INSTANCE_ID_FOLDER_NAME_PATTERN.matcher(instanceId).replaceAll("_");
     }
   }
 
@@ -1245,6 +1250,7 @@ public final class ODKFileUtils {
    */
   @SuppressWarnings("WeakerAccess")
   public static String getNakedMd5Hash(String appName, Object file) {
+    InputStream is = null;
     try {
       // CTS (6/15/2010) : stream file through digest instead of handing
       // it the byte[]
@@ -1272,9 +1278,13 @@ public final class ODKFileUtils {
         return null;
       }
 
+      if (lLength > Integer.MAX_VALUE) {
+        throw new RuntimeException("Refusing to cast from long to int with loss of precision");
+      }
+      //noinspection NumericCastThatLosesPrecision
       int length = (int) lLength;
 
-      InputStream is;
+
       if (file instanceof File) {
         is = new FileInputStream((File) file);
       } else {
@@ -1315,6 +1325,14 @@ public final class ODKFileUtils {
     } catch (IOException e) {
       WebLogger.getLogger(appName).e("Problem reading from file", e.getMessage());
       return null;
+    } finally {
+      if (is != null) {
+        try {
+          is.close();
+        } catch (IOException e) {
+          WebLogger.getLogger(appName).printStackTrace(e);
+        }
+      }
     }
 
   }

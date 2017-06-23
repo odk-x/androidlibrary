@@ -16,6 +16,11 @@
 package org.opendatakit.database.data;
 
 
-public interface WrapperTable {
+interface WrapperTable {
+  /**
+   * Used in BaseTable, UserTable
+   * @return the wrapper table
+   */
+  @SuppressWarnings("unused")
   WrapperTable getWrapperTable();
 }

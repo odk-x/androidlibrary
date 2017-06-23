@@ -16,7 +16,6 @@ package org.opendatakit.database.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
@@ -27,42 +26,53 @@ import java.util.TreeMap;
 
 public class OrderedColumns implements Parcelable {
 
-  public interface OrderedColumnsIterator {
-    void doAction( ColumnDefinition cd) throws Exception;
-  }
-  
+  public static final Parcelable.Creator<OrderedColumns> CREATOR = new Parcelable.Creator<OrderedColumns>() {
+    public OrderedColumns createFromParcel(Parcel in) {
+      return new OrderedColumns(in);
+    }
+
+    public OrderedColumns[] newArray(int size) {
+      return new OrderedColumns[size];
+    }
+  };
   private final String appName;
   private final String tableId;
-  private final ArrayList<ColumnDefinition> orderedDefns;
-  
+
   // private static final Map<String, ArrayList<ColumnDefinition> > mapping;
-  
+  private final ArrayList<ColumnDefinition> orderedDefns;
+
   public OrderedColumns(String appName, String tableId, List<Column> columns) {
     this.appName = appName;
     this.tableId = tableId;
     this.orderedDefns = ColumnDefinition.buildColumnDefinitions(appName, tableId, columns);
   }
-  
+
+  public OrderedColumns(Parcel in) {
+    appName = in.readString();
+    tableId = in.readString();
+    ColumnList cl = new ColumnList(in);
+    this.orderedDefns = ColumnDefinition.buildColumnDefinitions(appName, tableId, cl.getColumns());
+  }
+
   public ColumnDefinition find(String elementKey) {
     return ColumnDefinition.find(orderedDefns, elementKey);
   }
-  
+
   /**
    * Get the names of the columns that are written into the underlying database table.
    * These are the isUnitOfRetention() columns.
-   * 
-   * @return
+   *
+   * @return the list of column names that will be retained
    */
   public ArrayList<String> getRetentionColumnNames() {
-    ArrayList<String> writtenColumns = new ArrayList<String>();
-    for ( ColumnDefinition cd : orderedDefns ) {
-      if ( cd.isUnitOfRetention() ) {
+    ArrayList<String> writtenColumns = new ArrayList<>();
+    for (ColumnDefinition cd : orderedDefns) {
+      if (cd.isUnitOfRetention()) {
         writtenColumns.add(cd.getElementKey());
       }
     }
     return writtenColumns;
   }
-  
 
   public boolean graphViewIsPossible() {
     for (ColumnDefinition cd : orderedDefns) {
@@ -72,19 +82,21 @@ public class OrderedColumns implements Parcelable {
       ElementType elementType = cd.getType();
       ElementDataType type = elementType.getDataType();
       if (type == ElementDataType.number || type == ElementDataType.integer) {
-        return (orderedDefns.size() > 1);
+        return orderedDefns.size() > 1;
       }
     }
     return false;
   }
-  
+
   /**
    * Extract the list of geopoints from the table.
-   * 
+   * These three methods are used in TableUtil
+   *
    * @return the list of geopoints.
    */
+  @SuppressWarnings("WeakerAccess")
   public ArrayList<ColumnDefinition> getGeopointColumnDefinitions() {
-    ArrayList<ColumnDefinition> cdList = new ArrayList<ColumnDefinition>();
+    ArrayList<ColumnDefinition> cdList = new ArrayList<>();
 
     for (ColumnDefinition cd : orderedDefns) {
       if (cd.getType().getElementType().equals(ElementType.GEOPOINT)) {
@@ -94,6 +106,7 @@ public class OrderedColumns implements Parcelable {
     return cdList;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public boolean isLatitudeColumnDefinition(List<ColumnDefinition> geoPointList,
       ColumnDefinition cd) {
     if (!cd.isUnitOfRetention()) {
@@ -107,12 +120,11 @@ public class OrderedColumns implements Parcelable {
 
     ColumnDefinition cdParent = cd.getParent();
 
-    boolean outcome = (cdParent != null)
-        && geoPointList.contains(cdParent)
-        && cd.getElementName().equals("latitude");
-    return outcome;
+    return cdParent != null && geoPointList.contains(cdParent) && "latitude"
+        .equals(cd.getElementName());
   }
 
+  @SuppressWarnings("WeakerAccess")
   public boolean isLongitudeColumnDefinition(List<ColumnDefinition> geoPointList,
       ColumnDefinition cd) {
     if (!cd.isUnitOfRetention()) {
@@ -126,15 +138,13 @@ public class OrderedColumns implements Parcelable {
 
     ColumnDefinition cdParent = cd.getParent();
 
-    boolean outcome = (cdParent != null)
-        && geoPointList.contains(cdParent)
-        && cd.getElementName().equals("longitude");
-    return outcome;
+    return cdParent != null && geoPointList.contains(cdParent) && "longitude"
+        .equals(cd.getElementName());
   }
 
   public boolean mapViewIsPossible() {
     List<ColumnDefinition> geoPoints = getGeopointColumnDefinitions();
-    if (geoPoints.size() != 0) {
+    if (!geoPoints.isEmpty()) {
       return true;
     }
 
@@ -144,10 +154,10 @@ public class OrderedColumns implements Parcelable {
       hasLatitude = hasLatitude || isLatitudeColumnDefinition(geoPoints, cd);
       hasLongitude = hasLongitude || isLongitudeColumnDefinition(geoPoints, cd);
     }
-    
-    return (hasLatitude && hasLongitude);
+
+    return hasLatitude && hasLongitude;
   }
-  
+
   public ArrayList<ColumnDefinition> getColumnDefinitions() {
     return orderedDefns;
   }
@@ -155,24 +165,26 @@ public class OrderedColumns implements Parcelable {
   public String getAppName() {
     return appName;
   }
-  
+
   public String getTableId() {
     return tableId;
   }
-  
+
   public ArrayList<Column> getColumns() {
     return ColumnDefinition.getColumns(orderedDefns);
   }
-  
+
   public TreeMap<String, Object> getDataModel() {
     return ColumnDefinition.getDataModel(orderedDefns);
   }
 
   /**
-   * Return the JSON schema of the table that includes all the metadata columns.
+   * Returns the JSON schema of the table that includes all the metadata columns.
+   * Used in ExecutorProcessor, ColumnDefinition
    *
-   * @return
+   * @return the JSON schema of the table that includes all the metadata columns.
    */
+  @SuppressWarnings("unused")
   public TreeMap<String, Object> getExtendedDataModel() {
     return ColumnDefinition.getExtendedDataModel(orderedDefns);
   }
@@ -189,23 +201,5 @@ public class OrderedColumns implements Parcelable {
     ColumnList cl = new ColumnList(getColumns());
     cl.writeToParcel(out, flags);
   }
-  
-  public OrderedColumns(Parcel in) {
-    appName = in.readString();
-    tableId = in.readString();
-    ColumnList cl = new ColumnList(in);
-    this.orderedDefns = ColumnDefinition.buildColumnDefinitions(appName, tableId, cl.getColumns());
-  }
-
-  public static final Parcelable.Creator<OrderedColumns> CREATOR
-          = new Parcelable.Creator<OrderedColumns>() {
-      public OrderedColumns createFromParcel(Parcel in) {
-          return new OrderedColumns(in);
-      }
-
-      public OrderedColumns[] newArray(int size) {
-          return new OrderedColumns[size];
-      }
-  };
 
 }

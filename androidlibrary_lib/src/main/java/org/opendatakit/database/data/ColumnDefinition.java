@@ -18,22 +18,16 @@ package org.opendatakit.database.data;
 import android.support.annotation.NonNull;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.utilities.NameUtil;
 import org.opendatakit.utilities.ODKFileUtils;
-import org.opendatakit.logging.WebLogger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ColumnDefinition implements Comparable<ColumnDefinition> {
   private static final String TAG = "ColumnDefinition";
@@ -57,94 +51,27 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
   private static final String JSON_SCHEMA_TYPE = "type";
 
   private final Column column;
-
+  private final ArrayList<ColumnDefinition> children = new ArrayList<>();
   // public final String elementKey;
   // public final String elementName;
   // public final String elementType;
   private boolean isUnitOfRetention = true; // assumed until revised...
+  private ElementType type = null;
+  private ColumnDefinition parent = null;
 
-  final ArrayList<ColumnDefinition> children = new ArrayList<ColumnDefinition>();
-  ElementType type = null;
-  ColumnDefinition parent = null;
-
-  ColumnDefinition(String elementKey, String elementName, String elementType,
+  private ColumnDefinition(String elementKey, String elementName, String elementType,
       String listChildElementKeys) {
     this.column = new Column(elementKey, elementName, elementType, listChildElementKeys);
-  }
-
-  public String getElementKey() {
-    return column.getElementKey();
-  }
-
-  public String getElementName() {
-    return column.getElementName();
-  }
-
-  public String getElementType() {
-    return column.getElementType();
-  }
-  
-  public synchronized ElementType getType() {
-    if ( type == null ) {
-      type = ElementType.parseElementType(getElementType(), !getChildren().isEmpty());
-    }
-    return type;
-  }
-
-  public String getListChildElementKeys() {
-    return column.getListChildElementKeys();
-  }
-
-  private void setParent(ColumnDefinition parent) {
-    this.parent = parent;
-  }
-
-  public ColumnDefinition getParent() {
-    return this.parent;
-  }
-
-  public void addChild(ColumnDefinition child) {
-    child.setParent(this);
-    children.add(child);
-  }
-
-  public List<ColumnDefinition> getChildren() {
-    return Collections.unmodifiableList(this.children);
-  }
-
-  public boolean isUnitOfRetention() {
-    return isUnitOfRetention;
-  }
-
-  void setNotUnitOfRetention() {
-    isUnitOfRetention = false;
-  }
-
-  public String toString() {
-    return column.toString();
-  }
-
-  public int hashCode() {
-    return column.hashCode();
-  }
-
-  public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof ColumnDefinition)) {
-      return false;
-    }
-    ColumnDefinition o = (ColumnDefinition) obj;
-
-    return column.equals(o.column);
   }
 
   /**
    * Binary search using elementKey. The ColumnDefinition list returned by
    * ColumnDefinition.buildColumnDefinitions() is ordered. This function makes
    * use of that property to quickly retrieve the definition for an elementKey.
-   * 
-   * @param orderedDefns
-   * @param elementKey
-   * @return
+   *
+   * @param orderedDefns the definitions to search through
+   * @param elementKey the key of the definition we're looking for
+   * @return the definition with that key in the set
    * @throws IllegalArgumentException - if elementKey not found
    */
   static ColumnDefinition find(ArrayList<ColumnDefinition> orderedDefns, String elementKey)
@@ -170,7 +97,8 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     }
 
     if (iLow >= orderedDefns.size()) {
-      throw new IllegalArgumentException("could not find elementKey in columns list: " + elementKey);
+      throw new IllegalArgumentException(
+          "could not find elementKey in columns list: " + elementKey);
     }
 
     ColumnDefinition cd = orderedDefns.get(iGuess);
@@ -181,65 +109,52 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
   }
 
   /**
-   * Helper class for building ColumnDefinition objects from Column objects.
-   * 
-   * @author mitchellsundt@gmail.com
-   */
-  private static class ColumnContainer {
-    public ColumnDefinition defn = null;
-    public ArrayList<String> children = null;
-  }
-
-  /**
    * Construct the rich ColumnDefinition objects for a table from the underlying
    * information in the list of Column objects.
-   * 
-   * @param appName
-   * @param tableId
-   * @param columns
-   * @return
+   *
+   * @param appName the app name
+   * @param tableId the id of the table with the columns
+   * @param columns a list of columns to be turned into column definitions
+   * @return a list of column definitions from those columns
    */
   @SuppressWarnings("unchecked")
-  static ArrayList<ColumnDefinition> buildColumnDefinitions(String appName, String tableId, List<Column> columns) {
+  static ArrayList<ColumnDefinition> buildColumnDefinitions(String appName, String tableId,
+      List<Column> columns) {
 
-     if ( appName == null || appName.length() == 0 ) {
-        throw new IllegalArgumentException("appName cannot be null or an empty string");
-     }
-
-     if ( tableId == null || tableId.length() == 0 ) {
-        throw new IllegalArgumentException("tableId cannot be null or an empty string");
-     }
-
-    if ( columns == null ) {
-       throw new IllegalArgumentException("columns cannot be null");
+    if (appName == null || appName.isEmpty()) {
+      throw new IllegalArgumentException("appName cannot be null or an empty string");
     }
 
-    WebLogger.getLogger(appName).d(TAG, "[buildColumnDefinitions] tableId: " + tableId + " size: " + columns.size() + " first column: " + 
-        (columns.isEmpty() ? "<none>" : columns.get(0).getElementKey()));
-    
-    Map<String, ColumnDefinition> colDefs = new HashMap<String, ColumnDefinition>();
-    List<ColumnContainer> ccList = new ArrayList<ColumnContainer>();
+    if (tableId == null || tableId.isEmpty()) {
+      throw new IllegalArgumentException("tableId cannot be null or an empty string");
+    }
+
+    if (columns == null) {
+      throw new IllegalArgumentException("columns cannot be null");
+    }
+
+    WebLogger.getLogger(appName).d(TAG,
+        "[buildColumnDefinitions] tableId: " + tableId + " size: " + columns.size()
+            + " first column: " + (columns.isEmpty() ? "<none>" : columns.get(0).getElementKey()));
+
+    Map<String, ColumnDefinition> colDefs = new HashMap<>();
+    List<ColumnContainer> ccList = new ArrayList<>();
     for (Column col : columns) {
       if (!NameUtil.isValidUserDefinedDatabaseName(col.getElementKey())) {
-        throw new IllegalArgumentException("ColumnDefinition: invalid user-defined column name: "
-            + col.getElementKey());
+        throw new IllegalArgumentException(
+            "ColumnDefinition: invalid user-defined column name: " + col.getElementKey());
       }
       ColumnDefinition cd = new ColumnDefinition(col.getElementKey(), col.getElementName(),
           col.getElementType(), col.getListChildElementKeys());
       ColumnContainer cc = new ColumnContainer();
       cc.defn = cd;
       String children = col.getListChildElementKeys();
-      if (children != null && children.length() != 0) {
+      if (children != null && !children.isEmpty()) {
         ArrayList<String> chi;
         try {
           chi = ODKFileUtils.mapper.readValue(children, ArrayList.class);
-        } catch (JsonParseException e) {
-          WebLogger.getLogger(appName).printStackTrace(e);
-          throw new IllegalArgumentException("Invalid list of children: " + children);
-        } catch (JsonMappingException e) {
-          WebLogger.getLogger(appName).printStackTrace(e);
-          throw new IllegalArgumentException("Invalid list of children: " + children);
         } catch (IOException e) {
+          // JsonMappingException and JsonParseException extends IOException and will be caught here
           WebLogger.getLogger(appName).printStackTrace(e);
           throw new IllegalArgumentException("Invalid list of children: " + children);
         }
@@ -253,8 +168,9 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
       for (String childKey : cc.children) {
         ColumnDefinition cchild = colDefs.get(childKey);
         if (cchild == null) {
-          throw new IllegalArgumentException("Child elementkey " + childKey
-              + " was never defined but referenced in " + cparent.getElementKey() + "!");
+          throw new IllegalArgumentException(
+              "Child elementkey " + childKey + " was never defined but referenced in " + cparent
+                  .getElementKey() + "!");
         }
         // set up bi-directional linkage of child and parent.
         cparent.addChild(cchild);
@@ -269,8 +185,8 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
       ColumnDefinition defn = cc.defn;
 
       if (defn.getChildren().size() != cc.children.size()) {
-        throw new IllegalArgumentException("Not all children of element have been defined! "
-            + defn.getElementKey());
+        throw new IllegalArgumentException(
+            "Not all children of element have been defined! " + defn.getElementKey());
       }
 
       ElementType type = defn.getType();
@@ -286,10 +202,10 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
 
       for (ColumnDefinition child : defn.getChildren()) {
         if (child.getParent() != defn) {
-          throw new IllegalArgumentException("Column is enclosed by two or more groupings: "
-              + defn.getElementKey());
+          throw new IllegalArgumentException(
+              "Column is enclosed by two or more groupings: " + defn.getElementKey());
         }
-        if (!child.getElementKey().equals(defn.getElementKey() + "_" + child.getElementName())) {
+        if (!child.getElementKey().equals(defn.getElementKey() + '_' + child.getElementName())) {
           throw new IllegalArgumentException(
               "Children are expected to have elementKey equal to parent's "
                   + "elementKey-underscore-childElementName: " + child.getElementKey());
@@ -297,7 +213,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
       }
     }
     markUnitOfRetention(colDefs);
-    ArrayList<ColumnDefinition> defns = new ArrayList<ColumnDefinition>(colDefs.values());
+    ArrayList<ColumnDefinition> defns = new ArrayList<>(colDefs.values());
     Collections.sort(defns);
 
     return defns;
@@ -305,29 +221,29 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
 
   /**
    * This must match the code in the javascript layer
-   * 
+   * <p>
    * See databaseUtils.markUnitOfRetention
-   * 
+   * <p>
    * Sweeps through the collection of ColumnDefinition objects and marks the
    * ones that exist in the actual database table.
-   * 
-   * @param defn
+   *
+   * @param defn the map of column definitions to mark
    */
   private static void markUnitOfRetention(Map<String, ColumnDefinition> defn) {
     // for all arrays, mark all descendants of the array as not-retained
     // because they are all folded up into the json representation of the array
-    for (String startKey : defn.keySet()) {
-      ColumnDefinition colDefn = defn.get(startKey);
+    for (Map.Entry<String, ColumnDefinition> stringColumnDefinitionEntry : defn.entrySet()) {
+      ColumnDefinition colDefn = stringColumnDefinitionEntry.getValue();
       if (!colDefn.isUnitOfRetention()) {
         // this has already been processed
         continue;
       }
       ElementType type = colDefn.getType();
       if (ElementDataType.array == type.getDataType()) {
-        ArrayList<ColumnDefinition> descendantsOfArray = new ArrayList<ColumnDefinition>(
+        ArrayList<ColumnDefinition> descendantsOfArray = new ArrayList<>(
             colDefn.getChildren());
-        ArrayList<ColumnDefinition> scratchArray = new ArrayList<ColumnDefinition>();
-        for (;;) {
+        ArrayList<ColumnDefinition> scratchArray = new ArrayList<>();
+        while (true) {
           for (ColumnDefinition subDefn : descendantsOfArray) {
             if (!subDefn.isUnitOfRetention()) {
               // this has already been processed
@@ -340,15 +256,15 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
           descendantsOfArray.clear();
           descendantsOfArray.addAll(scratchArray);
           scratchArray.clear();
-          if ( descendantsOfArray.isEmpty()) {
+          if (descendantsOfArray.isEmpty()) {
             break;
           }
         }
       }
     }
     // and mark any non-arrays with multiple fields as not retained
-    for (String startKey : defn.keySet()) {
-      ColumnDefinition colDefn = defn.get(startKey);
+    for (Map.Entry<String, ColumnDefinition> stringColumnDefinitionEntry : defn.entrySet()) {
+      ColumnDefinition colDefn = stringColumnDefinitionEntry.getValue();
       if (!colDefn.isUnitOfRetention()) {
         // this has already been processed
         continue;
@@ -365,10 +281,12 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
   /**
    * Convert the ColumnDefinition map to an ordered list of columns for
    * transport layer.
-   * 
-   * @param orderedDefns
+   * Used in AggregateSynchronizer, CsvUtil, others
+   *
+   * @param orderedDefns a list of ColumnDefinition objects
    * @return ordered list of Column objects
    */
+  @SuppressWarnings("WeakerAccess")
   public static ArrayList<Column> getColumns(ArrayList<ColumnDefinition> orderedDefns) {
     ArrayList<Column> columns = new ArrayList<Column>();
     for (ColumnDefinition col : orderedDefns) {
@@ -380,18 +298,18 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
   /**
    * Covert the ColumnDefinition map into a JSON schema. and augment it with
    * the schema for the administrative columns.
-   *
+   * <p>
    * The structure of this schema matches the dataTableModel produced by XLSXConverter
    *
-   * @param orderedDefns
-   * @return
+   * @param orderedDefns Used for getting the data model
+   * @return An extended data model for the columns
    */
   static TreeMap<String, Object> getExtendedDataModel(List<ColumnDefinition> orderedDefns) {
     TreeMap<String, Object> model = getDataModel(orderedDefns);
 
     TreeMap<String, Object> jsonSchema;
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.ID, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
@@ -400,7 +318,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.ID);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.ID);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.ROW_ETAG, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
@@ -409,7 +327,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.ROW_ETAG);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.ROW_ETAG);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.SYNC_STATE, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
@@ -419,7 +337,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.SYNC_STATE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.SYNC_STATE);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.CONFLICT_TYPE, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.integer.name());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
@@ -428,7 +346,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.CONFLICT_TYPE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.CONFLICT_TYPE);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.DEFAULT_ACCESS, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_SET, JSON_SCHEMA_INSTANCE_METADATA_VALUE);
@@ -437,7 +355,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.DEFAULT_ACCESS);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.DEFAULT_ACCESS);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.ROW_OWNER, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
@@ -446,7 +364,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.ROW_OWNER);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.ROW_OWNER);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.GROUP_READ_ONLY, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
@@ -455,7 +373,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.GROUP_READ_ONLY);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.GROUP_READ_ONLY);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.GROUP_MODIFY, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
@@ -464,7 +382,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.GROUP_MODIFY);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.GROUP_MODIFY);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.GROUP_PRIVILEGED, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
@@ -473,7 +391,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.GROUP_PRIVILEGED);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.GROUP_PRIVILEGED);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.FORM_ID, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
@@ -482,7 +400,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.FORM_ID);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.FORM_ID);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.LOCALE, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
@@ -491,7 +409,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.LOCALE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.LOCALE);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.SAVEPOINT_TYPE, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
@@ -500,7 +418,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.SAVEPOINT_TYPE);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.SAVEPOINT_TYPE);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.SAVEPOINT_TIMESTAMP, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.TRUE);
@@ -509,7 +427,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, DataTableColumns.SAVEPOINT_TIMESTAMP);
     jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, DataTableColumns.SAVEPOINT_TIMESTAMP);
     //
-    jsonSchema = new TreeMap<String, Object>();
+    jsonSchema = new TreeMap<>();
     model.put(DataTableColumns.SAVEPOINT_CREATOR, jsonSchema);
     jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
     jsonSchema.put(JSON_SCHEMA_IS_NOT_NULLABLE, Boolean.FALSE);
@@ -523,22 +441,22 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
 
   /**
    * Covert the ColumnDefinition map into a JSON schema.
-   *
+   * <p>
    * Add elements to this schema to match the dataTableModel produced by XLSXConverter
    *
-   * @param orderedDefns
-   * @return
+   * @param orderedDefns a list of column definitions
+   * @return the JSON schema for those columns
    */
   static TreeMap<String, Object> getDataModel(List<ColumnDefinition> orderedDefns) {
-    TreeMap<String, Object> model = new TreeMap<String, Object>();
+    TreeMap<String, Object> model = new TreeMap<>();
 
     for (ColumnDefinition c : orderedDefns) {
       if (c.getParent() == null) {
-        TreeMap<String, Object> jsonSchema = new TreeMap<String, Object>();
+        TreeMap<String, Object> jsonSchema = new TreeMap<>();
         model.put(c.getElementName(), jsonSchema);
         jsonSchema.put(JSON_SCHEMA_ELEMENT_PATH, c.getElementName());
         getDataModelHelper(jsonSchema, c, false);
-        if ( !c.isUnitOfRetention() ) {
+        if (!c.isUnitOfRetention()) {
           jsonSchema.put(JSON_SCHEMA_NOT_UNIT_OF_RETENTION, Boolean.TRUE);
         }
       }
@@ -556,7 +474,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     jsonSchema.put(JSON_SCHEMA_ELEMENT_NAME, c.getElementName());
     jsonSchema.put(JSON_SCHEMA_ELEMENT_KEY, c.getElementKey());
 
-    if ( nestedInsideUnitOfRetention ) {
+    if (nestedInsideUnitOfRetention) {
       jsonSchema.put(JSON_SCHEMA_NOT_UNIT_OF_RETENTION, Boolean.TRUE);
     }
 
@@ -566,10 +484,10 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
         jsonSchema.put(JSON_SCHEMA_ELEMENT_TYPE, c.getElementType());
       }
       ColumnDefinition ch = c.getChildren().get(0);
-      TreeMap<String, Object> itemSchema = new TreeMap<String, Object>();
+      TreeMap<String, Object> itemSchema = new TreeMap<>();
       jsonSchema.put(JSON_SCHEMA_ITEMS, itemSchema);
       itemSchema.put(JSON_SCHEMA_ELEMENT_PATH,
-          ((String) jsonSchema.get(JSON_SCHEMA_ELEMENT_PATH)) + '.' + ch.getElementName());
+          (String) jsonSchema.get(JSON_SCHEMA_ELEMENT_PATH) + '.' + ch.getElementName());
       // if it isn't already nested within a unit of retention,
       // an array is always itself a unit of retention
       getDataModelHelper(itemSchema, ch, true); // recursion...
@@ -585,12 +503,7 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     } else if (dataType == ElementDataType.configpath) {
       jsonSchema.put(JSON_SCHEMA_TYPE, ElementDataType.string.name());
       jsonSchema.put(JSON_SCHEMA_ELEMENT_TYPE, c.getElementType());
-    } else if (dataType == ElementDataType.integer) {
-      jsonSchema.put(JSON_SCHEMA_TYPE, dataType.name());
-      if (!c.getElementType().equals(dataType.name())) {
-        jsonSchema.put(JSON_SCHEMA_ELEMENT_TYPE, c.getElementType());
-      }
-    } else if (dataType == ElementDataType.number) {
+    } else if (dataType == ElementDataType.integer || dataType == ElementDataType.number) {
       jsonSchema.put(JSON_SCHEMA_TYPE, dataType.name());
       if (!c.getElementType().equals(dataType.name())) {
         jsonSchema.put(JSON_SCHEMA_ELEMENT_TYPE, c.getElementType());
@@ -600,14 +513,14 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
       if (!c.getElementType().equals(dataType.name())) {
         jsonSchema.put(JSON_SCHEMA_ELEMENT_TYPE, c.getElementType());
       }
-      TreeMap<String, Object> propertiesSchema = new TreeMap<String, Object>();
+      TreeMap<String, Object> propertiesSchema = new TreeMap<>();
       jsonSchema.put(JSON_SCHEMA_PROPERTIES, propertiesSchema);
-      ArrayList<String> keys = new ArrayList<String>();
+      ArrayList<String> keys = new ArrayList<>();
       for (ColumnDefinition ch : c.getChildren()) {
-        TreeMap<String, Object> itemSchema = new TreeMap<String, Object>();
+        TreeMap<String, Object> itemSchema = new TreeMap<>();
         propertiesSchema.put(ch.getElementName(), itemSchema);
         itemSchema.put(JSON_SCHEMA_ELEMENT_PATH,
-            ((String) jsonSchema.get(JSON_SCHEMA_ELEMENT_PATH)) + '.' + ch.getElementName());
+            (String) jsonSchema.get(JSON_SCHEMA_ELEMENT_PATH) + '.' + ch.getElementName());
         // objects are not units of retention -- propagate retention status.
         getDataModelHelper(itemSchema, ch, nestedInsideUnitOfRetention); // recursion...
         keys.add(ch.getElementKey());
@@ -626,9 +539,97 @@ public class ColumnDefinition implements Comparable<ColumnDefinition> {
     }
   }
 
+  public String getElementKey() {
+    return column.getElementKey();
+  }
+
+  public String getElementName() {
+    return column.getElementName();
+  }
+
+  public String getElementType() {
+    return column.getElementType();
+  }
+
+  public synchronized ElementType getType() {
+    if (type == null) {
+      type = ElementType.parseElementType(getElementType(), !getChildren().isEmpty());
+    }
+    return type;
+  }
+
+  public String getListChildElementKeys() {
+    return column.getListChildElementKeys();
+  }
+
+  public ColumnDefinition getParent() {
+    return this.parent;
+  }
+
+  private void setParent(ColumnDefinition parent) {
+    this.parent = parent;
+  }
+
+  /**
+   * Despite being public, this method is only used in this class
+   * @param child the child to add
+   */
+  public void addChild(ColumnDefinition child) {
+    child.setParent(this);
+    children.add(child);
+  }
+
+  /**
+   * Used in ODKDatabaseImplUtils
+   * @return a copy of the children
+   */
+  @SuppressWarnings("WeakerAccess")
+  public List<ColumnDefinition> getChildren() {
+    return Collections.unmodifiableList(this.children);
+  }
+
+  public boolean isUnitOfRetention() {
+    return isUnitOfRetention;
+  }
+
+  /**
+   * Used in DbColumnDefinitions
+   */
+  @SuppressWarnings("WeakerAccess")
+  void setNotUnitOfRetention() {
+    isUnitOfRetention = false;
+  }
+
+  public String toString() {
+    return column.toString();
+  }
+
+  public int hashCode() {
+    return column.hashCode();
+  }
+
+  public boolean equals(Object obj) {
+    if (!(obj instanceof ColumnDefinition)) {
+      return false;
+    }
+    ColumnDefinition o = (ColumnDefinition) obj;
+
+    return column.equals(o.column);
+  }
+
   @Override
   public int compareTo(@NonNull ColumnDefinition another) {
     return this.getElementKey().compareTo(another.getElementKey());
+  }
+
+  /**
+   * Helper class for building ColumnDefinition objects from Column objects.
+   *
+   * @author mitchellsundt@gmail.com
+   */
+  private static class ColumnContainer {
+    ColumnDefinition defn = null;
+    ArrayList<String> children = null;
   }
 
 }

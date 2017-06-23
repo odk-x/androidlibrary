@@ -28,6 +28,10 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class QueryBounds implements Parcelable, Serializable {
 
+   /**
+    * Used in ODKDatabaseImplUtils
+    */
+   @SuppressWarnings("WeakerAccess")
    public final int mLimit;
 
    public final int mOffset;

@@ -33,6 +33,10 @@ import java.util.ArrayList;
 @SuppressWarnings("serial")
 public class BindArgs implements Parcelable, Serializable {
 
+  /**
+   * Used in OdkDatabaseServiceImpl, probably more
+   */
+  @SuppressWarnings("WeakerAccess")
   public final Object[] bindArgs;
 
   public BindArgs() {
@@ -42,22 +46,21 @@ public class BindArgs implements Parcelable, Serializable {
   public BindArgs(Object[] args) {
     bindArgs = args;
     if ( args != null ) {
-      for (int i = 0 ; i < args.length ; ++i ) {
-        Object o = args[i];
-        if ( o == null ) continue;
-        if ( o instanceof String ) continue;
-        if ( o instanceof Integer ) continue;
-        if ( o instanceof Boolean ) continue;
-        if ( o instanceof Double ) continue;
-        if ( o instanceof Float ) continue;
-        if ( o instanceof Long ) continue;
+      for (Object o : args) {
+        if (o == null) continue;
+        if (o instanceof String) continue;
+        if (o instanceof Integer) continue;
+        if (o instanceof Boolean) continue;
+        if (o instanceof Double) continue;
+        if (o instanceof Float) continue;
+        if (o instanceof Long) continue;
         throw new IllegalArgumentException("bind args must be a primitive type");
       }
     }
   }
 
   public BindArgs(String fromJSON) {
-    if ( fromJSON == null || fromJSON.length() == 0) {
+    if ( fromJSON == null || fromJSON.isEmpty()) {
       bindArgs = new Object[0];
       return;
     }
@@ -67,20 +70,24 @@ public class BindArgs implements Parcelable, Serializable {
       ArrayList<Object> values = ODKFileUtils.mapper.readValue(fromJSON, type);
       if ( values == null ) {
         bindArgs = new Object[0];
-        return;
       } else {
         bindArgs = values.toArray(new Object[values.size()]);
       }
-    } catch (IOException e) {
+    } catch (IOException ignored) {
       // not expected
       throw new IllegalStateException("Unable to deserialize bindArgs");
     }
   }
 
+  /**
+   * Used in IntentUtil
+   * @return the arguments, encoded to json
+   */
+  @SuppressWarnings("unused")
   public String asJSON() {
     try {
       return ODKFileUtils.mapper.writeValueAsString(bindArgs);
-    } catch (JsonProcessingException e) {
+    } catch (JsonProcessingException ignored) {
       // not expected
       throw new IllegalStateException("Unable to serialize bindArgs");
     }
@@ -157,8 +164,8 @@ public class BindArgs implements Parcelable, Serializable {
       dest.writeInt(-1);
     } else {
       dest.writeInt(bindArgs.length);
-      for ( int i = 0 ; i < bindArgs.length ; ++i ) {
-        marshallObject(dest, bindArgs[i]);
+      for (Object bindArg : bindArgs) {
+        marshallObject(dest, bindArg);
       }
     }
   }

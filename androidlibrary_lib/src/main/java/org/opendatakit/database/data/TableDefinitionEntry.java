@@ -20,26 +20,34 @@ import android.os.Parcelable;
 
 /**
  * A simple struct to hold the contents of a table definition entry.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class TableDefinitionEntry implements Parcelable {
 
-  public String tableId;
+  public static final Parcelable.Creator<TableDefinitionEntry> CREATOR = new Parcelable.Creator<TableDefinitionEntry>() {
+    public TableDefinitionEntry createFromParcel(Parcel in) {
+      return new TableDefinitionEntry(in);
+    }
 
-  public String revId;
+    public TableDefinitionEntry[] newArray(int size) {
+      return new TableDefinitionEntry[size];
+    }
+  };
+  private String tableId;
 
-  public String schemaETag;
+  private String revId = null;
 
-  public String lastDataETag;
+  private String schemaETag = null;
 
-  public String lastSyncTime;
+  private String lastDataETag = null;
+
+  private String lastSyncTime = null;
 
   public TableDefinitionEntry(String tableId) {
     this.tableId = tableId;
   }
-  
+
   public TableDefinitionEntry(Parcel in) {
     readFromParcel(in);
   }
@@ -48,34 +56,46 @@ public class TableDefinitionEntry implements Parcelable {
     return tableId;
   }
 
+  public void setTableId(String tableId) {
+    this.tableId = tableId;
+  }
+
+  @SuppressWarnings("unused")
   public String getRevId() {
     return revId;
   }
 
+  @SuppressWarnings("unused")
   public void setRevId(String revId) {
     this.revId = revId;
   }
 
+  @SuppressWarnings("unused")
   public String getSchemaETag() {
     return schemaETag;
   }
 
+  @SuppressWarnings("unused")
   public void setSchemaETag(String schemaETag) {
     this.schemaETag = schemaETag;
   }
 
+  @SuppressWarnings("unused")
   public String getLastDataETag() {
     return lastDataETag;
   }
 
+  @SuppressWarnings("unused")
   public void setLastDataETag(String lastDataETag) {
     this.lastDataETag = lastDataETag;
   }
 
+  @SuppressWarnings("unused")
   public String getLastSyncTime() {
     return lastSyncTime;
   }
 
+  @SuppressWarnings("unused")
   public void setLastSyncTime(String lastSyncTime) {
     this.lastSyncTime = lastSyncTime;
   }
@@ -93,7 +113,7 @@ public class TableDefinitionEntry implements Parcelable {
     out.writeString(lastDataETag);
     out.writeString(lastSyncTime);
   }
-  
+
   private void readFromParcel(Parcel in) {
     tableId = in.readString();
     revId = in.readString();
@@ -101,15 +121,4 @@ public class TableDefinitionEntry implements Parcelable {
     lastDataETag = in.readString();
     lastSyncTime = in.readString();
   }
-
-  public static final Parcelable.Creator<TableDefinitionEntry> CREATOR
-          = new Parcelable.Creator<TableDefinitionEntry>() {
-      public TableDefinitionEntry createFromParcel(Parcel in) {
-          return new TableDefinitionEntry(in);
-      }
-
-      public TableDefinitionEntry[] newArray(int size) {
-          return new TableDefinitionEntry[size];
-      }
-  };
 }
