@@ -204,7 +204,7 @@ public class InitializationUtil {
         if (entry.isDirectory()) {
           detail = appContext.getString(R.string.expansion_create_dir_detail);
           getSupervisor().publishProgress(formattedString, detail);
-          if (!tempFile.mkdirs()) {
+          if (!tempFile.exists() && !tempFile.mkdirs()) {
             throw new RuntimeException("Unable to make required directories");
           }
         } else if (overwrite || !tempFile.exists()) {

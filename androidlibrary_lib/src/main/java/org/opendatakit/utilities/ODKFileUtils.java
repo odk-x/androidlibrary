@@ -381,7 +381,9 @@ public final class ODKFileUtils {
 
     if (!versionFile.exists()) {
       if (!versionFile.getParentFile().mkdirs()) {
-        throw new RuntimeException("Failed mkdirs on " + versionFile.getPath());
+        //throw new RuntimeException("Failed mkdirs on " + versionFile.getPath());
+        WebLogger.getLogger(appName)
+            .e(TAG, "Failed mkdirs on " + versionFile.getParentFile().getPath());
       }
     }
 
