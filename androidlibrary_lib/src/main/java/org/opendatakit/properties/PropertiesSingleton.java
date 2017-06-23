@@ -663,11 +663,12 @@ public class PropertiesSingleton {
               File installationFile = new File(mSecureStorageDir, SECURE_INSTALLATION_ID_FILENAME_PREFIX
                   + mInstallationId);
               installationFile.createNewFile();
+            } else {
+              // just in case -- if some start-up paths may generate 2 or more files
+              // -- use the lexically first
+              Arrays.sort(names);
+              mInstallationId = names[0].substring(SECURE_INSTALLATION_ID_FILENAME_PREFIX.length());
             }
-            // just in case -- if some start-up paths may generate 2 or more files
-            // -- use the lexically first
-            Arrays.sort(names);
-            mInstallationId = names[0].substring(SECURE_INSTALLATION_ID_FILENAME_PREFIX.length());
           }
 
         } catch (Exception e) {
