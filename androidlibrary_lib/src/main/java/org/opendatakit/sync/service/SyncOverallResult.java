@@ -38,7 +38,7 @@ public class SyncOverallResult implements Parcelable {
 
   private SyncOutcome appLevelSyncOutcome = SyncOutcome.WORKING;
 
-  private final TreeMap<String, TableLevelResult> mResults = new TreeMap<String, TableLevelResult>();
+  private final TreeMap<String, TableLevelResult> mResults = new TreeMap<>();
 
   public SyncOverallResult() {
   }
@@ -80,32 +80,40 @@ public class SyncOverallResult implements Parcelable {
   /**
    * Get the app-level sync outcome.
    *
-   * @return
+   * Used in services.sync.service.ProcessAppAndTableLevelChanges, SyncExecutionContext and
+   * AppSynchronizer
+   *
+   * @return the outcome of the sync
    */
+  @SuppressWarnings("unused WeakerAccess")
   public SyncOutcome getAppLevelSyncOutcome() {
     return appLevelSyncOutcome;
   }
 
   /**
-   * Record the app-level sync outcome. This should be SUCCESS.
-   * If it is anything else, then sync will typically be abandoned
-   * without taking any table-level actions.
+   * Record the app-level sync outcome. This should be SUCCESS. If it is anything else, then sync
+   * will typically be abandoned without taking any table-level actions.
    *
-   * @param syncOutcome
+   * Used in the same places as {@link #getAppLevelSyncOutcome()}
+   *
+   * @param syncOutcome The updated outcome of the sync
    */
+  @SuppressWarnings("unused")
   public void setAppLevelSyncOutcome(SyncOutcome syncOutcome) {
     this.appLevelSyncOutcome = syncOutcome;
   }
 
   /**
-   * Get all the {@link TableLevelResult} objects.  This may not be
-   * the full list of tables on the server if the sync interaction
-   * aborts prematurely.
+   * Get all the {@link TableLevelResult} objects.  This may not be the full list of tables on
+   * the server if the sync interaction aborts prematurely.
+   *
+   * Used in AppSynchronizer
    * 
-   * @return
+   * @return A list of sync results, one for each table, alphabetized by table id
    */
+  @SuppressWarnings("unused")
   public List<TableLevelResult> getTableLevelResults() {
-    List<TableLevelResult> r = new ArrayList<TableLevelResult>();
+    List<TableLevelResult> r = new ArrayList<>();
     r.addAll(this.mResults.values());
     Collections.sort(r, new Comparator<TableLevelResult>() {
       @Override
@@ -118,22 +126,15 @@ public class SyncOverallResult implements Parcelable {
   }
 
   /**
-   * Record a table result.
-   *
-   * @param tableId
-   * @param tableLevelResult
-   */
-  public void setTableLevelResult(String tableId, TableLevelResult tableLevelResult) {
-    mResults.put(tableId, tableLevelResult);
-  }
-
-  /**
    * Get the TableLevelResult for the indicated tableId.
    * This will create that object if it does not already exist.
    *
-   * @param tableId
-   * @return
+   * Used in SyncExecutionContext only
+   *
+   * @param tableId the id of the table to get results for
+   * @return The sync result for the requested table
    */
+  @SuppressWarnings("unused")
   public TableLevelResult fetchTableLevelResult(String tableId) {
     TableLevelResult r = mResults.get(tableId);
     if (r == null) {

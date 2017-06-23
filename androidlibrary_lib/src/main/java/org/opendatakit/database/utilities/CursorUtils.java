@@ -52,7 +52,11 @@ public class CursorUtils {
   }
 
   public static boolean getTableHealthIsClean(int health) {
-    return health == 0;
+    return (health == TABLE_HEALTH_IS_CLEAN);
+  }
+
+  public static boolean getTableHealthHasConflictsOrCheckpoints(int health) {
+    return getTableHealthHasConflicts(health) || getTableHealthHasCheckpoints(health);
   }
 
   public static boolean getTableHealthHasConflicts(int health) {

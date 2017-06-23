@@ -42,7 +42,7 @@ import java.util.Collection;
  *
  * @author Carl Hartung (carlhartung@gmail.com)
  */
-public class ODKFileUtils {
+public final class ODKFileUtils {
   public static final ObjectMapper mapper = new ObjectMapper();
   // 2nd level -- directories
   // special filename
@@ -51,7 +51,7 @@ public class ODKFileUtils {
   // 1st level -- appId
   private static final String MD5_COLON_PREFIX = "md5:";
   // Used for logging
-  private final static String TAG = ODKFileUtils.class.getSimpleName();
+  private static final String TAG = ODKFileUtils.class.getSimpleName();
   // Default app name when unspecified
   private static final String ODK_DEFAULT_APP_NAME = "default";
   // base path
@@ -132,6 +132,12 @@ public class ODKFileUtils {
   private static final String TABLE_SPECIFIC_DEFINITIONS_JS = "tableSpecificDefinitions.js";
 
   /**
+   * Do not instantiate this class
+   */
+  private ODKFileUtils() {
+  }
+
+  /**
    * uri on web server begins with appName.
    * construct the full file.
    * <p>
@@ -172,10 +178,12 @@ public class ODKFileUtils {
       case PERMANENT_FOLDER_NAME:
         return filename;
       case DATA_FOLDER_NAME:
-        if ((parts.length > 2) && parts[1].equals(TABLES_FOLDER_NAME)) {
+        if (parts.length > 2 && parts[1].equals(TABLES_FOLDER_NAME)) {
           return filename;
         }
         break;
+      default:
+        // ignore;
       }
     }
     return null;
@@ -260,7 +268,7 @@ public class ODKFileUtils {
 
       @Override
       public boolean accept(File pathname) {
-        return (pathname.isDirectory());
+        return pathname.isDirectory();
       }
     });
   }
@@ -313,7 +321,7 @@ public class ODKFileUtils {
       // DO NOT CHANGE THIS TO WebLogger
       // WebLogger.getLogger calls assertDirectoryStructure, and we will end up in an infinite
       // loop of failures
-      Log.e(TAG, "Cannot create .nomedia in app directory: " + ex.toString());
+      Log.e(TAG, "Cannot create .nomedia in app directory: " + ex);
       // Also, don't throw an exception or the tests will fail
     }
   }
@@ -341,7 +349,7 @@ public class ODKFileUtils {
           return false;
         }
         String type = name.substring(idx + 1);
-        return type.equals("version");
+        return "version".equals(type);
       }
     });
     for (File f : filesToDelete) {
@@ -457,21 +465,21 @@ public class ODKFileUtils {
       br = new BufferedReader(r);
       versionLine = br.readLine();
     } catch (IOException e) {
-      e.printStackTrace();
+      WebLogger.getLogger(appName).printStackTrace(e);
       return false;
     } finally {
       if (br != null) {
         try {
           br.close();
         } catch (IOException e) {
-          e.printStackTrace();
+          WebLogger.getLogger(appName).printStackTrace(e);
         }
       }
       if (r != null) {
         try {
           r.close();
         } catch (IOException e) {
-          e.printStackTrace();
+          WebLogger.getLogger(appName).printStackTrace(e);
         }
       }
       try {
@@ -479,7 +487,7 @@ public class ODKFileUtils {
           fs.close();
         }
       } catch (IOException e) {
-        e.printStackTrace();
+        WebLogger.getLogger(appName).printStackTrace(e);
       }
     }
 
@@ -508,6 +516,7 @@ public class ODKFileUtils {
 
   /**
    * Used in ScanUtils, ProcessManifestContentAndFileChanges
+   *
    * @param appName the app name
    * @return :app_name/config
    */
@@ -645,7 +654,7 @@ public class ODKFileUtils {
   @SuppressWarnings("WeakerAccess")
   public static String getTablesFolder(String appName, String tableId) {
     String path;
-    if (tableId == null || tableId.length() == 0) {
+    if (tableId == null || tableId.isEmpty()) {
       throw new IllegalArgumentException("getTablesFolder: tableId is null or the empty string!");
     } else {
       if (!tableId.matches("^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)+$")) {
@@ -708,7 +717,7 @@ public class ODKFileUtils {
   }
 
   public static String getFormFolder(String appName, String tableId, String formId) {
-    if (formId == null || formId.length() == 0) {
+    if (formId == null || formId.isEmpty()) {
       throw new IllegalArgumentException("getFormFolder: formId is null or the empty string!");
     } else {
       if (!formId.matches("^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)+$")) {
@@ -812,7 +821,7 @@ public class ODKFileUtils {
   }
 
   private static String safeInstanceIdFolderName(String instanceId) {
-    if (instanceId == null || instanceId.length() == 0) {
+    if (instanceId == null || instanceId.isEmpty()) {
       throw new IllegalArgumentException(
           "getInstanceFolder: instanceId is null or the empty string!");
     } else {
@@ -953,8 +962,8 @@ public class ODKFileUtils {
    * @return :app_name/output/csv/:table_id(.:file_qualifier).csv
    */
   public static String getOutputTableCsvFile(String appName, String tableId, String fileQualifier) {
-    return getOutputCsvFolder(appName) + File.separator + tableId + ((fileQualifier != null
-        && fileQualifier.length() != 0) ? ("." + fileQualifier) : "") + ".csv";
+    return getOutputCsvFolder(appName) + File.separator + tableId + (
+        fileQualifier != null && !fileQualifier.isEmpty() ? "." + fileQualifier : "") + ".csv";
   }
 
   /**
@@ -966,8 +975,9 @@ public class ODKFileUtils {
    */
   public static String getOutputTableDefinitionCsvFile(String appName, String tableId,
       String fileQualifier) {
-    return getOutputCsvFolder(appName) + File.separator + tableId + ((fileQualifier != null
-        && fileQualifier.length() != 0) ? ("." + fileQualifier) : "") + "." + DEFINITION_CSV;
+    return getOutputCsvFolder(appName) + File.separator + tableId + (
+        fileQualifier != null && !fileQualifier.isEmpty() ? "." + fileQualifier : "") + "."
+        + DEFINITION_CSV;
   }
 
   /**
@@ -979,8 +989,9 @@ public class ODKFileUtils {
    */
   public static String getOutputTablePropertiesCsvFile(String appName, String tableId,
       String fileQualifier) {
-    return getOutputCsvFolder(appName) + File.separator + tableId + ((fileQualifier != null
-        && fileQualifier.length() != 0) ? ("." + fileQualifier) : "") + "." + PROPERTIES_CSV;
+    return getOutputCsvFolder(appName) + File.separator + tableId + (
+        fileQualifier != null && !fileQualifier.isEmpty() ? "." + fileQualifier : "") + "."
+        + PROPERTIES_CSV;
   }
 
   ////////////////////////////////////////
@@ -1026,7 +1037,7 @@ public class ODKFileUtils {
       path = path.getParentFile();
     }
 
-    return (path != null);
+    return path != null;
   }
 
   /**
@@ -1125,7 +1136,7 @@ public class ODKFileUtils {
   @SuppressWarnings("WeakerAccess")
   public static File getAsFile(String appName, String uriFragment) {
     // forward slash always...
-    if (uriFragment == null || uriFragment.length() == 0) {
+    if (uriFragment == null || uriFragment.isEmpty()) {
       throw new IllegalArgumentException("Not a valid uriFragment: " + appName + "/" + uriFragment
           + " application or subdirectory not specified.");
     }
@@ -1318,7 +1329,7 @@ public class ODKFileUtils {
   @SuppressWarnings("unused")
   public static String getXMLText(Node n, boolean trim) {
     NodeList nl = n.getChildNodes();
-    return (nl.getLength() == 0 ? null : getXMLText(nl, 0, trim));
+    return nl.getLength() == 0 ? null : getXMLText(nl, 0, trim);
   }
 
   /**

@@ -20,13 +20,23 @@ package org.opendatakit.provider;
 import android.net.Uri;
 
 /**
- * Convenience definitions for NotePadProvider
+ * Used in survey SplashScreenActivity, AndroidShortcuts, MainMenuActivity,
+ * FormChooserListFragment, FormListLoader, androidlibrary OdkCommon and FormsProvider
  */
 public final class FormsProviderAPI {
+  /**
+   * Used in FormIdStructTest, InitializationUtil, FormsProvider
+   */
   public static final String AUTHORITY = "org.opendatakit.provider.forms";
+  /**
+   * Used in the other places listed
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/");
 
-  // This class cannot be instantiated
+  /**
+   * This class cannot be instantiated
+   */
   private FormsProviderAPI() {
   }
 }
