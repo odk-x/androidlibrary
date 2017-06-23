@@ -22,10 +22,12 @@ import java.io.FileFilter;
 
 /**
  * Implements property access methods that return dynamic values
+ * <p>
+ * Used in OdkCommon, AbsBaseWebActivity, MainMenuActivity, DoActionUtils, SubmissionProvider
  *
  * @author mitchellsundt@gmail.com
- *
  */
+@SuppressWarnings("unused")
 public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
 
   private final String appName;
@@ -80,23 +82,26 @@ public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
 
   @Override
   public String getInstanceDirectory() {
-    if ( tableId == null ) {
-      throw new IllegalStateException("getInstanceDirectory() unexpectedly invoked outside of a form.");
+    if (tableId == null) {
+      throw new IllegalStateException(
+          "getInstanceDirectory() unexpectedly invoked outside of a form.");
     }
-    String mediaPath = ODKFileUtils.getInstanceFolder(appName, tableId, instanceId);
-    return mediaPath;
+    return ODKFileUtils.getInstanceFolder(appName, tableId, instanceId);
   }
 
   @Override
   public String getUriFragmentNewInstanceFile(String uriDeviceId, String extension) {
-    if ( tableId == null ) {
-      throw new IllegalStateException("getUriFragmentNewInstanceFile(...) unexpectedly invoked outside of a form.");
+    if (tableId == null) {
+      throw new IllegalStateException(
+          "getUriFragmentNewInstanceFile(...) unexpectedly invoked outside of a form.");
     }
     String mediaPath = ODKFileUtils.getInstanceFolder(appName, tableId, instanceId);
     File f = new File(mediaPath);
-    f.mkdirs();
+    if (!f.exists() && !f.mkdirs()) {
+      throw new RuntimeException("Could not create instance folder " + f.getPath());
+    }
     String chosenFileName;
-    for (;;) {
+    while (true) {
       String candidate = Long.toString(System.currentTimeMillis()) + "_" + uriDeviceId;
       final String fileName = candidate.replaceAll("[\\p{Punct}\\p{Space}]", "_");
       chosenFileName = fileName;
@@ -127,8 +132,8 @@ public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
         break;
       }
     }
-    String filePath = mediaPath + File.separator + chosenFileName
-        + ((extension != null && extension.length() > 0) ? ("." + extension) : "");
+    String filePath = mediaPath + File.separator + chosenFileName + (extension != null
+        && !extension.isEmpty() ? "." + extension : "");
     return ODKFileUtils.asUriFragment(appName, new File(filePath));
   }
 }
