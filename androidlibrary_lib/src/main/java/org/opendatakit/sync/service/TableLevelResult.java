@@ -18,6 +18,8 @@ package org.opendatakit.sync.service;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.HashMap;
+
 /**
  * The mapping of a table to the SyncOutcome of its synchronization.
  * Also includes interesting metrics on the scope of change.
@@ -53,6 +55,7 @@ public class TableLevelResult implements Parcelable {
   private String mDisplayName;
   private String mMessage = SyncOutcome.WORKING.name();
   private SyncOutcome mSyncOutcome = SyncOutcome.WORKING;
+
   /**
    * Flag if schema was pulled from the server.
    */
@@ -116,6 +119,32 @@ public class TableLevelResult implements Parcelable {
     this.mHadLocalDataChanges = false;
     this.mHadServerDataChanges = false;
     this.mHadServerSchemaChanges = false;
+  }
+
+  public HashMap<String, Object> getStatusMap() {
+    HashMap<String, Object> statusMap = new HashMap<String, Object>();
+    statusMap.put("tableId", mTableId);
+    statusMap.put("syncOutcome", mSyncOutcome.name());
+    statusMap.put("message", mMessage);
+
+    // some of these will be under-reported if server schema is bad
+    statusMap.put("pulledServerSchemaInfo", mPulledServerSchema);
+    statusMap.put("serverSchemaDiffered", mHadServerSchemaChanges);
+    if ( mSyncOutcome != SyncOutcome.TABLE_SCHEMA_COLUMN_DEFINITION_MISMATCH ) {
+
+      statusMap.put("hadServerDataChanges", mHadServerDataChanges);
+      statusMap.put("pulledServerDataChanges", mPulledServerData);
+      statusMap.put("hadLocalDataChanges", mHadLocalDataChanges);
+      statusMap.put("pushedLocalChanges", mPushedLocalData);
+
+      statusMap.put("serverNumUpserts", mServerNumUpserts);
+      statusMap.put("serverNumDeletes", mServerNumDeletes);
+      statusMap.put("localNumInserts", mLocalNumInserts);
+      statusMap.put("localNumDeletes", mLocalNumDeletes);
+      statusMap.put("localNumAttachmentRetries", mLocalNumAttachmentRetries);
+
+    }
+    return statusMap;
   }
 
   @Override
