@@ -25,7 +25,8 @@ package org.opendatakit.utilities;
  * @author mitchellsundt@gmail.com
  *
  */
-public class ODKJsonNames {
+@SuppressWarnings("unused")
+public final class ODKJsonNames {
   public static final String jsonTableStr = "table";
   public static final String jsonTableIdStr = "tableId";
   public static final String jsonElementKeyStr = "elementKey";
@@ -33,4 +34,10 @@ public class ODKJsonNames {
   public static final String jsonElementTypeStr = "elementType";
   public static final String jsonListChildElementKeysStr = "listChildElementKeys";
   public static final String jsonColumnsStr = "columns";
+
+  /**
+   * Do not instantiate this class
+   */
+  private ODKJsonNames() {
+  }
 }

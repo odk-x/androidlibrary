@@ -22,18 +22,36 @@ package org.opendatakit.utilities;
  * @author mitchellsundt@gmail.com
  *
  */
-public class DataHelper {
+public final class DataHelper {
+
+  /**
+   * Do not instantiate this class
+   */
+  private DataHelper() {
+  }
 
   public static boolean intToBool(int i) {
     return i != 0;
   }
 
+  /**
+   * Used in SyncETagUtils
+   * @param b a boolean
+   * @return that boolean as an int, with one for true and zero for false
+   */
+  @SuppressWarnings("WeakerAccess")
   public static int boolToInt(boolean b) {
     return b ? 1 : 0;
   }
 
+  /**
+   * Used in ExecutorProcessor
+   * @param bool a string that represents a boolean
+   * @return whether that bool was "true", ignoring case
+   */
+  @SuppressWarnings("unused")
   public static boolean stringToBool(String bool) {
-    return (bool == null) || bool.equalsIgnoreCase("true");
+    return "true".equalsIgnoreCase(bool);
   }
 
 }

@@ -23,10 +23,16 @@ import java.io.*;
 /**
  * Isolate bitmap resizing to its own utility class.
  *
+ * Used in DrawActivity in survey
+ *
  * @author mitchellsundt@gmail.com
  */
-public class BitmapUtils {
-  private final static String TAG = BitmapUtils.class.getSimpleName();
+@SuppressWarnings("unused WeakerAccess")
+public final class BitmapUtils {
+  private static final String TAG = BitmapUtils.class.getSimpleName();
+
+  private BitmapUtils() {
+  }
 
   /**
    * Resizes a bitmap to fit on a particular display, used in survey.activities.DrawActivity

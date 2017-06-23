@@ -28,6 +28,10 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Used in OdkDatabaseServiceTest
+ */
+@SuppressWarnings("WeakerAccess")
 public class DateUtils {
 
   @SuppressWarnings("unused") private static final String TAG = DateUtils.class.getSimpleName();
@@ -129,7 +133,7 @@ public class DateUtils {
 
   private DateTime tryParseInstant(String input) {
     input = input.trim();
-    if (input.equalsIgnoreCase("now")) {
+    if ("now".equalsIgnoreCase(input)) {
       return new DateTime();
     }
     Matcher matcher = USER_NOW_RELATIVE_FORMAT.matcher(input);
@@ -137,7 +141,7 @@ public class DateUtils {
       int delta = tryParseDuration(matcher.group(2));
       if (delta < 0) {
         return null;
-      } else if (matcher.group(1).equals("-")) {
+      } else if ("-".equals(matcher.group(1))) {
         return new DateTime().minusSeconds(delta);
       } else {
         return new DateTime().plusSeconds(delta);
@@ -145,7 +149,7 @@ public class DateUtils {
     }
     try {
       return userFullParser.parseDateTime(input);
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException ignored) {
       // TODO
     }
     //if (!locale.getLanguage().equals(Locale.ENGLISH.getLanguage())) {
@@ -160,7 +164,7 @@ public class DateUtils {
         DateTime start = userPartialParsers[i].parseDateTime(input);
         DateTime end = start.plusSeconds(USER_INTERVAL_DURATIONS[i]);
         return new Interval(start, end);
-      } catch (IllegalArgumentException e) {
+      } catch (IllegalArgumentException ignored) {
         // TODO
       }
     }
@@ -169,13 +173,12 @@ public class DateUtils {
     }
     DateTime start = new DateTime().withTimeAtStartOfDay();
     boolean match = false;
-    if (input.equalsIgnoreCase("today")) {
+    if ("today".equalsIgnoreCase(input)) {
       match = true;
-    } else if (input.equalsIgnoreCase("yesterday")) {
+    } else if ("yesterday".equalsIgnoreCase(input)) {
       start = start.minusDays(1);
       match = true;
-    } else if (input.equalsIgnoreCase("tomorrow") ||
-        input.equalsIgnoreCase("tmw")) {
+    } else if ("tomorrow".equalsIgnoreCase(input) || "tmw".equalsIgnoreCase(input)) {
       start = start.plusDays(1);
       match = true;
     }
@@ -209,9 +212,5 @@ public class DateUtils {
 
   public String formatDateTimeForDb(DateTime dt) {
     return TableConstants.nanoSecondsFromMillis(dt.getMillis());
-  }
-
-  private String formatIntervalForDb(Interval interval) {
-    return formatDateTimeForDb(interval.getStart()) + "/" + formatDateTimeForDb(interval.getEnd());
   }
 }
