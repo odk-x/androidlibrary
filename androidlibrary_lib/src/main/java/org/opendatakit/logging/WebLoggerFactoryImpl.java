@@ -20,16 +20,14 @@ package org.opendatakit.logging;
  *
  * @author mitchellsundt@gmail.com
  */
-public class WebLoggerFactoryImpl implements WebLoggerFactoryIf {
+class WebLoggerFactoryImpl implements WebLoggerFactoryIf {
 
   public synchronized WebLoggerIf createWebLogger(String appName) {
     if ( appName == null ) {
       // log to just the system log...
-      WebLoggerIf logger = new WebLoggerAppNameUnknownImpl();
-      return logger;
+      return new WebLoggerAppNameUnknownImpl();
     } else {
-      WebLoggerIf logger = new WebLoggerImpl(appName);
-      return logger;
+      return new WebLoggerImpl(appName);
     }
   }
 }

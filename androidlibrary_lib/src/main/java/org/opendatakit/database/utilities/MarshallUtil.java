@@ -17,10 +17,12 @@ package org.opendatakit.database.utilities;
 
 import android.os.Parcel;
 
-public class MarshallUtil {
+public final class MarshallUtil {
 
+  /**
+   * This class should never be instantiated
+   */
   private MarshallUtil() {
-    // This class should never be instantiated
     throw new IllegalStateException("Never Instantiate this static class");
   }
 
@@ -34,16 +36,12 @@ public class MarshallUtil {
   }
 
   public static String[] unmarshallStringArray(Parcel in) {
-    String[] result = null;
-
     int dataCount = in.readInt();
     if (dataCount < 0) {
       return null;
-    } else {
-      result = new String[dataCount];
-      in.readStringArray(result);
     }
-
+    String[] result = new String[dataCount];
+    in.readStringArray(result);
     return result;
   }
 }

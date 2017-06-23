@@ -35,6 +35,11 @@ import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.task.LicenseReaderTask;
 import org.opendatakit.logging.WebLogger;
 
+/**
+ * Used in ConflictResolutionActivity, CheckpointResolutionActivity,
+ * AllConflictsResolutionActivity, MainMenuActivity, SyncBaseActivity, MainActivity, SyncActivity
+ */
+@SuppressWarnings("unused")
 public class AboutMenuFragment extends Fragment implements LicenseReaderListener {
   private static final String TAG = AboutMenuFragment.class.getSimpleName();
 
@@ -107,6 +112,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
       if (Build.VERSION.SDK_INT >= 24) {
         html = Html.fromHtml(mLicenseText, Html.FROM_HTML_MODE_LEGACY);
       } else {
+        //noinspection deprecation
         html = Html.fromHtml(mLicenseText);
       }
       mTextView.setText(html);
@@ -134,6 +140,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
       if (Build.VERSION.SDK_INT >= 24) {
         html = Html.fromHtml(result, Html.FROM_HTML_MODE_LEGACY);
       } else {
+        //noinspection deprecation
         html = Html.fromHtml(result);
       }
       mTextView.setText(html);

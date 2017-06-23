@@ -35,9 +35,12 @@ import java.util.*;
 
 /**
  * Various utilities for importing/exporting tables from/to CSV.
+ * <p>
+ * Used by Tables
  *
  * @author sudar.sam@gmail.com
  */
+@SuppressWarnings("WeakerAccess")
 public class CsvUtil {
 
   private static final String TAG = CsvUtil.class.getSimpleName();
@@ -69,8 +72,10 @@ public class CsvUtil {
    * <li>tableid.definition.csv - data table column definition</li>
    * <li>tableid.properties.csv - key-value store of this table</li>
    * </ul>
+   * <p>
+   * Used in ExportTask
    *
-   * @param exportListener Unused! exportListener.exportComplete(b) is never called
+   * @param exportListener We send it progress updates
    * @param db             the database handle
    * @param tableId        the id of the table to export
    * @param orderedDefns   a list of the columns in the table
@@ -78,6 +83,7 @@ public class CsvUtil {
    * @return whether it was successful
    * @throws ServicesAvailabilityException if the database is down
    */
+  @SuppressWarnings("unused")
   public boolean exportSeparable(ExportListener exportListener, DbHandle db, String tableId,
       OrderedColumns orderedDefns, String fileQualifier) throws ServicesAvailabilityException {
     // building array of columns to select and header row for output file
@@ -85,7 +91,7 @@ public class CsvUtil {
     ArrayList<String> columns = new ArrayList<>();
 
     WebLogger.getLogger(appName).i(TAG,
-        "exportSeparable: tableId: " + tableId + " fileQualifier: " + ((fileQualifier == null) ?
+        "exportSeparable: tableId: " + tableId + " fileQualifier: " + (fileQualifier == null ?
             "<null>" :
             fileQualifier));
 
@@ -119,7 +125,7 @@ public class CsvUtil {
       File[] subDirectories = tableInstancesFolder.listFiles(new FileFilter() {
         @Override
         public boolean accept(File pathname) {
-          return pathname.isDirectory() && (pathname.list().length != 0);
+          return pathname.isDirectory() && pathname.list().length != 0;
         }
       });
       instancesWithData.addAll(Arrays.asList(subDirectories));
@@ -154,14 +160,13 @@ public class CsvUtil {
       String[] emptyArray = new String[0];
 
       UserTable table = supervisor.getDatabase()
-          .simpleQuery(appName, db, tableId, orderedDefns, whereString, emptyArgs, emptyArray,
-              null, null, null, null, null);
+          .simpleQuery(appName, db, tableId, orderedDefns, whereString, emptyArgs, emptyArray, null,
+              null, null, null, null);
 
       // emit data table...
       File file = new File(outputCsv,
-          tableId + ((fileQualifier != null && fileQualifier.length() != 0) ?
-              ("." + fileQualifier) :
-              "") + ".csv");
+          tableId + (fileQualifier != null && !fileQualifier.isEmpty() ? "." + fileQualifier : "")
+              + ".csv");
       FileOutputStream out = new FileOutputStream(file);
       output = new OutputStreamWriter(out, CharEncoding.UTF_8);
       RFC4180CsvWriter cw = new RFC4180CsvWriter(output);
@@ -201,18 +206,16 @@ public class CsvUtil {
       cw.close();
 
       return true;
-    } catch (IOException e) {
-      if (outputCsv != null) {
-        try {
-          File outputCsvFolder = new File(ODKFileUtils.getOutputCsvFolder(appName));
-          while (ODKFileUtils.directoryContains(outputCsvFolder, outputCsv)) {
-            ODKFileUtils.deleteDirectory(outputCsv);
-            outputCsv = outputCsv.getParentFile();
-          }
-        } catch (IOException e1) {
-          e1.printStackTrace();
-          return false;
+    } catch (IOException ignored) {
+      try {
+        File outputCsvFolder = new File(ODKFileUtils.getOutputCsvFolder(appName));
+        while (ODKFileUtils.directoryContains(outputCsvFolder, outputCsv)) {
+          ODKFileUtils.deleteDirectory(outputCsv);
+          outputCsv = outputCsv.getParentFile();
         }
+      } catch (IOException e1) {
+        WebLogger.getLogger(appName).printStackTrace(e1);
+        return false;
       }
       return false;
     } finally {
@@ -220,13 +223,14 @@ public class CsvUtil {
         if (output != null) {
           output.close();
         }
-      } catch (IOException e) {
+      } catch (IOException ignored) {
         // we couldn't even open the file
       }
     }
   }
 
   /**
+   * Common routine to write the definition and properties files.
    * Writes the definition and properties files for the given tableId. This is
    * written to:
    * <ul>
@@ -240,23 +244,6 @@ public class CsvUtil {
    * store). The md5hash of it corresponds to the propertiesETag.
    * <p>
    * For use by the sync mechanism.
-   *
-   * @param db           the database handle
-   * @param tableId      the id of the table to export
-   * @param orderedDefns a list of the columns in the table
-   * @return true if we were able to write the csv files
-   * @throws ServicesAvailabilityException if the database is down
-   */
-  public boolean writePropertiesCsv(DbHandle db, String tableId, OrderedColumns orderedDefns)
-      throws ServicesAvailabilityException {
-    File definitionCsv = new File(ODKFileUtils.getTableDefinitionCsvFile(appName, tableId));
-    File propertiesCsv = new File(ODKFileUtils.getTablePropertiesCsvFile(appName, tableId));
-
-    return writePropertiesCsv(db, tableId, orderedDefns, definitionCsv, propertiesCsv);
-  }
-
-  /**
-   * Common routine to write the definition and properties files.
    *
    * @param db            the database handle
    * @param tableId       the id of the table to export
@@ -285,7 +272,7 @@ public class CsvUtil {
           .equals(KeyValueStoreConstants.COLUMN_DISPLAY_CHOICES_LIST)) {
         // exported type is an array -- the choiceListJSON
         entry.type = ElementDataType.array.name();
-        if ((entry.value != null) && (entry.value.trim().length() != 0)) {
+        if (entry.value != null && !entry.value.trim().isEmpty()) {
           entry.value = supervisor.getDatabase().getChoiceList(appName, db, entry.value);
         } else {
           entry.value = null;
@@ -308,7 +295,7 @@ public class CsvUtil {
   private int countUpToLastNonNullElement(String[] row) {
     for (int i = row.length - 1; i >= 0; --i) {
       if (row[i] != null) {
-        return (i + 1);
+        return i + 1;
       }
     }
     return 0;
@@ -346,7 +333,7 @@ public class CsvUtil {
             .equals(KeyValueStoreConstants.COLUMN_DISPLAY_CHOICES_LIST)) {
           // stored type is a string -- the choiceListId
           entry.type = ElementDataType.string.name();
-          if ((entry.value != null) && (entry.value.trim().length() != 0)) {
+          if (entry.value != null && !entry.value.trim().isEmpty()) {
             entry.value = supervisor.getDatabase().setChoiceList(appName, db, entry.value);
           } else {
             entry.value = null;
@@ -407,7 +394,7 @@ public class CsvUtil {
           .getUserDefinedColumns(appName, db, tableId);
 
       WebLogger.getLogger(appName).i(TAG,
-          "importSeparable: tableId: " + tableId + " fileQualifier: " + ((fileQualifier == null) ?
+          "importSeparable: tableId: " + tableId + " fileQualifier: " + (fileQualifier == null ?
               "<null>" :
               fileQualifier));
 
@@ -423,7 +410,7 @@ public class CsvUtil {
 
             @Override
             public boolean accept(File pathname) {
-              return pathname.isDirectory() && (pathname.list().length != 0);
+              return pathname.isDirectory() && pathname.list().length != 0;
             }
           });
           instancesHavingData.addAll(Arrays.asList(subDirectories));
@@ -434,9 +421,8 @@ public class CsvUtil {
 
         // read data table...
         File file = new File(assetsCsv,
-            tableId + ((fileQualifier != null && fileQualifier.length() != 0) ?
-                ("." + fileQualifier) :
-                "") + ".csv");
+            tableId + (fileQualifier != null && !fileQualifier.isEmpty() ? "." + fileQualifier : "")
+                + ".csv");
         FileInputStream in = new FileInputStream(file);
         input = new InputStreamReader(in, CharEncoding.UTF_8);
         RFC4180CsvReader cr = new RFC4180CsvReader(input);
@@ -461,7 +447,7 @@ public class CsvUtil {
 
         int rowCount = 0;
         String[] row;
-        for (; ; ) {
+        while (true) {
           row = cr.readNext();
           rowCount++;
           if (rowCount % 5 == 0) {
@@ -496,74 +482,74 @@ public class CsvUtil {
             String column = columnsInFile[i];
             String tmp = row[i];
             if (DataTableColumns.ID.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 foundId = true;
                 v_id = tmp;
               }
               continue;
             }
             if (DataTableColumns.FORM_ID.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_form_id = tmp;
               }
               continue;
             }
             if (DataTableColumns.LOCALE.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_locale = tmp;
               }
               continue;
             }
             if (DataTableColumns.SAVEPOINT_TYPE.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_savepoint_type = tmp;
               }
               continue;
             }
             if (DataTableColumns.SAVEPOINT_CREATOR.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_savepoint_creator = tmp;
               }
               continue;
             }
             if (DataTableColumns.SAVEPOINT_TIMESTAMP.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_savepoint_timestamp = tmp;
               }
               continue;
             }
             if (DataTableColumns.ROW_ETAG.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_row_etag = tmp;
               }
               continue;
             }
             if (DataTableColumns.DEFAULT_ACCESS.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_default_access = tmp;
               }
               continue;
             }
             if (DataTableColumns.ROW_OWNER.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_row_owner = tmp;
               }
               continue;
             }
             if (DataTableColumns.GROUP_READ_ONLY.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_group_read_only = tmp;
               }
               continue;
             }
             if (DataTableColumns.GROUP_MODIFY.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_group_modify = tmp;
               }
               continue;
             }
             if (DataTableColumns.GROUP_PRIVILEGED.equals(column)) {
-              if (tmp != null && tmp.length() != 0) {
+              if (tmp != null && !tmp.isEmpty()) {
                 v_group_privileged = tmp;
               }
               continue;
@@ -572,7 +558,7 @@ public class CsvUtil {
             try {
               orderedDefns.find(column);
               valueMap.put(column, tmp);
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException ignored) {
               // this is OK --
               // the csv contains an extra column
             }
@@ -707,16 +693,16 @@ public class CsvUtil {
         }
         cr.close();
         return true;
-      } catch (IOException e) {
+      } catch (IOException ignored) {
         return false;
       } finally {
         try {
           input.close();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
           // we never even opened the file
         }
       }
-    } catch (IOException e) {
+    } catch (IOException ignored) {
       return false;
     } finally {
       if (db != null) {

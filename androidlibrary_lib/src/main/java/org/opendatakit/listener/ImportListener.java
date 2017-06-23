@@ -21,6 +21,10 @@ package org.opendatakit.listener;
 public interface ImportListener {
   void updateProgressDetail(int progressDetailString);
 
-  // Ignore the android studio warnings, InternationaizationUtil uses this
+  /**
+   * Used by InitializationUtil
+   * @param outcome whether successful or not
+   */
+  @SuppressWarnings("unused")
   void importComplete(boolean outcome);
 }

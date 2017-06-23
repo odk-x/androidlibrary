@@ -6,10 +6,7 @@ import android.util.Log;
  * @author mitchellsundt@gmail.com
  */
 
-public class WebLoggerAppNameUnknownImpl implements WebLoggerIf {
-
-  public WebLoggerAppNameUnknownImpl() {
-  }
+class WebLoggerAppNameUnknownImpl implements WebLoggerIf {
 
   @Override
   public void staleFileScan(long now) {

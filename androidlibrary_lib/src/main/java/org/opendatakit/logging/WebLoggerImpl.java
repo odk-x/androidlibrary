@@ -67,11 +67,11 @@ class WebLoggerImpl implements WebLoggerIf {
   }
 
   private String getFormattedFileDateNow() {
-    return (new DateTime()).toString(DATE_FORMAT);
+    return new DateTime().toString(DATE_FORMAT);
   }
 
   private String getFormattedLogLineDateNow() {
-    return (new DateTime()).toString(LOG_LINE_DATE_FORMAT);
+    return new DateTime().toString(LOG_LINE_DATE_FORMAT);
   }
 
   public synchronized void close() {
@@ -81,7 +81,7 @@ class WebLoggerImpl implements WebLoggerIf {
       String loggingPath = ODKFileUtils.getLoggingFolder(appName);
       File loggingDirectory = new File(loggingPath);
       if (!loggingDirectory.exists()) {
-        Log.e("WebLogger", "Logging directory does not exist -- special handling under " + appName);
+        Log.e(TAG, "Logging directory does not exist -- special handling under " + appName);
         try {
           writer.close();
         } catch (IOException e) {
@@ -95,8 +95,8 @@ class WebLoggerImpl implements WebLoggerIf {
         try {
           writer.flush();
           writer.close();
-        } catch (IOException e) {
-          Log.e("WebLogger", "Unable to flush and close " + appName + " WebLogger");
+        } catch (IOException ignored) {
+          Log.e(TAG, "Unable to flush and close " + appName + " WebLogger");
         }
       }
     }
@@ -114,20 +114,20 @@ class WebLoggerImpl implements WebLoggerIf {
       File loggingDirectory = new File(loggingPath);
       if (!loggingDirectory.exists()) {
         if (!loggingDirectory.mkdirs()) {
-          Log.e("WebLogger", "Unable to create logging directory");
+          Log.e(TAG, "Unable to create logging directory");
           return;
         }
       }
 
       if (!loggingDirectory.isDirectory()) {
-        Log.e("WebLogger", "Logging Directory exists but is not a directory!");
+        Log.e(TAG, "Logging Directory exists but is not a directory!");
         return;
       }
 
       File[] stale = loggingDirectory.listFiles(new FileFilter() {
         @Override
         public boolean accept(File pathname) {
-          return (pathname.lastModified() < distantPast);
+          return pathname.lastModified() < distantPast;
         }
       });
 
@@ -142,7 +142,7 @@ class WebLoggerImpl implements WebLoggerIf {
       // no exceptions are claimed, but since we can mount/unmount
       // the SDCard, there might be an external storage unavailable
       // exception that would otherwise percolate up.
-      e.printStackTrace();
+      printStackTrace(e);
     }
   }
 
@@ -159,7 +159,7 @@ class WebLoggerImpl implements WebLoggerIf {
         try {
           writer.close();
         } catch (IOException e) {
-          e.printStackTrace();
+          Log.e(TAG, Log.getStackTraceString(e), e);
         }
       }
 
@@ -168,8 +168,8 @@ class WebLoggerImpl implements WebLoggerIf {
         ODKFileUtils.verifyExternalStorageAvailability();
         ODKFileUtils.assertDirectoryStructure(appName);
       } catch (Exception e) {
-        e.printStackTrace();
-        Log.e("WebLogger", "Unable to create logging directory");
+        Log.e(TAG, "Unable to create logging directory");
+        Log.e(TAG, Log.getStackTraceString(e), e);
         return;
       }
 
@@ -177,7 +177,7 @@ class WebLoggerImpl implements WebLoggerIf {
       File loggingDirectory = new File(loggingPath);
 
       if (!loggingDirectory.isDirectory()) {
-        Log.e("WebLogger", "Logging Directory exists but is not a directory!");
+        Log.e(TAG, "Logging Directory exists but is not a directory!");
         return;
       }
 
@@ -193,13 +193,12 @@ class WebLoggerImpl implements WebLoggerIf {
         // if we see a lot of these being logged, we have a problem
         logFile.write("---- starting ----\n");
       } catch (Exception e) {
-        e.printStackTrace();
-        Log.e("WebLogger", "Unexpected exception while opening logging file: " + e.toString());
+        Log.e(TAG, "Unexpected exception while opening logfile: " + Log.getStackTraceString(e), e);
         try {
           if (logFile != null) {
             logFile.close();
           }
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
           // ignore
         }
         logFile = null;
@@ -244,7 +243,7 @@ class WebLoggerImpl implements WebLoggerIf {
       if (!logMsg.startsWith(curLogLineStamp.substring(0, 16))) {
         logMsg = curLogLineStamp + " " + logMsg;
       } else {
-        androidLogLine = (logMsg.length() > curLogLineStamp.length()) ?
+        androidLogLine = logMsg.length() > curLogLineStamp.length() ?
             logMsg.substring(curLogLineStamp.length()) :
             logMsg;
       }
@@ -317,7 +316,7 @@ class WebLoggerImpl implements WebLoggerIf {
       }
       log(logMsg);
     } catch (IOException e) {
-      e.printStackTrace();
+      Log.e(TAG, Log.getStackTraceString(e), e);
     }
   }
 
@@ -354,7 +353,7 @@ class WebLoggerImpl implements WebLoggerIf {
   }
 
   public void printStackTrace(Throwable e) {
-    e.printStackTrace();
+    //e.printStackTrace();
     ByteArrayOutputStream ba = new ByteArrayOutputStream();
     PrintStream w;
     try {
@@ -363,15 +362,15 @@ class WebLoggerImpl implements WebLoggerIf {
       w.flush();
       w.close();
       log(ba.toString("UTF-8"));
-    } catch (UnsupportedEncodingException e1) {
+    } catch (UnsupportedEncodingException ignored) {
       // error if it ever occurs
       throw new IllegalStateException("unable to specify UTF-8 Charset!");
     } catch (IOException e1) {
-      e1.printStackTrace();
+      Log.e(TAG, Log.getStackTraceString(e1), e1);
     }
   }
 
-  private class LoggingFileObserver extends FileObserver {
+  private final class LoggingFileObserver extends FileObserver {
 
     private LoggingFileObserver(String path) {
       super(path, FileObserver.DELETE_SELF | FileObserver.MOVE_SELF);
@@ -386,8 +385,8 @@ class WebLoggerImpl implements WebLoggerIf {
           }
           WebLoggerImpl.this.logFile.close();
         } catch (IOException e) {
-          e.printStackTrace();
-          Log.w("WebLogger", "detected delete or move of logging directory -- shutting down");
+          Log.e(TAG, Log.getStackTraceString(e), e);
+          Log.w(TAG, "detected delete or move of logging directory -- shutting down");
         }
         WebLoggerImpl.this.logFile = null;
       }

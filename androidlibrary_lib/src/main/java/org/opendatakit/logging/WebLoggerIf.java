@@ -78,6 +78,7 @@ public interface WebLoggerIf {
   void a(String t, String logMsg);
 
   void t(String t, String logMsg);
+  @SuppressWarnings("unused")
   void v(String t, String logMsg);
   void d(String t, String logMsg);
   void i(String t, String logMsg);
@@ -90,7 +91,9 @@ public interface WebLoggerIf {
   /**
    * Set the minimum log level for logging to the system log.
    *
-   * @param level
+   * This is actually totally unused
+   *
+   * @param level the lowest level to log
     */
   void setMinimumSystemLogLevel(int level);
 

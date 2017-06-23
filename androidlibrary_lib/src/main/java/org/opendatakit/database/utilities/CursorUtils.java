@@ -17,56 +17,124 @@ package org.opendatakit.database.utilities;
 
 import android.annotation.SuppressLint;
 import android.database.Cursor;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class CursorUtils {
+/**
+ * Used all over the place, FormInfo, IntitializationUtil, FormsProvider, CsvUtil, etc..
+ */
+public final class CursorUtils {
 
   /**
    * values that can be returned from getTableHealth()
+   * These first three are used in several places
    */
-  public static final int TABLE_HEALTH_IS_CLEAN = 0;
-  public static final int TABLE_HEALTH_HAS_CONFLICTS = 1;
-  public static final int TABLE_HEALTH_HAS_CHECKPOINTS = 2;
-  public static final int TABLE_HEALTH_HAS_CHANGES = 4;
+  @SuppressWarnings("WeakerAccess")
+  public static final int TABLE_HEALTH_IS_CLEAN = 0b000;
+  @SuppressWarnings("WeakerAccess")
+  public static final int TABLE_HEALTH_HAS_CONFLICTS = 0b001;
+  @SuppressWarnings("WeakerAccess")
+  public static final int TABLE_HEALTH_HAS_CHECKPOINTS = 0b010;
+  /**
+   * This isn't used anywhere
+   */
+  public static final int TABLE_HEALTH_HAS_CHANGES = 0b100;
 
   public static final String DEFAULT_LOCALE = "default";
   public static final String DEFAULT_CREATOR = "anonymous";
 
+  /**
+   * Do not instantiate this class
+   */
+  private CursorUtils() {
+  }
+
+  /**
+   * Used in ODKDatabaseImplUtils
+   *
+   * @param health the table health
+   * @return whether the table has conflicts
+   */
+  @SuppressWarnings("unused")
   public static int setTableHealthHasConflicts(int health) {
     return health | TABLE_HEALTH_HAS_CONFLICTS;
   }
 
+  /**
+   * Used in ODKDatabaseImplUtils
+   *
+   * @param health the table health
+   * @return whether the table has checkpoints
+   */
+  @SuppressWarnings("unused")
   public static int setTableHealthHasCheckpoints(int health) {
     return health | TABLE_HEALTH_HAS_CHECKPOINTS;
   }
 
+  /**
+   * Used in ODKDatabaseImplUtils
+   *
+   * @param health the table health
+   * @return whether the table has changes
+   */
+  @SuppressWarnings("unused")
   public static int setTableHealthHasChanges(int health) {
     return health | TABLE_HEALTH_HAS_CHANGES;
   }
 
+  /**
+   * This is totally unused
+   *
+   * @param health the table's health
+   * @return whether the table is clean
+   */
   public static boolean getTableHealthIsClean(int health) {
-    return (health == TABLE_HEALTH_IS_CLEAN);
+    return health == TABLE_HEALTH_IS_CLEAN;
   }
 
+  /**
+   * This is totally unused
+   *
+   * @param health the health of the table
+   * @return whether the table has either conflicts or checkpoints
+   */
   public static boolean getTableHealthHasConflictsOrCheckpoints(int health) {
     return getTableHealthHasConflicts(health) || getTableHealthHasCheckpoints(health);
   }
 
+  /**
+   * Used by OdkDatabaseServiceImpl, FetchInConflictTableIdsLoader
+   *
+   * @param health the health of the table
+   * @return whether the table has conflicts
+   */
+  @SuppressWarnings("WeakerAccess")
   public static boolean getTableHealthHasConflicts(int health) {
     return (health & TABLE_HEALTH_HAS_CONFLICTS) != 0;
   }
 
+  /**
+   * Used by OdkDatabaseServiceImpl
+   *
+   * @param health the health of the table
+   * @return whether the table has checkpoints
+   */
+  @SuppressWarnings("WeakerAccess")
   public static boolean getTableHealthHasCheckpoints(int health) {
     return (health & TABLE_HEALTH_HAS_CHECKPOINTS) != 0;
   }
 
+  /**
+   * Used by OdkDatabaseServiceImpl
+   *
+   * @param health the health of the table
+   * @return whether the table has changes
+   */
+  @SuppressWarnings("unused")
   public static boolean getTableHealthHasChanges(int health) {
     return (health & TABLE_HEALTH_HAS_CHANGES) != 0;
   }
@@ -76,12 +144,15 @@ public class CursorUtils {
    * (ie the given row which the cursor is currently on) as null OR a String.
    * <p>
    * NB: Currently only checks for Strings, long, int, and double.
+   * <p>
+   * Used in many places
    *
-   * @param c
-   * @param i
-   * @return
+   * @param c the cursor
+   * @param i the index into the cursors result
+   * @return the data at that index as a string
    */
   @SuppressLint("NewApi")
+  @SuppressWarnings("unused")
   public static String getIndexAsString(Cursor c, int i) {
     // If you add additional return types here be sure to modify the javadoc.
     if (i == -1)
@@ -93,16 +164,14 @@ public class CursorUtils {
     case Cursor.FIELD_TYPE_STRING:
       return c.getString(i);
     case Cursor.FIELD_TYPE_FLOAT: {
-       // the static version of this seems to have problems...
-       Double d = c.getDouble(i);
-       String v = d.toString();
-       return v;
+      // the static version of this seems to have problems...
+      Double d = c.getDouble(i);
+      return d.toString();
     }
     case Cursor.FIELD_TYPE_INTEGER: {
-       // the static version of this seems to have problems...
-       Long l = c.getLong(i);
-       String v = l.toString();
-       return v;
+      // the static version of this seems to have problems...
+      Long l = c.getLong(i);
+      return l.toString();
     }
     default:
       // all the possible values are enumerated. Nothing should fall here.
@@ -115,11 +184,13 @@ public class CursorUtils {
 
   /**
    * Retrieve the data type of the [i] field in the Cursor.
-   * 
-   * @param c
-   * @param i
-   * @return
+   * Used by FormsProvider, CursorUtils, ODKDatabaseImplUtils
+   *
+   * @param c the cursor
+   * @param i the index into the result in the cursor
+   * @return A class that the cell can be safely casted to
    */
+  @SuppressWarnings("unused")
   public static Class<?> getIndexDataType(Cursor c, int i) {
     switch (c.getType(i)) {
     case Cursor.FIELD_TYPE_STRING:
@@ -146,13 +217,15 @@ public class CursorUtils {
    * Instead, it safely preserves null values and returns boxed data values. If
    * you specify ArrayList or HashMap, it JSON deserializes the value into one
    * of those.
+   * Used in FormInfo, CursorUtils, ODKDatabaseImplUtils, SubmissionProvider, FormsProvider,
+   * FormIdStruct
    *
-   * @param c
-   * @param clazz
-   * @param i
-   * @return
+   * @param c     the database cursor
+   * @param clazz a class to deserialize to
+   * @param i     the index into the cursor's result
+   * @return the element at index i in the cursors result, casted to class clazz
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked unused")
   public static <T> T getIndexAsType(Cursor c, Class<T> clazz, int i) {
     // If you add additional return types here be sure to modify the javadoc.
     try {
@@ -188,22 +261,12 @@ public class CursorUtils {
       } else {
         throw new IllegalStateException("Unexpected data type in SQLite table");
       }
-    } catch (ClassCastException e) {
-      e.printStackTrace();
-      throw new IllegalStateException("Unexpected data type conversion failure " + e.toString()
-          + " in SQLite table ");
-    } catch (JsonParseException e) {
-      e.printStackTrace();
-      throw new IllegalStateException("Unexpected data type conversion failure " + e.toString()
-          + " on SQLite table");
-    } catch (JsonMappingException e) {
-      e.printStackTrace();
-      throw new IllegalStateException("Unexpected data type conversion failure " + e.toString()
-          + " on SQLite table");
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new IllegalStateException("Unexpected data type conversion failure " + e.toString()
-          + " on SQLite table");
+    } catch (ClassCastException | IOException e) {
+      // JsonParseException and JsonMappingException both subclass IOException
+      WebLogger.getLogger(null).printStackTrace(e);
+      throw new IllegalStateException(
+          "Unexpected data type conversion failure " + e + " in SQLite table");
     }
   }
 }
+

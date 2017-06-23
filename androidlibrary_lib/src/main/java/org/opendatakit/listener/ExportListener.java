@@ -21,6 +21,4 @@ package org.opendatakit.listener;
 public interface ExportListener {
   void updateProgressDetail(int progressDetailString);
 
-  // No need to suppress the unused warning here, this is actually totally unused
-  void exportComplete(boolean outcome);
 }

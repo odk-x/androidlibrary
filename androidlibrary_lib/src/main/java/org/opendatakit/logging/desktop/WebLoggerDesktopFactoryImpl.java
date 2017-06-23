@@ -31,10 +31,7 @@ import java.util.logging.Logger;
 @SuppressLint("NewApi")
 public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
 
-  public class WebLoggerDesktopImpl implements WebLoggerIf {
-
-    public WebLoggerDesktopImpl() {
-    }
+  private class WebLoggerDesktopImpl implements WebLoggerIf {
 
     public void staleFileScan(long now) {
      // no-op
@@ -95,8 +92,7 @@ public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
   }
 
   public synchronized WebLoggerIf createWebLogger(String appName) {
-    WebLoggerIf logger = new WebLoggerDesktopImpl();
-    return logger;
+    return new WebLoggerDesktopImpl();
   }
 
 }

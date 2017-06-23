@@ -27,7 +27,7 @@ import java.util.Map;
  *
  * @author mitchellsundt@gmail.com
  */
-public class WebLogger {
+public final class WebLogger {
   static final long MILLISECONDS_DAY = 86400000L;
   private static final Map<String, WebLoggerIf> loggers = new HashMap<>();
   private static long lastStaleScan = 0L;
@@ -48,6 +48,12 @@ public class WebLogger {
     });
   }
 
+  /**
+   * Do not instantiate this class
+   */
+  private WebLogger() {
+  }
+
   public static void setFactory(WebLoggerFactoryIf webLoggerFactoryImpl) {
     webLoggerFactory = webLoggerFactoryImpl;
   }
@@ -66,7 +72,7 @@ public class WebLogger {
     return getLogger(appNameOfThread);
   }
 
-  public synchronized static WebLoggerIf getLogger(String appName) {
+  public static synchronized WebLoggerIf getLogger(String appName) {
     if (appName == null) {
       // create a one-off logger to handle this case
       // factory will create a logger that doesn't care

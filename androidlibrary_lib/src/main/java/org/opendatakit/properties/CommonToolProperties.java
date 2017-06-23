@@ -26,7 +26,7 @@ import java.util.TreeMap;
 public final class CommonToolProperties {
 
   /**
-   * Used in CommonToolProperties, TableUtil
+   * Used in TableUtil
    */
   @SuppressWarnings("WeakerAccess")
   public static final int DEFAULT_FONT_SIZE = 16;
@@ -37,34 +37,43 @@ public final class CommonToolProperties {
   @SuppressWarnings("unused")
   public static final String ANONYMOUS_USER = "anonymous";
 
-
   // TODO finish linting this file
 
   /*******************
    * Garbage 'properties' to control PreferencesCategories and PreferencesScreens
+   * Used in AdminPasswordSettingsFragment, ServerSettingsFragment
    */
+  @SuppressWarnings("unused")
   public static final String GROUPING_PASSWORD_SCREEN = "group.common.password_screen";
 
+  /**
+   * Used in DeviceSettingsFragment
+   */
+  @SuppressWarnings("unused")
   public static final String GROUPING_DEVICE_CATEGORY = "group.common.device";
 
+  /**
+   * Used in ServerSettingsFragment
+   */
+  @SuppressWarnings("unused")
   public static final String GROUPING_SERVER_CATEGORY = "group.common.server";
 
+  /**
+   * Used in TablesSettingsFragment
+   */
+  @SuppressWarnings("unused")
   public static final String GROUPING_TOOL_TABLES_CATEGORY = "group.common.tables";
 
-  public static final String GROUPING_TOOL_SURVEY_CATEGORY = "group.common.survey";
-
-  public static final String GROUPING_TOOL_SCAN_CATEGORY = "group.common.scan";
-
-  public static final String GROUPING_TOOL_SENSORS_CATEGORY = "group.common.sensors";
-
-  /*******************
-   * General Settings
-   */
+  //******************
+  // General Settings
 
   // server identity
   /**
    * ODK 2.0 server URL
+   * Used in SyncExecutionContext, SyncFragment, VerifyServerSettingsFragment,
+   * InstanceUploaderTask, LoginFragment, ServerSettingsFragment
    */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_SYNC_SERVER_URL = "common.sync_server_url";
 
   public static final String KEY_AUTHENTICATION_TYPE = "common.auth_credentials";
@@ -76,70 +85,102 @@ public final class CommonToolProperties {
   public static final String KEY_ACCOUNT = "common.account";
   /**
    * ODK Aggregate username
+   * Used in VerifyServerSettingsFragment, SyncFragment, LoginFragment, InstanceUploaderTask,
+   * AbsBaseWebActivity, ServerSettingsFragment, SubmissionProvider, MainMenuActivity,
+   * ODKServicesPropertyUtils, SyncExecutionContext, OdkCommon, DoActionUtils
    */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_USERNAME = "common.username";
   /** User id as given by the server. This is the getActiveUser() value */
   public static final String KEY_AUTHENTICATED_USER_ID = "common.userid";
 
   // general settings
 
-  // null if we should use Android system locale
+  /**
+   * null if we should use Android system locale
+   * Used in PropertiesSingleton, CommonTranslationsLocaleScreen, OdkCommon, DeviceSettingsFragment
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_COMMON_TRANSLATIONS_LOCALE = "common.common_translations_locale";
 
   public static final String KEY_FONT_SIZE = "common.font_size";
 
+  /**
+   * Used in SplashScreenActivity, DeviceSettingsFragment
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_SHOW_SPLASH = "common.show_splash";
 
+  /**
+   * Used in DeviceSettingsFragment, SplashScreenActivity
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_SPLASH_PATH = "common.splash_path";
 
-  /////////////////////////////////////////////////////////////
-  // ODK Tables specific
+  /**
+   * ODK Tables specific
+   * Used in MainActivity, TablesSettingsFragment
+   */
+  @SuppressWarnings("unused")
   public static final String KEY_USE_HOME_SCREEN = "tables.custom_home_screen";
 
-  /*******************
-   * Admin Settings 
+  //******************
+  // Admin Settings
+  /**
+   * These four used in ServerSettingsFragment
    */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_CHANGE_SYNC_SERVER = "common.change_sync_server";
-
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_CHANGE_AUTHENTICATION_TYPE = "common.change_auth_credentials";
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_CHANGE_GOOGLE_ACCOUNT = "common.change_google_account";
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_CHANGE_USERNAME_PASSWORD = "common.change_username_password";
 
+  /**
+   * These two used in DeviceSettingsFragment
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_CHANGE_FONT_SIZE = "common.change_font_size";
-
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_CHANGE_SPLASH_SETTINGS = "common.change_splash_settings";
 
+  /**
+   * Used in TablesSettingsFragment
+   */
+  @SuppressWarnings("unused")
   public static final String KEY_CHANGE_USE_HOME_SCREEN = "tables.change_custom_home_screen";
 
-  /***********************************************************************
-   * Secure properties (always move into appName-secure location).
-   * e.g., authentication codes and passwords.
-   */
+  //**********************************************************************
+  // Secure properties (always move into appName-secure location).
+  // e.g., authentication codes and passwords.
 
-  /*******************
-   * General Settings
-   */
+  ////////////////////
+  // General Settings
 
   /**
    * gmail account OAuth 2.0 token
+   * These five are used all over the place, LoginActivity, SyncFragment, SyncExecutionContext,
+   * etc..
    */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_AUTH = "common.auth";
-  /**
-   * ODK Aggregate password
-   */
-  public static final String KEY_PASSWORD = "common.password";
   /**
    * Roles that the user is known to have. JSON encoded list of strings
    */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_ROLES_LIST = "common.roles";
   /**
    * Default group of the current user.
    */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_DEFAULT_GROUP = "common.default_group";
   /**
    * List of all users and their roles on the server.
    * JSON encoded list of { "user_id": "...", "full_name": "...", "roles": ["...","...",...]}
    */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_USERS_LIST = "common.users";
   /**
    *  Unique code for this installation. Cleared only via device's app settings
@@ -148,8 +189,17 @@ public final class CommonToolProperties {
   /**
    *  Admin Settings password
    */
+  @SuppressWarnings("WeakerAccess")
   public static final String KEY_ADMIN_PW = "common.admin_pw";
+
   private static CommonPropertiesSingletonFactory factory = null;
+  /**
+   * ODK Aggregate password
+   * Used in VerifyServerSettingsFragment, SyncFragment, InstanceUploaderTask,
+   * ServerSettingsFragment, LoginFragment, SyncExecutionContext
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static final String KEY_PASSWORD = "common.password";
 
   static {
     // register a state-reset manipulator for 'commonPropertiesSingletonFactory' field.
@@ -245,6 +295,13 @@ public final class CommonToolProperties {
     return factory.getSingleton(context, appName);
   }
 
+  /**
+   * Used in AndroidShortcuts, CommonToolProperties, ODKWebView
+   * @param context the context to get properties from
+   * @param appName the app name
+   * @return the font size to use
+   */
+  @SuppressWarnings("unused")
   public static int getQuestionFontsize(Context context, String appName) {
     PropertiesSingleton props = CommonToolProperties.get(context, appName);
     Integer question_font = props.getIntegerProperty(CommonToolProperties.KEY_FONT_SIZE);
