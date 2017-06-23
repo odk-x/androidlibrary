@@ -16,6 +16,7 @@
 package org.opendatakit.utilities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.opendatakit.logging.WebLogger;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
  *
  * @author sudar.sam@gmail.com
  */
-public class NameUtil {
+public final class NameUtil {
 
   /**
    * Because Android content provider internals do not quote the
@@ -88,12 +89,18 @@ public class NameUtil {
   }
 
   /**
+   * Do not instantiate this class
+   */
+  private NameUtil() {
+  }
+
+  /**
    * Determines whether or not the given name is valid for a user-defined
    * entity in the database. Valid names are determined to not begin with a
    * single underscore, not to begin with a digit, and to contain only unicode
    * appropriate word characters.
    *
-   * @param name
+   * @param name The string to be looked up in the list of definitely not allowed words
    * @return true if valid else false
    */
   public static boolean isValidUserDefinedDatabaseName(String name) {
@@ -101,28 +108,49 @@ public class NameUtil {
     // TODO: uppercase is bad...
     boolean reserveHit =
         Collections.binarySearch(reservedNamesSortedList, name.toUpperCase(Locale.US)) >= 0;
-    return (!reserveHit && matchHit);
+    return !reserveHit && matchHit;
   }
 
+  /**
+   * Used in ColumnUtil, TableUtil, FormsProvider, OdkResolveConflictRowLoader,
+   * ODkResolveConflictFieldLoader, OdkResolveCheckpointRowLoader,
+   * OdkResolveCheckpointFieldLoader and SyncExecutionContext
+   *
+   * @param name a name that might have underscores
+   * @return A suitable display name given the passed string
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String constructSimpleDisplayName(String name) {
     String displayName = name.replaceAll("_", " ");
     if (displayName.startsWith(" ")) {
       displayName = "_" + displayName;
     }
     if (displayName.endsWith(" ")) {
-      displayName = displayName + "_";
+      displayName += "_";
     }
     Map<String, Object> displayEntry = new HashMap<>();
     displayEntry.put("text", displayName);
     try {
       return ODKFileUtils.mapper.writeValueAsString(displayEntry);
     } catch (JsonProcessingException e) {
-      e.printStackTrace();
+      WebLogger.getContextLogger().printStackTrace(e);
       throw new IllegalStateException("constructSimpleDisplayName: " + displayName);
     }
   }
 
+  /**
+   * Used in MediaCaptureVideoActivity, MediaCaptureImageActivity, MediaDeleteAudioActivity,
+   * MediaChooseAudioActivity, MediaCaptureAudioActivity, MediaChooseImageActivity,
+   * DeviceSettingsFragment, MediaDeleteImageActivity, MediaChooseVideoActivity,
+   * MediaDeleteVideoActivity
+   *
+   * @param displayName a display name to normalize
+   * @return a normalized version of that display name
+   */
+  @SuppressWarnings("WeakerAccess")
   public static String normalizeDisplayName(String displayName) {
+    // TODO this seems backwards
+    //noinspection UnnecessaryParentheses
     if ((displayName.startsWith("\"") && displayName.endsWith("\"")) || (displayName.startsWith("{")
         && displayName.endsWith("}"))) {
       return displayName;
@@ -130,7 +158,7 @@ public class NameUtil {
       try {
         return ODKFileUtils.mapper.writeValueAsString(displayName);
       } catch (JsonProcessingException e) {
-        e.printStackTrace();
+        WebLogger.getContextLogger().printStackTrace(e);
         throw new IllegalArgumentException(
             "normalizeDisplayName: Invalid displayName " + displayName);
       }

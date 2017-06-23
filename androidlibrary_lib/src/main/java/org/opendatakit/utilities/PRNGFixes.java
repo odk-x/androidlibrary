@@ -13,6 +13,7 @@ package org.opendatakit.utilities;
 import android.os.Build;
 import android.os.Process;
 import android.util.Log;
+import net.jcip.annotations.GuardedBy;
 
 import java.io.*;
 import java.security.*;
@@ -53,16 +54,20 @@ public final class PRNGFixes {
    * @throws SecurityException if the fix is needed but could not be applied.
    */
   private static void applyOpenSSLFix() throws SecurityException {
-    if ((Build.VERSION.SDK_INT < VERSION_CODE_JELLY_BEAN) || (Build.VERSION.SDK_INT
-        > VERSION_CODE_JELLY_BEAN_MR2)) {
+    if (Build.VERSION.SDK_INT < VERSION_CODE_JELLY_BEAN
+        || Build.VERSION.SDK_INT > VERSION_CODE_JELLY_BEAN_MR2) {
       // No need to apply the fix
       return;
     }
 
     try {
       // Mix in the device- and invocation-specific seed.
+      byte[] seed = generateSeed();
+      Object[] args = new Object[seed.length + 1];
+      System.arraycopy(seed, 0, args, 1, seed.length);
+      args[0] = null;
       Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
-          .getMethod("RAND_seed", byte[].class).invoke(null, generateSeed());
+          .getMethod("RAND_seed", byte[].class).invoke(args);
 
       // Mix output of Linux PRNG into OpenSSL's PRNG
       int bytesRead = (Integer) Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
@@ -91,8 +96,8 @@ public final class PRNGFixes {
     // Install a Linux PRNG-based SecureRandom implementation as the
     // default, if not yet installed.
     Provider[] secureRandomProviders = Security.getProviders("SecureRandom.SHA1PRNG");
-    if ((secureRandomProviders == null) || (secureRandomProviders.length < 1)
-        || (!LinuxPRNGSecureRandomProvider.class.equals(secureRandomProviders[0].getClass()))) {
+    if (secureRandomProviders == null || secureRandomProviders.length < 1
+        || !LinuxPRNGSecureRandomProvider.class.equals(secureRandomProviders[0].getClass())) {
       Security.insertProviderAt(new LinuxPRNGSecureRandomProvider(), 1);
     }
 
@@ -165,7 +170,7 @@ public final class PRNGFixes {
     }
     try {
       return result.toString().getBytes("UTF-8");
-    } catch (UnsupportedEncodingException e) {
+    } catch (UnsupportedEncodingException ignored) {
       throw new RuntimeException("UTF-8 encoding not supported");
     }
   }
@@ -213,17 +218,15 @@ public final class PRNGFixes {
     /**
      * Input stream for reading from Linux PRNG or {@code null} if not yet
      * opened.
-     *
-     * @GuardedBy("urandomMutex")
      */
+    @GuardedBy("urandomMutex")
     private static DataInputStream sUrandomIn;
 
     /**
      * Output stream for writing to Linux PRNG or {@code null} if not yet
      * opened.
-     *
-     * @GuardedBy("urandomMutex")
      */
+    @GuardedBy("urandomMutex")
     private static OutputStream sUrandomOut;
 
     /**
@@ -242,7 +245,7 @@ public final class PRNGFixes {
         }
         out.write(bytes);
         out.flush();
-      } catch (IOException e) {
+      } catch (IOException ignored) {
         // On a small fraction of devices /dev/urandom is not writable.
         // Log and ignore.
         Log.w(PRNGFixes.class.getSimpleName(), "Failed to mix seed into " + URANDOM_FILE);

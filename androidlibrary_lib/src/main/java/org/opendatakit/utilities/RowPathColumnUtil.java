@@ -19,16 +19,12 @@ import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.database.data.ColumnDefinition;
 import org.opendatakit.database.data.OrderedColumns;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-class RowPathColumnUtil {
+final class RowPathColumnUtil {
 
   private static RowPathColumnUtil rowPathColumnUtil = new RowPathColumnUtil();
-  
+
   static {
     // register a state-reset manipulator for 'rowPathColumnUtil' field.
     StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {
@@ -37,8 +33,11 @@ class RowPathColumnUtil {
       public void reset() {
         rowPathColumnUtil = new RowPathColumnUtil();
       }
-      
+
     });
+  }
+
+  private RowPathColumnUtil() {
   }
 
   public static RowPathColumnUtil get() {
@@ -47,43 +46,39 @@ class RowPathColumnUtil {
 
   /**
    * For mocking -- supply a mocked object.
-   * 
-   * @param util
+   *
+   * @param util the object to set the RowPathColumnUtil to
    */
   public static void set(RowPathColumnUtil util) {
     rowPathColumnUtil = util;
   }
 
-  private RowPathColumnUtil() {
-  }
-
   /**
    * Return the element groups that define a uriFragment of type rowpath
    * and a contentType. Whatever these are named, they are media attachment groups.
-   * 
-   * @return
+   *
+   * @param orderedDefns A list of definitions to be put into the result list
+   * @return a list of the column definitions given an OrderedColumns object
    */
   List<ColumnDefinition> getUriColumnDefinitions(OrderedColumns orderedDefns) {
-    
+
     Set<ColumnDefinition> uriFragmentList = new HashSet<>();
     Set<ColumnDefinition> contentTypeList = new HashSet<>();
-    
-    for (ColumnDefinition cd : orderedDefns.getColumnDefinitions() ) {
+
+    for (ColumnDefinition cd : orderedDefns.getColumnDefinitions()) {
       ColumnDefinition cdParent = cd.getParent();
-      
-      if ( cd.getElementName().equals("uriFragment") && 
-          cd.getType().getDataType() == ElementDataType.rowpath &&
-              cdParent != null ) {
+
+      if ("uriFragment".equals(cd.getElementName())
+          && cd.getType().getDataType() == ElementDataType.rowpath && cdParent != null) {
         uriFragmentList.add(cdParent);
       }
-      if ( cd.getElementName().equals("contentType") &&
-          cd.getType().getDataType() == ElementDataType.string &&
-          cdParent != null ) {
+      if ("contentType".equals(cd.getElementName())
+          && cd.getType().getDataType() == ElementDataType.string && cdParent != null) {
         contentTypeList.add(cdParent);
       }
     }
     uriFragmentList.retainAll(contentTypeList);
-    
+
     List<ColumnDefinition> cdList = new ArrayList<>(uriFragmentList);
     Collections.sort(cdList);
     return cdList;

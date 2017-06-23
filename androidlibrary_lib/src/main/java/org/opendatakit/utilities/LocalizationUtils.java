@@ -16,43 +16,49 @@
 package org.opendatakit.utilities;
 
 import android.os.Build;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import org.apache.commons.io.Charsets;
+import org.opendatakit.logging.WebLogger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-public class LocalizationUtils {
-
-  public static String genUUID() {
-    return "uuid:" + UUID.randomUUID().toString();
-  }
+public final class LocalizationUtils {
 
   private static String savedAppName;
   private static Map<String, Object> commonDefinitions;
   private static Map<String, Map<String, Object>> tableSpecificDefinitionsMap = new HashMap<>();
+  private LocalizationUtils() {
+  }
+
+  public static String genUUID() {
+    return "uuid:" + UUID.randomUUID();
+  }
 
   /**
    * Used in CommonApplication
    */
-  public synchronized static void clearTranslations() {
+  @SuppressWarnings("WeakerAccess")
+  public static synchronized void clearTranslations() {
     commonDefinitions = null;
     tableSpecificDefinitionsMap.clear();
   }
 
-  private synchronized static void loadTranslations(String appName, String tableId)
+  private static synchronized void loadTranslations(String appName, String tableId)
       throws IOException {
-    if ( savedAppName != null && !savedAppName.equals(appName) ) {
+    if (savedAppName != null && !savedAppName.equals(appName)) {
       clearTranslations();
     }
     savedAppName = appName;
-    TypeReference<HashMap<String,Object>> ref = new TypeReference<HashMap<String,Object>>() {};
-    if ( commonDefinitions == null ) {
+    TypeReference<HashMap<String, Object>> ref = new TypeReference<HashMap<String, Object>>() {
+    };
+    if (commonDefinitions == null) {
       File commonFile = new File(ODKFileUtils.getCommonDefinitionsFile(appName));
-      if ( commonFile.exists() && commonFile.isFile() ) {
+      if (commonFile.exists() && commonFile.isFile()) {
         InputStream stream = null;
         BufferedReader reader = null;
         String value;
@@ -64,28 +70,28 @@ public class LocalizationUtils {
             reader = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
           }
           int ch = reader.read();
-          while ( ch != -1 && ch != '{') {
+          while (ch != -1 && ch != '{') {
             ch = reader.read();
           }
 
           StringBuilder b = new StringBuilder();
-          b.append((char)ch);
+          b.append((char) ch);
           ch = reader.read();
-          while ( ch != -1) {
-            b.append((char)ch);
+          while (ch != -1) {
+            b.append((char) ch);
             ch = reader.read();
           }
           reader.close();
           stream.close();
           value = b.toString().trim();
-          if ( value.endsWith(";") ) {
-            value = value.substring(0, value.length()-1 ).trim();
+          if (value.endsWith(";")) {
+            value = value.substring(0, value.length() - 1).trim();
           }
 
         } finally {
-          if ( reader != null ) {
+          if (reader != null) {
             reader.close();
-          } else if ( stream != null ) {
+          } else if (stream != null) {
             stream.close();
           }
         }
@@ -93,13 +99,13 @@ public class LocalizationUtils {
         try {
           commonDefinitions = ODKFileUtils.mapper.readValue(value, ref);
         } catch (IOException e) {
-          e.printStackTrace();
+          WebLogger.getLogger(appName).printStackTrace(e);
           throw new IllegalStateException("Unable to read commonDefinitions.js file");
         }
       }
     }
 
-    if ( tableId != null) {
+    if (tableId != null) {
       File tableFile = new File(ODKFileUtils.getTableSpecificDefinitionsFile(appName, tableId));
       if (!tableFile.exists()) {
         tableSpecificDefinitionsMap.remove(tableId);
@@ -124,7 +130,8 @@ public class LocalizationUtils {
             ch = reader.read();
           }
           reader.reset();
-          Map<String, Object> tableSpecificTranslations = ODKFileUtils.mapper.readValue(reader, ref);
+          Map<String, Object> tableSpecificTranslations = ODKFileUtils.mapper
+              .readValue(reader, ref);
           if (tableSpecificTranslations != null) {
             tableSpecificDefinitionsMap.put(tableId, tableSpecificTranslations);
           }
@@ -141,18 +148,20 @@ public class LocalizationUtils {
 
   /**
    * Used in commonTranslationLocaleScreen
+   *
    * @param appName the app name
    * @return a list of locales provided by that app
    * @throws IOException if the file couldn't be opened
    */
+  @SuppressWarnings("unused")
   public static List<Map<String, Object>> getCommonLocales(String appName) throws IOException {
-    if ( commonDefinitions == null ) {
+    if (commonDefinitions == null) {
       loadTranslations(appName, null);
     }
 
-    if ( commonDefinitions != null && commonDefinitions.containsKey("_locales")) {
+    if (commonDefinitions != null && commonDefinitions.containsKey("_locales")) {
       Map<String, Object> localesObject = (Map<String, Object>) commonDefinitions.get("_locales");
-      if ( localesObject != null && localesObject.containsKey("value")) {
+      if (localesObject != null && localesObject.containsKey("value")) {
         return (List<Map<String, Object>>) localesObject.get("value");
       }
     }
@@ -161,54 +170,53 @@ public class LocalizationUtils {
 
   /**
    * Used in commonTranslationLocaleScreen
+   *
    * @param appName the app name
    * @return a list of locales provided by that app
    * @throws IOException if the file couldn't be opened
    */
-  public static String getCommonLocaleDefault(String appName) throws
-      IOException {
-    if ( commonDefinitions == null ) {
+  @SuppressWarnings("unused")
+  public static String getCommonLocaleDefault(String appName) throws IOException {
+    if (commonDefinitions == null) {
       loadTranslations(appName, null);
     }
 
-    if ( commonDefinitions != null && commonDefinitions.containsKey("_default_locale")) {
-      Map<String,Object> default_locale =  (Map<String, Object>) commonDefinitions.get("_default_locale");
+    if (commonDefinitions != null && commonDefinitions.containsKey("_default_locale")) {
+      Map<String, Object> default_locale = (Map<String, Object>) commonDefinitions
+          .get("_default_locale");
       String value = (String) default_locale.get("value");
-      if ( value != null && value.length() != 0 ) {
+      if (value != null && !value.isEmpty()) {
         return value;
       }
     }
     return "default";
   }
 
-  private synchronized static Map<String, Object> resolveTranslation(String appName,
-          String tableId, String translationToken) throws IOException  {
-    if ( appName == null ) {
+  private static synchronized Map<String, Object> resolveTranslation(String appName, String tableId,
+      String translationToken) throws IOException {
+    if (appName == null) {
       throw new IllegalArgumentException("appName cannot be null");
     }
-    if ( tableId == null ) {
+    if (tableId == null) {
       throw new IllegalArgumentException("tableId cannot be null");
     }
-    if ( translationToken == null ) {
+    if (translationToken == null) {
       throw new IllegalArgumentException("translationToken cannot be null");
     }
-    if ( savedAppName == null || !savedAppName.equals(appName) ) {
+    if (savedAppName == null || !savedAppName.equals(appName)) {
       clearTranslations();
     }
-    if ( commonDefinitions == null ||
-        (tableId != null && !tableSpecificDefinitionsMap.containsKey(tableId)) ) {
+    if (commonDefinitions == null || !tableSpecificDefinitionsMap.containsKey(tableId)) {
       loadTranslations(appName, tableId);
     }
 
-    Map<String, Object>  value = null;
-    if ( tableId != null) {
-      Map<String, Object> tableSpecificDefinitions = tableSpecificDefinitionsMap.get(tableId);
-      if (tableSpecificDefinitions != null) {
-        Map<String, Object> tokens = (Map<String, Object>) tableSpecificDefinitions.get("_tokens");
-        value = (Map<String, Object>) tokens.get(translationToken);
-      }
+    Map<String, Object> value = null;
+    Map<String, Object> tableSpecificDefinitions = tableSpecificDefinitionsMap.get(tableId);
+    if (tableSpecificDefinitions != null) {
+      Map<String, Object> tokens = (Map<String, Object>) tableSpecificDefinitions.get("_tokens");
+      value = (Map<String, Object>) tokens.get(translationToken);
     }
-    if ( commonDefinitions != null && value == null ) {
+    if (commonDefinitions != null && value == null) {
       Map<String, Object> tokens = (Map<String, Object>) commonDefinitions.get("_tokens");
       value = (Map<String, Object>) tokens.get(translationToken);
     }
@@ -218,58 +226,58 @@ public class LocalizationUtils {
   /**
    * Retrieve a translation from the localizationMap. The map might be for text, image,
    * audio, etc. entries.
-   *
+   * <p>
    * If localizationMap is a string, return it as-is, otherwise, it should be a
    * Map<String,Object> with locale as the key and value as the internationalized string.
-   *
+   * <p>
    * full_locale is assumed to be of the form: language + "_" + country, with language not
    * containing an underscore. It first tries exact-case match of full_locale then tries for
    * case-insensitive matching of full_locale and then of just language. And if none of these
    * are present, returns the default translation or null if none is available.
    *
    * @param localizationMap a map of locale IDs to translations
-   * @param full_locale the locale to get the translation for
+   * @param full_locale     the locale to get the translation for
    * @return null or the translation string.
    */
-  public static String processLocalizationMap( Object localizationMap, String full_locale) {
-    if ( localizationMap == null ) {
+  private static String processLocalizationMap(Object localizationMap, String full_locale) {
+    if (localizationMap == null) {
       throw new IllegalStateException("null localizationMap");
     }
 
-    if ( localizationMap instanceof String ) {
+    if (localizationMap instanceof String) {
       return (String) localizationMap;
     }
 
     Map<String, Object> aMap = (Map<String, Object>) localizationMap;
 
     int underscore = full_locale.indexOf('_');
-    String lang_only_locale = (underscore <= 0) ? null : full_locale.substring(0, underscore);
+    String lang_only_locale = underscore <= 0 ? null : full_locale.substring(0, underscore);
 
     String langOnlyMatch = null;
     String defaultMatch = null;
 
-    if ( aMap.containsKey(full_locale) ) {
+    if (aMap.containsKey(full_locale)) {
       return (String) aMap.get(full_locale);
     }
 
     // otherwise, do a case-independent compare to find a match
     // and also consider language-only comparisons and, finally
     // retrieve the default translation.
-    for (Map.Entry<String, Object> entry : aMap.entrySet() ) {
+    for (Map.Entry<String, Object> entry : aMap.entrySet()) {
       String key = entry.getKey();
-      if ( key.compareToIgnoreCase(full_locale) == 0 ) {
+      if (key.compareToIgnoreCase(full_locale) == 0) {
         return (String) entry.getValue();
       }
-      if ( lang_only_locale != null && key.compareToIgnoreCase(lang_only_locale) == 0 ) {
+      if (lang_only_locale != null && key.compareToIgnoreCase(lang_only_locale) == 0) {
         langOnlyMatch = (String) entry.getValue();
       }
 
-      if ( key.compareToIgnoreCase("default") == 0 ) {
+      if (key.compareToIgnoreCase("default") == 0) {
         defaultMatch = (String) entry.getValue();
       }
     }
 
-    if ( langOnlyMatch != null ) {
+    if (langOnlyMatch != null) {
       return langOnlyMatch;
     }
 
@@ -278,19 +286,23 @@ public class LocalizationUtils {
 
   /**
    * displayName is a JSON serialization of either an i18n token or of a Map&lt;String,Object&gt;.
-   *
+   * <p>
    * full_locale is assumed to be of the form: language + "_" + country, with language not
    * containing an underscore. It first tries exact-case match of full_locale then tries for
    * case-insensitive matching of full_locale and then of just language. And if none of these
    * are present, returns the default translation or null if none is available.
    *
-   * @param appName
-   * @param tableId
-   * @param full_locale
-   * @param displayName
-   * @return
+   * Used all over the place
+   *
+   * @param appName the app name
+   * @param tableId the table id to get the display name for
+   * @param full_locale the locale to use to decode the display name
+   * @param displayName the raw display name json from the properties
+   * @return a display name in the requested locale, if available
    */
-  public static String getLocalizedDisplayName(String appName, String tableId, String full_locale, String displayName) {
+  @SuppressWarnings("WeakerAccess")
+  public static String getLocalizedDisplayName(String appName, String tableId, String full_locale,
+      String displayName) {
 
     // retrieve the localeMap from the JSON string stored in this field.
     // this JSON serialization will either be a string that is a translationToken
@@ -302,39 +314,32 @@ public class LocalizationUtils {
       try {
         translationToken = ODKFileUtils.mapper.readValue(displayName, String.class);
       } catch (IOException e) {
-        e.printStackTrace();
+        WebLogger.getLogger(appName).printStackTrace(e);
         throw new IllegalStateException("bad displayName: " + displayName);
       }
       try {
         localizationMap = resolveTranslation(appName, tableId, translationToken);
       } catch (IOException e) {
-        e.printStackTrace();
+        WebLogger.getLogger(appName).printStackTrace(e);
         throw new IllegalStateException(
             "unable to retrieve display localization from string " + "token: " + translationToken);
       }
-      if ( localizationMap == null ) {
+      if (localizationMap == null) {
         throw new IllegalStateException(
-            "no translations found for translation token: " +
-                translationToken);
+            "no translations found for translation token: " + translationToken);
       }
     } else {
       TypeReference<Map<String, Object>> ref = new TypeReference<Map<String, Object>>() {
       };
       try {
         localizationMap = ODKFileUtils.mapper.readValue(displayName, ref);
-      } catch (JsonParseException e) {
-        e.printStackTrace();
-        throw new IllegalStateException("bad displayName: " + displayName);
-      } catch (JsonMappingException e) {
-        e.printStackTrace();
-        throw new IllegalStateException("bad displayName: " + displayName);
       } catch (IOException e) {
-        e.printStackTrace();
+        WebLogger.getLogger(appName).printStackTrace(e);
         throw new IllegalStateException("bad displayName: " + displayName);
       }
     }
 
-    if ( localizationMap == null ) {
+    if (localizationMap == null) {
       throw new IllegalStateException(
           "bad displayName (no localization map found): " + displayName);
     }
@@ -342,7 +347,7 @@ public class LocalizationUtils {
     // the localization has "text", "image", etc. keys.
     // pull out the text entry.
     Object textEntry = localizationMap.get("text");
-    if ( textEntry == null ) {
+    if (textEntry == null) {
       throw new IllegalStateException("no text entry for displayname: " + displayName);
     }
 
@@ -353,25 +358,27 @@ public class LocalizationUtils {
    * candidateLocalizationMap may either be an i18n token or a Map&lt;String,Object&gt;.
    * If the former, then it is resolved into a map via the common or table-specific
    * translations.
-   *
+   * <p>
    * The internationalization for the full_locale is then retrieved from this map.
-   *
+   * <p>
    * full_locale is assumed to be of the form: language + "_" + country, with language not
    * containing an underscore. It first tries exact-case match of full_locale then tries for
    * case-insensitive matching of full_locale and then of just language. And if none of these
    * are present, returns the default translation or null if none is available.
-   *
+   * <p>
    * Used in CommonTranslationsLocaleScreen
    *
-   * @param appName
-   * @param tableId
-   * @param full_locale  -- of the form    language + "_" + country
-   * @param candidateLocalizationMap
-   * @return
+   * @param appName the app name
+   * @param tableId the table id, used to get a localization map using an i18n token
+   * @param full_locale of the form language + "_" + country
+   * @param candidateLocalizationMap a map from locales to localized strings or an i18n token
+   * @return the localized string
    */
+  @SuppressWarnings("unused")
   public static String getLocalizationFromMap(String appName, String tableId, String full_locale,
-      Object candidateLocalizationMap ) {
+      Object candidateLocalizationMap) {
 
+    //noinspection UnusedAssignment
     Map<String, Object> localizationMap = null;
 
     if (candidateLocalizationMap == null) {
@@ -386,7 +393,7 @@ public class LocalizationUtils {
       try {
         localizationMap = resolveTranslation(appName, tableId, translationToken);
       } catch (IOException e) {
-        e.printStackTrace();
+        WebLogger.getLogger(appName).printStackTrace(e);
         throw new IllegalStateException(
             "unable to retrieve display localization from string " + "token: " + translationToken);
       }

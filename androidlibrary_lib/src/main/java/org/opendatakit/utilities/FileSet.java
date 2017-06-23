@@ -14,7 +14,6 @@
 
 package org.opendatakit.utilities;
 
-import android.content.Context;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -29,25 +28,55 @@ import java.util.Map;
 
 /**
  * Holds the files required for a submission to the ODK Aggregate legacy interface
+ * Used in SubmissionProvider, InstanceUploaderTask, EncryptionUtils
  *
  * @author mitchellsundt@gmail.com
  */
+@SuppressWarnings("WeakerAccess")
 public class FileSet {
   private static final String APPLICATION_XML = "application/xml";
   private static final String URI_FRAGMENT = "uriFragment";
   private static final String CONTENT_TYPE = "contentType";
-  public File instanceFile = null;
   public final String appName;
-
-  public static final class MimeFile {
-    public File file;
-    public String contentType;
-  }
-
+  public File instanceFile = null;
   public ArrayList<MimeFile> attachmentFiles = new ArrayList<>();
 
   public FileSet(String appName) {
     this.appName = appName;
+  }
+
+  public static FileSet parse(String appName, InputStream src) {
+    CollectionType javaType = ODKFileUtils.mapper.getTypeFactory()
+        .constructCollectionType(ArrayList.class, Map.class);
+    ArrayList<Map> mapArrayList = null;
+    try {
+      mapArrayList = ODKFileUtils.mapper.readValue(src, javaType);
+    } catch (JsonParseException e) {
+      WebLogger.getLogger(appName)
+          .e("FileSet", "parse: problem parsing json list entry from the fileSet");
+      WebLogger.getLogger(appName).printStackTrace(e);
+    } catch (JsonMappingException e) {
+      WebLogger.getLogger(appName)
+          .e("FileSet", "parse: problem mapping json list entry from the fileSet");
+      WebLogger.getLogger(appName).printStackTrace(e);
+    } catch (IOException e) {
+      WebLogger.getLogger(appName)
+          .e("FileSet", "parse: i/o problem with json for list entry from the fileSet");
+      WebLogger.getLogger(appName).printStackTrace(e);
+    }
+
+    FileSet fs = new FileSet(appName);
+    String instanceRelativePath = (String) mapArrayList.get(0).get(URI_FRAGMENT);
+    fs.instanceFile = ODKFileUtils.getAsFile(appName, instanceRelativePath);
+    for (int i = 1; i < mapArrayList.size(); ++i) {
+      String relativePath = (String) mapArrayList.get(i).get(URI_FRAGMENT);
+      String contentType = (String) mapArrayList.get(i).get(CONTENT_TYPE);
+      MimeFile f = new MimeFile();
+      f.file = ODKFileUtils.getAsFile(appName, relativePath);
+      f.contentType = contentType;
+      fs.attachmentFiles.add(f);
+    }
+    return fs;
   }
 
   public void addAttachmentFile(File file, String contentType) {
@@ -75,38 +104,9 @@ public class FileSet {
     return ODKFileUtils.mapper.writeValueAsString(str);
   }
 
-  public static FileSet parse(String appName, InputStream src) throws IOException {
-    CollectionType javaType =
-        ODKFileUtils.mapper.getTypeFactory().constructCollectionType(ArrayList.class, Map.class);
-    ArrayList<Map> mapArrayList = null;
-    try {
-      mapArrayList = ODKFileUtils.mapper.readValue(src, javaType);
-    } catch (JsonParseException e) {
-      WebLogger.getLogger(appName).e("FileSet",
-          "parse: problem parsing json list entry from the fileSet");
-      WebLogger.getLogger(appName).printStackTrace(e);
-    } catch (JsonMappingException e) {
-      WebLogger.getLogger(appName).e("FileSet",
-          "parse: problem mapping json list entry from the fileSet");
-      WebLogger.getLogger(appName).printStackTrace(e);
-    } catch (IOException e) {
-      WebLogger.getLogger(appName).e("FileSet",
-          "parse: i/o problem with json for list entry from the fileSet");
-      WebLogger.getLogger(appName).printStackTrace(e);
-    }
-
-    FileSet fs = new FileSet(appName);
-    String instanceRelativePath = (String) mapArrayList.get(0).get(URI_FRAGMENT);
-    fs.instanceFile = ODKFileUtils.getAsFile(appName, instanceRelativePath);
-    for (int i = 1; i < mapArrayList.size(); ++i) {
-      String relativePath = (String) mapArrayList.get(i).get(URI_FRAGMENT);
-      String contentType = (String) mapArrayList.get(i).get(CONTENT_TYPE);
-      MimeFile f = new MimeFile();
-      f.file = ODKFileUtils.getAsFile(appName, relativePath);
-      f.contentType = contentType;
-      fs.attachmentFiles.add(f);
-    }
-    return fs;
+  public static final class MimeFile {
+    public File file;
+    public String contentType;
   }
 
 }
