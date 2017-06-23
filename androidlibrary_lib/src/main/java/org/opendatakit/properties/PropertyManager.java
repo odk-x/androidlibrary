@@ -18,7 +18,6 @@ import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -53,14 +52,8 @@ public class PropertyManager {
   private final HashMap<String, String> mProperties;
 
   public final static String DEVICE_ID_PROPERTY = "deviceid"; // imei
-  public final static String SUBSCRIBER_ID_PROPERTY = "subscriberid"; // imsi
-  public final static String SIM_SERIAL_PROPERTY = "simserial";
-  public final static String PHONE_NUMBER_PROPERTY = "phonenumber";
 
   public final static String OR_DEVICE_ID_PROPERTY = "uri:deviceid"; // imei
-  public final static String OR_SUBSCRIBER_ID_PROPERTY = "uri:subscriberid"; // imsi
-  public final static String OR_SIM_SERIAL_PROPERTY = "uri:simserial";
-  public final static String OR_PHONE_NUMBER_PROPERTY = "uri:phonenumber";
 
   /**
    * These properties are dynamic and accessed through the
@@ -94,21 +87,8 @@ public class PropertyManager {
   public PropertyManager(Context context) {
 
     mProperties = new HashMap<String, String>();
-
-    TelephonyManager mTelephonyManager = (TelephonyManager) context
-        .getSystemService(Context.TELEPHONY_SERVICE);
-
-    String deviceId = mTelephonyManager.getDeviceId();
     String orDeviceId = null;
-    if (deviceId != null) {
-      if ((deviceId.contains("*") || deviceId.contains("000000000000000"))) {
-        deviceId = Settings.Secure.getString(context.getContentResolver(),
-            Settings.Secure.ANDROID_ID);
-        orDeviceId = Settings.Secure.ANDROID_ID + ":" + deviceId;
-      } else {
-        orDeviceId = "imei:" + deviceId;
-      }
-    }
+    String deviceId = null;
 
     if (deviceId == null) {
       // no SIM -- WiFi only
@@ -137,22 +117,6 @@ public class PropertyManager {
     mProperties.put(OR_DEVICE_ID_PROPERTY, orDeviceId);
 
     String value;
-
-    value = mTelephonyManager.getSubscriberId();
-    if (value != null) {
-      mProperties.put(SUBSCRIBER_ID_PROPERTY, value);
-      mProperties.put(OR_SUBSCRIBER_ID_PROPERTY, "imsi:" + value);
-    }
-    value = mTelephonyManager.getSimSerialNumber();
-    if (value != null) {
-      mProperties.put(SIM_SERIAL_PROPERTY, value);
-      mProperties.put(OR_SIM_SERIAL_PROPERTY, "simserial:" + value);
-    }
-    value = mTelephonyManager.getLine1Number();
-    if (value != null) {
-      mProperties.put(PHONE_NUMBER_PROPERTY, value);
-      mProperties.put(OR_PHONE_NUMBER_PROPERTY, "tel:" + value);
-    }
   }
 
   public String getSingularProperty(String rawPropertyName, DynamicPropertiesInterface callback) {
