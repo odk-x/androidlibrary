@@ -141,9 +141,13 @@ public final class CommonToolProperties {
    * JSON encoded list of { "user_id": "...", "full_name": "...", "roles": ["...","...",...]}
    */
   public static final String KEY_USERS_LIST = "common.users";
-  /** Unique code for this installation. Cleared only via device's app settings */
+  /**
+   *  Unique code for this installation. Cleared only via device's app settings
+   */
   public static final String KEY_INSTALLATION_ID = "common.installationId";
-  /** Admin Settings password */
+  /**
+   *  Admin Settings password
+   */
   public static final String KEY_ADMIN_PW = "common.admin_pw";
   private static CommonPropertiesSingletonFactory factory = null;
 

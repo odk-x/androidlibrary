@@ -35,18 +35,14 @@ public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
   private final String instanceId;
   private final String activeUser;
   private final String locale;
-  private final String username;
-  private final String userEmail;
 
   public DynamicPropertiesCallback(String appName, String tableId, String instanceId,
-      String activeUser, String locale, String username, String userEmail) {
+      String activeUser, String locale) {
     this.appName = appName;
     this.tableId = tableId;
     this.instanceId = instanceId;
     this.activeUser = activeUser;
     this.locale = locale;
-    this.username = username;
-    this.userEmail = userEmail;
   }
 
   @Override
@@ -61,18 +57,6 @@ public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
   public String getLocale() {
     // Get the locale in use
     return locale;
-  }
-
-  @Override
-  public String getUsername() {
-    // Get the user name
-    return username;
-  }
-
-  @Override
-  public String getUserEmail() {
-    // Get the user email
-    return userEmail;
   }
 
   @Override
