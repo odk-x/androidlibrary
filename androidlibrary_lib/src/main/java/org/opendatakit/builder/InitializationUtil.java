@@ -43,13 +43,13 @@ import java.util.zip.ZipInputStream;
  */
 public class InitializationUtil {
 
-  private static final String TAG = "InitializationUtil";
+  private static final String TAG = InitializationUtil.class.getSimpleName();
 
   private Context appContext;
   private InitializationSupervisor supervisor;
   private String appName;
-  private String displayTablesProgress;
-  private String tableIdInProgress;
+  private String displayTablesProgress = null;
+  private String tableIdInProgress = null;
 
   public InitializationUtil(Context appContext, String appName,
       InitializationSupervisor supervisor) {
@@ -148,7 +148,7 @@ public class InitializationUtil {
             zipInputStream.close();
           } catch (IOException e) {
             WebLogger.getLogger(appName).printStackTrace(e);
-            WebLogger.getLogger(appName).e(TAG, "Closing of ZipFile failed: " + e.toString());
+            WebLogger.getLogger(appName).e(TAG, "Closing of ZipFile failed: " + e);
           }
         }
       }
@@ -211,21 +211,24 @@ public class InitializationUtil {
           int bufferSize = 8192;
           OutputStream out = new BufferedOutputStream(new FileOutputStream(tempFile, false),
               bufferSize);
-          byte buffer[] = new byte[bufferSize];
-          int bread;
-          while ((bread = zipInputStream.read(buffer)) != -1) {
-            bytesProcessed += bread;
-            long curThousands = (bytesProcessed / 1000L);
-            if (curThousands != lastBytesProcessedThousands) {
-              detail = appContext
-                  .getString(R.string.expansion_unzipping_detail, bytesProcessed, indexIntoZip);
-              getSupervisor().publishProgress(formattedString, detail);
-              lastBytesProcessedThousands = curThousands;
+          try {
+            byte buffer[] = new byte[bufferSize];
+            int bread;
+            while ((bread = zipInputStream.read(buffer)) != -1) {
+              bytesProcessed += bread;
+              long curThousands = bytesProcessed / 1000L;
+              if (curThousands != lastBytesProcessedThousands) {
+                detail = appContext
+                    .getString(R.string.expansion_unzipping_detail, bytesProcessed, indexIntoZip);
+                getSupervisor().publishProgress(formattedString, detail);
+                lastBytesProcessedThousands = curThousands;
+              }
+              out.write(buffer, 0, bread);
             }
-            out.write(buffer, 0, bread);
+          } finally {
+            out.flush();
+            out.close();
           }
-          out.flush();
-          out.close();
 
           detail = appContext
               .getString(R.string.expansion_unzipping_detail, bytesProcessed, indexIntoZip);
