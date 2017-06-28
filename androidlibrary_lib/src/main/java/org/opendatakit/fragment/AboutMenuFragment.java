@@ -14,7 +14,6 @@
 
 package org.opendatakit.fragment;
 
-import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,49 +25,50 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.opendatakit.androidlibrary.R;
+import net.jcip.annotations.GuardedBy;
 import org.opendatakit.activities.IAppAwareActivity;
+import org.opendatakit.androidlibrary.R;
 import org.opendatakit.application.ToolAwareApplication;
 import org.opendatakit.listener.LicenseReaderListener;
+import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.task.LicenseReaderTask;
-import org.opendatakit.logging.WebLogger;
 
 /**
  * Used in ConflictResolutionActivity, CheckpointResolutionActivity,
  * AllConflictsResolutionActivity, MainMenuActivity, SyncBaseActivity, MainActivity, SyncActivity
  */
 @SuppressWarnings("unused")
-public class AboutMenuFragment extends Fragment implements LicenseReaderListener {
-  private static final String TAG = AboutMenuFragment.class.getSimpleName();
-
+public class AboutMenuFragment extends AbsBaseAndroidLibraryFragment
+    implements LicenseReaderListener {
   public static final String NAME = "About";
   public static final int ID = R.layout.about_menu_layout;
+  private static final String TAG = AboutMenuFragment.class.getSimpleName();
   /**
    * Key for savedInstanceState
    */
   private static final String LICENSE_TEXT = "LICENSE_TEXT";
-
+  private static final Object lrtMutex = new Object();
   /**
    * The license reader task. Once this completes, we never re-run it.
    */
+  @GuardedBy("lrtMutex")
   private static LicenseReaderTask licenseReaderTask = null;
-
   private TextView mTextView;
-  
+
   /**
    * retained value...
    */
   private String mLicenseText = null;
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+      Bundle savedInstanceState) {
 
     View aboutMenuView = inflater.inflate(ID, container, false);
 
     TextView versionBox = (TextView) aboutMenuView.findViewById(R.id.versionText);
-    versionBox.setText(((ToolAwareApplication) getActivity().getApplication()).getVersionedToolName());
+    versionBox.setText(getToolApplication().getVersionedToolName());
 
     {
       IAppAwareActivity appAwareActivity = (IAppAwareActivity) getActivity();
@@ -109,7 +109,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     if (savedInstanceState != null && savedInstanceState.containsKey(LICENSE_TEXT)) {
       mLicenseText = savedInstanceState.getString(LICENSE_TEXT);
       Spanned html;
-      if (Build.VERSION.SDK_INT >= 24) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         html = Html.fromHtml(mLicenseText, Html.FROM_HTML_MODE_LEGACY);
       } else {
         //noinspection deprecation
@@ -137,7 +137,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
       // Read license file successfully
       mLicenseText = result;
       Spanned html;
-      if (Build.VERSION.SDK_INT >= 24) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         html = Html.fromHtml(result, Html.FROM_HTML_MODE_LEGACY);
       } else {
         //noinspection deprecation
@@ -151,34 +151,38 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     }
   }
 
-  private synchronized void readLicenseFile() {
+  private void readLicenseFile() {
     IAppAwareActivity activity = (IAppAwareActivity) getActivity();
     String appName = activity.getAppName();
-
-    if ( licenseReaderTask == null ) {
-      LicenseReaderTask lrt = new LicenseReaderTask();
-      lrt.setApplication((ToolAwareApplication) getActivity().getApplication());
-      lrt.setAppName(appName);
-      lrt.setLicenseReaderListener(this);
-      licenseReaderTask = lrt;
-      licenseReaderTask.execute();
-    } else {
-      // update listener
-      licenseReaderTask.setLicenseReaderListener(this);
-      if (licenseReaderTask.getStatus() != AsyncTask.Status.FINISHED) {
-        Toast.makeText(getActivity(), getString(R.string.still_reading_license_file), Toast.LENGTH_LONG)
-            .show();
+    synchronized (lrtMutex) {
+      if (licenseReaderTask == null) {
+        LicenseReaderTask lrt = new LicenseReaderTask();
+        lrt.setApplication((ToolAwareApplication) getActivity().getApplication());
+        lrt.setAppName(appName);
+        lrt.setLicenseReaderListener(this);
+        licenseReaderTask = lrt;
+        licenseReaderTask.execute();
       } else {
-        // it is already done -- grab the result and display it.
-        licenseReaderTask.setLicenseReaderListener(null);
-        this.readLicenseComplete(licenseReaderTask.getResult());
+        // update listener
+        licenseReaderTask.setLicenseReaderListener(this);
+        if (licenseReaderTask.getStatus() != AsyncTask.Status.FINISHED) {
+          Toast.makeText(getActivity(), getString(R.string.still_reading_license_file),
+              Toast.LENGTH_LONG).show();
+        } else {
+          // it is already done -- grab the result and display it.
+          licenseReaderTask.setLicenseReaderListener(null);
+          this.readLicenseComplete(licenseReaderTask.getResult());
+        }
       }
     }
   }
 
-  @Override public void onDestroy() {
-    if ( licenseReaderTask != null ) {
-      licenseReaderTask.clearLicenseReaderListener(null);
+  @Override
+  public void onDestroy() {
+    synchronized (lrtMutex) {
+      if (licenseReaderTask != null) {
+        licenseReaderTask.clearLicenseReaderListener(null);
+      }
     }
     super.onDestroy();
   }

@@ -14,10 +14,7 @@
 
 package org.opendatakit.fragment;
 
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.ProgressDialog;
+import android.app.*;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
@@ -51,8 +48,8 @@ public class ProgressDialogFragment extends DialogFragment {
    * Updates the message on the dialog
    * @param message the new mssage
    */
-  public void setMessage(String message) {
-    ((ProgressDialog) this.getDialog()).setMessage(message);
+  public void setMessage(CharSequence message) {
+    ((AlertDialog) this.getDialog()).setMessage(message);
   }
 
   /**
@@ -87,10 +84,10 @@ public class ProgressDialogFragment extends DialogFragment {
         // user to dismiss the dialog by showing them the button. Otherwise, the client code will
         // dismiss the dialog, so don't let the user do it and hide the button
         if (f instanceof CancelProgressDialog) {
-          ((ProgressDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
+          ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
               .setVisibility(View.VISIBLE);
         } else {
-          ((ProgressDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
+          ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
               .setVisibility(View.GONE);
         }
 
