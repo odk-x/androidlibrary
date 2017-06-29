@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.BaseColumns;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
@@ -69,7 +70,7 @@ public final class MediaUtils {
   public static Uri getImageUriFromMediaProvider(Context context, String imageFile) {
     String selection = Images.ImageColumns.DATA + "=?";
     String[] selectArgs = { imageFile };
-    String[] projection = { Images.ImageColumns._ID };
+    String[] projection = { BaseColumns._ID };
     Cursor c = null;
     try {
       c = context.getContentResolver()
@@ -77,7 +78,7 @@ public final class MediaUtils {
               selection, selectArgs, null);
       if (c != null && c.getCount() > 0) {
         c.moveToFirst();
-        String id = CursorUtils.getIndexAsString(c, c.getColumnIndex(Images.ImageColumns._ID));
+        String id = CursorUtils.getIndexAsString(c, c.getColumnIndex(BaseColumns._ID));
 
         return Uri
             .withAppendedPath(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
@@ -103,7 +104,7 @@ public final class MediaUtils {
       String select = Images.Media.DATA + "=?";
       String[] selectArgs = { imageFile };
 
-      String[] projection = { Images.ImageColumns._ID };
+      String[] projection = { BaseColumns._ID };
       imageCursor = cr
           .query(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, select,
               selectArgs, null);
@@ -112,7 +113,7 @@ public final class MediaUtils {
         List<Uri> imagesToDelete = new ArrayList<>();
         do {
           String id = CursorUtils
-              .getIndexAsString(imageCursor, imageCursor.getColumnIndex(Images.ImageColumns._ID));
+              .getIndexAsString(imageCursor, imageCursor.getColumnIndex(BaseColumns._ID));
 
           imagesToDelete.add(
               Uri.withAppendedPath(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -153,7 +154,7 @@ public final class MediaUtils {
       String select = Images.Media.DATA + " like ? escape '!'";
       String[] selectArgs = { escapePath(folder.getAbsolutePath()) };
 
-      String[] projection = { Images.ImageColumns._ID };
+      String[] projection = { BaseColumns._ID };
       imageCursor = cr
           .query(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, select,
               selectArgs, null);
@@ -162,7 +163,7 @@ public final class MediaUtils {
         List<Uri> imagesToDelete = new ArrayList<>();
         do {
           String id = CursorUtils
-              .getIndexAsString(imageCursor, imageCursor.getColumnIndex(Images.ImageColumns._ID));
+              .getIndexAsString(imageCursor, imageCursor.getColumnIndex(BaseColumns._ID));
 
           imagesToDelete.add(
               Uri.withAppendedPath(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -187,7 +188,7 @@ public final class MediaUtils {
   public static Uri getAudioUriFromMediaProvider(Context ctxt, String audioFile) {
     String selection = Audio.AudioColumns.DATA + "=?";
     String[] selectArgs = { audioFile };
-    String[] projection = { Audio.AudioColumns._ID };
+    String[] projection = { BaseColumns._ID };
     Cursor c = null;
     try {
       c = ctxt.getContentResolver()
@@ -195,7 +196,7 @@ public final class MediaUtils {
               selection, selectArgs, null);
       if (c != null && c.getCount() > 0) {
         c.moveToFirst();
-        String id = CursorUtils.getIndexAsString(c, c.getColumnIndex(Audio.AudioColumns._ID));
+        String id = CursorUtils.getIndexAsString(c, c.getColumnIndex(BaseColumns._ID));
 
         return Uri
             .withAppendedPath(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
@@ -221,7 +222,7 @@ public final class MediaUtils {
       String select = Audio.Media.DATA + "=?";
       String[] selectArgs = { audioFile };
 
-      String[] projection = { Audio.AudioColumns._ID };
+      String[] projection = { BaseColumns._ID };
       audioCursor = cr
           .query(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, select,
               selectArgs, null);
@@ -230,7 +231,7 @@ public final class MediaUtils {
         List<Uri> audioToDelete = new ArrayList<>();
         do {
           String id = CursorUtils
-              .getIndexAsString(audioCursor, audioCursor.getColumnIndex(Audio.AudioColumns._ID));
+              .getIndexAsString(audioCursor, audioCursor.getColumnIndex(BaseColumns._ID));
 
           audioToDelete.add(
               Uri.withAppendedPath(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -271,7 +272,7 @@ public final class MediaUtils {
       String select = Audio.Media.DATA + " like ? escape '!'";
       String[] selectArgs = { escapePath(folder.getAbsolutePath()) };
 
-      String[] projection = { Audio.AudioColumns._ID };
+      String[] projection = { BaseColumns._ID };
       audioCursor = cr
           .query(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, select,
               selectArgs, null);
@@ -280,7 +281,7 @@ public final class MediaUtils {
         List<Uri> audioToDelete = new ArrayList<>();
         do {
           String id = CursorUtils
-              .getIndexAsString(audioCursor, audioCursor.getColumnIndex(Audio.AudioColumns._ID));
+              .getIndexAsString(audioCursor, audioCursor.getColumnIndex(BaseColumns._ID));
 
           audioToDelete.add(
               Uri.withAppendedPath(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -305,7 +306,7 @@ public final class MediaUtils {
   public static Uri getVideoUriFromMediaProvider(Context ctxt, String videoFile) {
     String selection = Video.VideoColumns.DATA + "=?";
     String[] selectArgs = { videoFile };
-    String[] projection = { Video.VideoColumns._ID };
+    String[] projection = { BaseColumns._ID };
     Cursor c = null;
     try {
       c = ctxt.getContentResolver()
@@ -313,7 +314,7 @@ public final class MediaUtils {
               selection, selectArgs, null);
       if (c != null && c.getCount() > 0) {
         c.moveToFirst();
-        String id = CursorUtils.getIndexAsString(c, c.getColumnIndex(Video.VideoColumns._ID));
+        String id = CursorUtils.getIndexAsString(c, c.getColumnIndex(BaseColumns._ID));
 
         return Uri
             .withAppendedPath(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
@@ -339,7 +340,7 @@ public final class MediaUtils {
       String select = Video.Media.DATA + "=?";
       String[] selectArgs = { videoFile };
 
-      String[] projection = { Video.VideoColumns._ID };
+      String[] projection = { BaseColumns._ID };
       videoCursor = cr
           .query(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, select,
               selectArgs, null);
@@ -348,7 +349,7 @@ public final class MediaUtils {
         List<Uri> videoToDelete = new ArrayList<>();
         do {
           String id = CursorUtils
-              .getIndexAsString(videoCursor, videoCursor.getColumnIndex(Video.VideoColumns._ID));
+              .getIndexAsString(videoCursor, videoCursor.getColumnIndex(BaseColumns._ID));
 
           videoToDelete.add(
               Uri.withAppendedPath(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
@@ -389,7 +390,7 @@ public final class MediaUtils {
       String select = Video.Media.DATA + " like ? escape '!'";
       String[] selectArgs = { escapePath(folder.getAbsolutePath()) };
 
-      String[] projection = { Video.VideoColumns._ID };
+      String[] projection = { BaseColumns._ID };
       videoCursor = cr
           .query(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, select,
               selectArgs, null);
@@ -398,7 +399,7 @@ public final class MediaUtils {
         List<Uri> videoToDelete = new ArrayList<>();
         do {
           String id = CursorUtils
-              .getIndexAsString(videoCursor, videoCursor.getColumnIndex(Video.VideoColumns._ID));
+              .getIndexAsString(videoCursor, videoCursor.getColumnIndex(BaseColumns._ID));
 
           videoToDelete.add(
               Uri.withAppendedPath(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
