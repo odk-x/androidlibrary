@@ -46,25 +46,26 @@ public final class NameUtil {
    */
   private static final ArrayList<String> reservedNamesSortedList;
 
+  /**
+   * This pattern does not support (?U) (UNICODE_CHARACTER_CLASS)
+   */
   private static final Pattern letterFirstPattern;
+  private static final Pattern UNDERSCORE = Pattern.compile("_");
 
   static {
-    /**
-     * This pattern does not support (?U) (UNICODE_CHARACTER_CLASS)
-     */
     letterFirstPattern = Pattern
         .compile("^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)*$", Pattern.UNICODE_CASE);
 
     ArrayList<String> reservedNames = new ArrayList<>();
 
-    /**
+    /*
      * ODK Metadata reserved names
      */
     reservedNames.addAll(Arrays
         .asList("ROW_ETAG", "SYNC_STATE", "CONFLICT_TYPE", "SAVEPOINT_TIMESTAMP",
             "SAVEPOINT_CREATOR", "SAVEPOINT_TYPE", "DEFAULT_ACCESS", "ROW_OWNER", "GROUP_READ_ONLY",
             "GROUP_MODIFY", "GROUP_PRIVILEGED", "FORM_ID", "LOCALE"));
-    /**
+    /*
      * SQLite keywords ( http://www.sqlite.org/lang_keywords.html )
      */
     reservedNames.addAll(Arrays
@@ -120,8 +121,8 @@ public final class NameUtil {
    * @return A suitable display name given the passed string
    */
   @SuppressWarnings("WeakerAccess")
-  public static String constructSimpleDisplayName(String name) {
-    String displayName = name.replaceAll("_", " ");
+  public static String constructSimpleDisplayName(CharSequence name) {
+    String displayName = UNDERSCORE.matcher(name).replaceAll(" ");
     if (displayName.startsWith(" ")) {
       displayName = "_" + displayName;
     }

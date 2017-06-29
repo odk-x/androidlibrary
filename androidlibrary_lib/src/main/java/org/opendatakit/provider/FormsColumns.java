@@ -24,7 +24,7 @@ import java.util.List;
  * <p>
  * Tracks what forms are available in the ODK Survey forms directory.
  */
-public final class FormsColumns implements BaseColumns {
+public final class FormsColumns {
   /**
    * Used in FormsProvider
    */
@@ -118,7 +118,7 @@ public final class FormsColumns implements BaseColumns {
   public static String getTableCreateSql(String tableName) {
     //@formatter:off
     return "CREATE TABLE IF NOT EXISTS " + tableName + " ("
-           + _ID + " integer not null primary key, " // for Google...
+           + BaseColumns._ID + " integer not null primary key, " // for Google...
            + TABLE_ID + " text not null, " // PK part 1
            + FORM_ID + " text not null, "  // PK part 2
            + SETTINGS + " text not null, "

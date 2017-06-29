@@ -30,7 +30,7 @@ import android.provider.BaseColumns;
  * Used in ODKDatabaseImplUtils and ChoiceListUtils
  */
 @SuppressWarnings("unused")
-public final class ChoiceListColumns implements BaseColumns {
+public final class ChoiceListColumns {
 
   /**
    * Used in ChoiceListUtils
@@ -57,7 +57,7 @@ public final class ChoiceListColumns implements BaseColumns {
   public static String getTableCreateSql(String tableName) {
     //@formatter:off
     return "CREATE TABLE IF NOT EXISTS " + tableName + " ("
-        + _ID + " integer primary key, "
+        + BaseColumns._ID + " integer primary key, "
         + CHOICE_LIST_ID + " TEXT NOT NULL, "
         + CHOICE_LIST_JSON + " TEXT NOT NULL)";
     //@formatter:on
