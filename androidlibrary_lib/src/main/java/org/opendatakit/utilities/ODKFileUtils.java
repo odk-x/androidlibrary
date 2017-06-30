@@ -864,7 +864,7 @@ public final class ODKFileUtils {
    * @param tableId the id of the table to find the instances folder for
    * @return :app_name/data/tables/:table_id/instances
    */
-  public static String getInstancesFolder(String appName, String tableId) {
+  public static synchronized String getInstancesFolder(String appName, String tableId) {
     String path;
     path = getTableDataFolder(appName) + File.separator + tableId + File.separator
         + INSTANCES_FOLDER_NAME;
@@ -893,7 +893,7 @@ public final class ODKFileUtils {
    * @param instanceId the instance id
    * @return :app_name/data/tables/:table_id/instances/:instance_id
    */
-  public static String getInstanceFolder(String appName, String tableId, String instanceId) {
+  public static synchronized String getInstanceFolder(String appName, String tableId, String instanceId) {
     String path;
     String instanceFolder = safeInstanceIdFolderName(instanceId);
 
