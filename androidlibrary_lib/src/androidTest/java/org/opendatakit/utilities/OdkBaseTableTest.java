@@ -15,8 +15,11 @@
 package org.opendatakit.utilities;
 
 import android.os.Parcel;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.BaseTable;
 import org.opendatakit.logging.WebLogger;
@@ -24,7 +27,11 @@ import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 
 import java.io.IOException;
 
-public class OdkBaseTableTest extends AndroidTestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+@RunWith(AndroidJUnit4.class)
+public class OdkBaseTableTest {
 
   /* Test data */
   private static final String COLUMN1 = "firstCol";
@@ -57,13 +64,13 @@ public class OdkBaseTableTest extends AndroidTestCase {
   private static final String[] ORDERBYELEM = null;
   private static final String[] ORDERBYDIR = null;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
 
+  @Test
   public void testOdkTableParcelation() throws IOException {
 
     /*

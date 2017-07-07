@@ -17,11 +17,22 @@ package org.opendatakit.provider;
 
 import android.net.Uri;
 
-public class TablesProviderAPI {
+/**
+ * Used in AndroidShortcuts and Launcher (both Tables) + TablesProvider (services)
+ */
+@SuppressWarnings("unused")
+public final class TablesProviderAPI {
+  /**
+   * Used in services TablesProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String AUTHORITY = "org.opendatakit.provider.tables";
+  @SuppressWarnings("unused")
   public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/");
 
-  // This class cannot be instantiated
+  /**
+   * This class cannot be instantiated
+   */
   private TablesProviderAPI() {
   }
 

@@ -14,9 +14,6 @@
 
 package org.opendatakit.utilities;
 
-import android.content.Context;
-
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -30,73 +27,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Holds the files required for a submission to the ODK Aggregate legacy
- * interface
+ * Holds the files required for a submission to the ODK Aggregate legacy interface
+ * Used in SubmissionProvider, InstanceUploaderTask, EncryptionUtils
  *
  * @author mitchellsundt@gmail.com
  */
+@SuppressWarnings("WeakerAccess")
 public class FileSet {
   private static final String APPLICATION_XML = "application/xml";
   private static final String URI_FRAGMENT = "uriFragment";
   private static final String CONTENT_TYPE = "contentType";
-  public File instanceFile = null;
   public final String appName;
-
-  public static final class MimeFile {
-    public File file;
-    public String contentType;
-  }
-
-  public ArrayList<MimeFile> attachmentFiles = new ArrayList<MimeFile>();
+  public File instanceFile = null;
+  public ArrayList<MimeFile> attachmentFiles = new ArrayList<>();
 
   public FileSet(String appName) {
     this.appName = appName;
   }
 
-  public void addAttachmentFile(File file, String contentType) {
-    MimeFile f = new MimeFile();
-    f.file = file;
-    f.contentType = contentType;
-    attachmentFiles.add(f);
-  }
-
-  public String serializeUriFragmentList(Context context) throws JsonGenerationException, JsonMappingException, IOException {
-    ArrayList<HashMap<String, String>> str = new ArrayList<HashMap<String, String>>();
-
-    HashMap<String, String> map;
-    map = new HashMap<String, String>();
-    map.put(URI_FRAGMENT, ODKFileUtils.asUriFragment(appName, instanceFile));
-    map.put(CONTENT_TYPE, APPLICATION_XML);
-    str.add(map);
-    for (MimeFile f : attachmentFiles) {
-      map = new HashMap<String, String>();
-      map.put(URI_FRAGMENT, ODKFileUtils.asUriFragment(appName, f.file));
-      map.put(CONTENT_TYPE, f.contentType);
-      str.add(map);
-    }
-
-    String serializedString = ODKFileUtils.mapper.writeValueAsString(str);
-    return serializedString;
-  }
-
-  public static FileSet parse(Context context, String appName, InputStream src) throws JsonParseException,
-      JsonMappingException, IOException {
-    CollectionType javaType =
-        ODKFileUtils.mapper.getTypeFactory().constructCollectionType(ArrayList.class, Map.class);
+  public static FileSet parse(String appName, InputStream src) {
+    CollectionType javaType = ODKFileUtils.mapper.getTypeFactory()
+        .constructCollectionType(ArrayList.class, Map.class);
     ArrayList<Map> mapArrayList = null;
     try {
       mapArrayList = ODKFileUtils.mapper.readValue(src, javaType);
     } catch (JsonParseException e) {
-      WebLogger.getLogger(appName).e("FileSet",
-          "parse: problem parsing json list entry from the fileSet");
+      WebLogger.getLogger(appName)
+          .e("FileSet", "parse: problem parsing json list entry from the fileSet");
       WebLogger.getLogger(appName).printStackTrace(e);
     } catch (JsonMappingException e) {
-      WebLogger.getLogger(appName).e("FileSet",
-          "parse: problem mapping json list entry from the fileSet");
+      WebLogger.getLogger(appName)
+          .e("FileSet", "parse: problem mapping json list entry from the fileSet");
       WebLogger.getLogger(appName).printStackTrace(e);
     } catch (IOException e) {
-      WebLogger.getLogger(appName).e("FileSet",
-          "parse: i/o problem with json for list entry from the fileSet");
+      WebLogger.getLogger(appName)
+          .e("FileSet", "parse: i/o problem with json for list entry from the fileSet");
       WebLogger.getLogger(appName).printStackTrace(e);
     }
 
@@ -112,6 +77,36 @@ public class FileSet {
       fs.attachmentFiles.add(f);
     }
     return fs;
+  }
+
+  public void addAttachmentFile(File file, String contentType) {
+    MimeFile f = new MimeFile();
+    f.file = file;
+    f.contentType = contentType;
+    attachmentFiles.add(f);
+  }
+
+  public String serializeUriFragmentList() throws IOException {
+    ArrayList<HashMap<String, String>> str = new ArrayList<>();
+
+    HashMap<String, String> map;
+    map = new HashMap<>();
+    map.put(URI_FRAGMENT, ODKFileUtils.asUriFragment(appName, instanceFile));
+    map.put(CONTENT_TYPE, APPLICATION_XML);
+    str.add(map);
+    for (MimeFile f : attachmentFiles) {
+      map = new HashMap<>();
+      map.put(URI_FRAGMENT, ODKFileUtils.asUriFragment(appName, f.file));
+      map.put(CONTENT_TYPE, f.contentType);
+      str.add(map);
+    }
+
+    return ODKFileUtils.mapper.writeValueAsString(str);
+  }
+
+  public static final class MimeFile {
+    public File file;
+    public String contentType;
   }
 
 }

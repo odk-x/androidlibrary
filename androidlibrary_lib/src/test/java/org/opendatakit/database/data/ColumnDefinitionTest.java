@@ -15,14 +15,15 @@
 package org.opendatakit.database.data;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.utilities.ODKFileUtils;
-import org.opendatakit.utilities.StaticStateManipulator;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
+import org.opendatakit.utilities.ODKFileUtils;
+import org.opendatakit.utilities.StaticStateManipulator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ColumnDefinitionTest {
 
@@ -1112,21 +1115,45 @@ public class ColumnDefinitionTest {
               "\"elementSet\": \"instanceMetadata\"," +
               "\"elementPath\": \"_conflict_type\"" +
               "}," +
-              "\"_filter_type\": {" +
+              "\"_default_access\": {" +
               "\"type\": \"string\"," +
               "\"isNotNullable\": false," +
-              "\"elementKey\": \"_filter_type\"," +
-              "\"elementName\": \"_filter_type\"," +
+              "\"elementKey\": \"_default_access\"," +
+              "\"elementName\": \"_default_access\"," +
               "\"elementSet\": \"instanceMetadata\"," +
-              "\"elementPath\": \"_filter_type\"" +
+              "\"elementPath\": \"_default_access\"" +
               "}," +
-              "\"_filter_value\": {" +
+              "\"_row_owner\": {" +
               "\"type\": \"string\"," +
               "\"isNotNullable\": false," +
-              "\"elementKey\": \"_filter_value\"," +
-              "\"elementName\": \"_filter_value\"," +
+              "\"elementKey\": \"_row_owner\"," +
+              "\"elementName\": \"_row_owner\"," +
               "\"elementSet\": \"instanceMetadata\"," +
-              "\"elementPath\": \"_filter_value\"" +
+              "\"elementPath\": \"_row_owner\"" +
+              "}," +
+              "\"_group_read_only\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_group_read_only\"," +
+              "\"elementName\": \"_group_read_only\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_group_read_only\"" +
+              "}," +
+              "\"_group_modify\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_group_modify\"," +
+              "\"elementName\": \"_group_modify\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_group_modify\"" +
+              "}," +
+              "\"_group_privileged\": {" +
+              "\"type\": \"string\"," +
+              "\"isNotNullable\": false," +
+              "\"elementKey\": \"_group_privileged\"," +
+              "\"elementName\": \"_group_privileged\"," +
+              "\"elementSet\": \"instanceMetadata\"," +
+              "\"elementPath\": \"_group_privileged\"" +
               "}," +
               "\"_form_id\": {" +
               "\"type\": \"string\"," +
@@ -1229,11 +1256,23 @@ public class ColumnDefinitionTest {
                metaCount++;
                assertEquals(value.get("type"), "integer");
                assertEquals(value.get("isNotNullable"), false);
-            } else if ( elementKey.equals(TableConstants.FILTER_TYPE)) {
+            } else if ( elementKey.equals(TableConstants.DEFAULT_ACCESS)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
                assertEquals(value.get("isNotNullable"), false);
-            } else if ( elementKey.equals(TableConstants.FILTER_VALUE)) {
+            } else if ( elementKey.equals(TableConstants.ROW_OWNER)) {
+               metaCount++;
+               assertEquals(value.get("type"), "string");
+               assertEquals(value.get("isNotNullable"), false);
+            } else if ( elementKey.equals(TableConstants.GROUP_READ_ONLY)) {
+               metaCount++;
+               assertEquals(value.get("type"), "string");
+               assertEquals(value.get("isNotNullable"), false);
+            } else if ( elementKey.equals(TableConstants.GROUP_MODIFY)) {
+               metaCount++;
+               assertEquals(value.get("type"), "string");
+               assertEquals(value.get("isNotNullable"), false);
+            } else if ( elementKey.equals(TableConstants.GROUP_PRIVILEGED)) {
                metaCount++;
                assertEquals(value.get("type"), "string");
                assertEquals(value.get("isNotNullable"), false);
@@ -1272,7 +1311,7 @@ public class ColumnDefinitionTest {
             assertEquals(value.containsKey("isNotNullable"), false);
          }
       }
-      assertEquals(metaCount, 11);
+      assertEquals(metaCount, 14);
    }
 
    @SuppressWarnings("unchecked")

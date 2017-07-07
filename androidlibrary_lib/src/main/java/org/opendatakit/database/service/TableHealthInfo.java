@@ -20,10 +20,12 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class TableHealthInfo implements Parcelable, Serializable {
 
   private final String tableId;
   private final TableHealthStatus status;
+  private final boolean hasChanges;
   
   public String getTableId() {
     return tableId;
@@ -32,10 +34,15 @@ public class TableHealthInfo implements Parcelable, Serializable {
   public TableHealthStatus getHealthStatus() {
     return status;
   }
+
+  public boolean hasChanges() {
+    return hasChanges;
+  }
   
-  public TableHealthInfo(String tableId, TableHealthStatus status) {
+  public TableHealthInfo(String tableId, TableHealthStatus status, boolean hasChanges) {
     this.tableId = tableId;
     this.status = status;
+    this.hasChanges = hasChanges;
   }
   
   public int describeContents() {
@@ -45,6 +52,7 @@ public class TableHealthInfo implements Parcelable, Serializable {
   public void writeToParcel(Parcel out, int flags) {
     out.writeString(tableId);
     status.writeToParcel(out, flags);
+    out.writeByte((byte) (hasChanges ? 1 : 0));
   }
 
   public static final Parcelable.Creator<TableHealthInfo> CREATOR
@@ -61,6 +69,7 @@ public class TableHealthInfo implements Parcelable, Serializable {
   private TableHealthInfo(Parcel in) {
     tableId = in.readString();
     status = TableHealthStatus.CREATOR.createFromParcel(in);
+    hasChanges = in.readByte() == 1;
   }
 
 }

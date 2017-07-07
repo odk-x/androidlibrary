@@ -17,74 +17,81 @@ package org.opendatakit.database.utilities;
 
 import org.opendatakit.provider.DataTableColumns;
 
-public class QueryUtil {
+public final class QueryUtil {
 
-   private static final String TAG = QueryUtil.class.getSimpleName();
+  /**
+   * Standard Queries we commonly use
+   * All five are used in ODKDatabaseImplUtils
+   */
+  @SuppressWarnings("unused")
+  public static final String GET_ROWS_WITH_ID_WHERE = DataTableColumns.ID + "=?";
+  @SuppressWarnings("unused")
+  public static final String[] GET_ROWS_WITH_ID_GROUP_BY = null;
+  @SuppressWarnings("unused")
+  public static final String GET_ROWS_WITH_ID_HAVING = null;
+  @SuppressWarnings("unused")
+  public static final String[] GET_ROWS_WITH_ID_ORDER_BY_KEYS = {
+      DataTableColumns.SAVEPOINT_TIMESTAMP };
+  @SuppressWarnings("unused")
+  public static final String[] GET_ROWS_WITH_ID_ORDER_BY_DIR = { "DESC" };
 
-   private QueryUtil() {
-      // This class should never be instantiated
-      throw new IllegalStateException("Never Instantiate this static class");
-   }
+  /**
+   * This class should never be instantiated
+   */
+  private QueryUtil() {
+    throw new IllegalStateException("Never Instantiate this static class");
+  }
 
-   public static String buildSqlStatement(String tableId, String whereClause,
-       String[] groupBy, String having, String[] orderByElementKey, String[] orderByDirection) {
-      StringBuilder s = new StringBuilder();
-      s.append("SELECT * FROM \"").append(tableId).append("\" ");
+  public static String buildSqlStatement(String tableId, String whereClause, String[] groupBy,
+      String having, String[] orderByElementKey, String[] orderByDirection) {
+    StringBuilder s = new StringBuilder();
+    s.append("SELECT * FROM \"").append(tableId).append("\" ");
 
-      if (whereClause != null && whereClause.length() != 0) {
-         s.append(" WHERE ").append(whereClause);
+    if (whereClause != null && !whereClause.isEmpty()) {
+      s.append(" WHERE ").append(whereClause);
+    }
+
+    if (groupBy != null && groupBy.length != 0) {
+      s.append(" GROUP BY ");
+      boolean first = true;
+      for (String elementKey : groupBy) {
+        if (!first) {
+          s.append(", ");
+        }
+        first = false;
+        s.append(elementKey);
       }
-
-      if (groupBy != null && groupBy.length != 0) {
-         s.append(" GROUP BY ");
-         boolean first = true;
-         for (String elementKey : groupBy) {
-            if (!first) {
-               s.append(", ");
-            }
-            first = false;
-            s.append(elementKey);
-         }
-         if (having != null && having.length() != 0) {
-            s.append(" HAVING ").append(having);
-         }
+      if (having != null && !having.isEmpty()) {
+        s.append(" HAVING ").append(having);
       }
+    }
 
-      boolean directionSpecified =
-          (orderByDirection != null && orderByElementKey != null) && (orderByDirection.length
-              == orderByElementKey.length);
-      if (orderByElementKey != null && orderByElementKey.length != 0) {
-         boolean first = true;
-         for (int i = 0; i < orderByElementKey.length; i++) {
-            if (orderByElementKey[i] == null || orderByElementKey[i].length() == 0) {
-               continue;
-            }
+    boolean directionSpecified = orderByDirection != null && orderByElementKey != null
+        && orderByDirection.length == orderByElementKey.length;
+    if (orderByElementKey != null && orderByElementKey.length != 0) {
+      boolean first = true;
+      for (int i = 0; i < orderByElementKey.length; i++) {
+        if (orderByElementKey[i] == null || orderByElementKey[i].isEmpty()) {
+          continue;
+        }
 
-            if (first) {
-               s.append(" ORDER BY ");
-            } else {
-               s.append(", ");
-               first = false;
-            }
-            s.append(orderByElementKey[i]);
+        if (first) {
+          s.append(" ORDER BY ");
+          first = false;
+        } else {
+          s.append(", ");
+        }
+        s.append(orderByElementKey[i]);
 
-            if (directionSpecified && orderByDirection[i] != null && orderByDirection.length > 0) {
-               s.append(" ").append(orderByDirection[i]);
-            } else {
-               s.append(" ASC");
-            }
-         }
+        if (directionSpecified && orderByDirection[i] != null && orderByDirection.length > 0) {
+          s.append(" ").append(orderByDirection[i]);
+        } else {
+          s.append(" ASC");
+        }
       }
+    }
 
-      return s.toString();
-   }
-
-   /* Standard Queries we commonly use */
-   public static final String GET_ROWS_WITH_ID_WHERE = DataTableColumns.ID + "=?";
-   public static final String[] GET_ROWS_WITH_ID_GROUP_BY = null;
-   public static final String GET_ROWS_WITH_ID_HAVING = null;
-   public static final String[] GET_ROWS_WITH_ID_ORDER_BY_KEYS = {
-       DataTableColumns.SAVEPOINT_TIMESTAMP };
-   public static final String[] GET_ROWS_WITH_ID_ORDER_BY_DIR = { "DESC" };
+    return s.toString();
+  }
 }
 

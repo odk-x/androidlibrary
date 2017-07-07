@@ -18,14 +18,25 @@ package org.opendatakit.database.queries;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.opendatakit.utilities.ODKFileUtils;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * This holds the list of objects that are bind arguments to the SQLite database.
  * The objects are primitive objects (String, Integer, Long, Float, Double, Boolean)
  */
+@SuppressWarnings("serial")
 public class BindArgs implements Parcelable, Serializable {
+
+  /**
+   * Used in OdkDatabaseServiceImpl, probably more
+   */
+  @SuppressWarnings("WeakerAccess")
   public final Object[] bindArgs;
 
   public BindArgs() {
@@ -35,17 +46,50 @@ public class BindArgs implements Parcelable, Serializable {
   public BindArgs(Object[] args) {
     bindArgs = args;
     if ( args != null ) {
-      for (int i = 0 ; i < args.length ; ++i ) {
-        Object o = args[i];
-        if ( o == null ) continue;
-        if ( o instanceof String ) continue;
-        if ( o instanceof Integer ) continue;
-        if ( o instanceof Boolean ) continue;
-        if ( o instanceof Double ) continue;
-        if ( o instanceof Float ) continue;
-        if ( o instanceof Long ) continue;
+      for (Object o : args) {
+        if (o == null) continue;
+        if (o instanceof String) continue;
+        if (o instanceof Integer) continue;
+        if (o instanceof Boolean) continue;
+        if (o instanceof Double) continue;
+        if (o instanceof Float) continue;
+        if (o instanceof Long) continue;
         throw new IllegalArgumentException("bind args must be a primitive type");
       }
+    }
+  }
+
+  public BindArgs(String fromJSON) {
+    if ( fromJSON == null || fromJSON.isEmpty()) {
+      bindArgs = new Object[0];
+      return;
+    }
+
+    TypeReference<ArrayList<Object>> type = new TypeReference<ArrayList<Object>>() {};
+    try {
+      ArrayList<Object> values = ODKFileUtils.mapper.readValue(fromJSON, type);
+      if ( values == null ) {
+        bindArgs = new Object[0];
+      } else {
+        bindArgs = values.toArray(new Object[values.size()]);
+      }
+    } catch (IOException ignored) {
+      // not expected
+      throw new IllegalStateException("Unable to deserialize bindArgs");
+    }
+  }
+
+  /**
+   * Used in IntentUtil
+   * @return the arguments, encoded to json
+   */
+  @SuppressWarnings("unused")
+  public String asJSON() {
+    try {
+      return ODKFileUtils.mapper.writeValueAsString(bindArgs);
+    } catch (JsonProcessingException ignored) {
+      // not expected
+      throw new IllegalStateException("Unable to serialize bindArgs");
     }
   }
 
@@ -120,8 +164,8 @@ public class BindArgs implements Parcelable, Serializable {
       dest.writeInt(-1);
     } else {
       dest.writeInt(bindArgs.length);
-      for ( int i = 0 ; i < bindArgs.length ; ++i ) {
-        marshallObject(dest, bindArgs[i]);
+      for (Object bindArg : bindArgs) {
+        marshallObject(dest, bindArg);
       }
     }
   }

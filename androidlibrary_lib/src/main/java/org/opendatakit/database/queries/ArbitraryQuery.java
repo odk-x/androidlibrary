@@ -45,11 +45,19 @@ public class ArbitraryQuery extends ResumableQuery {
       this.mSqlCommand = sqlCommand;
    }
 
+   /**
+    * Used in UserDbInterfaceImpl
+    * @param tableId the table id
+    * @param bindArgs the arguments to the query
+    * @param sqlCommand the raw sql query
+    * @param bounds a limit
+    */
+   @SuppressWarnings("unused")
    public ArbitraryQuery(String tableId, BindArgs bindArgs, String sqlCommand,
        QueryBounds bounds) {
 
-      this(tableId, bindArgs, sqlCommand, (bounds != null ? bounds.mLimit : -1),
-          (bounds != null ? bounds.mOffset : -1));
+      this(tableId, bindArgs, sqlCommand, bounds != null ? bounds.mLimit : -1,
+          bounds != null ? bounds.mOffset : -1);
    }
 
    public String getSqlCommand() {

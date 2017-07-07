@@ -85,8 +85,8 @@ public class SimpleQuery extends ResumableQuery {
        String[] orderByDirections, QueryBounds bounds) {
 
       this(tableId, bindArgs, whereClause, groupByArgs, havingClause, orderByColNames,
-          orderByDirections, (bounds != null ? bounds.mLimit : -1),
-          (bounds != null ? bounds.mOffset : -1));
+          orderByDirections, bounds != null ? bounds.mLimit : -1,
+          bounds != null ? bounds.mOffset : -1);
    }
 
 
@@ -95,33 +95,47 @@ public class SimpleQuery extends ResumableQuery {
           mOrderByColNames, mOrderByDirections);
    }
 
+   /**
+    * Totally unused
+    * @return the where clause for the query
+    */
    public String getWhereClause() {
       return mWhereClause;
    }
 
+   /**
+    * Totally unused
+    * @return the group by arguments for the query
+    */
    public String[] getGroupByArgs() {
-      return (mGroupByArgs != null ? mGroupByArgs.clone() : null);
+      return mGroupByArgs != null ? mGroupByArgs.clone() : null;
    }
 
+   /**
+    * Totally unused
+    * @return the having clause for the query
+    */
    public String getHavingClause() {
       return mHavingClause;
    }
 
    /**
     * Return the list of columns to order the results by
+    * totally unused
     *
     * @return column names to order by
     */
    public String[] getOrderByColNames() {
-      return (mOrderByColNames != null ? mOrderByColNames.clone() : null);
+      return mOrderByColNames != null ? mOrderByColNames.clone() : null;
    }
 
    /**
     * Return the list of direction values corresponding to the order by columns
+    * totally unused
     *
     * @return directions to order results by for each column
     */
    public String[] getOrderByDirections() {
-      return (mOrderByDirections != null ? mOrderByDirections.clone() : null);
+      return mOrderByDirections != null ? mOrderByDirections.clone() : null;
    }
 }

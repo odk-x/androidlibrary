@@ -16,8 +16,11 @@ package org.opendatakit.utilities;
 
 import android.os.Bundle;
 import android.os.Parcel;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendatakit.database.service.DbChunk;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
@@ -30,7 +33,10 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.UUID;
 
-public class OdkDbChunkTest extends AndroidTestCase {
+import static org.junit.Assert.*;
+
+@RunWith(AndroidJUnit4.class)
+public class OdkDbChunkTest {
 
   /**
    * Test Data
@@ -40,13 +46,13 @@ public class OdkDbChunkTest extends AndroidTestCase {
 
   private String[] testData = { "Miscellaneous", "test", "data", "to", "parcel", "and", "unpack" };
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
 
+  @Test
   public void testConvertSerializableNull() {
     String[] nullData = null;
     try {
@@ -57,6 +63,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
     }
   }
 
+  @Test
   public void testRebuildSerializableNull() {
     List<DbChunk> nullList = null;
 
@@ -71,6 +78,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
     }
   }
 
+  @Test
   public void testConvertSerializableToAndFromChunk() {
     List<DbChunk> chunks;
 
@@ -104,6 +112,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
     }
   }
 
+  @Test
   public void testConvertSerializableToAndFromChunks() {
     List<DbChunk> chunks;
 
@@ -150,18 +159,21 @@ public class OdkDbChunkTest extends AndroidTestCase {
     }
   }
 
+  @Test
   public void testConvertParcelableNull() {
     Bundle nullData = null;
 
     assertNull(DbChunkUtil.convertToChunks(nullData, largeChunkSize));
   }
 
+  @Test
   public void testRebuildParcelableNull() {
     List<DbChunk> nullList = null;
 
     assertNull(DbChunkUtil.rebuildFromChunks(nullList, Bundle.CREATOR));
   }
 
+  @Test
   public void testConvertParcelableToAndFromChunk() {
     List<DbChunk> chunks;
     Bundle parcelableTestData = new Bundle();
@@ -185,6 +197,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
     }
   }
 
+  @Test
   public void testConvertParcelableToAndFromChunks() {
     List<DbChunk> chunks;
     Bundle parcelableTestData = new Bundle();
@@ -221,6 +234,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
     }
   }
 
+  @Test
   public void testChunkParcelation() {
     List<DbChunk> chunks;
 
@@ -269,6 +283,7 @@ public class OdkDbChunkTest extends AndroidTestCase {
     }
   }
 
+  @Test
   public void testChunksParcelation() {
     List<DbChunk> chunks;
 

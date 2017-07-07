@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
- * Copyright (C) 2011-2013 University of Washington
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*
+** Modified to support SQLite extensions by the SQLite developers: 
+** sqlite-dev@sqlite.org.
+*/
 
-package org.opendatakit.provider;
+package org.sqlite.database.sqlite;
 
-import android.net.Uri;
+@SuppressWarnings("serial")
+public class SQLiteCantOpenDatabaseException extends SQLiteException {
+    public SQLiteCantOpenDatabaseException() {}
 
-/**
- * Convenience definitions for NotePadProvider
- */
-public final class InstanceProviderAPI {
-  public static final String AUTHORITY = "org.opendatakit.provider.instances";
-  public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/");
-
-  // This class cannot be instantiated
-  private InstanceProviderAPI() {
-  }
+    public SQLiteCantOpenDatabaseException(String error) {
+        super(error);
+    }
 }

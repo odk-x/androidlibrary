@@ -14,11 +14,13 @@
 
 package org.opendatakit.provider;
 
-import android.provider.BaseColumns;
+public final class ColumnDefinitionsColumns {
 
-public class ColumnDefinitionsColumns implements BaseColumns {
-
-  // table_id cannot be null
+  /**
+   * Used in ODKDatabaseImplUtils
+   * table_id cannot be null
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String TABLE_ID = "_table_id";
   // element_key cannot be null
   public static final String ELEMENT_KEY = "_element_key";
@@ -30,15 +32,19 @@ public class ColumnDefinitionsColumns implements BaseColumns {
   // json array of [element_key] entries
   public static final String LIST_CHILD_ELEMENT_KEYS = "_list_child_element_keys";
 
-  // This class cannot be instantiated
+  /**
+   * This class cannot be instantiated
+   */
   private ColumnDefinitionsColumns() {
   }
 
   /**
    * Get the create sql for the column_definitions table.
+   * Used in ODKDatabaseImplUtils
    *
-   * @return
+   * @return A sql query that will create this table
    */
+  @SuppressWarnings("unused")
   public static String getTableCreateSql(String tableName) {
     //@formatter:off
 		return "CREATE TABLE IF NOT EXISTS " + tableName + "("

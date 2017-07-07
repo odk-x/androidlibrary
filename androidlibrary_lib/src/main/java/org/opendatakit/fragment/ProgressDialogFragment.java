@@ -14,27 +14,27 @@
 
 package org.opendatakit.fragment;
 
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.ProgressDialog;
+import android.app.*;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-
 import org.opendatakit.androidlibrary.R;
 
 /**
- * Fragment-version of Progress dialog
+ * Fragment-version of Progress dialog, used all over the place
  *
  * @author mitchellsundt@gmail.com
  */
+@SuppressWarnings("unused")
 public class ProgressDialogFragment extends DialogFragment {
 
-  public interface CancelProgressDialog {
-    void cancelProgressDialog();
-  }
-
+  /**
+   * Returns a new ProgressDialogFragment with the given title and message
+   *
+   * @param title   the title to be displayed in the dialog
+   * @param message the message to be displayed in the dialog
+   * @return a ProgressDialogFragment with the cirrect arguments set
+   */
   public static ProgressDialogFragment newInstance(String title, String message) {
     ProgressDialogFragment frag = new ProgressDialogFragment();
     Bundle args = new Bundle();
@@ -44,10 +44,19 @@ public class ProgressDialogFragment extends DialogFragment {
     return frag;
   }
 
-  public void setMessage(String message) {
-    ((ProgressDialog) this.getDialog()).setMessage(message);
+  /**
+   * Updates the message on the dialog
+   * @param message the new mssage
+   */
+  public void setMessage(CharSequence message) {
+    ((AlertDialog) this.getDialog()).setMessage(message);
   }
 
+  /**
+   * Called from onCreate when a dialog object needs to be created
+   * @param savedInstanceState unused
+   * @return a Dialog object with the correct message and title
+   */
   @Override
   public Dialog onCreateDialog(Bundle savedInstanceState) {
     String title = getArguments().getString("title");
@@ -58,7 +67,7 @@ public class ProgressDialogFragment extends DialogFragment {
       public void onClick(DialogInterface dialog, int which) {
         Fragment f = ProgressDialogFragment.this;
 
-        if (f != null && f instanceof CancelProgressDialog) {
+        if (f instanceof CancelProgressDialog) {
           // user code should dismiss the dialog
           // since this is a cancellation action...
           // dialog.dismiss();
@@ -71,11 +80,14 @@ public class ProgressDialogFragment extends DialogFragment {
       public void onShow(DialogInterface dialog) {
         Fragment f = ProgressDialogFragment.this;
 
-        if (f != null && f instanceof CancelProgressDialog) {
-          ((ProgressDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
+        // If the client code wants to get an event when the user dismisses the dialog, allow the
+        // user to dismiss the dialog by showing them the button. Otherwise, the client code will
+        // dismiss the dialog, so don't let the user do it and hide the button
+        if (f instanceof CancelProgressDialog) {
+          ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
               .setVisibility(View.VISIBLE);
         } else {
-          ((ProgressDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
+          ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
               .setVisibility(View.GONE);
         }
 
@@ -94,5 +106,13 @@ public class ProgressDialogFragment extends DialogFragment {
     mProgressDialog.setOnShowListener(showButtonListener);
 
     return mProgressDialog;
+  }
+
+  /**
+   * Implemented by InitializationFragment in survey, scan and tables
+   */
+  @SuppressWarnings("WeakerAccess")
+  public interface CancelProgressDialog {
+    void cancelProgressDialog();
   }
 }

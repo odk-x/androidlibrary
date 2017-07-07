@@ -31,13 +31,7 @@ import java.util.logging.Logger;
 @SuppressLint("NewApi")
 public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
 
-  public class WebLoggerDesktopImpl implements WebLoggerIf {
-
-    private final String appName;
-
-    public WebLoggerDesktopImpl(String appName) {
-      this.appName = appName;
-    }
+  private class WebLoggerDesktopImpl implements WebLoggerIf {
 
     public void staleFileScan(long now) {
      // no-op
@@ -84,14 +78,21 @@ public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
     }
 
     public void printStackTrace(Throwable e) {
-      Logger.getGlobal().throwing("unknown", "unknown", e);
+      Logger.getGlobal().log(Level.SEVERE, e.getMessage(), e);
+    }
+
+    public void setMinimumSystemLogLevel(int level) {
+      // TODO: no-op
+    }
+
+    public int getMinimumSystemLogLevel() {
+      return WebLoggerIf.VERBOSE;
     }
 
   }
 
   public synchronized WebLoggerIf createWebLogger(String appName) {
-    WebLoggerIf logger = new WebLoggerDesktopImpl(appName);
-    return logger;
+    return new WebLoggerDesktopImpl();
   }
 
 }

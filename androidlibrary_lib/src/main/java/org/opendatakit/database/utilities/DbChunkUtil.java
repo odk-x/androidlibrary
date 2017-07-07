@@ -32,9 +32,17 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public final class DbChunkUtil {
+
+  private static class UUIDGenerator {
+    private static Random generator = new Random();
+    static UUID randomGenerator() {
+      return new UUID(generator.nextLong(), generator.nextLong());
+    }
+  }
 
   private static final String TAG = DbChunkUtil.class.getSimpleName();
 
@@ -55,7 +63,7 @@ public final class DbChunkUtil {
   private static DbChunk createChunk(byte[] sourceData, int dataIndex, int chunkSize,
       DbChunk prevChunk) {
 
-    UUID chunkID = UUID.randomUUID();
+    UUID chunkID = UUIDGenerator.randomGenerator();
 
     byte[] chunkData = new byte[chunkSize];
     System.arraycopy(sourceData, dataIndex, chunkData, 0, chunkSize);
@@ -119,9 +127,9 @@ public final class DbChunkUtil {
   /**
    * Partition the serialized data into chunks and create the chunk objects
    *
-   * @param bytes
-   * @param chunkSize
-   * @return
+   * @param bytes the data to chunk
+   * @param chunkSize the maximum size of any give chunk
+   * @return a list of chunks of the data
    */
   private static List<DbChunk> createChunkList(byte[] bytes, int chunkSize) {
     // Partition bytes into chunks, inserting them into the list along the way
@@ -154,7 +162,7 @@ public final class DbChunkUtil {
   public static <T> T rebuildFromChunks(List<DbChunk> chunks,
       Parcelable.Creator<T> creator) {
 
-    if (chunks == null || chunks.size() == 0 || creator == null) {
+    if (chunks == null || chunks.isEmpty() || creator == null) {
       Log.w(TAG, "rebuildFromChunks: Invalid input. Null returned");
       return null;
     }
@@ -181,7 +189,7 @@ public final class DbChunkUtil {
   public static <T> T rebuildFromChunks(List<DbChunk> chunks, Class<T> serializable)
       throws IOException, ClassNotFoundException {
 
-    if (chunks == null || chunks.size() == 0 || serializable == null) {
+    if (chunks == null || chunks.isEmpty() || serializable == null) {
       Log.w(TAG, "rebuildFromChunks: Invalid input. Null returned");
       return null;
     }
@@ -198,10 +206,10 @@ public final class DbChunkUtil {
   }
 
   /**
-   * Extract the bytes from the chunks and concatonate them into a single byte array
+   * Extract the bytes from the chunks and concatenate them into a single byte array
    *
-   * @param chunks
-   * @return
+   * @param chunks a list of chunks representing a split stream of bytes
+   * @return the original bytes
    */
   private static byte[] getData(List<DbChunk> chunks) {
     // Find the size of data

@@ -27,19 +27,18 @@ import java.util.Map;
  *
  * @author mitchellsundt@gmail.com
  */
-public class WebLogger {
-  private static final long MILLISECONDS_DAY = 86400000L;
-
+public final class WebLogger {
+  static final long MILLISECONDS_DAY = 86400000L;
+  private static final Map<String, WebLoggerIf> loggers = new HashMap<>();
   private static long lastStaleScan = 0L;
-  private static final Map<String, WebLoggerIf> loggers = new HashMap<String, WebLoggerIf>();
-
   private static WebLoggerFactoryIf webLoggerFactory;
+  private static ThreadLogger contextLogger = new ThreadLogger();
 
   static {
     webLoggerFactory = new WebLoggerFactoryImpl();
 
     // register a state-reset manipulator for 'loggers' field.
-    StaticStateManipulator.get().register(99, new IStaticFieldManipulator() {
+    StaticStateManipulator.get().register(new IStaticFieldManipulator() {
 
       @Override
       public void reset() {
@@ -49,20 +48,15 @@ public class WebLogger {
     });
   }
 
+  /**
+   * Do not instantiate this class
+   */
+  private WebLogger() {
+  }
+
   public static void setFactory(WebLoggerFactoryIf webLoggerFactoryImpl) {
     webLoggerFactory = webLoggerFactoryImpl;
   }
-
-  private static class ThreadLogger extends ThreadLocal<String> {
-
-    @Override
-    protected String initialValue() {
-      return null;
-    }
-
-  }
-
-  private static ThreadLogger contextLogger = new ThreadLogger();
 
   public static synchronized void closeAll() {
     for (WebLoggerIf l : loggers.values()) {
@@ -75,13 +69,17 @@ public class WebLogger {
 
   public static WebLoggerIf getContextLogger() {
     String appNameOfThread = contextLogger.get();
-    if (appNameOfThread != null) {
-      return getLogger(appNameOfThread);
-    }
-    return null;
+    return getLogger(appNameOfThread);
   }
 
-  public synchronized static WebLoggerIf getLogger(String appName) {
+  public static synchronized WebLoggerIf getLogger(String appName) {
+    if (appName == null) {
+      // create a one-off logger to handle this case
+      // factory will create a logger that doesn't care
+      // about the appName (e.g., log to just system log)
+      return webLoggerFactory.createWebLogger(null);
+    }
+
     WebLoggerIf logger = loggers.get(appName);
     if (logger == null) {
       logger = webLoggerFactory.createWebLogger(appName);
@@ -100,5 +98,14 @@ public class WebLogger {
       }
     }
     return logger;
+  }
+
+  private static class ThreadLogger extends ThreadLocal<String> {
+
+    @Override
+    protected String initialValue() {
+      return null;
+    }
+
   }
 }

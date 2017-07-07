@@ -39,17 +39,38 @@ import org.opendatakit.database.data.KeyValueStoreEntry;
 */
 interface AidlDbInterface {
 
+ /**
+   * Return the active user or "anonymous" if the user
+   * has not been authenticated against the server.
+   *
+   * @param appName
+   *
+   * @return the user reported from the server or "anonymous" if
+   * server authentication has not been completed.
+   */
+  String getActiveUser(in String appName);
+
   /**
-   * Return the roles of a verified username or google account.
+   * Return the roles and groups of a verified username or google account.
    * If the username or google account have not been verified,
    * or if the server settings specify to use an anonymous user,
    * then return an empty string.
    *
    * @param appName
    *
-   * @return empty string or JSON serialization of an array of ROLES. See RoleConsts for possible values.
+   * @return null or JSON serialization of an array of ROLES and GROUPS.
+   *
+   * See RoleConsts for possible values.
    */
   String getRolesList(in String appName);
+
+  /**
+   * Return the current user's default group.
+   * This will be an empty string if the server does not support user-defined groups.
+   *
+   * @return null or the name of the default group.
+   */
+  String getDefaultGroup(in String appName);
 
   /**
    * Return the users configured on the server if the current
@@ -60,10 +81,10 @@ interface AidlDbInterface {
    *
    * @param appName
    *
-   * @return empty string or JSON serialization of an array of objects
+   * @return null or DbChunk of JSON serialization of an array of objects
    * structured as { "user_id": "...", "full_name": "...", "roles": ["...",...] }
    */
-  String getUsersList(in String appName);
+  DbChunk getUsersList(in String appName);
 
   /**
    * Obtain a databaseHandleName
@@ -207,9 +228,9 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param choiceListId -- the md5 hash of the choiceListJSON
-   * @return choiceListJSON -- the actual JSON choice list text.
+   * @return null or DbChunk of choiceListJSON -- the actual JSON choice list text.
    */
-  String getChoiceList(in String appName, in DbHandle dbHandleName, in String choiceListId );
+  DbChunk getChoiceList(in String appName, in DbHandle dbHandleName, in String choiceListId );
 
   /**
    * If the tableId is not recorded in the TableDefinition metadata table, then
@@ -356,6 +377,17 @@ interface AidlDbInterface {
       in String tableId);
 
   /**
+   * Return the a table's health status.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   *
+   * @return the first chunk of the TableHealthInfo record for this appName and tableId
+   */
+  DbChunk getTableHealthStatus(in String appName, in DbHandle dbHandleName, in String tableId);
+
+  /**
    * Return the list of all tables and their health status.
    *
    * @param appName
@@ -402,7 +434,7 @@ interface AidlDbInterface {
    * @param dbHandleName
    * @param sqlCommand
    * @param sqlBindArgs
-   * @param tableId -- optional. If not null and _filter_type, _filter_value and _sync_state are
+   * @param tableId -- optional. If not null and _default_access, _owner and _sync_state are
    *       present in the result cursor, append an _effective_access column with r, rw, or rwd
    *       values.
    * @return
@@ -424,7 +456,7 @@ interface AidlDbInterface {
    * @param dbHandleName
    * @param sqlCommand
    * @param sqlBindArgs
-   * @param tableId -- optional. If not null and _filter_type, _filter_value and _sync_state are
+   * @param tableId -- optional. If not null and _default_access, _owner and _sync_state are
    *       present in the result cursor, append an _effective_access column with r, rw, or rwd
    *       values.
    * @return
@@ -619,12 +651,11 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues  server's field values for this row
    * @param rowId
    */
   DbChunk privilegedPerhapsPlaceRowIntoConflictWithId(in String appName, in DbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues,
+      in String tableId, in ContentValues cvValues,
       in String rowId);
 
   /**
@@ -638,13 +669,12 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the inserted row
    */
   DbChunk privilegedInsertRowWithId(in String appName, in DbHandle dbHandleName,
-  	  in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId,
+  	  in String tableId, in ContentValues cvValues, in String rowId,
   	  boolean asCsvRequestedChange);
 
 
@@ -657,13 +687,12 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the inserted checkpoint
    */
   DbChunk insertCheckpointRowWithId(in String appName, in DbHandle dbHandleName,
-      in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+      in String tableId, in ContentValues cvValues, in String rowId);
 
   /**
    * Insert the given rowId with the values in the cvValues. If certain metadata
@@ -676,13 +705,12 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the inserted row
    */
   DbChunk insertRowWithId(in String appName, in DbHandle dbHandleName,
-  	  in String tableId, in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+  	  in String tableId, in ContentValues cvValues, in String rowId);
 
 
   /**
@@ -694,7 +722,6 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param rowId
    */
   DbChunk deleteAllCheckpointRowsWithId(in String appName, in DbHandle dbHandleName,
@@ -796,14 +823,13 @@ interface AidlDbInterface {
    * @param appName
    * @param dbHandleName
    * @param tableId
-   * @param orderedColumns
    * @param cvValues
    * @param rowId
    * @return single-row table with the content of the saved-as-incomplete row
    */
   DbChunk updateRowWithId(in String appName, in DbHandle dbHandleName,
       in String tableId,
-      in OrderedColumns orderedColumns, in ContentValues cvValues, in String rowId);
+      in ContentValues cvValues, in String rowId);
 
   /**
    * Delete the local and server conflict records to resolve a server conflict

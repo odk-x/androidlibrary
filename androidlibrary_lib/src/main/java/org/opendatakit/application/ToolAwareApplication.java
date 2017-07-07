@@ -20,8 +20,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.util.Log;
 
-import org.opendatakit.properties.CommonToolProperties;
-import org.opendatakit.properties.PropertiesSingleton;
 import org.opendatakit.utilities.ODKFileUtils;
 import org.opendatakit.utilities.PRNGFixes;
 import org.opendatakit.logging.WebLogger;
@@ -33,9 +31,9 @@ import org.opendatakit.logging.WebLogger;
  *
  * @author mitchellsundt@gmail.com
  */
-public abstract class AppAwareApplication extends Application {
+public abstract class ToolAwareApplication extends Application {
 
-  private static final String t = "AppAwareApplication";
+  private static final String t = ToolAwareApplication.class.getSimpleName();
 
   /**
    * Creates required directories on the SDCard (or other external storage)
@@ -51,7 +49,7 @@ public abstract class AppAwareApplication extends Application {
     ODKFileUtils.assertDirectoryStructure(appName);
   }
 
-  public AppAwareApplication() {
+  public ToolAwareApplication() {
     super();
     PRNGFixes.apply();
   }
@@ -81,12 +79,7 @@ public abstract class AppAwareApplication extends Application {
     Log.i(t, "onTerminate");
   }
 
-  public int getQuestionFontsize(String appName) {
-    PropertiesSingleton props = CommonToolProperties.get(this, appName);
-    Integer question_font = props.getIntegerProperty(CommonToolProperties.KEY_FONT_SIZE);
-    int questionFontsize = (question_font == null) ? CommonToolProperties.DEFAULT_FONT_SIZE : question_font;
-    return questionFontsize;
-  }
+
 
   /**
    * The tool name is the name of the package after the org.opendatakit. prefix.
@@ -124,7 +117,7 @@ public abstract class AppAwareApplication extends Application {
     return versionDetail;
   }
 
-  public String getVersionedAppName() {
+  public String getVersionedToolName() {
     String versionDetail = this.getVersionDetail();
     return getString(getApkDisplayNameResourceId()) + versionDetail;
   }

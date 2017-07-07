@@ -29,16 +29,24 @@ import java.io.Serializable;
  * KeyValueStoreManager.java class in ODK Tables.
  *
  * @author sudar.sam@gmail.com
- *
  */
-public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreEntry>,
-    Serializable {
+@SuppressWarnings("serial")
+public class KeyValueStoreEntry
+    implements Parcelable, Comparable<KeyValueStoreEntry>, Serializable {
 
+  public static final Parcelable.Creator<KeyValueStoreEntry> CREATOR = new Parcelable.Creator<KeyValueStoreEntry>() {
+    public KeyValueStoreEntry createFromParcel(Parcel in) {
+      return new KeyValueStoreEntry(in);
+    }
+
+    public KeyValueStoreEntry[] newArray(int size) {
+      return new KeyValueStoreEntry[size];
+    }
+  };
   /**
    * The table id of the table to which this entry belongs.
    */
-  public String tableId;
-
+  public String tableId = null;
   /**
    * The partition in the key value store to which the entry belongs. For an in
    * depth example see KeyValueStoreManager.java in the ODK Tables project.
@@ -47,8 +55,7 @@ public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreE
    * convention) a partition name ListView. TableProperties and ColumnProperties
    * are the exception, belonging simply to the partitions "Table" and "Column".
    */
-  public String partition;
-
+  public String partition = null;
   /**
    * The aspect is essentially the scope, or the instance of the partition, to
    * which this key/entry belongs. For instance, a table-wide property would
@@ -56,15 +63,13 @@ public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreE
    * its unique column identifier for the table). A particular saved graph view
    * might have the display name of that graph.
    */
-  public String aspect;
-
+  public String aspect = null;
   /**
    * The key of this entry. This is important so that ODKTables knows what to do
    * with this entry. Eg a key of "list" might mean that this entry is important
    * to the list view of the table.
    */
-  public String key;
-
+  public String key = null;
   /**
    * The type of this entry. This is important to taht ODKTables knows how to
    * interpret the value of this entry. Eg type String means that the value
@@ -72,17 +77,16 @@ public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreE
    * FileManifestEntry object with information relating to the version of the
    * file and how to get it.
    */
-  public String type;
-
+  public String type = null;
   /**
    * The actual value of this entry. If the type is String, this is a string. If
    * it is a File, it is a FileManifestEntry JSON object.
    */
-  public String value;
-  
+  public String value = null;
+
   public KeyValueStoreEntry() {
   }
-  
+
   public KeyValueStoreEntry(Parcel in) {
     readFromParcel(in);
   }
@@ -97,12 +101,12 @@ public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreE
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-    result = prime * result + ((partition == null) ? 0 : partition.hashCode());
-    result = prime * result + ((aspect == null) ? 0 : aspect.hashCode());
-    result = prime * result + ((key == null) ? 0 : key.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    result = prime * result + (tableId == null ? 0 : tableId.hashCode());
+    result = prime * result + (partition == null ? 0 : partition.hashCode());
+    result = prime * result + (aspect == null ? 0 : aspect.hashCode());
+    result = prime * result + (key == null ? 0 : key.hashCode());
+    result = prime * result + (type == null ? 0 : type.hashCode());
+    result = prime * result + (value == null ? 0 : value.hashCode());
     return result;
   }
 
@@ -118,12 +122,14 @@ public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreE
       return false;
     }
     KeyValueStoreEntry other = (KeyValueStoreEntry) obj;
-    return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
-        && (partition == null ? other.partition == null : partition.equals(other.partition))
-        && (aspect == null ? other.aspect == null : aspect.equals(other.aspect))
-        && (key == null ? other.key == null : key.equals(other.key))
-        && (type == null ? other.type == null : type.equals(other.type))
-        && (value == null ? other.value == null : value.equals(other.value));
+    return (tableId == null ? other.tableId == null : tableId.equals(other.tableId)) && (
+        partition == null ? other.partition == null : partition.equals(other.partition)) && (
+        aspect == null ? other.aspect == null : aspect.equals(other.aspect)) && (key == null ?
+        other.key == null :
+        key.equals(other.key)) && (type == null ? other.type == null : type.equals(other.type)) && (
+        value == null ?
+            other.value == null :
+            value.equals(other.value));
   }
 
   @Override
@@ -138,8 +144,7 @@ public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreE
     }
     // Otherwise, we'll just return the value of the key, b/c if the key
     // is also the same, we're equal.
-    int keyComparison = this.key.compareTo(that.key);
-    return keyComparison;
+    return this.key.compareTo(that.key);
   }
 
   @Override
@@ -156,7 +161,7 @@ public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreE
     out.writeString(type);
     out.writeString(value);
   }
-  
+
   private void readFromParcel(Parcel in) {
     tableId = in.readString();
     partition = in.readString();
@@ -165,16 +170,5 @@ public class KeyValueStoreEntry implements Parcelable, Comparable<KeyValueStoreE
     type = in.readString();
     value = in.readString();
   }
-
-  public static final Parcelable.Creator<KeyValueStoreEntry> CREATOR
-          = new Parcelable.Creator<KeyValueStoreEntry>() {
-      public KeyValueStoreEntry createFromParcel(Parcel in) {
-          return new KeyValueStoreEntry(in);
-      }
-
-      public KeyValueStoreEntry[] newArray(int size) {
-          return new KeyValueStoreEntry[size];
-      }
-  };
 
 }
