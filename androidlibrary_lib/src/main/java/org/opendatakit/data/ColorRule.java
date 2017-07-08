@@ -321,21 +321,17 @@ public class ColorRule {
     /**
      * Return the possible values. Intended for a preference screen.
      *
-     * @param type the data type of the column
      * @return a list of the available values
      */
-    public static CharSequence[] getValues(String type) {
+    public static CharSequence[] getValues() {
       ArrayList<CharSequence> result = new ArrayList<>();
-      if (type.equals(ElementDataType.string.name())) {
-        result.add(EQUAL.getSymbol());
-        result.add(EQUAL_IGNORE_CASE.getSymbol());
-      } else {
-        result.add(LESS_THAN.getSymbol());
-        result.add(LESS_THAN_OR_EQUAL.getSymbol());
-        result.add(EQUAL.getSymbol());
-        result.add(GREATER_THAN_OR_EQUAL.getSymbol());
-        result.add(GREATER_THAN.getSymbol());
-      }
+
+      result.add(LESS_THAN.getSymbol());
+      result.add(LESS_THAN_OR_EQUAL.getSymbol());
+      result.add(EQUAL.getSymbol());
+      result.add(GREATER_THAN_OR_EQUAL.getSymbol());
+      result.add(GREATER_THAN.getSymbol());
+
       return result.toArray(new CharSequence[result.size()]);
     }
 
