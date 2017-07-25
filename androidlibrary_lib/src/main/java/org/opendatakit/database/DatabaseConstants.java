@@ -17,7 +17,7 @@ package org.opendatakit.database;
 /**
  * Used in ODKDatabaseImplUtils, SubmissionProvider, TablesProvider,
  * ODKDatabaseImplUtilsResetState, SyncETagsUtils, OdkDatabaseServiceInterface,
- * OdkResolveConflictRowLoader, ChoiceListUtils, FormsProvider,
+ * OdkResolveConflictRowLoader, InstanceProvider, ChoiceListUtils, FormsProvider,
  * OdkResolveCheckpointRowLoader
  */
 @SuppressWarnings("unused")
@@ -25,7 +25,7 @@ public final class DatabaseConstants {
 
   /**
    * key-value store table
-   * Used in ODKDatabaseImplUtils, SubmissionProvider,
+   * Used in ODKDatabaseImplUtils, InstanceProvider, SubmissionProvider,
    * ODKDatabaseImplUtilsResetState
    */
   public static final String KEY_VALUE_STORE_ACTIVE_TABLE_NAME = "_key_value_store_active";
@@ -50,7 +50,7 @@ public final class DatabaseConstants {
    * publishing to multiple formids for a given table row
    */
 
-  //public static final String UPLOADS_TABLE_NAME = "_uploads";
+  public static final String UPLOADS_TABLE_NAME = "_uploads";
 
   /**
    * For ODK Survey (only)
