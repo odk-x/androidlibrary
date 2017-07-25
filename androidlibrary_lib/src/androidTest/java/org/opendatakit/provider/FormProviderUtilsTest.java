@@ -108,10 +108,7 @@ public class FormProviderUtilsTest {
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, null, null, null, null);
 
-      String expected =
-              "content://org.opendatakit.provider.forms/" + APPNAME + "/" + TABLE_ID +
-                      "/_/#";
-      assertEquals(expected, url);
+      assertEquals(EXPECTED_TABLEID_ONLY_BASE, url);
 
       Uri uri = Uri.parse(url);
       FormsProviderUtils.ParsedFragment pf = FormsProviderUtils.parseUri(uri);
@@ -139,10 +136,7 @@ public class FormProviderUtilsTest {
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, null, null, null, elementKeyValueMap);
 
-      String expected =
-              "content://org.opendatakit.provider.forms/" + APPNAME + "/" + TABLE_ID +
-                      "/_/#";
-      assertEquals(expected, url);
+      assertEquals(EXPECTED_TABLEID_ONLY_BASE, url);
 
       Uri uri = Uri.parse(url);
       FormsProviderUtils.ParsedFragment pf = FormsProviderUtils.parseUri(uri);
