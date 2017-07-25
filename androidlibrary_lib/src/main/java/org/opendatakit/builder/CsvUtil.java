@@ -16,21 +16,9 @@
 package org.opendatakit.builder;
 
 import android.content.ContentValues;
-
 import org.apache.commons.lang3.CharEncoding;
-import org.opendatakit.aggregate.odktables.rest.ConflictType;
-import org.opendatakit.aggregate.odktables.rest.ElementDataType;
-import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
-import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
-import org.opendatakit.aggregate.odktables.rest.RFC4180CsvWriter;
-import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
-import org.opendatakit.aggregate.odktables.rest.SyncState;
-import org.opendatakit.aggregate.odktables.rest.TableConstants;
-import org.opendatakit.database.data.ColumnDefinition;
-import org.opendatakit.database.data.KeyValueStoreEntry;
-import org.opendatakit.database.data.OrderedColumns;
-import org.opendatakit.database.data.Row;
-import org.opendatakit.database.data.UserTable;
+import org.opendatakit.aggregate.odktables.rest.*;
+import org.opendatakit.database.data.*;
 import org.opendatakit.database.queries.BindArgs;
 import org.opendatakit.database.service.DbHandle;
 import org.opendatakit.database.utilities.CursorUtils;
@@ -42,21 +30,8 @@ import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.utilities.LocalizationUtils;
 import org.opendatakit.utilities.ODKFileUtils;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.io.*;
+import java.util.*;
 
 /**
  * Various utilities for importing/exporting tables from/to CSV.
@@ -730,7 +705,9 @@ public class CsvUtil {
           if (instancesHavingData.contains(assetsInstanceFolder)) {
             File tableInstanceFolder = new File(
                 ODKFileUtils.getInstanceFolder(appName, tableId, v_id));
-            tableInstanceFolder.mkdirs();
+            if (!tableInstanceFolder.mkdirs()) {
+              throw new IOException();
+            }
             ODKFileUtils.copyDirectory(assetsInstanceFolder, tableInstanceFolder);
             instancesHavingData.remove(assetsInstanceFolder);
           }
