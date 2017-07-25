@@ -16,9 +16,21 @@
 package org.opendatakit.builder;
 
 import android.content.ContentValues;
+
 import org.apache.commons.lang3.CharEncoding;
-import org.opendatakit.aggregate.odktables.rest.*;
-import org.opendatakit.database.data.*;
+import org.opendatakit.aggregate.odktables.rest.ConflictType;
+import org.opendatakit.aggregate.odktables.rest.ElementDataType;
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
+import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
+import org.opendatakit.aggregate.odktables.rest.RFC4180CsvWriter;
+import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
+import org.opendatakit.aggregate.odktables.rest.SyncState;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
+import org.opendatakit.database.data.ColumnDefinition;
+import org.opendatakit.database.data.KeyValueStoreEntry;
+import org.opendatakit.database.data.OrderedColumns;
+import org.opendatakit.database.data.Row;
+import org.opendatakit.database.data.UserTable;
 import org.opendatakit.database.queries.BindArgs;
 import org.opendatakit.database.service.DbHandle;
 import org.opendatakit.database.utilities.CursorUtils;
@@ -30,8 +42,21 @@ import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.utilities.LocalizationUtils;
 import org.opendatakit.utilities.ODKFileUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Various utilities for importing/exporting tables from/to CSV.
@@ -564,14 +589,15 @@ public class CsvUtil {
             }
           }
 
-          // TODO: should resolve this properly when we have conflict rows and
-          // uncommitted edits. For now, we just add our csv import to those,
-          // rather than resolve the problems.
+          // if there are any conflicts or checkpoints on this row, we do not import
+          // this row change. Instead, silently ignore them.
           UserTable table = supervisor.getDatabase()
               .privilegedGetRowsWithId(appName, db, tableId, orderedDefns, v_id);
           if (table.getNumberOfRows() > 1) {
-            throw new IllegalStateException(
-                "There are either checkpoint or conflict rows in the destination table");
+            WebLogger.getLogger(appName).w(TAG,
+                "importSeparable: tableId: " + tableId + " rowId: " + v_id +
+                    " has checkpoints or conflicts -- IGNORED in .csv");
+            continue;
           }
 
           SyncState syncState = null;
@@ -683,9 +709,7 @@ public class CsvUtil {
           if (instancesHavingData.contains(assetsInstanceFolder)) {
             File tableInstanceFolder = new File(
                 ODKFileUtils.getInstanceFolder(appName, tableId, v_id));
-            if (!tableInstanceFolder.mkdirs()) {
-              throw new IOException();
-            }
+            tableInstanceFolder.mkdirs();
             ODKFileUtils.copyDirectory(assetsInstanceFolder, tableInstanceFolder);
             instancesHavingData.remove(assetsInstanceFolder);
           }

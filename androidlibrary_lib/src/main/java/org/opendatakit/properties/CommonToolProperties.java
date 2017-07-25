@@ -187,6 +187,12 @@ public final class CommonToolProperties {
    */
   public static final String KEY_INSTALLATION_ID = "common.installationId";
   /**
+   * Flag indicating that we are running in non-secure communications mode.
+   * Used for developer testing.
+   */
+  public static final String KEY_ALLOW_NON_SECURE_AUTHENTICATION = "common.non_secure_authentication";
+
+  /**
    *  Admin Settings password
    */
   @SuppressWarnings("WeakerAccess")
@@ -276,6 +282,7 @@ public final class CommonToolProperties {
       secureProperties.put(KEY_ROLES_LIST, "");
       secureProperties.put(KEY_USERS_LIST, "");
       secureProperties.put(KEY_INSTALLATION_ID, "");
+      secureProperties.put(KEY_ALLOW_NON_SECURE_AUTHENTICATION, "");
       secureProperties.put(KEY_ADMIN_PW, "");
     }
   }
