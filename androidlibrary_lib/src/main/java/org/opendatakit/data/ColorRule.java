@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.database.data.Row;
 
-import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -38,9 +37,8 @@ public class ColorRule {
 
     LESS_THAN("<"), 
     LESS_THAN_OR_EQUAL("<="), 
-    EQUAL("="),
-    EQUAL_IGNORE_CASE("= (ignore case)"),
-    GREATER_THAN_OR_EQUAL(">="),
+    EQUAL("="), 
+    GREATER_THAN_OR_EQUAL(">="), 
     GREATER_THAN(">"), 
     NO_OP("operation value");
 
@@ -48,9 +46,9 @@ public class ColorRule {
     private static final String STR_LESS_THAN = "<";
     private static final String STR_LESS_OR_EQUAL = "<=";
     private static final String STR_EQUAL = "=";
-    private static final String STR_EQUAL_IGNORE_CASE = "= (ignore case)";
     private static final String STR_GREATER_OR_EQUAL = ">=";
     private static final String STR_GREATER_THAN = ">";
+    private static final int NUM_VALUES_FOR_SPINNER = 5;
 
     // This is the string that represents this operation.
     private String symbol;
@@ -64,19 +62,14 @@ public class ColorRule {
      * 
      * @return
      */
-    public static CharSequence[] getValues(String type) {
-      ArrayList<CharSequence> result = new ArrayList<>();
-      if (type.equals(ElementDataType.string.name())) {
-        result.add(STR_EQUAL);
-        result.add(STR_EQUAL_IGNORE_CASE);
-      } else {
-        result.add(STR_LESS_THAN);
-        result.add(STR_LESS_OR_EQUAL);
-        result.add(STR_EQUAL);
-        result.add(STR_GREATER_OR_EQUAL);
-        result.add(STR_GREATER_THAN);
-      }
-      return result.toArray(new CharSequence[result.size()]);
+    public static CharSequence[] getValues() {
+      CharSequence[] result = new CharSequence[NUM_VALUES_FOR_SPINNER];
+      result[0] = STR_LESS_THAN;
+      result[1] = STR_LESS_OR_EQUAL;
+      result[2] = STR_EQUAL;
+      result[3] = STR_GREATER_OR_EQUAL;
+      result[4] = STR_GREATER_THAN;
+      return result;
     }
 
     public String getSymbol() {
@@ -90,8 +83,6 @@ public class ColorRule {
         return LESS_THAN_OR_EQUAL;
       } else if (inputString.equals(EQUAL.symbol)) {
         return EQUAL;
-      } else if (inputString.equals(EQUAL_IGNORE_CASE.symbol)) {
-        return EQUAL_IGNORE_CASE;
       } else if (inputString.equals(GREATER_THAN_OR_EQUAL.symbol)) {
         return GREATER_THAN_OR_EQUAL;
       } else if (inputString.equals(GREATER_THAN.symbol)) {
@@ -324,16 +315,13 @@ public class ColorRule {
         return (compVal <= 0);
       case EQUAL:
         return (compVal == 0);
-      case EQUAL_IGNORE_CASE:
-        return testValue.equalsIgnoreCase(mValue);
       case GREATER_THAN_OR_EQUAL:
         return (compVal >= 0);
       case GREATER_THAN:
         return (compVal > 0);
-      case NO_OP:
-        return false;
       default:
-        throw new IllegalArgumentException("unrecognized op passed to checkMatch: " + mOperator);
+        throw new IllegalArgumentException("unrecognized op passed to checkMatch: "
+            + mOperator);
       }
     } catch (NumberFormatException e) {
       // this should never happen
