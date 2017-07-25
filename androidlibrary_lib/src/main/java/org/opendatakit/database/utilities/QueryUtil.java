@@ -24,12 +24,16 @@ public final class QueryUtil {
    * All five are used in ODKDatabaseImplUtils
    */
   @SuppressWarnings("unused")
-  public static final String WHERE_CLAUSE_ROWS_WITH_ID_EQUALS = DataTableColumns.ID + "=?";
+  public static final String GET_ROWS_WITH_ID_WHERE = DataTableColumns.ID + "=?";
   @SuppressWarnings("unused")
-  public static final String[] ORDER_BY_SAVEPOINT_TIMESTAMP = {
+  public static final String[] GET_ROWS_WITH_ID_GROUP_BY = null;
+  @SuppressWarnings("unused")
+  public static final String GET_ROWS_WITH_ID_HAVING = null;
+  @SuppressWarnings("unused")
+  public static final String[] GET_ROWS_WITH_ID_ORDER_BY_KEYS = {
       DataTableColumns.SAVEPOINT_TIMESTAMP };
   @SuppressWarnings("unused")
-  public static final String[] ORDER_BY_DESCENDING = { "DESC" };
+  public static final String[] GET_ROWS_WITH_ID_ORDER_BY_DIR = { "DESC" };
 
   /**
    * This class should never be instantiated
