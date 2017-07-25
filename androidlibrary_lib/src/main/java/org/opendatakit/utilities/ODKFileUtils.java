@@ -36,7 +36,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -45,14 +44,9 @@ import java.util.regex.Pattern;
  * @author Carl Hartung (carlhartung@gmail.com)
  */
 public final class ODKFileUtils {
-  /**
-   * A mapper that can read json strings into instances of the given class
-   */
   public static final ObjectMapper mapper = new ObjectMapper();
   // 2nd level -- directories
-  /**
-   * Filename for the form definition
-   */
+  // special filename
   public static final String FORMDEF_JSON_FILENAME = "formDef.json";
 
   // 1st level -- appId
@@ -155,8 +149,6 @@ public final class ODKFileUtils {
    * return null if the file does not exist or is not an
    * accessible uri thru the WebServer. (i.e., the getAsFile() API).
    * used in services/fi.iki.elonen.SimpleWebServer
-   * @param uri The uri to translate
-   * @return A file with the correct path
    */
   @SuppressWarnings("unused")
   public static File fileFromUriOnWebServer(String uri) {
@@ -222,9 +214,6 @@ public final class ODKFileUtils {
     return DATABASE_LOCK_FILE_NAME;
   }
 
-  /**
-   * Throws an exception if there is no sd card available
-   */
   public static void verifyExternalStorageAvailability() {
     String cardstatus = Environment.getExternalStorageState();
     if (cardstatus.equals(Environment.MEDIA_REMOVED) || cardstatus
@@ -289,10 +278,6 @@ public final class ODKFileUtils {
     });
   }
 
-  /**
-   * Makes sure that all the necessary directories exist for the given app name
-   * @param appName the app name to configure
-   */
   public static void assertDirectoryStructure(String appName) {
     String[] dirs = { getAppFolder(appName), getConfigFolder(appName), getDataFolder(appName),
         getOutputFolder(appName), getSystemFolder(appName), getPermanentFolder(appName),
@@ -379,12 +364,6 @@ public final class ODKFileUtils {
     }
   }
 
-  /**
-   * Writes the given tool version to the tool's associated version file
-   * @param appName the app name
-   * @param toolName the name of the tool, used to generate the version file name
-   * @param apkVersion the version to write
-   */
   public static void assertConfiguredToolApp(String appName, String toolName, String apkVersion) {
     writeConfiguredOdkAppVersion(appName, toolName + ".version", apkVersion);
   }
@@ -536,11 +515,6 @@ public final class ODKFileUtils {
     return new File(new File(getOdkFolder()), appPath);
   }
 
-  /**
-   * Gets the folder that contains all the configuration for a particular app
-   * @param appName the app name
-   * @return opendatakit/:app_name
-   */
   public static String getAppFolder(String appName) {
     return getOdkFolder() + File.separator + appName;
   }
@@ -597,20 +571,10 @@ public final class ODKFileUtils {
   //////////////////////////////////////////////////////////
   // Everything under config folder
 
-  /**
-   * Gets the folder with the static app configuration data
-   * @param appName the app name
-   * @return :app_name/config/assets
-   */
   public static String getAssetsFolder(String appName) {
     return getConfigFolder(appName) + File.separator + ASSETS_FOLDER_NAME;
   }
 
-  /**
-   * Gets the folder with the csv files to import on first run
-   * @param appName the app name
-   * @return :app_name/config/assets/csv
-   */
   public static String getAssetsCsvFolder(String appName) {
     return getAssetsFolder(appName) + File.separator + CSV_FOLDER_NAME;
   }
@@ -759,13 +723,6 @@ public final class ODKFileUtils {
     return getTablesFolder(appName, tableId) + File.separator + FORMS_FOLDER_NAME;
   }
 
-  /**
-   * Gets the form folder for the given app, table and form id, contains the formDef.json file
-   * @param appName the app name
-   * @param tableId the table associated with the form
-   * @param formId the form to get the folder for
-   * @return :app_name/config/tables/:table_id/forms/:form_id/
-   */
   public static String getFormFolder(String appName, String tableId, String formId) {
     if (formId == null || formId.isEmpty()) {
       throw new IllegalArgumentException("getFormFolder: formId is null or the empty string!");
@@ -781,12 +738,6 @@ public final class ODKFileUtils {
   /////////////////////////////////////////////////////////
   // Everything under data folder
 
-  /**
-   * Returns the filename that contains the status for whether tables has finished its one time
-   * setup or not
-   * @param appName the app name
-   * @return :app_name/data/tables.init
-   */
   public static String getTablesInitializationCompleteMarkerFile(String appName) {
     return getDataFolder(appName) + File.separator + ODK_TABLES_INIT_FILENAME;
   }
@@ -871,9 +822,7 @@ public final class ODKFileUtils {
 
     File f = new File(path);
     if (!f.exists() && !f.mkdirs()) {
-      //throw new RuntimeException("Could not mkdirs on " + f.getPath());
-      // ignore
-      WebLogger.getLogger(appName).e(TAG, "Could not mkdirs on " + f.getPath());
+      throw new RuntimeException("Could not mkdirs on " + f.getPath());
     }
     return f.getAbsolutePath();
   }
@@ -1136,7 +1085,7 @@ public final class ODKFileUtils {
     // we just append it to the AppFolder, we have a full path.
     File parentDir = new File(getAppFolder(appName));
 
-    List<String> pathElements = new ArrayList<>();
+    ArrayList<String> pathElements = new ArrayList<>();
 
     File f = fileUnderAppName;
     while (f != null && !f.equals(parentDir)) {
@@ -1161,12 +1110,6 @@ public final class ODKFileUtils {
 
   }
 
-  /**
-   * Returns the requested file as a part of a Uri object
-   * @param appName the app name
-   * @param fileUnderAppName a file with a path inside /sdcard/opendatakit/:app_name
-   * @return the filename represented as an encoded part of a uri fragment
-   */
   public static String asUriFragment(String appName, File fileUnderAppName) {
     String relativePath = asRelativePath(appName, fileUnderAppName);
     String separatorString;
@@ -1296,12 +1239,6 @@ public final class ODKFileUtils {
     return ".." + File.separator + ODKFileUtils.SYSTEM_FOLDER_NAME;
   }
 
-  /**
-   * Gets the md5sum of the given file with the correct prefix
-   * @param appName the app name
-   * @param file the file to md5
-   * @return md5:(:the hash of the file)
-   */
   public static String getMd5Hash(String appName, File file) {
     return MD5_COLON_PREFIX + getNakedMd5Hash(appName, file);
   }
@@ -1442,12 +1379,6 @@ public final class ODKFileUtils {
     return text;
   }
 
-  /**
-   * Copies the given directory, see {@link FileUtils#copyDirectory}
-   * @param sourceFolder the directory to copy
-   * @param destinationFolder where to copy it to
-   * @throws IOException if the action couldn't be completed
-   */
   public static void copyDirectory(File sourceFolder, File destinationFolder) throws IOException {
     ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
     try {
@@ -1457,12 +1388,6 @@ public final class ODKFileUtils {
     }
   }
 
-  /**
-   * Moves the given directory, see {@link FileUtils#moveDirectory}
-   * @param sourceFolder the directory to move
-   * @param destinationFolder where to move it to
-   * @throws IOException if the action couldn't be completed
-   */
   public static void moveDirectory(File sourceFolder, File destinationFolder) throws IOException {
     ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
     try {
@@ -1472,13 +1397,6 @@ public final class ODKFileUtils {
     }
   }
 
-  /**
-   * Returns true if the given directory contains the file. See {@link FileUtils#directoryContains}
-   * @param folder the directory that may or may not contain the file
-   * @param file the file that may or may not be under the given folder
-   * @return whether the file is in the passed directory
-   * @throws IOException if the action couldn't be completed
-   */
   public static boolean directoryContains(File folder, File file) throws IOException {
     ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
     try {
@@ -1488,11 +1406,6 @@ public final class ODKFileUtils {
     }
   }
 
-  /**
-   * Deletes the given folder. See {@link FileUtils#deleteDirectory}
-   * @param folder the folder to delete
-   * @throws IOException if the action couldn't be completed
-   */
   public static void deleteDirectory(File folder) throws IOException {
     ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
     try {
@@ -1502,12 +1415,6 @@ public final class ODKFileUtils {
     }
   }
 
-  /**
-   * Copies the given file, see {@link FileUtils#copyFile}
-   * @param sourceFile the file to copy
-   * @param destinationFile where to move it to
-   * @throws IOException if the action couldn't be completed
-   */
   public static void copyFile(File sourceFile, File destinationFile) throws IOException {
     ContextClassLoaderWrapper wrapper = new ContextClassLoaderWrapper();
     try {
