@@ -16,7 +16,7 @@ package org.opendatakit.provider;
 
 import android.provider.BaseColumns;
 
-public class KeyValueStoreColumns {
+public class KeyValueStoreColumns implements BaseColumns {
 
   // Names of the columns in the key value store.
   /**

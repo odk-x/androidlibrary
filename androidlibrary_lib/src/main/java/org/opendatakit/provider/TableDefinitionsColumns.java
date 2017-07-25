@@ -16,7 +16,7 @@ package org.opendatakit.provider;
 
 import android.provider.BaseColumns;
 
-public class TableDefinitionsColumns {
+public class TableDefinitionsColumns implements BaseColumns {
 
   public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.opendatakit.table";
   public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.opendatakit.table";
