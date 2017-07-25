@@ -30,7 +30,6 @@ import java.util.UUID;
 public final class LocalizationUtils {
 
   private static String savedAppName;
-  private static final String TAG = LocalizationUtils.class.getSimpleName();
   private static Map<String, Object> commonDefinitions;
   private static Map<String, Map<String, Object>> tableSpecificDefinitionsMap = new HashMap<>();
   private LocalizationUtils() {
@@ -326,10 +325,8 @@ public final class LocalizationUtils {
             "unable to retrieve display localization from string " + "token: " + translationToken);
       }
       if (localizationMap == null) {
-        //throw new IllegalStateException(
-            //"no translations found for translation token: " + translationToken);
-        WebLogger.getLogger(appName).e(TAG, "No translation tokens found!");
-        return "Error translating \"" + translationToken + "\"";
+        throw new IllegalStateException(
+            "no translations found for translation token: " + translationToken);
       }
     } else {
       TypeReference<Map<String, Object>> ref = new TypeReference<Map<String, Object>>() {

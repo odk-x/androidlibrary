@@ -312,9 +312,6 @@ public class BaseTable implements Parcelable {
   }
 
   public Row getRowAtIndex(int index) {
-    if (index < 0 || index >= mRows.size()) {
-      return null;
-    }
     return mRows.get(index);
   }
 

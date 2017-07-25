@@ -14,6 +14,7 @@
 
 package org.opendatakit.provider;
 
+import android.provider.BaseColumns;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 
@@ -22,7 +23,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
  *
  * @author mitchellsundt@gmail.com
  */
-public final class DataTableColumns {
+public final class DataTableColumns implements BaseColumns {
 
   /**
    * For simplicity, share the exact names with the REST interface to the server.

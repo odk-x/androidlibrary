@@ -16,11 +16,11 @@ package org.opendatakit.provider;
 
 import android.provider.BaseColumns;
 
-public class KeyValueStoreColumns {
+public class KeyValueStoreColumns implements BaseColumns {
 
   // Names of the columns in the key value store.
   /**
-   * TABLE_ID is used in SubmissionProvider, ODKDatabaseImplUtils
+   * TABLE_ID is used in SubmissionProvider, ODKDatabaseImplUtils and InstanceProvider
    */
   @SuppressWarnings("WeakerAccess")
   public static final String TABLE_ID = "_table_id";

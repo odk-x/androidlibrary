@@ -31,7 +31,7 @@ import android.provider.BaseColumns;
  * </li></ul>
  */
 @SuppressWarnings("unused")
-public final class SyncETagColumns {
+public final class SyncETagColumns implements BaseColumns {
 
   /**
    * These first four used in SyncETagsUtils
@@ -61,7 +61,7 @@ public final class SyncETagColumns {
   public static String getTableCreateSql(String tableName) {
     //@formatter:off
     return "CREATE TABLE IF NOT EXISTS " + tableName + " ("
-        + BaseColumns._ID + " integer primary key, "
+        + _ID + " integer primary key, "
         + TABLE_ID + " TEXT NULL, "
         + IS_MANIFEST + " INTEGER, "
         + URL + " TEXT NOT NULL, "

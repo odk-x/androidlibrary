@@ -74,11 +74,6 @@ public class CsvUtil {
 
   private final CsvUtilSupervisor supervisor;
 
-  /**
-   * Simple constructor that saves its arguments
-   * @param supervisor Used to get the database interface
-   * @param appName the app name
-   */
   public CsvUtil(CsvUtilSupervisor supervisor, String appName) {
     this.supervisor = supervisor;
     this.appName = appName;
@@ -150,7 +145,7 @@ public class CsvUtil {
     }
 
     File tableInstancesFolder = new File(ODKFileUtils.getInstancesFolder(appName, tableId));
-    Collection<File> instancesWithData = new HashSet<>();
+    HashSet<File> instancesWithData = new HashSet<>();
     if (tableInstancesFolder.exists() && tableInstancesFolder.isDirectory()) {
       File[] subDirectories = tableInstancesFolder.listFiles(new FileFilter() {
         @Override
@@ -204,7 +199,9 @@ public class CsvUtil {
       cw.writeNext(columns.toArray(new String[columns.size()]));
       String[] row = new String[columns.size()];
       for (int i = 0; i < table.getNumberOfRows(); i++) {
-        exportListener.updateProgressDetail(i, table.getNumberOfRows());
+        if (i % 5 == 0) {
+          exportListener.updateProgressDetail(i);
+        }
         Row dataRow = table.getRowAtIndex(i);
         for (int j = 0; j < columns.size(); ++j) {
           row[j] = dataRow.getDataByKey(columns.get(j));
@@ -320,7 +317,7 @@ public class CsvUtil {
    * @param row an array of strings representing all the values in a row
    * @return the index of the last non-null element, or zero if the row was all nulls
    */
-  private static int countUpToLastNonNullElement(String[] row) {
+  private int countUpToLastNonNullElement(String[] row) {
     for (int i = row.length - 1; i >= 0; --i) {
       if (row[i] != null) {
         return i + 1;
@@ -432,7 +429,7 @@ public class CsvUtil {
 
         File assetsCsvInstances = new File(
             ODKFileUtils.getAssetsCsvInstancesFolder(appName, tableId));
-        Collection<File> instancesHavingData = new HashSet<>();
+        HashSet<File> instancesHavingData = new HashSet<>();
         if (assetsCsvInstances.exists() && assetsCsvInstances.isDirectory()) {
           File[] subDirectories = assetsCsvInstances.listFiles(new FileFilter() {
 
@@ -453,27 +450,6 @@ public class CsvUtil {
                 + ".csv");
         FileInputStream in = new FileInputStream(file);
         input = new InputStreamReader(in, CharEncoding.UTF_8);
-        int total = 0;
-        char[] buf = new char[1024];
-        int read;
-        while ((read = input.read(buf)) > 0) {
-          int i = 0;
-          // while not for because we change i in the loop and java doesn't like that
-          while (i < read) {
-            if (buf[i] == '\r' || buf[i] == '\n') {
-              if (i + 1 < buf.length && (buf[i + 1] == '\r' || buf[i + 1] == '\n')) {
-                i++;
-              }
-              total++;
-            }
-            i++;
-          }
-        }
-        input.close();
-        in.close();
-        in = new FileInputStream(file);
-        input = new InputStreamReader(in, CharEncoding.UTF_8);
-        //int total = r.getLineNumber();
         RFC4180CsvReader cr = new RFC4180CsvReader(input);
         // don't have to worry about quotes in elementKeys...
         String[] columnsInFile = cr.readNext();
@@ -492,14 +468,16 @@ public class CsvUtil {
         String v_group_modify;
         String v_group_privileged;
 
-        Map<String, String> valueMap = new HashMap<>();
+        HashMap<String, String> valueMap = new HashMap<>();
 
         int rowCount = 0;
         String[] row;
         while (true) {
           row = cr.readNext();
           rowCount++;
-          importListener.updateProgressDetail(rowCount, total);
+          if (rowCount % 5 == 0) {
+            importListener.updateProgressDetail(rowCount);
+          }
           if (row == null || countUpToLastNonNullElement(row) == 0) {
             break;
           }

@@ -14,7 +14,9 @@
 
 package org.opendatakit.provider;
 
-public final class ColumnDefinitionsColumns {
+import android.provider.BaseColumns;
+
+public final class ColumnDefinitionsColumns implements BaseColumns {
 
   /**
    * Used in ODKDatabaseImplUtils
