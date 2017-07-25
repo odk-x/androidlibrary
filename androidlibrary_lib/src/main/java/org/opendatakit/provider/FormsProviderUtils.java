@@ -123,7 +123,7 @@ public final class FormsProviderUtils {
 
       // if no formId is specified, let ODK Survey choose the default form to use on this tableId.
       if ( formId == null ) {
-         formId = "_";
+         formId = "";
       }
 
       Uri uri = Uri.withAppendedPath(
