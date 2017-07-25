@@ -14,10 +14,9 @@
 
 package org.opendatakit.provider;
 
-/**
- * Holds the columns and create sql for the table of tables
- */
-public final class TableDefinitionsColumns {
+import android.provider.BaseColumns;
+
+public class TableDefinitionsColumns {
 
   public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.opendatakit.table";
   public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.opendatakit.table";
