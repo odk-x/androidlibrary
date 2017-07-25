@@ -611,15 +611,14 @@ public class CsvUtil {
             }
           }
 
-          // if there are any conflicts or checkpoints on this row, we do not import
-          // this row change. Instead, silently ignore them.
+          // TODO: should resolve this properly when we have conflict rows and
+          // uncommitted edits. For now, we just add our csv import to those,
+          // rather than resolve the problems.
           UserTable table = supervisor.getDatabase()
               .privilegedGetRowsWithId(appName, db, tableId, orderedDefns, v_id);
           if (table.getNumberOfRows() > 1) {
-            WebLogger.getLogger(appName).w(TAG,
-                "importSeparable: tableId: " + tableId + " rowId: " + v_id +
-                    " has checkpoints or conflicts -- IGNORED in .csv");
-            continue;
+            throw new IllegalStateException(
+                "There are either checkpoint or conflict rows in the destination table");
           }
 
           SyncState syncState = null;
