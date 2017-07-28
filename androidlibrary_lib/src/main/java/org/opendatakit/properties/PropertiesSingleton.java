@@ -307,7 +307,7 @@ public class PropertiesSingleton {
   @SuppressWarnings("unused")
   public boolean shouldRunInitializationTask(String toolName) {
     // this is stored in the device properties
-    readPropertiesIfModified();
+    init();
     String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
     return value == null || value.isEmpty();
   }
