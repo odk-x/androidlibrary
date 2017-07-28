@@ -1295,18 +1295,14 @@ public final class ODKFileUtils {
 
       int l;
       for (l = 0; l + chunkSize < length; l += chunkSize) {
-        // TODO double check that this still works after the change
-        if (is.read(chunk, 0, chunkSize) == -1)
-          break;
+        is.read(chunk, 0, chunkSize);
         md.update(chunk, 0, chunkSize);
       }
 
       int remaining = length - l;
       if (remaining > 0) {
-        // TODO double check that this still works after the change
-        if (is.read(chunk, 0, remaining) != -1) {
-          md.update(chunk, 0, remaining);
-        }
+        is.read(chunk, 0, remaining);
+        md.update(chunk, 0, remaining);
       }
       byte[] messageDigest = md.digest();
 
