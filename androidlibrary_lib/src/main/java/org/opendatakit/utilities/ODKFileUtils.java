@@ -232,7 +232,7 @@ public final class ODKFileUtils {
    */
   @SuppressWarnings("WeakerAccess")
   public static String getOdkFolder() {
-    return Environment.getExternalStorageDirectory() + File.separator + ODK_FOLDER_NAME;
+    return Environment.getExternalStorageDirectory().getPath() + File.separator + ODK_FOLDER_NAME;
   }
 
   /**
