@@ -22,21 +22,16 @@ import org.opendatakit.aggregate.odktables.rest.RFC4180CsvWriter;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.database.data.ColumnDefinition;
 import org.opendatakit.database.data.ColumnList;
+import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.database.data.OrderedColumns;
 import org.opendatakit.database.utilities.KeyValueStoreUtils;
 import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.ColumnDefinitionsColumns;
 import org.opendatakit.provider.KeyValueStoreColumns;
-import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.utilities.ODKFileUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,9 +46,9 @@ import java.util.List;
  *
  * @author sudar.sam@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class PropertiesFileUtils {
+  // used for logging
   private static final String TAG = PropertiesFileUtils.class.getSimpleName();
 
   public static class DataTableDefinition {
@@ -70,21 +65,21 @@ public final class PropertiesFileUtils {
    * Assumes the kvsEntries have had the choice list entries expanded
    * from the choiceList table.
    *
-   * @param appName
-   * @param tableId
-   * @param orderedDefns
-   * @param definitionCsv
-   * @param propertiesCsv
-   * @return
-   * @throws ServicesAvailabilityException
+   * @param appName       the app name
+   * @param tableId       the id of the table to be exported
+   * @param orderedDefns  a list of the columns in the table
+   * @param definitionCsv the file to write the table definitions to
+   * @param propertiesCsv the file to write the properties to
+   * @return whether successful or not
+   * @throws ServicesAvailabilityException if the database is down
    */
   public static synchronized boolean writePropertiesIntoCsv(String appName, String tableId,
-      OrderedColumns orderedDefns, List<KeyValueStoreEntry> kvsEntries,
-      File definitionCsv, File propertiesCsv) throws ServicesAvailabilityException {
+      OrderedColumns orderedDefns, List<KeyValueStoreEntry> kvsEntries, File definitionCsv,
+      File propertiesCsv) throws ServicesAvailabilityException {
     WebLogger.getLogger(appName).i(TAG, "writePropertiesIntoCsv: tableId: " + tableId);
 
     // writing metadata
-    FileOutputStream out;
+    FileOutputStream out = null;
     RFC4180CsvWriter cw;
     OutputStreamWriter output = null;
     try {
@@ -95,7 +90,7 @@ public final class PropertiesFileUtils {
 
       // Emit ColumnDefinitions
 
-      ArrayList<String> colDefHeaders = new ArrayList<String>();
+      ArrayList<String> colDefHeaders = new ArrayList<>();
       colDefHeaders.add(ColumnDefinitionsColumns.ELEMENT_KEY);
       colDefHeaders.add(ColumnDefinitionsColumns.ELEMENT_NAME);
       colDefHeaders.add(ColumnDefinitionsColumns.ELEMENT_TYPE);
@@ -104,10 +99,9 @@ public final class PropertiesFileUtils {
       cw.writeNext(colDefHeaders.toArray(new String[colDefHeaders.size()]));
       String[] colDefRow = new String[colDefHeaders.size()];
 
-      /**
-       * Since the md5Hash of the file identifies identical schemas, ensure that
-       * the list of columns is in alphabetical order.
-       */
+      // Since the md5Hash of the file identifies identical schemas, ensure that the list of
+      // columns is in alphabetical order.
+      // This writes data about each of the columns to definitionsCsv
       for (ColumnDefinition cd : orderedDefns.getColumnDefinitions()) {
         colDefRow[0] = cd.getElementKey();
         colDefRow[1] = cd.getElementName();
@@ -126,13 +120,15 @@ public final class PropertiesFileUtils {
 
       // Emit KeyValueStore
 
-      ArrayList<String> kvsHeaders = new ArrayList<String>();
+      ArrayList<String> kvsHeaders = new ArrayList<>();
       kvsHeaders.add(KeyValueStoreColumns.PARTITION);
       kvsHeaders.add(KeyValueStoreColumns.ASPECT);
       kvsHeaders.add(KeyValueStoreColumns.KEY);
       kvsHeaders.add(KeyValueStoreColumns.VALUE_TYPE);
       kvsHeaders.add(KeyValueStoreColumns.VALUE);
 
+      // This sorts the KeyValueStore entries first based on their partition, then based on their
+      // aspect, and finally based on their key. It shuffles things with null properties to the end
       Collections.sort(kvsEntries, new Comparator<KeyValueStoreEntry>() {
 
         @Override
@@ -173,11 +169,12 @@ public final class PropertiesFileUtils {
         }
       });
 
+      // Writes the CSV header to the output file
       cw.writeNext(kvsHeaders.toArray(new String[kvsHeaders.size()]));
+      // kvsRow has the length of the number of columns in the table
       String[] kvsRow = new String[kvsHeaders.size()];
-      for (int i = 0; i < kvsEntries.size(); i++) {
-        KeyValueStoreEntry entry = kvsEntries.get(i);
-
+      for (KeyValueStoreEntry entry : kvsEntries) {
+        // but only the first five are used? Seems strange
         kvsRow[0] = entry.partition;
         kvsRow[1] = entry.aspect;
         kvsRow[2] = entry.key;
@@ -193,12 +190,22 @@ public final class PropertiesFileUtils {
       return false;
     } finally {
       try {
-        output.close();
+        if (output != null) output.close();
+        if (out != null) out.close();
       } catch (IOException e) {
+        // we have failed. We should have already returned false at this point
       }
     }
   }
 
+  /**
+   * Does the same thing as CsvUtil.countUpToLastNonNullElement
+   * Returns the index of the last non-null element in the row. So [1, 2, 3, null, null] would
+   * return 3, but so would [null, null, 3, null, null] and [1, 2, 3] and [null, null, 3]
+   *
+   * @param row an array of strings representing all the values in a row
+   * @return the index of the last non-null element, or zero if the row was all nulls
+   */
   private static int countUpToLastNonNullElement(String[] row) {
     for (int i = row.length - 1; i >= 0; --i) {
       if (row[i] != null) {
@@ -215,24 +222,24 @@ public final class PropertiesFileUtils {
    * <li>tables/tableId/definition.csv</li>
    * </ul>
    * And return them to the caller.
-   *
+   * <p>
    * The returned kvsEntries will not have had their choice list
    * entries consolidated.
    *
-   * @param appName
-   * @param tableId
-   * @return
-   * @throws IOException
+   * @param appName the app name
+   * @param tableId the table id to import
+   * @return the table that it read, a list of columns and a list of KeyValueStoreEntries
+   * @throws IOException if we couldn't properly read the file
+   * @throws IllegalStateException if the CSV file was improperly formatted
    */
-  public static synchronized DataTableDefinition readPropertiesFromCsv(
-      String appName,
-      String tableId)
-      throws IOException {
+  public static synchronized DataTableDefinition readPropertiesFromCsv(String appName,
+      String tableId) throws IOException {
 
     WebLogger.getLogger(appName).i(TAG, "readPropertiesFromCsv: tableId: " + tableId);
 
-    List<Column> columns = new ArrayList<Column>();
-    List<KeyValueStoreEntry> kvsEntries = new ArrayList<KeyValueStoreEntry>();
+    // Initialize what will later be passed into the DataTableDefinition constructor
+    List<Column> columns = new ArrayList<>();
+    List<KeyValueStoreEntry> kvsEntries = new ArrayList<>();
 
     // reading data
     File file = null;

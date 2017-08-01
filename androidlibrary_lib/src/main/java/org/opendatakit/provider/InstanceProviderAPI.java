@@ -20,13 +20,25 @@ package org.opendatakit.provider;
 import android.net.Uri;
 
 /**
- * Convenience definitions for NotePadProvider
+ * Instance provider returns rows from the underlying database table.
+ * <p>
+ * Used in InstanceProvider, InstanceUploaderTask
  */
+@SuppressWarnings("unused")
 public final class InstanceProviderAPI {
+  /**
+   * Used in InstanceProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String AUTHORITY = "org.opendatakit.provider.instances";
+  /**
+   * Used in InstanceUploaderTask
+   */
   public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/");
 
-  // This class cannot be instantiated
+  /**
+   * This class cannot be instantiated
+   */
   private InstanceProviderAPI() {
   }
 }

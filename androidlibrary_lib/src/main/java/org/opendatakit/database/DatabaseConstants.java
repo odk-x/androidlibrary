@@ -14,12 +14,20 @@
 
 package org.opendatakit.database;
 
-public class DatabaseConstants {
+/**
+ * Used in ODKDatabaseImplUtils, SubmissionProvider, TablesProvider,
+ * ODKDatabaseImplUtilsResetState, SyncETagsUtils, OdkDatabaseServiceInterface,
+ * OdkResolveConflictRowLoader, InstanceProvider, ChoiceListUtils, FormsProvider,
+ * OdkResolveCheckpointRowLoader
+ */
+@SuppressWarnings("unused")
+public final class DatabaseConstants {
 
   /**
    * key-value store table
+   * Used in ODKDatabaseImplUtils, InstanceProvider, SubmissionProvider,
+   * ODKDatabaseImplUtilsResetState
    */
-
   public static final String KEY_VALUE_STORE_ACTIVE_TABLE_NAME = "_key_value_store_active";
 
   /**
@@ -34,13 +42,6 @@ public class DatabaseConstants {
 
   // only one of these...
   public static final String COLUMN_DEFINITIONS_TABLE_NAME = "_column_definitions";
-
-  /**
-   * For ODK Survey (only)
-   *
-   * Tracks all the forms present in the forms directory.
-   */
-  public static final String SURVEY_CONFIGURATION_TABLE_NAME = "_survey_configuration";
 
   /**
    * For ODK Survey (only)
@@ -78,4 +79,9 @@ public class DatabaseConstants {
   // The size of data chunks to pass across the AIDL wire.
   public static final int PARCEL_SIZE = 946176; // 100 KB shy of 1 MB, the max size
 
+  /**
+   * Do not instantiate this class
+   */
+  private DatabaseConstants() {
+  }
 }

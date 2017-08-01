@@ -19,6 +19,10 @@ import android.provider.BaseColumns;
 public class KeyValueStoreColumns implements BaseColumns {
 
   // Names of the columns in the key value store.
+  /**
+   * TABLE_ID is used in SubmissionProvider, ODKDatabaseImplUtils and InstanceProvider
+   */
+  @SuppressWarnings("WeakerAccess")
   public static final String TABLE_ID = "_table_id";
   public static final String PARTITION = "_partition";
   public static final String ASPECT = "_aspect";
@@ -29,10 +33,12 @@ public class KeyValueStoreColumns implements BaseColumns {
   /**
    * The table creation SQL statement for a KeyValueStore table.
    *
-   * @param tableName
-   *          -- the name of the KVS table to be created
+   * Used in ODKDatabaseImplUtils
+   *
+   * @param tableName the name of the KVS table to be created
    * @return well-formed SQL create-table statement.
    */
+  @SuppressWarnings("unused")
   public static String getTableCreateSql(String tableName) {
     //@formatter:off
     return "CREATE TABLE IF NOT EXISTS " + tableName + " ("

@@ -65,7 +65,7 @@ public class DbChunk implements Parcelable {
   }
 
   public boolean hasNextID() {
-    return (this.nextID != null);
+    return this.nextID != null;
   }
 
   public void setNextID(UUID nextID) {

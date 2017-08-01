@@ -15,8 +15,11 @@
 package org.opendatakit.utilities;
 
 import android.os.Parcel;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
@@ -24,12 +27,12 @@ import org.opendatakit.aggregate.odktables.rest.SyncState;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.database.data.ColumnDefinition;
-import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.OrderedColumns;
+import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.UserTable;
 import org.opendatakit.logging.WebLogger;
-import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
+import org.opendatakit.provider.DataTableColumns;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,7 +41,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
-public class UserTableTest extends AndroidTestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+
+@RunWith(AndroidJUnit4.class)
+public class UserTableTest {
 
   /*
                  * These are the columns that are present in any row in a user data table in
@@ -59,8 +67,11 @@ public class UserTableTest extends AndroidTestCase {
     adminColumns.add(DataTableColumns.ROW_ETAG);
     adminColumns.add(DataTableColumns.SYNC_STATE); // not exportable
     adminColumns.add(DataTableColumns.CONFLICT_TYPE); // not exportable
-    adminColumns.add(DataTableColumns.FILTER_TYPE);
-    adminColumns.add(DataTableColumns.FILTER_VALUE);
+    adminColumns.add(DataTableColumns.DEFAULT_ACCESS);
+    adminColumns.add(DataTableColumns.ROW_OWNER);
+    adminColumns.add(DataTableColumns.GROUP_READ_ONLY);
+    adminColumns.add(DataTableColumns.GROUP_MODIFY);
+    adminColumns.add(DataTableColumns.GROUP_PRIVILEGED);
     adminColumns.add(DataTableColumns.FORM_ID);
     adminColumns.add(DataTableColumns.LOCALE);
     adminColumns.add(DataTableColumns.SAVEPOINT_TYPE);
@@ -72,8 +83,11 @@ public class UserTableTest extends AndroidTestCase {
     ArrayList<String> exportColumns = new ArrayList<String>();
     exportColumns.add(DataTableColumns.ID);
     exportColumns.add(DataTableColumns.ROW_ETAG);
-    exportColumns.add(DataTableColumns.FILTER_TYPE);
-    exportColumns.add(DataTableColumns.FILTER_VALUE);
+    exportColumns.add(DataTableColumns.DEFAULT_ACCESS);
+    exportColumns.add(DataTableColumns.ROW_OWNER);
+    exportColumns.add(DataTableColumns.GROUP_READ_ONLY);
+    exportColumns.add(DataTableColumns.GROUP_MODIFY);
+    exportColumns.add(DataTableColumns.GROUP_PRIVILEGED);
     exportColumns.add(DataTableColumns.FORM_ID);
     exportColumns.add(DataTableColumns.LOCALE);
     exportColumns.add(DataTableColumns.SAVEPOINT_TYPE);
@@ -99,13 +113,13 @@ public class UserTableTest extends AndroidTestCase {
   public static final String YOUR_CONFIG_FILE_COL = "Your_config_file_col";
   public static final String YOUR_ROW_FILE_COL = "Your_row_file_col";
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
 
+  @Test
   public void testOrderedColumnsParcelation() throws IOException {
 
     List<String> geopointCells = new ArrayList<String>();
@@ -199,6 +213,7 @@ public class UserTableTest extends AndroidTestCase {
   }
 
 
+  @Test
   public void testOrderedColumnsParcelationNoGeoNoArray() throws IOException {
 
     List<Column> columns = new ArrayList<Column>();
@@ -255,6 +270,7 @@ public class UserTableTest extends AndroidTestCase {
   }
 
   @SuppressWarnings("unchecked")
+  @Test
   public void testUserTableParcelation() throws IOException {
 
     List<String> geopointCells = new ArrayList<String>();
@@ -352,14 +368,26 @@ public class UserTableTest extends AndroidTestCase {
     rowValues2[i] = null;
     elementKeyForIndex[i] = DataTableColumns.CONFLICT_TYPE;
     elementKeyToIndex.put(DataTableColumns.CONFLICT_TYPE, i++); // not exportable
+    rowValues1[i] = "FULL";
+    rowValues2[i] = "FULL";
+    elementKeyForIndex[i] = DataTableColumns.DEFAULT_ACCESS;
+    elementKeyToIndex.put(DataTableColumns.DEFAULT_ACCESS, i++);
+    rowValues1[i] = "sudar";
+    rowValues2[i] = "wrb";
+    elementKeyForIndex[i] = DataTableColumns.ROW_OWNER;
+    elementKeyToIndex.put(DataTableColumns.ROW_OWNER, i++);
+    rowValues1[i] = "sudar";
+    rowValues2[i] = "wrb";
+    elementKeyForIndex[i] = DataTableColumns.GROUP_READ_ONLY;
+    elementKeyToIndex.put(DataTableColumns.GROUP_READ_ONLY, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_TYPE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_TYPE, i++);
+    elementKeyForIndex[i] = DataTableColumns.GROUP_MODIFY;
+    elementKeyToIndex.put(DataTableColumns.GROUP_MODIFY, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_VALUE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_VALUE, i++);
+    elementKeyForIndex[i] = DataTableColumns.GROUP_PRIVILEGED;
+    elementKeyToIndex.put(DataTableColumns.GROUP_PRIVILEGED, i++);
     rowValues1[i] = "myform_1";
     rowValues2[i] = "myform_2";
     elementKeyForIndex[i] = DataTableColumns.FORM_ID;
@@ -539,6 +567,7 @@ public class UserTableTest extends AndroidTestCase {
     assertNull(cta);
   }
 
+  @Test
   public void testUserTableParcelationNoGeoNoArray() throws IOException {
 
     List<Column> columns = new ArrayList<Column>();
@@ -580,12 +609,24 @@ public class UserTableTest extends AndroidTestCase {
     elementKeyToIndex.put(DataTableColumns.CONFLICT_TYPE, i++); // not exportable
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_TYPE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_TYPE, i++);
+    elementKeyForIndex[i] = DataTableColumns.DEFAULT_ACCESS;
+    elementKeyToIndex.put(DataTableColumns.DEFAULT_ACCESS, i++);
+    rowValues1[i] = "sudar";
+    rowValues2[i] = "wrb";
+    elementKeyForIndex[i] = DataTableColumns.ROW_OWNER;
+    elementKeyToIndex.put(DataTableColumns.ROW_OWNER, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_VALUE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_VALUE, i++);
+    elementKeyForIndex[i] = DataTableColumns.GROUP_READ_ONLY;
+    elementKeyToIndex.put(DataTableColumns.GROUP_READ_ONLY, i++);
+    rowValues1[i] = null;
+    rowValues2[i] = null;
+    elementKeyForIndex[i] = DataTableColumns.GROUP_MODIFY;
+    elementKeyToIndex.put(DataTableColumns.GROUP_MODIFY, i++);
+    rowValues1[i] = null;
+    rowValues2[i] = null;
+    elementKeyForIndex[i] = DataTableColumns.GROUP_PRIVILEGED;
+    elementKeyToIndex.put(DataTableColumns.GROUP_PRIVILEGED, i++);
     rowValues1[i] = "myform_1";
     rowValues2[i] = "myform_2";
     elementKeyForIndex[i] = DataTableColumns.FORM_ID;
@@ -719,6 +760,7 @@ public class UserTableTest extends AndroidTestCase {
     assertFalse(t.hasConflictRows());
   }
 
+  @Test
   public void testUserTableSubsetNoGeoNoArray() throws IOException {
 
     List<Column> columns = new ArrayList<Column>();
@@ -758,14 +800,26 @@ public class UserTableTest extends AndroidTestCase {
     rowValues2[i] = null;
     elementKeyForIndex[i] = DataTableColumns.CONFLICT_TYPE;
     elementKeyToIndex.put(DataTableColumns.CONFLICT_TYPE, i++); // not exportable
+    rowValues1[i] = "FULL";
+    rowValues2[i] = "FULL";
+    elementKeyForIndex[i] = DataTableColumns.DEFAULT_ACCESS;
+    elementKeyToIndex.put(DataTableColumns.DEFAULT_ACCESS, i++);
+    rowValues1[i] = "sudar";
+    rowValues2[i] = "wrb";
+    elementKeyForIndex[i] = DataTableColumns.ROW_OWNER;
+    elementKeyToIndex.put(DataTableColumns.ROW_OWNER, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_TYPE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_TYPE, i++);
+    elementKeyForIndex[i] = DataTableColumns.GROUP_READ_ONLY;
+    elementKeyToIndex.put(DataTableColumns.GROUP_READ_ONLY, i++);
     rowValues1[i] = null;
     rowValues2[i] = null;
-    elementKeyForIndex[i] = DataTableColumns.FILTER_VALUE;
-    elementKeyToIndex.put(DataTableColumns.FILTER_VALUE, i++);
+    elementKeyForIndex[i] = DataTableColumns.GROUP_MODIFY;
+    elementKeyToIndex.put(DataTableColumns.GROUP_MODIFY, i++);
+    rowValues1[i] = null;
+    rowValues2[i] = null;
+    elementKeyForIndex[i] = DataTableColumns.GROUP_PRIVILEGED;
+    elementKeyToIndex.put(DataTableColumns.GROUP_PRIVILEGED, i++);
     rowValues1[i] = "myform_1";
     rowValues2[i] = "myform_2";
     elementKeyForIndex[i] = DataTableColumns.FORM_ID;

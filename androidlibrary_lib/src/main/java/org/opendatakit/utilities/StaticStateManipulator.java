@@ -31,11 +31,10 @@ public class StaticStateManipulator {
   private static StaticStateManipulator gStateManipulator = new StaticStateManipulator();
   
   /**
-   * Used only by the test framework to obtain the 
-   * singleton instance that can reset all static
+   * Used only by the test framework to obtain the singleton instance that can reset all static
    * state in an APK.
    * 
-   * @return
+   * @return the manipulator, used for testing
    */
   public static synchronized StaticStateManipulator get() {
     return gStateManipulator;
@@ -44,7 +43,7 @@ public class StaticStateManipulator {
   /**
    * Used for mocking only. Normally never called.
    * 
-   * @param sm
+   * @param sm the manipulator to set the internal one to
    */
   public static synchronized void set(StaticStateManipulator sm) {
     gStateManipulator = sm;
@@ -69,7 +68,7 @@ public class StaticStateManipulator {
     void reset();
   }
 
-  private final ArrayList<IStaticFieldManipulator> mStaticManipulators = new ArrayList<IStaticFieldManipulator>();
+  private final ArrayList<IStaticFieldManipulator> mStaticManipulators = new ArrayList<>();
 
   protected StaticStateManipulator() {
   }
@@ -89,8 +88,8 @@ public class StaticStateManipulator {
   /**
    * Invoke this to register a class that can reset 
    * non-final static fields to their initial state.
-   * 
-   * @param order The order in which to invoke this relative to
+   *
+   * @oldparam order The order in which to invoke this relative to
    *     other static field manipulators. Use 50 if you are not
    *     aware of a conflict or if there is no state within the 
    *     object being reset (e.g., it is only there to support
@@ -114,7 +113,7 @@ public class StaticStateManipulator {
    *     </ul>
    * @param fm a manipulator that can perform the reset.
    */
-  public void register(int order, IStaticFieldManipulator fm) {
+  public void register(IStaticFieldManipulator fm) {
     mStaticManipulators.add(fm);
   }
   

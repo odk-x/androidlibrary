@@ -22,10 +22,12 @@ import java.io.FileFilter;
 
 /**
  * Implements property access methods that return dynamic values
+ * <p>
+ * Used in OdkCommon, AbsBaseWebActivity, MainMenuActivity, DoActionUtils, SubmissionProvider
  *
  * @author mitchellsundt@gmail.com
- *
  */
+@SuppressWarnings("unused")
 public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
 
   private final String appName;
@@ -33,18 +35,14 @@ public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
   private final String instanceId;
   private final String activeUser;
   private final String locale;
-  private final String username;
-  private final String userEmail;
 
   public DynamicPropertiesCallback(String appName, String tableId, String instanceId,
-      String activeUser, String locale, String username, String userEmail) {
+      String activeUser, String locale) {
     this.appName = appName;
     this.tableId = tableId;
     this.instanceId = instanceId;
     this.activeUser = activeUser;
     this.locale = locale;
-    this.username = username;
-    this.userEmail = userEmail;
   }
 
   @Override
@@ -62,41 +60,32 @@ public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
   }
 
   @Override
-  public String getUsername() {
-    // Get the user name
-    return username;
-  }
-
-  @Override
-  public String getUserEmail() {
-    // Get the user email
-    return userEmail;
-  }
-
-  @Override
   public String getAppName() {
     return appName;
   }
 
   @Override
   public String getInstanceDirectory() {
-    if ( tableId == null ) {
-      throw new IllegalStateException("getInstanceDirectory() unexpectedly invoked outside of a form.");
+    if (tableId == null) {
+      throw new IllegalStateException(
+          "getInstanceDirectory() unexpectedly invoked outside of a form.");
     }
-    String mediaPath = ODKFileUtils.getInstanceFolder(appName, tableId, instanceId);
-    return mediaPath;
+    return ODKFileUtils.getInstanceFolder(appName, tableId, instanceId);
   }
 
   @Override
   public String getUriFragmentNewInstanceFile(String uriDeviceId, String extension) {
-    if ( tableId == null ) {
-      throw new IllegalStateException("getUriFragmentNewInstanceFile(...) unexpectedly invoked outside of a form.");
+    if (tableId == null) {
+      throw new IllegalStateException(
+          "getUriFragmentNewInstanceFile(...) unexpectedly invoked outside of a form.");
     }
     String mediaPath = ODKFileUtils.getInstanceFolder(appName, tableId, instanceId);
     File f = new File(mediaPath);
-    f.mkdirs();
+    if (!f.exists() && !f.mkdirs()) {
+      throw new RuntimeException("Could not create instance folder " + f.getPath());
+    }
     String chosenFileName;
-    for (;;) {
+    while (true) {
       String candidate = Long.toString(System.currentTimeMillis()) + "_" + uriDeviceId;
       final String fileName = candidate.replaceAll("[\\p{Punct}\\p{Space}]", "_");
       chosenFileName = fileName;
@@ -127,8 +116,8 @@ public class DynamicPropertiesCallback implements DynamicPropertiesInterface {
         break;
       }
     }
-    String filePath = mediaPath + File.separator + chosenFileName
-        + ((extension != null && extension.length() > 0) ? ("." + extension) : "");
+    String filePath = mediaPath + File.separator + chosenFileName + (extension != null
+        && !extension.isEmpty() ? "." + extension : "");
     return ODKFileUtils.asUriFragment(appName, new File(filePath));
   }
 }

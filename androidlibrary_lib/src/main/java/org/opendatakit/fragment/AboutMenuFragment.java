@@ -16,8 +16,10 @@ package org.opendatakit.fragment;
 
 import android.app.Fragment;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.Spanned;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,13 +29,19 @@ import android.widget.Toast;
 
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.activities.IAppAwareActivity;
-import org.opendatakit.application.AppAwareApplication;
+import org.opendatakit.application.ToolAwareApplication;
 import org.opendatakit.listener.LicenseReaderListener;
+import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.task.LicenseReaderTask;
 import org.opendatakit.logging.WebLogger;
 
+/**
+ * Used in ConflictResolutionActivity, CheckpointResolutionActivity,
+ * AllConflictsResolutionActivity, MainMenuActivity, SyncBaseActivity, MainActivity, SyncActivity
+ */
+@SuppressWarnings("unused")
 public class AboutMenuFragment extends Fragment implements LicenseReaderListener {
-  private static final String t = "AboutMenuFragment";
+  private static final String TAG = AboutMenuFragment.class.getSimpleName();
 
   public static final String NAME = "About";
   public static final int ID = R.layout.about_menu_layout;
@@ -60,8 +68,39 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     View aboutMenuView = inflater.inflate(ID, container, false);
 
     TextView versionBox = (TextView) aboutMenuView.findViewById(R.id.versionText);
-    versionBox.setText(((AppAwareApplication) getActivity().getApplication())
-        .getVersionedAppName());
+    versionBox.setText(((ToolAwareApplication) getActivity().getApplication()).getVersionedToolName());
+
+    {
+      IAppAwareActivity appAwareActivity = (IAppAwareActivity) getActivity();
+      int logLevel = WebLogger.getLogger(appAwareActivity.getAppName()).getMinimumSystemLogLevel();
+      String suppressLevel;
+      switch (logLevel) {
+      case WebLoggerIf.ASSERT:
+      case WebLoggerIf.TIP:
+        suppressLevel = getString(R.string.log_threshold_assert);
+        break;
+      case WebLoggerIf.ERROR:
+      case WebLoggerIf.SUCCESS:
+        suppressLevel = getString(R.string.log_threshold_error);
+        break;
+      case WebLoggerIf.WARN:
+        suppressLevel = getString(R.string.log_threshold_warn);
+        break;
+      case WebLoggerIf.INFO:
+        suppressLevel = getString(R.string.log_threshold_info);
+        break;
+      case WebLoggerIf.DEBUG:
+        suppressLevel = getString(R.string.log_threshold_debug);
+        break;
+      case WebLoggerIf.VERBOSE:
+        suppressLevel = getString(R.string.log_threshold_verbose);
+        break;
+      default:
+        throw new IllegalStateException("Unexpected log level filter value");
+      }
+      TextView logLevelBox = (TextView) aboutMenuView.findViewById(R.id.logLevelText);
+      logLevelBox.setText(suppressLevel);
+    }
 
     mTextView = (TextView) aboutMenuView.findViewById(R.id.text1);
     mTextView.setAutoLinkMask(Linkify.WEB_URLS);
@@ -69,7 +108,14 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
 
     if (savedInstanceState != null && savedInstanceState.containsKey(LICENSE_TEXT)) {
       mLicenseText = savedInstanceState.getString(LICENSE_TEXT);
-      mTextView.setText(Html.fromHtml(mLicenseText));
+      Spanned html;
+      if (Build.VERSION.SDK_INT >= 24) {
+        html = Html.fromHtml(mLicenseText, Html.FROM_HTML_MODE_LEGACY);
+      } else {
+        //noinspection deprecation
+        html = Html.fromHtml(mLicenseText);
+      }
+      mTextView.setText(html);
     } else {
       readLicenseFile();
     }
@@ -86,14 +132,21 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
   @Override
   public void readLicenseComplete(String result) {
     IAppAwareActivity activity = (IAppAwareActivity) getActivity();
-    WebLogger.getLogger(activity.getAppName()).i(t, "Read license complete");
+    WebLogger.getLogger(activity.getAppName()).i(TAG, "Read license complete");
     if (result != null) {
       // Read license file successfully
       mLicenseText = result;
-      mTextView.setText(Html.fromHtml(result));
+      Spanned html;
+      if (Build.VERSION.SDK_INT >= 24) {
+        html = Html.fromHtml(result, Html.FROM_HTML_MODE_LEGACY);
+      } else {
+        //noinspection deprecation
+        html = Html.fromHtml(result);
+      }
+      mTextView.setText(html);
     } else {
       // had some failures
-      WebLogger.getLogger(activity.getAppName()).e(t, "Failed to read license file");
+      WebLogger.getLogger(activity.getAppName()).e(TAG, "Failed to read license file");
       Toast.makeText(getActivity(), R.string.read_license_fail, Toast.LENGTH_LONG).show();
     }
   }
@@ -104,7 +157,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
 
     if ( licenseReaderTask == null ) {
       LicenseReaderTask lrt = new LicenseReaderTask();
-      lrt.setApplication((AppAwareApplication) getActivity().getApplication());
+      lrt.setApplication((ToolAwareApplication) getActivity().getApplication());
       lrt.setAppName(appName);
       lrt.setLicenseReaderListener(this);
       licenseReaderTask = lrt;

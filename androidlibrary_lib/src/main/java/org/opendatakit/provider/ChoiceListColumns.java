@@ -18,28 +18,41 @@ import android.provider.BaseColumns;
 
 /**
  * All tools.
- *
+ * <p>
  * Holds a mapping of an appName-unique choiceListID to
  * the choiceListJSON string.
- *
+ * <p>
  * This allows for future sharing of choiceList definitions
  * across forms and minimizes the size of the KVS content
  * when a large form reuses the same choiceList for many
  * questions (e.g, Yes/No prompts).
+ * <p>
+ * Used in ODKDatabaseImplUtils and ChoiceListUtils
  */
+@SuppressWarnings("unused")
 public final class ChoiceListColumns implements BaseColumns {
 
-  // This class cannot be instantiated
+  /**
+   * Used in ChoiceListUtils
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static final String CHOICE_LIST_ID = "_choice_list_id";
+  /**
+   * Used in ChoiceListUtils
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static final String CHOICE_LIST_JSON = "_choice_list_json";
+
+  /**
+   * This class cannot be instantiated
+   */
   private ChoiceListColumns() {
   }
-
-  public static final String CHOICE_LIST_ID = "_choice_list_id";
-  public static final String CHOICE_LIST_JSON = "_choice_list_json";
 
   /**
    * Get the create sql for the choiceList table.
    *
-   * @return
+   * @return a sql query that wil create the table
    */
   public static String getTableCreateSql(String tableName) {
     //@formatter:off

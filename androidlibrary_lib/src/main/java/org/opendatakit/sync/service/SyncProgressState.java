@@ -22,7 +22,10 @@ import android.os.Parcelable;
  * Tracks the progress of an active sync operation.
  *
  * After a sync is FINISHED, the SyncOverallResult object will be available.
+ *
+ * Used by SyncProgressEvent and aidl
  */
+@SuppressWarnings("WeakerAccess") // Should be public for aidl I think
 public enum SyncProgressState implements Parcelable {
   /** sync is not started */
   INACTIVE,

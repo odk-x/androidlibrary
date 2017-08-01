@@ -18,47 +18,72 @@ package org.opendatakit.sync.service;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.HashMap;
+
 /**
  * The mapping of a table to the SyncOutcome of its synchronization.
  * Also includes interesting metrics on the scope of change.
- * 
- * @author sudar.sam@gmail.com
+ * <p>
+ * Used in SyncOverallResult, (in services.sync.service.logic) ProcessAppAndTableLevelChanges,
+ * ProcessRowDataSyncAttachments, ProcessRowDataShardBase, ProcessRowDataPushLocalChanges,
+ * ProcessRowDataPullServerUpdates, ProcessRowDataOrchestrateChanges, (services.sync.service)
+ * SyncExecutionContext, AppSynchronizer
  *
+ * TODO it looks like we set things but never read them
+ *
+ * @author sudar.sam@gmail.com
  */
+@SuppressWarnings("WeakerAccess")
 public class TableLevelResult implements Parcelable {
-  private static final String TAG = "TableLevelResult";
+  public static final Creator<TableLevelResult> CREATOR = new Creator<TableLevelResult>() {
+    @Override
+    public TableLevelResult createFromParcel(Parcel in) {
+      return new TableLevelResult(in);
+    }
 
+    @Override
+    public TableLevelResult[] newArray(int size) {
+      return new TableLevelResult[size];
+    }
+  };
+  /**
+   * Used for logging
+   */
+  @SuppressWarnings("unused")
+  private static final String TAG = TableLevelResult.class.getSimpleName();
   private final String mTableId;
   private String mDisplayName;
-  private SyncOutcome mSyncOutcome = SyncOutcome.WORKING;
   private String mMessage = SyncOutcome.WORKING.name();
-  /** Flag if schema was pulled from the server. */
-  private boolean mPulledServerSchema;
-  /** Flag if properties were pulled from the server. */
-  private boolean mPulledServerProps;
-  /** Flag if data was pulled from the server. */
-  private boolean mPulledServerData;
-  /** Flag if properties were pushed to the server. */
-  private boolean mPushedLocalProps;
-  /** Flag if data was pushed to the server. */
-  private boolean mPushedLocalData;
-  /** Flag if properties had to be pushed to the server. */
-  private boolean mHadLocalPropChanges;
-  /** Flag if local data had to be pushed to the server. */
-  private boolean mHadLocalDataChanges;
-  /** Flag if schema had to be pulled from the server. */
-  private boolean mHadServerSchemaChanges;
-  /** Flag if properties had to be pulled from the server. */
-  private boolean mHadServerPropChanges;
-  /** Flat if data had to be pulled from the server. */
-  private boolean mHadServerDataChanges;
+  private SyncOutcome mSyncOutcome = SyncOutcome.WORKING;
 
+  /**
+   * Flag if schema was pulled from the server.
+   */
+  private boolean mPulledServerSchema;
+  /**
+   * Flag if data was pulled from the server.
+   */
+  private boolean mPulledServerData;
+  /**
+   * Flag if data was pushed to the server.
+   */
+  private boolean mPushedLocalData;
+  /**
+   * Flag if local data had to be pushed to the server.
+   */
+  private boolean mHadLocalDataChanges;
+  /**
+   * Flag if schema had to be pulled from the server.
+   */
+  private boolean mHadServerSchemaChanges;
+  /**
+   * Flat if data had to be pulled from the server.
+   */
+  private boolean mHadServerDataChanges;
   private int mServerNumUpserts = 0;
   private int mServerNumDeletes = 0;
   private int mLocalNumInserts = 0;
-  private int mLocalNumUpdates = 0;
   private int mLocalNumDeletes = 0;
-  private int mLocalNumConflicts = 0;
   private int mLocalNumAttachmentRetries = 0;
 
   protected TableLevelResult(Parcel in) {
@@ -66,203 +91,225 @@ public class TableLevelResult implements Parcelable {
     mDisplayName = in.readString();
     mMessage = in.readString();
     mPulledServerSchema = in.readByte() != 0;
-    mPulledServerProps = in.readByte() != 0;
     mPulledServerData = in.readByte() != 0;
-    mPushedLocalProps = in.readByte() != 0;
     mPushedLocalData = in.readByte() != 0;
-    mHadLocalPropChanges = in.readByte() != 0;
     mHadLocalDataChanges = in.readByte() != 0;
     mHadServerSchemaChanges = in.readByte() != 0;
-    mHadServerPropChanges = in.readByte() != 0;
     mHadServerDataChanges = in.readByte() != 0;
     mServerNumUpserts = in.readInt();
     mServerNumDeletes = in.readInt();
     mLocalNumInserts = in.readInt();
-    mLocalNumUpdates = in.readInt();
     mLocalNumDeletes = in.readInt();
-    mLocalNumConflicts = in.readInt();
     mLocalNumAttachmentRetries = in.readInt();
-  }
-
-  @Override public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(mTableId);
-    dest.writeString(mDisplayName);
-    dest.writeString(mMessage);
-    dest.writeByte((byte) (mPulledServerSchema ? 1 : 0));
-    dest.writeByte((byte) (mPulledServerProps ? 1 : 0));
-    dest.writeByte((byte) (mPulledServerData ? 1 : 0));
-    dest.writeByte((byte) (mPushedLocalProps ? 1 : 0));
-    dest.writeByte((byte) (mPushedLocalData ? 1 : 0));
-    dest.writeByte((byte) (mHadLocalPropChanges ? 1 : 0));
-    dest.writeByte((byte) (mHadLocalDataChanges ? 1 : 0));
-    dest.writeByte((byte) (mHadServerSchemaChanges ? 1 : 0));
-    dest.writeByte((byte) (mHadServerPropChanges ? 1 : 0));
-    dest.writeByte((byte) (mHadServerDataChanges ? 1 : 0));
-    dest.writeInt(mServerNumUpserts);
-    dest.writeInt(mServerNumDeletes);
-    dest.writeInt(mLocalNumInserts);
-    dest.writeInt(mLocalNumUpdates);
-    dest.writeInt(mLocalNumDeletes);
-    dest.writeInt(mLocalNumConflicts);
-    dest.writeInt(mLocalNumAttachmentRetries);
-  }
-
-  @Override public int describeContents() {
-    return 0;
-  }
-
-  public static final Creator<TableLevelResult> CREATOR = new Creator<TableLevelResult>() {
-    @Override public TableLevelResult createFromParcel(Parcel in) {
-      return new TableLevelResult(in);
-    }
-
-    @Override public TableLevelResult[] newArray(int size) {
-      return new TableLevelResult[size];
-    }
-  };
-
-  public void incServerUpserts() {
-    ++mServerNumUpserts;
-  }
-
-  public void incServerDeletes() {
-    ++mServerNumDeletes;
-  }
-
-  public void incLocalInserts() {
-    ++mLocalNumInserts;
-  }
-
-  public void incLocalUpdates() {
-    ++mLocalNumUpdates;
-  }
-
-  public void incLocalDeletes() {
-    ++mLocalNumDeletes;
-  }
-
-  public void incLocalConflicts() {
-    ++mLocalNumConflicts;
-  }
-
-  public void incLocalAttachmentRetries() {
-    ++mLocalNumAttachmentRetries;
   }
 
   /**
    * Create a table result with a status of {@link SyncOutcome#FAILURE}. This should
    * then only be updated in the case of success or exceptions. The boolean
    * flags are initialized to false;
-   * 
-   * @param tableId
+   *
+   * @param tableId the id of the table to create a result for
    */
   public TableLevelResult(String tableId) {
     this.mTableId = tableId;
     this.mDisplayName = tableId;
     this.mPulledServerData = false;
-    this.mPulledServerProps = false;
     this.mPulledServerSchema = false;
     this.mPushedLocalData = false;
-    this.mPushedLocalData = false;
     this.mHadLocalDataChanges = false;
-    this.mHadLocalPropChanges = false;
     this.mHadServerDataChanges = false;
-    this.mHadServerPropChanges = false;
     this.mHadServerSchemaChanges = false;
+  }
+
+  public HashMap<String, Object> getStatusMap() {
+    HashMap<String, Object> statusMap = new HashMap<String, Object>();
+    statusMap.put("tableId", mTableId);
+    statusMap.put("syncOutcome", mSyncOutcome.name());
+    statusMap.put("message", mMessage);
+
+    // some of these will be under-reported if server schema is bad
+    statusMap.put("pulledServerSchemaInfo", mPulledServerSchema);
+    statusMap.put("serverSchemaDiffered", mHadServerSchemaChanges);
+    if ( mSyncOutcome != SyncOutcome.TABLE_SCHEMA_COLUMN_DEFINITION_MISMATCH ) {
+
+      statusMap.put("hadServerDataChanges", mHadServerDataChanges);
+      statusMap.put("pulledServerDataChanges", mPulledServerData);
+      statusMap.put("hadLocalDataChanges", mHadLocalDataChanges);
+      statusMap.put("pushedLocalChanges", mPushedLocalData);
+
+      statusMap.put("serverNumUpserts", mServerNumUpserts);
+      statusMap.put("serverNumDeletes", mServerNumDeletes);
+      statusMap.put("localNumInserts", mLocalNumInserts);
+      statusMap.put("localNumDeletes", mLocalNumDeletes);
+      statusMap.put("localNumAttachmentRetries", mLocalNumAttachmentRetries);
+
+    }
+    return statusMap;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(mTableId);
+    dest.writeString(mDisplayName);
+    dest.writeString(mMessage);
+    dest.writeByte((byte) (mPulledServerSchema ? 1 : 0));
+    dest.writeByte((byte) (mPulledServerData ? 1 : 0));
+    dest.writeByte((byte) (mPushedLocalData ? 1 : 0));
+    dest.writeByte((byte) (mHadLocalDataChanges ? 1 : 0));
+    dest.writeByte((byte) (mHadServerSchemaChanges ? 1 : 0));
+    dest.writeByte((byte) (mHadServerDataChanges ? 1 : 0));
+    dest.writeInt(mServerNumUpserts);
+    dest.writeInt(mServerNumDeletes);
+    dest.writeInt(mLocalNumInserts);
+    dest.writeInt(mLocalNumDeletes);
+    dest.writeInt(mLocalNumAttachmentRetries);
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  /**
+   * Used in Aggregate TableResults, services.sync.service.logic.ProcessRowDataPushLocalChanges
+   */
+  @SuppressWarnings("unused")
+  public void incServerUpserts() {
+    mServerNumUpserts++;
+  }
+
+  /**
+   * @see #incServerUpserts for usages
+   */
+  @SuppressWarnings("unused")
+  public void incServerDeletes() {
+    mServerNumDeletes++;
+  }
+
+  /**
+   * @see #incServerUpserts for usages
+   */
+  @SuppressWarnings("unused")
+  public void incLocalInserts() {
+    mLocalNumInserts++;
+  }
+
+  /**
+   * @see #incServerUpserts for usages
+   */
+  @SuppressWarnings("unused")
+  public void incLocalDeletes() {
+    mLocalNumDeletes++;
+  }
+
+  /**
+   * @see #incServerUpserts for usages
+   */
+  @SuppressWarnings("unused")
+  public void incLocalAttachmentRetries() {
+    mLocalNumAttachmentRetries++;
   }
 
   public String getTableId() {
     return this.mTableId;
   }
 
-  public void setTableDisplayName(String displayName) {
-    this.mDisplayName = displayName;
-  }
-
+  /**
+   * Used in aggregate TableResults, (services.sync.service.logic)
+   * ProcessAppAndTableLevelChanges, ProcessRowDataOrchestrateChanges, and
+   * services.sync.service.SyncExecutionContext
+   * @return the display name for this table
+   */
+  @SuppressWarnings("unused")
   public String getTableDisplayName() {
     return this.mDisplayName;
   }
 
+  /**
+   * @see #getTableDisplayName() for usages
+   * @param displayName the display name to update this object to use
+   */
+  @SuppressWarnings("unused")
+  public void setTableDisplayName(String displayName) {
+    this.mDisplayName = displayName;
+  }
+
+  /**
+   * Used in lots of places in services.sync.service.logic.Process*
+   * @return the sync outcome
+   */
+  @SuppressWarnings("unused")
   public SyncOutcome getSyncOutcome() {
     return this.mSyncOutcome;
   }
 
-  public boolean pulledServerData() {
-    return this.mPulledServerData;
+  /**
+   * Update the status of this result
+   * Used in lots of places in services.sync.service.logic.Process*
+   *
+   * @param newSyncOutcome the sync outcome to update to
+   * @throws UnsupportedOperationException if the status is not currently {@link SyncOutcome#WORKING}.
+   */
+  @SuppressWarnings("unused")
+  public void setSyncOutcome(SyncOutcome newSyncOutcome) {
+    if (this.mSyncOutcome != SyncOutcome.WORKING) {
+      throw new UnsupportedOperationException(
+          "Tried to set TableLevelResult status to " + newSyncOutcome.name()
+              + " when it had already been set to " + mSyncOutcome.name());
+    }
+    this.mSyncOutcome = newSyncOutcome;
   }
 
-  public boolean pulledServerProperties() {
-    return this.mPulledServerProps;
-  }
-
-  public boolean pulledServerSchema() {
-    return this.mPulledServerSchema;
-  }
-
-  public boolean pushedLocalProperties() {
-    return this.mPushedLocalProps;
-  }
-
-  public boolean pushedLocalData() {
-    return this.mPushedLocalData;
-  }
-
-  public boolean hadLocalDataChanges() {
-    return this.mHadLocalDataChanges;
-  }
-
-  public boolean hadLocalPropertiesChanges() {
-    return this.mHadLocalPropChanges;
-  }
-
-  public boolean serverHadDataChanges() {
-    return this.mHadServerDataChanges;
-  }
-
-  public boolean serverHadPropertiesChanges() {
-    return this.mHadServerPropChanges;
-  }
-
-  public boolean serverHadSchemaChanges() {
-    return this.mHadServerSchemaChanges;
-  }
-
+  /**
+   * Used in services.sync.service.logic.ProcessRowDataPullServerUpdates
+   * @param pulledData whether we pulled down data from the server
+   */
+  @SuppressWarnings("unused")
   public void setPulledServerData(boolean pulledData) {
     this.mPulledServerData = pulledData;
   }
 
-  public void setPulledServerProperties(boolean pulledProperties) {
-    this.mPulledServerProps = pulledProperties;
-  }
-
+  /**
+   * Used in services.sync.service.logic.ProcessAppAndTableLevelChanges
+   * @param pulledSchema whether we pulled down the schema from the server
+   */
+  @SuppressWarnings("unused")
   public void setPulledServerSchema(boolean pulledSchema) {
     this.mPulledServerSchema = pulledSchema;
   }
 
-  public void setPushedLocalProperties(boolean pushedProperties) {
-    this.mPushedLocalProps = pushedProperties;
-  }
-
+  /**
+   * Used in ProcessRowDataSyncAttachments, ProcessRowDataPushLocalChanges
+   * @param pushedData whether we pushed data or not
+   */
+  @SuppressWarnings("unused")
   public void setPushedLocalData(boolean pushedData) {
     this.mPushedLocalData = pushedData;
   }
 
-  public void setHadLocalPropertiesChanges(boolean hadChanges) {
-    this.mHadLocalPropChanges = hadChanges;
-  }
-
+  /**
+   * Used in ProcessRowDataPushLocalChanges
+   * @param hadChanges whether there were changes to be pushed or not
+   */
+  @SuppressWarnings("unused")
   public void setHadLocalDataChanges(boolean hadChanges) {
     this.mHadLocalDataChanges = hadChanges;
   }
 
+  /**
+   * Used in ProcessAppAndTableLevelChanges, ProcessRowDataOrchestrateChanges
+   * @param serverHadChanges whether the server had schema changes or not
+   */
+  @SuppressWarnings("unused")
   public void setServerHadSchemaChanges(boolean serverHadChanges) {
     this.mHadServerSchemaChanges = serverHadChanges;
   }
 
-  public void setServerHadPropertiesChanges(boolean serverHadChanges) {
-    this.mHadServerPropChanges = serverHadChanges;
-  }
-
+  /**
+   * Used in ProcessRowDataPullServerUpdates
+   * @param serverHadChanges whether the server had data changes
+   */
+  @SuppressWarnings("unused")
   public void setServerHadDataChanges(boolean serverHadChanges) {
     this.mHadServerDataChanges = serverHadChanges;
   }
@@ -270,33 +317,13 @@ public class TableLevelResult implements Parcelable {
   /**
    * Set a message that might be passed back to the user. Likely a place to pass
    * the error message back to the user in case of exceptions.
-   * 
-   * @param message
+   *
+   * Used in Services somewhere
+   *
+   * @param message the message to be passed back
    */
+  @SuppressWarnings("unused")
   public void setMessage(String message) {
     this.mMessage = message;
-  }
-
-  public String getMessage() {
-    return this.mMessage;
-  }
-
-  /**
-   * Update the status of this result.
-   * 
-   * @param newSyncOutcome
-   * @throws UnsupportedOperationException
-   *           if the status is not currently {@link SyncOutcome#WORKING}.
-   */
-  public void setSyncOutcome(SyncOutcome newSyncOutcome) {
-    if (this.mSyncOutcome != SyncOutcome.WORKING ) {
-      throw new UnsupportedOperationException("Tried to set TableLevelResult status to " +
-          newSyncOutcome.name() + " when it had already been set to " + mSyncOutcome.name());
-    }
-    this.mSyncOutcome = newSyncOutcome;
-  }
-
-  public void resetSyncOutcome() {
-    this.mSyncOutcome = SyncOutcome.WORKING;
   }
 }

@@ -22,8 +22,11 @@ import android.os.Parcelable;
 /**
  * SyncOutcome code used at app and table levels when returning SyncOverallResult
  *
+ * Used all over the place
+ *
  * WORKING should never be returned (the initial value)
  */
+@SuppressWarnings("WeakerAccess")
 public enum SyncOutcome implements Parcelable {
   WORKING,
   SUCCESS,

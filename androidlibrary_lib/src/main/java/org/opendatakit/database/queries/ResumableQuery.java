@@ -15,39 +15,36 @@
  */
 package org.opendatakit.database.queries;
 
+/**
+ * Extended by ArbitraryQuery and SimpleQuery
+ */
 public abstract class ResumableQuery implements Query {
 
    /**
     * The table to select from
     */
-   protected final String mTableId;
+   final String mTableId;
 
    /**
     * The SELECT arguments for the SQL command
     */
-   protected final BindArgs mBindArgs;
+   private final BindArgs mBindArgs;
 
    /**
     * The maximum number of rows to return
     */
-   protected int mLimit;
+   private int mLimit;
 
    /**
     * The index into the full results to start counting the limit from
     */
-   protected int mOffset;
+   private int mOffset;
 
-   public ResumableQuery(String tableId, BindArgs bindArgs, Integer limit, Integer offset) {
+   ResumableQuery(String tableId, BindArgs bindArgs, Integer limit, Integer offset) {
       this.mTableId = tableId;
-      this.mBindArgs = bindArgs;
-      this.mLimit = limit != null ? limit.intValue() : -1;
-      this.mOffset = offset != null ? offset.intValue() : -1;
-   }
-
-   public ResumableQuery(String tableId, BindArgs bindArgs, QueryBounds bounds) {
-
-      this(tableId, bindArgs, (bounds != null ? bounds.mLimit : null),
-          (bounds != null ? bounds.mOffset : null));
+      this.mBindArgs = bindArgs != null ? bindArgs : new BindArgs(new Object[0]);
+      this.mLimit = limit != null ? limit : -1;
+      this.mOffset = offset != null ? offset : -1;
    }
 
    /**

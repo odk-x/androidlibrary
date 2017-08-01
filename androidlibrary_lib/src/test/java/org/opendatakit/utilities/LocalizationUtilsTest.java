@@ -29,6 +29,9 @@ import static org.junit.Assert.assertEquals;
 
 public class LocalizationUtilsTest {
 
+  String appName = "default";
+  String tableId = null;
+
   @BeforeClass
   public static void oneTimeSetUp() throws Exception {
     StaticStateManipulator.get().reset();
@@ -37,13 +40,15 @@ public class LocalizationUtilsTest {
 
   @Test
   public void testHackedName() {
-    assertEquals("aname", LocalizationUtils.getLocalizedDisplayName(
+    Locale defaultLocale = Locale.getDefault();
+    String full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    assertEquals("aname", LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale,
         NameUtil.normalizeDisplayName(NameUtil.constructSimpleDisplayName("aname"))));
-    assertEquals("a name", LocalizationUtils.getLocalizedDisplayName(
+    assertEquals("a name", LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale,
         NameUtil.normalizeDisplayName(NameUtil.constructSimpleDisplayName("a_name"))));
-    assertEquals("_ an am e", LocalizationUtils.getLocalizedDisplayName(
+    assertEquals("_ an am e", LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale,
         NameUtil.normalizeDisplayName(NameUtil.constructSimpleDisplayName("_an_am_e"))));
-    assertEquals("an ame _", LocalizationUtils.getLocalizedDisplayName(
+    assertEquals("an ame _", LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale,
         NameUtil.normalizeDisplayName(NameUtil.constructSimpleDisplayName("an_ame_"))));
   }
 
@@ -55,62 +60,42 @@ public class LocalizationUtilsTest {
     langMap.put("en", "Huh Test");
     langMap.put("fr", "Je suis");
     langMap.put("default", "No way!");
-    String value = ODKFileUtils.mapper.writeValueAsString(langMap);
+    Map<String,Object> topMap = new TreeMap<String,Object>();
+    topMap.put("text", langMap);
+    String value = ODKFileUtils.mapper.writeValueAsString(topMap);
 
+    Locale defaultLocale;
+    String full_locale;
     String match;
 
     Locale.setDefault(Locale.US);
-    match = LocalizationUtils.getLocalizedDisplayName(value);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("This is a test", match);
 
     Locale.setDefault(Locale.UK);
-    match = LocalizationUtils.getLocalizedDisplayName(value);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("Test is This", match);
 
     Locale.setDefault(Locale.CANADA);
-    match = LocalizationUtils.getLocalizedDisplayName(value);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("Huh Test", match);
 
     Locale.setDefault(Locale.CANADA_FRENCH);
-    match = LocalizationUtils.getLocalizedDisplayName(value);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("Je suis", match);
 
     Locale.setDefault(Locale.GERMANY);
-    match = LocalizationUtils.getLocalizedDisplayName(value);
-    assertEquals("No way!", match);
-
-    Locale.setDefault(Locale.US);
-  }
-
-  @Test
-  public void testNormalizeDisplayName2() {
-    Map<String,Object> langMap = new TreeMap<String,Object>();
-    langMap.put("en_US", "This is a test");
-    langMap.put("en_GB", "Test is This");
-    langMap.put("en", "Huh Test");
-    langMap.put("fr", "Je suis");
-    langMap.put("default", "No way!");
-
-    String match;
-
-    Locale.setDefault(Locale.US);
-    match = LocalizationUtils.getLocalizedDisplayName(langMap);
-    assertEquals("This is a test", match);
-
-    Locale.setDefault(Locale.UK);
-    match = LocalizationUtils.getLocalizedDisplayName(langMap);
-    assertEquals("Test is This", match);
-
-    Locale.setDefault(Locale.CANADA);
-    match = LocalizationUtils.getLocalizedDisplayName(langMap);
-    assertEquals("Huh Test", match);
-
-    Locale.setDefault(Locale.CANADA_FRENCH);
-    match = LocalizationUtils.getLocalizedDisplayName(langMap);
-    assertEquals("Je suis", match);
-
-    Locale.setDefault(Locale.GERMANY);
-    match = LocalizationUtils.getLocalizedDisplayName(langMap);
+    defaultLocale = Locale.getDefault();
+    full_locale = defaultLocale.getLanguage() + "_" + defaultLocale.getCountry();
+    match = LocalizationUtils.getLocalizedDisplayName(appName, tableId, full_locale, value);
     assertEquals("No way!", match);
 
     Locale.setDefault(Locale.US);

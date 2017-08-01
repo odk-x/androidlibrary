@@ -15,12 +15,10 @@
  */
 package org.opendatakit.task;
 
-
 import android.app.Application;
 import android.os.AsyncTask;
-
 import org.opendatakit.androidlibrary.R;
-import org.opendatakit.application.AppAwareApplication;
+import org.opendatakit.application.ToolAwareApplication;
 import org.opendatakit.listener.LicenseReaderListener;
 
 import java.io.BufferedReader;
@@ -29,15 +27,14 @@ import java.io.InputStreamReader;
 
 public class LicenseReaderTask extends AsyncTask<Void, Integer, String> {
 
-  private AppAwareApplication appContext;
+  private ToolAwareApplication appContext;
   private LicenseReaderListener lrl;
   private String appName;
   private String mResult;
 
-  protected String doInBackground(Void... arg0) {
-    
-    String result = null;
-    StringBuilder interimResult  = null;
+  protected String doInBackground(Void... args) {
+
+    StringBuilder interimResult = null;
 
     try {
       InputStream licenseInputStream = appContext.getResources().openRawResource(R.raw.license);
@@ -56,8 +53,7 @@ public class LicenseReaderTask extends AsyncTask<Void, Integer, String> {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    result = (interimResult == null) ? null : interimResult.toString();
-    return result;
+    return (interimResult == null) ? null : interimResult.toString();
   }
 
   @Override
@@ -70,7 +66,7 @@ public class LicenseReaderTask extends AsyncTask<Void, Integer, String> {
       }
     }
   }
-  
+
   @Override
   protected void onCancelled(String result) {
     synchronized (this) {
@@ -101,24 +97,24 @@ public class LicenseReaderTask extends AsyncTask<Void, Integer, String> {
     }
   }
 
+  public String getAppName() {
+    return appName;
+  }
+
   public void setAppName(String appName) {
     synchronized (this) {
       this.appName = appName;
     }
   }
 
-  public String getAppName() {
-    return appName;
+  public Application getApplication() {
+    return appContext;
   }
 
-  public void setApplication(AppAwareApplication appContext) {
+  public void setApplication(ToolAwareApplication appContext) {
     synchronized (this) {
       this.appContext = appContext;
     }
-  }
-
-  public Application getApplication() {
-    return appContext;
   }
 }
 

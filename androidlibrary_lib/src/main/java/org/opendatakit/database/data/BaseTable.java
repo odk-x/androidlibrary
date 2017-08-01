@@ -17,16 +17,13 @@ package org.opendatakit.database.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import org.opendatakit.database.queries.BindArgs;
-import org.opendatakit.database.queries.ResumableQuery;
 import org.opendatakit.database.queries.QueryBounds;
+import org.opendatakit.database.queries.ResumableQuery;
 import org.opendatakit.database.utilities.MarshallUtil;
+import org.opendatakit.logging.WebLogger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This is the generic parent table used inside the service. All other table objects should
@@ -34,96 +31,97 @@ import java.util.Map;
  */
 public class BaseTable implements Parcelable {
 
+  public static final Parcelable.Creator<BaseTable> CREATOR = new Parcelable.Creator<BaseTable>() {
+    public BaseTable createFromParcel(Parcel in) {
+      return new BaseTable(in);
+    }
 
-  static final String TAG = BaseTable.class.getSimpleName();
-
+    public BaseTable[] newArray(int size) {
+      return new BaseTable[size];
+    }
+  };
+  private static final String TAG = BaseTable.class.getSimpleName();
   /**
+   * These eight properties all have getters and setters, so I'm making them private - 06/23/17
    * The table data
    */
-  protected final ArrayList<Row> mRows;
-
+  private final ArrayList<Row> mRows;
+  /**
+   * The fields that make up the primary key
+   */
+  private final String[] mPrimaryKey;
+  /**
+   * Map indices to column names
+   */
+  private final String[] mElementKeyForIndex;
+  /**
+   * Map column names to indices
+   */
+  private final Map<String, Integer> mElementKeyToIndex;
   /**
    * The parent/container table
    */
-  protected ParentTable mParent;
-
+  private WrapperTable mWrapper;
   /**
    * Table metadata rev_id. If this differs from your cached value, you need to requery the
    * metadata.
    */
-  protected String mMetaDataRev;
-
+  private String mMetaDataRev = null;
   /**
    * True if the user has the permissions to create a row.
    * Defaults to false.
    */
-  protected boolean mEffectiveAccessCreateRow;
-
+  private boolean mEffectiveAccessCreateRow;
   /**
    * The query performed
    */
-  protected ResumableQuery mQuery;
-
-  /**
-   * The fields that make up the primary key
-   */
-  protected final String[] mPrimaryKey;
-
-  /**
-   * Map indices to column names
-   */
-  protected final String[] mElementKeyForIndex;
-
-  /**
-   * Map column names to indices
-   */
-  protected final Map<String, Integer> mElementKeyToIndex;
+  private ResumableQuery mQuery;
 
   /**
    * Construct the table
    *
-   * @param query the query that produced the results
+   * @param query              the query that produced the results
    * @param elementKeyForIndex map indices to column names in row data
-   * @param elementKeyToIndex map column names to indices in row data
-   * @param rowCount the capacity of the table
+   * @param elementKeyToIndex  map column names to indices in row data
+   * @param rowCount           the capacity of the table
    */
   public BaseTable(ResumableQuery query, String[] elementKeyForIndex,
       Map<String, Integer> elementKeyToIndex, String[] primaryKey, Integer rowCount) {
-    this.mParent = null;
+    mWrapper = null;
 
-    this.mEffectiveAccessCreateRow = false;
+    mEffectiveAccessCreateRow = false;
 
-    this.mQuery = query;
+    mQuery = query;
 
     if (elementKeyForIndex == null) {
       throw new IllegalStateException("elementKeyForIndex cannot be null");
     }
-    this.mElementKeyForIndex = elementKeyForIndex;
+    mElementKeyForIndex = elementKeyForIndex;
 
     if (elementKeyToIndex == null) {
-      this.mElementKeyToIndex = generateElementKeyToIndex();
+      mElementKeyToIndex = generateElementKeyToIndex();
     } else {
-      this.mElementKeyToIndex = elementKeyToIndex;
+      mElementKeyToIndex = elementKeyToIndex;
     }
 
-    this.mPrimaryKey = primaryKey;
+    mPrimaryKey = primaryKey;
 
     int numRows = 0;
     if (rowCount != null) {
-      numRows = rowCount.intValue();
+      numRows = rowCount;
     }
-    this.mRows = new ArrayList<>(numRows);
+    mRows = new ArrayList<>(numRows);
   }
 
   /**
    * Construct the table
    *
    * @param elementKeyForIndex map indices to column names in row data
-   * @param elementKeyToIndex map column names to indices in row data
-   * @param rowCount the capacity of the table
+   * @param elementKeyToIndex  map column names to indices in row data
+   * @param rowCount           the capacity of the table
    */
-  public BaseTable(String[] primaryKey, String[] elementKeyForIndex, Map<String, Integer> elementKeyToIndex,
-     Integer rowCount) {
+  public BaseTable(String[] primaryKey, String[] elementKeyForIndex,
+      Map<String, Integer> elementKeyToIndex, Integer rowCount) {
     this(null, elementKeyForIndex, elementKeyToIndex, primaryKey, rowCount);
   }
 
@@ -134,60 +132,77 @@ public class BaseTable implements Parcelable {
       mRows.add(r);
     }
 
-    this.mEffectiveAccessCreateRow = table.mEffectiveAccessCreateRow;
-    this.mQuery = table.mQuery;
-    this.mPrimaryKey = table.mPrimaryKey;
-    this.mElementKeyForIndex = table.mElementKeyForIndex;
-    this.mElementKeyToIndex = table.mElementKeyToIndex;
-    this.mParent = null; // Set this with register
-    this.mMetaDataRev = null;
+    mEffectiveAccessCreateRow = table.mEffectiveAccessCreateRow;
+    mQuery = table.mQuery;
+    mPrimaryKey = table.mPrimaryKey;
+    mElementKeyForIndex = table.mElementKeyForIndex;
+    mElementKeyToIndex = table.mElementKeyToIndex;
+    mWrapper = null; // Set this with register
+    mMetaDataRev = null;
   }
-
 
   public BaseTable(Parcel in) {
     int dataCount;
 
     try {
       byte eacr = in.readByte();
-      mEffectiveAccessCreateRow = (eacr == 0) ? false : true;
+      mEffectiveAccessCreateRow = eacr != 0;
       mPrimaryKey = MarshallUtil.unmarshallStringArray(in);
       mElementKeyForIndex = MarshallUtil.unmarshallStringArray(in);
       mElementKeyToIndex = generateElementKeyToIndex();
     } catch (Throwable t) {
-      Log.e(TAG, t.getMessage());
-      Log.e(TAG, Log.getStackTraceString(t));
+      WebLogger.getContextLogger().e(TAG, t.getMessage());
+      WebLogger.getContextLogger().printStackTrace(t);
       throw t;
     }
 
     dataCount = in.readInt();
     mRows = new ArrayList<>(dataCount);
-    for(; dataCount > 0; dataCount--) {
+    for (; dataCount > 0; dataCount--) {
+      //noinspection ThisEscapedInObjectConstruction
       Row r = new Row(in, this);
       mRows.add(r);
     }
 
     // The parent and the query are not parceled
-    this.mParent = null;
-    this.mQuery = null;
-    this.mMetaDataRev = null;
+    mWrapper = null;
+    mQuery = null;
+    mMetaDataRev = null;
   }
 
-  public void setEffectiveAccessCreateRow(boolean canCreateRow) {
-    this.mEffectiveAccessCreateRow = canCreateRow;
-  }
-
+  /**
+   * Used in ExecutorProcessor and UserTable
+   *
+   * @return whether we have access to create a row
+   */
+  @SuppressWarnings("WeakerAccess")
   public boolean getEffectiveAccessCreateRow() {
     return mEffectiveAccessCreateRow;
   }
 
-  public void setQuery(ResumableQuery query) {
-    this.mQuery = query;
+  /**
+   * Used in ODKDatabaseImplUtils
+   *
+   * @param canCreateRow whether we have access to create a row
+   */
+  @SuppressWarnings("unused")
+  public void setEffectiveAccessCreateRow(boolean canCreateRow) {
+    mEffectiveAccessCreateRow = canCreateRow;
   }
 
   public ResumableQuery getQuery() {
     return mQuery;
   }
 
+  public void setQuery(ResumableQuery query) {
+    mQuery = query;
+  }
+
+  /**
+   * Only used in this method, but public anyways
+   *
+   * @return the start index for the table
+   */
   public int getStartIndex() {
     if (mQuery == null || mQuery.getSqlQueryBounds() == null) {
       return 0;
@@ -202,46 +217,52 @@ public class BaseTable implements Parcelable {
     return bounds.mOffset;
   }
 
+  /**
+   * Only used in this method, but public anyways
+   *
+   * @return the end index for the table
+   */
   public int getEndIndex() {
     return getStartIndex() + getNumberOfRows() - 1;
   }
 
-   /**
-    * Return a resumable query that will perform the same query but adjust the query bounds. The
-    * bounds will be moved forward through the row indeces as determined by the ORDER BY row
-    * ordering.
-    *
-    * @param limit the maximum number of rows to retrieve
-    * @return
-    */
-   public ResumableQuery resumeQueryForward(int limit) {
-     if (mQuery == null) {
-       return null;
-     }
+  /**
+   * Return a resumable query that will perform the same query but adjust the query bounds. The
+   * bounds will be moved forward through the row indeces as determined by the ORDER BY row
+   * ordering.
+   * Used in UserTable, but that's it, no reason for it to be public
+   *
+   * @param limit the maximum number of rows to retrieve
+   * @return A new query with different query bounds
+   */
+  public ResumableQuery resumeQueryForward(int limit) {
+    if (mQuery == null) {
+      return null;
+    }
 
-     int numCurrentRows = getNumberOfRows();
-     if (numCurrentRows == 0 || numCurrentRows < mQuery.getSqlLimit()) {
-       // We have reached the end of the query results
-       return null;
-     }
+    int numCurrentRows = getNumberOfRows();
+    if (numCurrentRows == 0 || numCurrentRows < mQuery.getSqlLimit()) {
+      // We have reached the end of the query results
+      return null;
+    }
 
-     mQuery.setSqlLimit(limit);
-     mQuery.setSqlOffset(getEndIndex() + 1);
+    mQuery.setSqlLimit(limit);
+    mQuery.setSqlOffset(getEndIndex() + 1);
 
     return mQuery;
   }
-
 
   /**
    * Return a resumable query that will perform the same query but adjust the query bounds. The
    * bounds will be moved backward through the row indeces as determined by the ORDER BY row
    * ordering.
-   *
+   * <p>
    * The results are earlier in the ordering, but they are still conform to the ORDER BY
    * arguments (they are not reversed).
+   * Used in UserTable, but that's it, no reason for it to be public
    *
    * @param limit the maximum number of rows to retrieve
-   * @return
+   * @return A new query with different query bounds
    */
   public ResumableQuery resumeQueryBackward(int limit) {
     if (mQuery == null) {
@@ -271,75 +292,101 @@ public class BaseTable implements Parcelable {
     mRows.add(row);
   }
 
-  public void setMetaDataRev(String metaDataRev) {
-    mMetaDataRev = metaDataRev;
-  }
-
+  /**
+   * Gets the metadata revision
+   * Used in UserTable but that's it, no reason to be public
+   * @return the metadata revision
+   */
+  @SuppressWarnings("WeakerAccess")
   public String getMetaDataRev() {
     return mMetaDataRev;
   }
 
+  /**
+   * Used in ODKDatabaseImplUtils
+   * @param metaDataRev the new revision
+   */
+  @SuppressWarnings("unused")
+  public void setMetaDataRev(String metaDataRev) {
+    mMetaDataRev = metaDataRev;
+  }
+
   public Row getRowAtIndex(int index) {
-    return this.mRows.get(index);
+    return mRows.get(index);
   }
 
   /**
    * Return the list of rows in the table.
-   * Caller should treat this as a read-only (immutable) list.
    *
-   * @return
-     */
+   * @return the rows in the table
+   */
   public List<Row> getRows() {
-    return mRows;
+    // This may have broken something. If it did, just change it back to "return mRows;"
+    return Collections.unmodifiableList(mRows);
   }
 
   public String getElementKey(int colNum) {
     return mElementKeyForIndex[colNum];
   }
 
+  /**
+   * Gets the index of a column
+   * Used in UserTable, Row, no need for it to be public
+   * @param elementKey the column name
+   * @return the index of that column name
+   */
   public Integer getColumnIndexOfElementKey(String elementKey) {
     return mElementKeyToIndex.get(elementKey);
   }
 
   public String getSqlCommand() {
-    return (mQuery != null ? mQuery.getSqlCommand() : null);
+    return mQuery != null ? mQuery.getSqlCommand() : null;
   }
 
+  /**
+   * Gets the bindargs from the sql statement
+   * Used in UserTable only, no need for it to be public
+   * @return the bindargs
+   */
   public BindArgs getSqlBindArgs() {
-    return (mQuery != null ? mQuery.getSqlBindArgs() : null);
+    return mQuery != null ? mQuery.getSqlBindArgs() : null;
   }
 
   /**
    * Get the list of columns that comprise the primary key for the table.
    * Caller should treat this as a read-only array. I.e., don't change it.
+   * This method is completely unused
    *
-   * @return
-     */
+   * @return a copy of the primary key
+   */
   public String[] getPrimaryKey() {
     if (mPrimaryKey == null) {
       return null;
     }
-    return mPrimaryKey;
+    return mPrimaryKey.clone();
   }
 
   /**
    * Get the list of column names in the table.
-   * Caller should treat this as a read-only array. I.e., don't change it.
+   * Used in AggregateSynchronizer, others
    *
-   * @return
-     */
+   * @return a copy of the array of column names
+   */
+  @SuppressWarnings("WeakerAccess")
   public String[] getElementKeyForIndex() {
-    return mElementKeyForIndex;
+    return mElementKeyForIndex.clone();
   }
 
   /**
    * This is EXPENSIVE!!!  Used only for JS return value
    * Do not use for anything else!!!!
+   * Used in ExecutorProcessor
    *
    * @return copy of the map. Used for JS return value
    */
+  @SuppressWarnings("WeakerAccess")
   public Map<String, Integer> getElementKeyToIndex() {
-    return new HashMap<>(this.mElementKeyToIndex);
+    return new HashMap<>(mElementKeyToIndex);
   }
 
   private Map<String, Integer> generateElementKeyToIndex() {
@@ -351,16 +398,34 @@ public class BaseTable implements Parcelable {
     return elementKeyToIndex;
   }
 
+  /**
+   * Returns the number of columns
+   * Used in ExecutorProcessor
+   * @return number of columns
+   */
+  @SuppressWarnings("WeakerAccess")
   public int getWidth() {
     return mElementKeyForIndex.length;
   }
 
   public int getNumberOfRows() {
-    return this.mRows.size();
+    return mRows.size();
   }
 
-  public void registerParentTable(ParentTable table) {
-    this.mParent = table;
+  /**
+   * Used in UserTable, nothing else, no need to be public
+   * @param table the table to set the wrapper to
+   */
+  public void registerWrapperTable(WrapperTable table) {
+    mWrapper = table;
+  }
+
+  /**
+   * Actually used nowhere
+   * @return the wrapper
+   */
+  public WrapperTable getWrapperTable() {
+    return mWrapper;
   }
 
   @Override
@@ -373,12 +438,12 @@ public class BaseTable implements Parcelable {
     // Do not marshall mElementKeyToIndex; just rebuilt it from the mElementKeyForIndex
 
     try {
-      out.writeByte(mEffectiveAccessCreateRow ? ((byte) 1) : ((byte) 0));
+      out.writeByte(mEffectiveAccessCreateRow ? (byte) 1 : (byte) 0);
       MarshallUtil.marshallStringArray(out, mPrimaryKey);
       MarshallUtil.marshallStringArray(out, mElementKeyForIndex);
     } catch (Throwable t) {
-      Log.e(TAG, t.getMessage());
-      Log.e(TAG, Log.getStackTraceString(t));
+      WebLogger.getContextLogger().e(TAG, t.getMessage());
+      WebLogger.getContextLogger().printStackTrace(t);
       throw t;
     }
 
@@ -392,15 +457,5 @@ public class BaseTable implements Parcelable {
   public int describeContents() {
     return 0;
   }
-
-  public static final Parcelable.Creator<BaseTable> CREATOR = new Parcelable.Creator<BaseTable>() {
-    public BaseTable createFromParcel(Parcel in) {
-      return new BaseTable(in);
-    }
-
-    public BaseTable[] newArray(int size) {
-      return new BaseTable[size];
-    }
-  };
 
 }

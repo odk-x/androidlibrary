@@ -23,6 +23,52 @@ package org.opendatakit.logging;
  */
 public interface WebLoggerIf {
 
+  /**
+   * NOTE: this must match the value in android.util.Log
+   * Priority constant for the println method; use Log.v.
+   */
+  int VERBOSE = 2;
+
+  /**
+   * NOTE: this must match the value in android.util.Log
+   * Priority constant for the println method; use Log.d.
+   */
+  int DEBUG = 3;
+
+  /**
+   * NOTE: this must match the value in android.util.Log
+   * Priority constant for the println method; use Log.i.
+   */
+  int INFO = 4;
+
+  /**
+   * NOTE: this must match the value in android.util.Log
+   * Priority constant for the println method; use Log.w.
+   */
+  int WARN = 5;
+
+  /**
+   * NOTE: this must match the value in android.util.Log
+   * Priority constant for the println method; use Log.e.
+   */
+  int ERROR = 6;
+
+  /**
+   * NOTE: this must match the value in android.util.Log
+   * Priority constant for the println method.
+   */
+  int ASSERT = 7;
+
+  /**
+   * Info-like message that is logged with the same level as an error.
+   */
+  int SUCCESS = 8;
+
+  /**
+   * Info-like message that is logged with the same level as an assert.
+   */
+  int TIP = 9;
+
   void staleFileScan(long now);
 
   void close();
@@ -32,6 +78,7 @@ public interface WebLoggerIf {
   void a(String t, String logMsg);
 
   void t(String t, String logMsg);
+  @SuppressWarnings("unused")
   void v(String t, String logMsg);
   void d(String t, String logMsg);
   void i(String t, String logMsg);
@@ -40,5 +87,19 @@ public interface WebLoggerIf {
   void s(String t, String logMsg);
 
   void printStackTrace(Throwable e);
+
+  /**
+   * Set the minimum log level for logging to the system log.
+   *
+   * This is actually totally unused
+   *
+   * @param level the lowest level to log
+    */
+  void setMinimumSystemLogLevel(int level);
+
+  /**
+   * @return the minimum log message level that will be logged to the android system log.
+    */
+  int getMinimumSystemLogLevel();
 
 }

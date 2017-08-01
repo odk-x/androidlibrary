@@ -44,7 +44,7 @@ public class TableMetaDataEntries implements Parcelable {
     this.entries = new ArrayList<>(other.entries);
   }
 
-  public TableMetaDataEntries(Parcel in) {
+  private TableMetaDataEntries(Parcel in) {
     readFromParcel(in);
   }
 
@@ -90,7 +90,8 @@ public class TableMetaDataEntries implements Parcelable {
     revId = notNull ? in.readString() : null;
 
     notNull = in.readByte() == 1;
-    entries = notNull ? ((ArrayList<KeyValueStoreEntry>) in.readSerializable()) : null;
+    entries = notNull ? (ArrayList<KeyValueStoreEntry>) in.readSerializable() :
+        new ArrayList<KeyValueStoreEntry>();
   }
 
   public static final Parcelable.Creator<TableMetaDataEntries> CREATOR

@@ -14,9 +14,6 @@
 
 package org.opendatakit.utilities;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
@@ -42,9 +39,7 @@ public class RowPathColumnTest {
   }
 
   @Test
-  public void testRowPathColumnExtractionOneRecord() throws JsonParseException,
-      JsonMappingException,
-      IOException {
+  public void testRowPathColumnExtractionOneRecord() throws IOException {
 
     List<Column> columns = new ArrayList<Column>();
     columns.add(new Column("myField1", "myField1",
@@ -76,9 +71,7 @@ public class RowPathColumnTest {
 
 
   @Test
-  public void testRowPathColumnExtractionTwoRecords() throws JsonParseException,
-      JsonMappingException,
-      IOException {
+  public void testRowPathColumnExtractionTwoRecords() throws IOException {
 
     List<Column> columns = new ArrayList<Column>();
     columns.add(new Column("myField1", "myField1",
@@ -121,10 +114,7 @@ public class RowPathColumnTest {
   }
 
    @Test
-   public void testRowPathColumnExtractionSecondRecordWrongFragType() throws
-       JsonParseException,
-       JsonMappingException,
-       IOException {
+   public void testRowPathColumnExtractionSecondRecordWrongFragType() throws IOException {
 
       List<Column> columns = new ArrayList<Column>();
       columns.add(new Column("myField1", "myField1",
@@ -164,10 +154,7 @@ public class RowPathColumnTest {
    }
 
    @Test
-   public void testRowPathColumnExtractionSecondRecordWrongContentType() throws
-       JsonParseException,
-       JsonMappingException,
-       IOException {
+   public void testRowPathColumnExtractionSecondRecordWrongContentType() throws IOException {
 
       List<Column> columns = new ArrayList<Column>();
       columns.add(new Column("myField1", "myField1",
@@ -207,9 +194,7 @@ public class RowPathColumnTest {
    }
 
   @Test
-  public void testRowPathColumnExtractionNoParentSharedNamesWrongTypes() throws JsonParseException,
-      JsonMappingException,
-      IOException {
+  public void testRowPathColumnExtractionNoParentSharedNamesWrongTypes() throws IOException {
 
     List<Column> columns = new ArrayList<Column>();
     columns.add(new Column("uriFragment", "uriFragment",
@@ -241,9 +226,7 @@ public class RowPathColumnTest {
   }
 
   @Test
-  public void testRowPathColumnExtractionNoParentSharedNamesRightTypes() throws JsonParseException,
-      JsonMappingException,
-      IOException {
+  public void testRowPathColumnExtractionNoParentSharedNamesRightTypes() throws IOException {
 
     List<Column> columns = new ArrayList<Column>();
     columns.add(new Column("contentType", "contentType",

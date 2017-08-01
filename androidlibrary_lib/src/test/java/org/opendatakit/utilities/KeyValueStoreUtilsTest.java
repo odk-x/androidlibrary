@@ -64,7 +64,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(ElementDataType.string, ElementDataType.valueOf(e.type));
       assertEquals(VALUE, e.value);
 
-      assertEquals(VALUE, KeyValueStoreUtils.getString(APP_NAME, e));
+      assertEquals(VALUE, KeyValueStoreUtils.getString(e));
    }
 
    @Test
@@ -80,7 +80,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(INT_VALUE, e.value);
 
       Integer value = -1130;
-      assertEquals(value, KeyValueStoreUtils.getInteger(APP_NAME, e));
+      assertEquals(value, KeyValueStoreUtils.getInteger(e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -96,7 +96,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(INT_VALUE, e.value);
 
       Integer value = -1130;
-      assertEquals(value, KeyValueStoreUtils.getInteger(APP_NAME, e));
+      assertEquals(value, KeyValueStoreUtils.getInteger(e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -112,7 +112,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(VALUE, e.value);
 
       Integer value = -1130;
-      assertEquals(value, KeyValueStoreUtils.getInteger(APP_NAME, e));
+      assertEquals(value, KeyValueStoreUtils.getInteger(e));
    }
 
    @Test
@@ -127,7 +127,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(MY_KEY, e.key);
       assertEquals(ElementDataType.bool, ElementDataType.valueOf(e.type));
       assertEquals("1", e.value);
-      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(APP_NAME, e));
+      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -142,7 +142,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(MY_KEY, e.key);
       assertEquals(ElementDataType.array, ElementDataType.valueOf(e.type));
       assertEquals("1", e.value);
-      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(APP_NAME, e));
+      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -157,7 +157,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(MY_KEY, e.key);
       assertEquals(ElementDataType.bool, ElementDataType.valueOf(e.type));
       assertEquals(VALUE, e.value);
-      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(APP_NAME, e));
+      assertEquals(Boolean.TRUE, KeyValueStoreUtils.getBoolean(e));
    }
 
    @Test
@@ -173,7 +173,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(DBL_VALUE, e.value);
 
       Double value = 9.39;
-      assertEquals(value, KeyValueStoreUtils.getNumber(APP_NAME, e));
+      assertEquals(value, KeyValueStoreUtils.getNumber(e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -189,7 +189,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(DBL_VALUE, e.value);
 
       Double value = 9.39;
-      assertEquals(value, KeyValueStoreUtils.getNumber(APP_NAME, e));
+      assertEquals(value, KeyValueStoreUtils.getNumber(e));
    }
 
    @Test(expected = IllegalArgumentException.class)
@@ -205,7 +205,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(VALUE, e.value);
 
       Double value = 9.39;
-      assertEquals(value, KeyValueStoreUtils.getNumber(APP_NAME, e));
+      assertEquals(value, KeyValueStoreUtils.getNumber(e));
    }
 
    @Test
@@ -294,7 +294,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(ElementDataType.object, ElementDataType.valueOf(e.type));
       assertEquals(ODKFileUtils.mapper.writeValueAsString(myMap), e.value);
 
-      String returned = KeyValueStoreUtils.getObject(APP_NAME, e);
+      String returned = KeyValueStoreUtils.getObject(e);
       assertEquals(ODKFileUtils.mapper.writeValueAsString(myMap), e.value);
    }
 
@@ -318,7 +318,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(ElementDataType.integer, ElementDataType.valueOf(e.type));
       assertEquals(ODKFileUtils.mapper.writeValueAsString(myMap), e.value);
 
-      String returned = KeyValueStoreUtils.getObject(APP_NAME, e);
+      String returned = KeyValueStoreUtils.getObject(e);
       assertEquals(ODKFileUtils.mapper.writeValueAsString(myMap), e.value);
    }
 
@@ -339,7 +339,7 @@ public class KeyValueStoreUtilsTest {
       assertEquals(ElementDataType.array, ElementDataType.valueOf(e.type));
       assertEquals(ODKFileUtils.mapper.writeValueAsString(values), e.value);
 
-      String returned = KeyValueStoreUtils.getObject(APP_NAME, e);
+      String returned = KeyValueStoreUtils.getObject(e);
       assertEquals(ODKFileUtils.mapper.writeValueAsString(values), e.value);
    }
 }
