@@ -62,18 +62,19 @@ public final class PRNGFixes {
 
     try {
       // Mix in the device- and invocation-specific seed.
-      byte[] seed = generateSeed();
-      Object[] args = new Object[seed.length + 1];
-      System.arraycopy(seed, 0, args, 1, seed.length);
-      args[0] = null;
       Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
-          .getMethod("RAND_seed", byte[].class).invoke(args);
+          .getMethod("RAND_seed", byte[].class)
+          .invoke(null, generateSeed());
 
       // Mix output of Linux PRNG into OpenSSL's PRNG
-      int bytesRead = (Integer) Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
-          .getMethod("RAND_load_file", String.class, long.class).invoke(null, "/dev/urandom", 1024);
+      int bytesRead = (Integer) Class.forName(
+          "org.apache.harmony.xnet.provider.jsse.NativeCrypto")
+          .getMethod("RAND_load_file", String.class, long.class)
+          .invoke(null, "/dev/urandom", 1024);
       if (bytesRead != 1024) {
-        throw new IOException("Unexpected number of bytes read from Linux PRNG: " + bytesRead);
+        throw new IOException(
+            "Unexpected number of bytes read from Linux PRNG: "
+                + bytesRead);
       }
     } catch (Exception e) {
       throw new SecurityException("Failed to seed OpenSSL PRNG", e);
