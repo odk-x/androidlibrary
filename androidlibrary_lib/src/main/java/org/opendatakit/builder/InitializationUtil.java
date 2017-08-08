@@ -541,9 +541,9 @@ public class InitializationUtil {
               tableIdInProgress = request.getTableId();
               boolean success = cu.importSeparable(new ImportListener() {
                 @Override
-                public void updateProgressDetail(int row) {
+                public void updateProgressDetail(int row, int total) {
                   getSupervisor().publishProgress(displayTablesProgress,
-                      appContext.getString(R.string.import_in_progress, row));
+                      appContext.getString(R.string.import_in_progress, row, total));
                 }
 
                 @Override

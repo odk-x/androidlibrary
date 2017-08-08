@@ -94,7 +94,7 @@ public class BaseTable implements Parcelable {
     mQuery = query;
 
     if (elementKeyForIndex == null) {
-      throw new IllegalStateException("elementKeyForIndex cannot be null");
+      throw new IllegalArgumentException("elementKeyForIndex cannot be null");
     }
     mElementKeyForIndex = elementKeyForIndex;
 
