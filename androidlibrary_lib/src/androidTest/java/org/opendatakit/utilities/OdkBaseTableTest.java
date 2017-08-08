@@ -172,11 +172,7 @@ public class OdkBaseTableTest {
 
   @Test
   public void testOdkTableCreationValidationTable() throws IOException {
-
-    String sqlCmd = SQLCMD;
-    Object[] bindArgs = BINDARGS;
-    String[] orderByArgs = ORDERBYELEM;
-    String[] orderByDirections = ORDERBYDIR;
+    
     String[] primaryKey = PRIMARY_KEY;
 
     try {
