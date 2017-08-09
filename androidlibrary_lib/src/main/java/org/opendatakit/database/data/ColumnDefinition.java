@@ -29,7 +29,7 @@ import org.opendatakit.utilities.ODKFileUtils;
 import java.io.IOException;
 import java.util.*;
 
-public class ColumnDefinition implements Comparable<ColumnDefinition> {
+public final class ColumnDefinition implements Comparable<ColumnDefinition> {
   private static final String TAG = "ColumnDefinition";
   private static final String JSON_SCHEMA_NOT_UNIT_OF_RETENTION = "notUnitOfRetention";
   private static final String JSON_SCHEMA_IS_NOT_NULLABLE = "isNotNullable";
