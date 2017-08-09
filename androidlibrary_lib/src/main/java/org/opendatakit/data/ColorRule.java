@@ -326,7 +326,8 @@ public class ColorRule {
             + mOperator);
       }
     } catch (NumberFormatException e) {
-      WebLogger.getLogger(appName).printStackTrace(e);
+      // not printing stack trace here because this could be called 800 times for a list of health facilities, and that much logging really slows down the ui thread
+      //WebLogger.getLogger(appName).printStackTrace(e);
       WebLogger.getLogger(appName).w(TAG, "error parsing value as number, ignoring the offending rule");
       return false;
     }
