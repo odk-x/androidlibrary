@@ -170,17 +170,12 @@ public class OdkBaseTableTest {
     }
   }
 
-  @Test
+  @Test (expected = IllegalArgumentException.class)
   public void testOdkTableCreationValidationTable() throws IOException {
-    
+
     String[] primaryKey = PRIMARY_KEY;
 
-    try {
-      BaseTable table = new BaseTable(primaryKey, null, null, NUM_ROWS);
-      Assert.fail("BaseTable allowed the creation of an invalid table");
-    } catch (IllegalArgumentException e) {
-      // We want this exception to occur
-    }
+    BaseTable table = new BaseTable(primaryKey, null, null, NUM_ROWS);
   }
 
 }
