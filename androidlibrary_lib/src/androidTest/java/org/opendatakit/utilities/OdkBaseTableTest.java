@@ -17,6 +17,7 @@ package org.opendatakit.utilities;
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -167,6 +168,14 @@ public class OdkBaseTableTest {
       assertEquals(rat1.getDataByIndex(j), rat2.getDataByIndex(j));
       assertEquals(rbt2.getDataByIndex(j), rbt1.getDataByIndex(j));
     }
+  }
+
+  @Test (expected = IllegalArgumentException.class)
+  public void testOdkTableCreationValidationTable() throws IOException {
+
+    String[] primaryKey = PRIMARY_KEY;
+
+    BaseTable table = new BaseTable(primaryKey, null, null, NUM_ROWS);
   }
 
 }
