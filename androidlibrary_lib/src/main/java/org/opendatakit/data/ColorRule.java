@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.database.data.Row;
+import org.opendatakit.logging.WebLogger;
 
 import java.util.TreeMap;
 import java.util.UUID;
@@ -98,6 +99,7 @@ public class ColorRule {
 
   // The UUID of the rule.
   private String mId;
+  private String appName = null;
   /**
    * Element key of the column this rule queries on.
    */
@@ -324,9 +326,10 @@ public class ColorRule {
             + mOperator);
       }
     } catch (NumberFormatException e) {
-      // this should never happen
-      e.printStackTrace();
-      throw new IllegalArgumentException("error parsing value as number, removing the offending rule");
+      // not printing stack trace here because this could be called 800 times for a list of health facilities, and that much logging really slows down the ui thread
+      //WebLogger.getLogger(appName).printStackTrace(e);
+      WebLogger.getLogger(appName).w(TAG, "error parsing value as number, ignoring the offending rule");
+      return false;
     }
   }
 }
