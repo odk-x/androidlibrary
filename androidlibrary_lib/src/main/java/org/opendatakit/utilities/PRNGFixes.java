@@ -61,10 +61,17 @@ public final class PRNGFixes {
     }
 
     try {
+	  // because the seed is a byte[] 
+	  // and invoke's 2nd argument is Varargs
+	  // we need to supply it as an object
+	  // array of arguments, the first of which
+	  // is the byte[] array.
+	  Object[] args = new Object[1];
+	  args[0] = generateSeed();
       // Mix in the device- and invocation-specific seed.
       Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
           .getMethod("RAND_seed", byte[].class)
-          .invoke(null, generateSeed());
+          .invoke(null, args);
 
       // Mix output of Linux PRNG into OpenSSL's PRNG
       int bytesRead = (Integer) Class.forName(
@@ -266,6 +273,8 @@ public final class PRNGFixes {
         DataInputStream in;
         synchronized (urandomMutex) {
           in = getUrandomInputStream();
+        }
+        synchronized (in) {
           in.readFully(bytes);
         }
       } catch (IOException e) {
