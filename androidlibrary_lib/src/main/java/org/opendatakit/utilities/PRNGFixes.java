@@ -204,8 +204,11 @@ public final class PRNGFixes {
   /**
    * {@link SecureRandomSpi} which passes all requests to the Linux PRNG
    * ({@code /dev/urandom}).
+   *
+   * NOTE: needs to be public so that it can be created via reflection from
+   * within the security provider layer.
    */
-  private static class LinuxPRNGSecureRandom extends SecureRandomSpi {
+  public static class LinuxPRNGSecureRandom extends SecureRandomSpi {
 
         /*
          * IMPLEMENTATION NOTE: Requests to generate bytes and to mix in a seed
@@ -242,7 +245,10 @@ public final class PRNGFixes {
      * each instance needs to seed itself if the client does not explicitly
      * seed it.
      */
-    private boolean mSeeded;
+    private boolean mSeeded = false;
+
+    public LinuxPRNGSecureRandom() {
+    }
 
     @Override
     protected void engineSetSeed(byte[] bytes) {
