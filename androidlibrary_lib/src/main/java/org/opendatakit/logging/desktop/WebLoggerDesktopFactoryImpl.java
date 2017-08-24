@@ -42,39 +42,39 @@ public class WebLoggerDesktopFactoryImpl implements WebLoggerFactoryIf {
     }
 
     public void log(int severity, String t, String logMsg) {
-      Logger.getGlobal().log(Level.INFO, t, "N:" + severity + "/" + logMsg);
+      Logger.getGlobal().log(Level.INFO, t + ": " + "N:" + severity + "/" + logMsg);
     }
 
     public void a(String t, String logMsg) {
-      Logger.getGlobal().log(Level.FINEST, t, logMsg);
+      Logger.getGlobal().log(Level.FINEST, t + ": " + logMsg);
     }
 
     public void t(String t, String logMsg) {
-      Logger.getGlobal().log(Level.FINER, t, "Trace/" + logMsg);
+      Logger.getGlobal().log(Level.FINER, t + ": " + "Trace/" + logMsg);
     }
 
     public void v(String t, String logMsg) {
-      Logger.getGlobal().log(Level.FINER, t, "Verbose/" + logMsg);
+      Logger.getGlobal().log(Level.FINER, t + ": " + "Verbose/" + logMsg);
     }
 
     public void d(String t, String logMsg) {
-      Logger.getGlobal().log(Level.FINE, t, logMsg);
+      Logger.getGlobal().log(Level.FINE, t + ": " + logMsg);
     }
 
     public void i(String t, String logMsg) {
-      Logger.getGlobal().log(Level.INFO, t, logMsg);
+      Logger.getGlobal().log(Level.INFO, t + ": " + logMsg);
     }
 
     public void w(String t, String logMsg) {
-      Logger.getGlobal().log(Level.WARNING, t, logMsg);
+      Logger.getGlobal().log(Level.WARNING, t + ": " + logMsg);
     }
 
     public void e(String t, String logMsg) {
-      Logger.getGlobal().log(Level.SEVERE, t, logMsg);
+      Logger.getGlobal().log(Level.SEVERE, t + ": " + logMsg);
     }
 
     public void s(String t, String logMsg) {
-      Logger.getGlobal().log(Level.INFO, t, "Success/" + logMsg);
+      Logger.getGlobal().log(Level.INFO, t + ": " + "Success/" + logMsg);
     }
 
     public void printStackTrace(Throwable e) {
