@@ -46,6 +46,7 @@ import java.util.*;
 public class PropertiesSingleton {
 
   private static final String TAG = PropertiesSingleton.class.getSimpleName();
+  private static final int INVALID_REVISION = -1;
 
   private static final String PROPERTIES_REVISION_FILENAME = "properties.revision";
   private static final String GENERAL_PROPERTIES_FILENAME = "app.properties";
@@ -74,7 +75,7 @@ public class PropertiesSingleton {
   private final Properties mGlobalDeviceProps;
   private final Properties mDeviceProps;
   private final Properties mSecureProps;
-  private int currentRevision = invalidRevision();
+  private int currentRevision = INVALID_REVISION;
   private String mInstallationId;
 
   PropertiesSingleton(Context context, String appName, TreeMap<String, String> plainDefaults,
@@ -105,10 +106,6 @@ public class PropertiesSingleton {
 
     // call init
     init();
-  }
-
-  private static int invalidRevision() {
-    return -1;
   }
 
   private static String toolInitializationPropertyName(String toolName) {
@@ -307,7 +304,7 @@ public class PropertiesSingleton {
   @SuppressWarnings("unused")
   public boolean shouldRunInitializationTask(String toolName) {
     // this is stored in the device properties
-    init();
+    readPropertiesIfModified();
     String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
     return value == null || value.isEmpty();
   }
@@ -377,7 +374,7 @@ public class PropertiesSingleton {
   private void init() {
     // (re)set values to defaults
 
-    currentRevision = invalidRevision();
+    currentRevision = INVALID_REVISION;
 
     mGeneralProps.clear();
     mGlobalDeviceProps.clear();
@@ -448,7 +445,7 @@ public class PropertiesSingleton {
   }
 
   private int getCurrentRevision() {
-    int noResult = 0;
+    int noResult = INVALID_REVISION;
     try {
       File dataFolder = new File(ODKFileUtils.getDataFolder(mAppName));
       String[] timestampNames = dataFolder.list(new FilenameFilter() {
@@ -537,8 +534,23 @@ public class PropertiesSingleton {
 
   private void readPropertiesIfModified() {
 
-    int newRevision = getCurrentRevision();
-    if (newRevision != currentRevision) {
+    int newRevision = INVALID_REVISION;
+
+    {
+      verifyDirectories();
+      /*
+       * Access revision within lock to ensure we get the latest
+       * update state after any revisions that are in progress.
+       */
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+      try {
+        newRevision = getCurrentRevision();
+      } finally {
+        theLock.release();
+      }
+    }
+    
+    if (newRevision == INVALID_REVISION || newRevision != currentRevision) {
       readProperties(false);
     }
 
