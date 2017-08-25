@@ -43,7 +43,7 @@ import java.util.*;
  * general (syncable) settings. You need to Reset the device configuration to
  * re-initialize these.
  */
-public class PropertiesSingleton {
+public final class PropertiesSingleton {
 
   private static final String TAG = PropertiesSingleton.class.getSimpleName();
 
