@@ -599,6 +599,7 @@ public class PropertiesSingleton {
         if (configFile.exists()) {
           configFileInputStream = new FileInputStream(configFile);
 
+          mGeneralProps.clear();
           mGeneralProps.loadFromXML(configFileInputStream);
         }
       } catch (Exception e) {
@@ -624,6 +625,7 @@ public class PropertiesSingleton {
           if (configFile.exists()) {
             configFileInputStream = new FileInputStream(configFile);
 
+            mGlobalDeviceProps.clear();
             mGlobalDeviceProps.loadFromXML(configFileInputStream);
           }
         } catch (Exception e) {
@@ -648,6 +650,7 @@ public class PropertiesSingleton {
         if (configFile.exists()) {
           configFileInputStream = new FileInputStream(configFile);
 
+          mDeviceProps.clear();
           mDeviceProps.loadFromXML(configFileInputStream);
         }
       } catch (Exception e) {
@@ -671,6 +674,7 @@ public class PropertiesSingleton {
           if (configFile.exists()) {
             configFileInputStream = new FileInputStream(configFile);
 
+            mSecureProps.clear();
             mSecureProps.loadFromXML(configFileInputStream);
           }
         } catch (Exception e) {
