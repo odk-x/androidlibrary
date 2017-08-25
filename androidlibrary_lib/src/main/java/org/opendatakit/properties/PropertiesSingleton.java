@@ -293,6 +293,32 @@ public class PropertiesSingleton {
   }
 
   /**
+   * Called during sync to re-read the properties files since they may have changed
+   * during the sync process (i.e., due to updates of app.properties pulled down from the
+   * server). After re-reading the properties files, this increments the properties
+   * revision file so that survey, tables, etc. will also pick up the latest changes.
+   */
+  public void signalPropertiesChange() {
+    // read the current revision and increment it
+    {
+      verifyDirectories();
+      /*
+       * Manipulate revision within lock to ensure we get the latest
+       * update state without any revisions in progress.
+       */
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+      try {
+        currentRevision = getCurrentRevision();
+        currentRevision = incrementAndWriteRevision(currentRevision);
+      } finally {
+        theLock.release();
+      }
+    }
+    // forcibly reload the properties
+    readProperties(false);
+  }
+
+  /**
    * Determine whether or not the initialization task for the given toolName
    * should be run.
    * <p>
