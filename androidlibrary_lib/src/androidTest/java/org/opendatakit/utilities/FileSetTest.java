@@ -14,11 +14,14 @@
 
 package org.opendatakit.utilities;
 
+import android.Manifest;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendatakit.logging.WebLogger;
@@ -44,6 +47,11 @@ public class FileSetTest {
 
   private static final String MIME_1 = "image/jpg";
   private static final String MIME_2 = "audio/wav";
+
+  @Rule
+  public GrantPermissionRule writeRuntimePermissionRule = GrantPermissionRule .grant(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+  @Rule
+  public GrantPermissionRule readtimePermissionRule = GrantPermissionRule .grant(Manifest.permission.READ_EXTERNAL_STORAGE);
 
   @Before
   public void setUp() throws Exception {

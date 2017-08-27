@@ -107,14 +107,3 @@ dependencies {
     androidTestCompile 'com.android.support.test:runner:1.0.0'
     compile 'net.jcip:jcip-annotations:1.0'
 }
-
-task grantWriteExtStoragePermission(type: Exec, dependsOn: 'installSnapshotDebugAndroidTest') {
-    commandLine "adb shell pm grant org.opendatakit.androidlibrary.test android.permission.WRITE_EXTERNAL_STORAGE"
-            .split(' ')
-}
-
-tasks.whenTaskAdded { task ->
-        if (task.name.startsWith('connected')) {
-            task.dependsOn grantWriteExtStoragePermission
-        }
-}
