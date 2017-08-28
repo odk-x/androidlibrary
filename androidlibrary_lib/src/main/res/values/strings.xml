@@ -70,4 +70,6 @@
 
 	<string name="abort_error_accessing_database">Aborted: Error accessing database</string>
 
+	<string name="permission_rational_title">Permission Request</string>
+
 </resources>
