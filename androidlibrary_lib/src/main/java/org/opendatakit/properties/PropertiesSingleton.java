@@ -46,6 +46,7 @@ import java.util.*;
 public final class PropertiesSingleton {
 
   private static final String TAG = PropertiesSingleton.class.getSimpleName();
+  private static final int INVALID_REVISION = -1;
 
   private static final String PROPERTIES_REVISION_FILENAME = "properties.revision";
   private static final String GENERAL_PROPERTIES_FILENAME = "app.properties";
@@ -74,7 +75,7 @@ public final class PropertiesSingleton {
   private final Properties mGlobalDeviceProps;
   private final Properties mDeviceProps;
   private final Properties mSecureProps;
-  private int currentRevision = invalidRevision();
+  private int currentRevision = INVALID_REVISION;
   private String mInstallationId;
 
   PropertiesSingleton(Context context, String appName, TreeMap<String, String> plainDefaults,
@@ -105,10 +106,6 @@ public final class PropertiesSingleton {
 
     // call init
     init();
-  }
-
-  private static int invalidRevision() {
-    return -1;
   }
 
   private static String toolInitializationPropertyName(String toolName) {
@@ -296,6 +293,32 @@ public final class PropertiesSingleton {
   }
 
   /**
+   * Called during sync to re-read the properties files since they may have changed
+   * during the sync process (i.e., due to updates of app.properties pulled down from the
+   * server). After re-reading the properties files, this increments the properties
+   * revision file so that survey, tables, etc. will also pick up the latest changes.
+   */
+  public void signalPropertiesChange() {
+    // read the current revision and increment it
+    {
+      verifyDirectories();
+      /*
+       * Manipulate revision within lock to ensure we get the latest
+       * update state without any revisions in progress.
+       */
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+      try {
+        currentRevision = getCurrentRevision();
+        currentRevision = incrementAndWriteRevision(currentRevision);
+      } finally {
+        theLock.release();
+      }
+    }
+    // forcibly reload the properties
+    readProperties(false);
+  }
+
+  /**
    * Determine whether or not the initialization task for the given toolName
    * should be run.
    * <p>
@@ -307,7 +330,7 @@ public final class PropertiesSingleton {
   @SuppressWarnings("unused")
   public boolean shouldRunInitializationTask(String toolName) {
     // this is stored in the device properties
-    init();
+    readPropertiesIfModified();
     String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
     return value == null || value.isEmpty();
   }
@@ -377,7 +400,7 @@ public final class PropertiesSingleton {
   private void init() {
     // (re)set values to defaults
 
-    currentRevision = invalidRevision();
+    currentRevision = INVALID_REVISION;
 
     mGeneralProps.clear();
     mGlobalDeviceProps.clear();
@@ -448,7 +471,7 @@ public final class PropertiesSingleton {
   }
 
   private int getCurrentRevision() {
-    int noResult = 0;
+    int noResult = INVALID_REVISION;
     try {
       File dataFolder = new File(ODKFileUtils.getDataFolder(mAppName));
       String[] timestampNames = dataFolder.list(new FilenameFilter() {
@@ -537,8 +560,23 @@ public final class PropertiesSingleton {
 
   private void readPropertiesIfModified() {
 
-    int newRevision = getCurrentRevision();
-    if (newRevision != currentRevision) {
+    int newRevision = INVALID_REVISION;
+
+    {
+      verifyDirectories();
+      /*
+       * Access revision within lock to ensure we get the latest
+       * update state after any revisions that are in progress.
+       */
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+      try {
+        newRevision = getCurrentRevision();
+      } finally {
+        theLock.release();
+      }
+    }
+    
+    if (newRevision == INVALID_REVISION || newRevision != currentRevision) {
       readProperties(false);
     }
 
@@ -561,6 +599,7 @@ public final class PropertiesSingleton {
         if (configFile.exists()) {
           configFileInputStream = new FileInputStream(configFile);
 
+          mGeneralProps.clear();
           mGeneralProps.loadFromXML(configFileInputStream);
         }
       } catch (Exception e) {
@@ -586,6 +625,7 @@ public final class PropertiesSingleton {
           if (configFile.exists()) {
             configFileInputStream = new FileInputStream(configFile);
 
+            mGlobalDeviceProps.clear();
             mGlobalDeviceProps.loadFromXML(configFileInputStream);
           }
         } catch (Exception e) {
@@ -610,6 +650,7 @@ public final class PropertiesSingleton {
         if (configFile.exists()) {
           configFileInputStream = new FileInputStream(configFile);
 
+          mDeviceProps.clear();
           mDeviceProps.loadFromXML(configFileInputStream);
         }
       } catch (Exception e) {
@@ -633,6 +674,7 @@ public final class PropertiesSingleton {
           if (configFile.exists()) {
             configFileInputStream = new FileInputStream(configFile);
 
+            mSecureProps.clear();
             mSecureProps.loadFromXML(configFileInputStream);
           }
         } catch (Exception e) {
