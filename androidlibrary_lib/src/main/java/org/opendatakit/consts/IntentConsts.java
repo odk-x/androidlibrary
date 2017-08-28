@@ -26,6 +26,8 @@ public class IntentConsts {
 
   public static final String INTENT_KEY_SETTINGS_IN_ADMIN_MODE = "adminMode";
   public static final String INTENT_KEY_SETTINGS_ADMIN_ENABLED = "adminEnabled";
+
+  public static final String INTENT_KEY_PERMISSION_ONLY = "permissionOnly";
   /**
    * Intent Extras:
    * <ol><li>INTENT_KEY_APP_NAME</li>
@@ -91,5 +93,14 @@ public class IntentConsts {
     public static final String SURVEY_PACKAGE_NAME = "org.opendatakit.survey";
     public static final String SURVEY_MAIN_MENU_ACTIVITY_COMPONENT_NAME = "org.opendatakit.survey"
         + ".activities.SplashScreenActivity";
+  }
+
+  /**
+   * Intent Extras:
+   * <ol><li>INTENT_KEY_PERMISSION_ONLY</li></ol>
+   */
+  public class Services {
+    public static final String PACKAGE_NAME = "org.opendatakit.services";
+    public static final String MAIN_ACTIVITY = "org.opendatakit.services.MainActivity";
   }
 }
