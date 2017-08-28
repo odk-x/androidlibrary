@@ -15,6 +15,7 @@
 
 package org.opendatakit.utilities;
 
+import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.CheckResult;
 import android.util.Log;
@@ -23,6 +24,7 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.CharEncoding;
+import org.opendatakit.consts.WebkitServerConsts;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.FormsColumns;
 import org.w3c.dom.Node;
@@ -34,6 +36,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -1167,16 +1170,16 @@ public final class ODKFileUtils {
       separatorString = File.separator;
     }
     String[] segments = relativePath.split(separatorString);
-    StringBuilder b = new StringBuilder();
-    boolean first = true;
-    for (String s : segments) {
-      if (!first) {
-        b.append("/"); // uris have forward slashes
+    String path;
+    {
+      Uri.Builder b = Uri.parse("http://localhost/").buildUpon();
+      for (String s : segments) {
+        b.appendPath(s);
       }
-      first = false;
-      b.append(s);
+      Uri u = b.build();
+      path = u.getEncodedPath().substring(1); // omit the leading slash
     }
-    return b.toString();
+    return path;
   }
 
   /**
@@ -1189,19 +1192,28 @@ public final class ODKFileUtils {
    */
   @SuppressWarnings("WeakerAccess")
   public static File getAsFile(String appName, String uriFragment) {
-    // forward slash always...
+
+    if (appName == null || appName.isEmpty()) {
+      throw new IllegalArgumentException("Not a valid uriFragment: " + appName + "/" + uriFragment
+          + " application not specified.");
+    }
     if (uriFragment == null || uriFragment.isEmpty()) {
       throw new IllegalArgumentException("Not a valid uriFragment: " + appName + "/" + uriFragment
-          + " application or subdirectory not specified.");
+          + " uri path not specified.");
     }
 
     File f = fromAppPath(appName);
     if (f == null || !f.exists() || !f.isDirectory()) {
       throw new IllegalArgumentException(
-          "Not a valid uriFragment: " + appName + "/" + uriFragment + " invalid application.");
+          "Not a valid uriFragment: " + appName + "/" + uriFragment + " - invalid application.");
     }
 
-    String[] segments = uriFragment.split("/");
+    // build a bogus Uri so that we can let Uri encode or decode the uriFragment
+    // by appending an encoded segment, any embedded slashes will be interpreted as
+    // segment delimiters -- which is exactly what we want.
+    Uri u = Uri.parse("http://localhost/").buildUpon().appendEncodedPath(uriFragment).build();
+
+    List<String> segments = u.getPathSegments();
     for (String s : segments) {
       f = new File(f, s);
     }
