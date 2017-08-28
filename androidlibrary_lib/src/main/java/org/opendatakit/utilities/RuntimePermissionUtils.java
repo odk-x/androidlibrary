@@ -3,6 +3,7 @@ package org.opendatakit.utilities;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -37,6 +38,34 @@ public class RuntimePermissionUtils {
     }
 
     return true;
+  }
+
+  public static boolean checkPackageAnyPermission(@NonNull Context context,
+                                              @NonNull String pkgName,
+                                              @NonNull String... permissions) {
+    PackageManager pm = context.getPackageManager();
+
+    for (String permission : permissions) {
+      if (pm.checkPermission(permission, pkgName) == PackageManager.PERMISSION_GRANTED) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public static boolean checkPackageAllPermission(@NonNull Context context,
+                                                  @NonNull String pkgName,
+                                                  @NonNull String... permissions) {
+    PackageManager pm = context.getPackageManager();
+
+    for (String permission : permissions) {
+      if (pm.checkPermission(permission, pkgName) != PackageManager.PERMISSION_GRANTED) {
+        return false;
+      }
+    }
+
+    return false;
   }
 
   public static boolean shouldShowAnyPermissionRationale(@NonNull Activity activity,
