@@ -84,6 +84,10 @@ public class RequestCodeConsts {
          * activity
          */
         public static final int LAUNCH_COLUMN_PREFS = 23;
+        /**
+         * Used to launch the main activity to let the user grant Services permissions
+         */
+        public static final int LAUNCH_MAIN_ACTIVITY = 24;
 
         /**
          * Do not instantiate this class
