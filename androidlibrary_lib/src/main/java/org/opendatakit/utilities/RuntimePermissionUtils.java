@@ -65,7 +65,7 @@ public class RuntimePermissionUtils {
       }
     }
 
-    return false;
+    return true;
   }
 
   public static boolean shouldShowAnyPermissionRationale(@NonNull Activity activity,
