@@ -16,6 +16,7 @@ package org.opendatakit.properties;
 
 import android.content.Context;
 import org.opendatakit.androidlibrary.R;
+import org.opendatakit.utilities.ODKFileUtils;
 import org.opendatakit.utilities.StaticStateManipulator;
 
 import java.util.TreeMap;
@@ -287,6 +288,15 @@ public final class CommonToolProperties {
     }
   }
 
+  private static void verifyDirectories(String appName) {
+    try {
+      ODKFileUtils.verifyExternalStorageAvailability();
+      ODKFileUtils.assertDirectoryStructure(appName);
+    } catch (Exception ignored) {
+      throw new IllegalArgumentException("External storage not available");
+    }
+  }
+
   public static synchronized PropertiesSingleton get(Context context, String appName) {
     if (factory == null) {
       TreeMap<String, String> generalProperties = new TreeMap<>();
@@ -298,6 +308,7 @@ public final class CommonToolProperties {
 
       factory = new CommonPropertiesSingletonFactory(generalProperties, deviceProperties,
           secureProperties);
+      verifyDirectories(appName);
     }
     return factory.getSingleton(context, appName);
   }
