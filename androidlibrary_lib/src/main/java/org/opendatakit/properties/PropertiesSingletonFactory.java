@@ -16,6 +16,7 @@ package org.opendatakit.properties;
 
 import android.content.Context;
 
+import org.opendatakit.utilities.ODKFileUtils;
 import java.util.TreeMap;
 
 /**
@@ -38,6 +39,15 @@ abstract class PropertiesSingletonFactory {
     mSecureDefaults = secureDefaults;
   }
 
+  private void verifyDirectories(String appName) {
+    try {
+      ODKFileUtils.verifyExternalStorageAvailability();
+      ODKFileUtils.assertDirectoryStructure(appName);
+    } catch (Exception ignored) {
+      throw new IllegalArgumentException("External storage not available");
+    }
+  }
+
   /**
    * This should be called shortly before accessing the settings.
    * The individual get/set/contains/remove functionality does not
@@ -56,6 +66,7 @@ abstract class PropertiesSingletonFactory {
       gSingleton = new PropertiesSingleton(context, appName, mGeneralDefaults, mDeviceDefaults,
         mSecureDefaults);
       gAppName = appName;
+      verifyDirectories(appName);
     }
     return gSingleton;
   }

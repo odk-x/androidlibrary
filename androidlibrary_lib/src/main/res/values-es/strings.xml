@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ODK Library</string>
+
+    <string name="app_userLabel">OpenDataKit</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancelar</string>
+    <string name="services_permission_tree">Open Data Kit Services</string>
+    <string name="services_permissions_description">Open Data Kit Services permisos de acceso</string>
+    <string name="webkit_launch_permission">Lanzar Serivdor de Paginas de Web</string>
+    <string name="database_launch_permission">Lanzar Baso de Datos</string>
+    <string name="sync_launch_permission">Lanzar Sincronizar</string>
+
+    <string name="added_on_date_at_time">\'Aggregado en \' EEE, MMM dd, yyyy \' a las \' HH:mm</string><!-- http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html -->
+    <string name="not_yet_sent">Nunca copiado al servidor</string>
+    <string name="sent_on_date_at_time">\'Enviado en \' EEE, MMM dd, yyyy \' a las \' HH:mm</string><!-- http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html -->
+    <string name="sending_failed_on_date_at_time">\'Error al enviar en \' EEE, MMM dd, yyyy \' a las \' HH:mm</string><!-- http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html -->
+
+    <string name="default_sync_server_url">https://open-data-kit.appspot.com</string>
+    <string name="default_legacy_server_url">https://opendatakit-2.appspot.com</string>
+
+    <string name="still_reading_license_file">Cargando licensias…</string>
+    <string name="about">Sobre ODK</string>
+    <string name="log_threshold_verbose">Registrando mensajes del nievel: Verboso</string>
+    <string name="log_threshold_debug">Registrando mensajes del nievel: Debug</string>
+    <string name="log_threshold_info">Registrando mensajes del nievel: Info</string>
+    <string name="log_threshold_warn">Registrando mensajes del nievel: Aviso</string>
+    <string name="log_threshold_error">Registrando mensajes del nievel: Error y/o Éxito</string>
+    <string name="log_threshold_assert">Registrando mensajes del nievel: Afirmaciones y/o consejos</string>
+    <string name="waiting_for_license">Leyendo licensias&#8230;</string>
+    <string name="read_license_success">Leído licencias con éxito</string>
+    <string name="read_license_fail">Error al leer licensias</string>
+
+    <string name="font_size_extra_large">Extra Grande</string>
+    <string name="font_size_large">Grande</string>
+    <string name="font_size_medium">Medio</string>
+    <string name="font_size_small">Pequeño</string>
+    <string name="font_size_extra_small">Extra Pequeño</string>
+
+    <string name="credential_none">Ningunos (Acceso Anonimo)</string>
+    <string name="credential_username_password">Nombre de usuario</string>
+    <string name="credential_google_account">Cuenta de Google</string>
+
+    <string name="expansion_unzipping_begins">Decomprimiendo archivos. Buscando archivos zip.</string>
+    <string name="expansion_unzipping_without_detail">Descomprimiendo archivos. Descomprimiendo %1$s (%2$d de %3$d)</string>
+    <string name="expansion_create_dir_detail">Haciendo carpeta</string>
+    <string name="expansion_unzipping_detail">en byte %1$d, archivo %2$d</string>
+    <string name="expansion_unzipping_complete">Descomprimido con éxito. %1$d archivos descomprimido.</string>
+
+    <string name="searching_for_deleted_forms">Buscando impresos eliminados &#8230;</string>
+    <string name="examining_form">Verificando que el impreso %2$s para la tabula %1$s existe &#8230;</string>
+
+    <string name="scanning_for_table_definitions">Buscando tabulas. Haciendo %1$s (%2$d de %3$d).</string>
+    <string name="processing_file">Leyendo archivo&#8230;</string>
+    <string name="defining_tableid_error">Error al leer definición de tabula %1$s</string>
+
+    <string name="poorly_formatted_init_file">Archivo tables.init no es válido</string>
+    <string name="csv_file_not_found">Aviso: Archivo CSV no encontrado: %1$s - ignorado</string>
+    <string name="importing_file_without_detail">Importando archivo (%1$d de %2$d): %3$s</string>
+    <string name="import_csv_success">Importado con éxito para tabula %1$s</string>
+    <string name="import_csv_failure">Error al importar para tabula %1$s</string>
+    <string name="import_success">Importado con éxito.</string>
+    <string name="import_in_progress">Importando fila %1$d de acerca de %2$d</string>
+
+    <string name="searching_for_form_defs">Buscando impresos nuevos &#8230;</string>
+    <string name="updating_form_information">Leyendo definición de impreso %1$s (%2$d de %3$d)</string>
+    <string name="form_register_success">Leído con éxito: impreso %2$s para la tabula %1$s</string>
+    <string name="form_register_failure">Error al leer: impreso %2$s para la tabula %1$s</string>
+
+    <string name="abort_error_accessing_database">Abortado: Error al acceder baso de datos</string>
+</resources>

@@ -3,3 +3,6 @@ build
 .idea
 local.properties
 *.iml
+androidlibrary_lib/google-services.json
+androidlibrary_lib/fabric.properties
+odkanalytics/
