@@ -301,7 +301,6 @@ public final class PropertiesSingleton {
   public void signalPropertiesChange() {
     // read the current revision and increment it
     {
-      verifyDirectories();
       /*
        * Manipulate revision within lock to ensure we get the latest
        * update state without any revisions in progress.
@@ -461,15 +460,6 @@ public final class PropertiesSingleton {
     }
   }
 
-  private void verifyDirectories() {
-    try {
-      ODKFileUtils.verifyExternalStorageAvailability();
-      ODKFileUtils.assertDirectoryStructure(mAppName);
-    } catch (Exception ignored) {
-      throw new IllegalArgumentException("External storage not available");
-    }
-  }
-
   private int getCurrentRevision() {
     int noResult = INVALID_REVISION;
     try {
@@ -563,7 +553,6 @@ public final class PropertiesSingleton {
     int newRevision = INVALID_REVISION;
 
     {
-      verifyDirectories();
       /*
        * Access revision within lock to ensure we get the latest
        * update state after any revisions that are in progress.
@@ -583,7 +572,6 @@ public final class PropertiesSingleton {
   }
 
   private void readProperties(boolean includingGlobalDeviceProps) {
-    verifyDirectories();
 
     WebLogger.getLogger(mAppName)
         .i("PropertiesSingleton", "readProperties(" + includingGlobalDeviceProps + ")");
@@ -727,7 +715,6 @@ public final class PropertiesSingleton {
 
   private void writeProperties(boolean updatedSecureProps, boolean updatedDeviceProps,
       boolean updatedGeneralProps) {
-    verifyDirectories();
 
     GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
     try {
@@ -811,9 +798,10 @@ public final class PropertiesSingleton {
   public void clearSettings() {
     try {
       GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
-      currentRevision = incrementAndWriteRevision(currentRevision);
 
       try {
+        currentRevision = incrementAndWriteRevision(currentRevision);
+
         File f;
         f = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
         if (f.exists()) {
