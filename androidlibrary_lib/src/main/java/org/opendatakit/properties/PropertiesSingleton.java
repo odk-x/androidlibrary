@@ -811,9 +811,10 @@ public final class PropertiesSingleton {
   public void clearSettings() {
     try {
       GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
-      currentRevision = incrementAndWriteRevision(currentRevision);
 
       try {
+        currentRevision = incrementAndWriteRevision(currentRevision);
+
         File f;
         f = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
         if (f.exists()) {
