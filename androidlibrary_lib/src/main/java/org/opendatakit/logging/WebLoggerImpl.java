@@ -163,16 +163,6 @@ class WebLoggerImpl implements WebLoggerIf {
         }
       }
 
-      // ensure we have the directories created...
-      try {
-        ODKFileUtils.verifyExternalStorageAvailability();
-        ODKFileUtils.assertDirectoryStructure(appName);
-      } catch (Exception e) {
-        Log.e(TAG, "Unable to create logging directory");
-        Log.e(TAG, Log.getStackTraceString(e), e);
-        return;
-      }
-
       String loggingPath = ODKFileUtils.getLoggingFolder(appName);
       File loggingDirectory = new File(loggingPath);
 
