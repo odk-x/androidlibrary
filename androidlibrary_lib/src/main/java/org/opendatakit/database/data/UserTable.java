@@ -115,16 +115,6 @@ public class UserTable implements Parcelable, WrapperTable {
     mBaseTable.addRow(row);
   }
 
-  /**
-   * These three methods are used in ExecutorProcessor, BaseTable, UserTable
-   *
-   * @return the metadata revision
-   */
-  @SuppressWarnings("unused")
-  public String getMetaDataRev() {
-    return mBaseTable.getMetaDataRev();
-  }
-
   @SuppressWarnings("unused")
   public Map<String, Integer> getElementKeyToIndex() {
     return mBaseTable.getElementKeyToIndex();
