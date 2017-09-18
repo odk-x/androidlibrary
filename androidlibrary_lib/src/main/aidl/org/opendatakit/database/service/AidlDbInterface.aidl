@@ -272,6 +272,17 @@ interface AidlDbInterface {
       in List<KeyValueStoreEntry> metaData, in boolean clear);
 
   /**
+   * Rescan the config directory tree of the given tableId and update the forms table
+   * with revised information from the formDef.json files that it contains.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @return true if there were no problems
+   */
+  boolean rescanTableFormDefs(in String appName, in DbHandle dbHandleName, in String tableId);
+
+  /**
    * Drop the given tableId and remove all the files (both configuration and
    * data attachments) associated with that table.
    * 

@@ -84,6 +84,7 @@ public class InitializationUtil {
 
     try {
       updateTableDirs(pendingOutcome);
+
     } catch (ServicesAvailabilityException e) {
       WebLogger.getLogger(appName).printStackTrace(e);
       WebLogger.getLogger(appName).e(TAG, "Error accesssing database during table creation sweep");
@@ -91,7 +92,15 @@ public class InitializationUtil {
       return pendingOutcome;
     }
 
-    updateFormDirs(pendingOutcome);
+    try {
+      updateFormDirs(pendingOutcome);
+
+    } catch (ServicesAvailabilityException e) {
+      WebLogger.getLogger(appName).printStackTrace(e);
+      WebLogger.getLogger(appName).e(TAG, "Error accesssing database during form creation sweep");
+      pendingOutcome.add(appContext.getString(R.string.abort_error_accessing_database));
+      return pendingOutcome;
+    }
 
     try {
       initTables(pendingOutcome);
@@ -245,112 +254,6 @@ public class InitializationUtil {
     doActionOnRawZip(resources, resourceId, result, worker);
   }
 
-  /**
-   * Remove definitions from the Forms database that are no longer present on
-   * disk.
-   */
-  private void removeStaleFormInfo(List<File> discoveredFormDefDirs) {
-    Uri formsProviderContentUri = Uri.parse("content://" + FormsProviderAPI.AUTHORITY);
-
-    String completionString = appContext.getString(R.string.searching_for_deleted_forms);
-    getSupervisor().publishProgress(completionString, null);
-
-    WebLogger.getLogger(appName).i(TAG, "removeStaleFormInfo " + appName + " begin");
-    ArrayList<Uri> badEntries = new ArrayList<>();
-    Cursor c = null;
-    try {
-      c = appContext.getContentResolver()
-          .query(Uri.withAppendedPath(formsProviderContentUri, appName), null, null, null, null);
-
-      if (c == null) {
-        WebLogger.getLogger(appName)
-            .w(TAG, "removeStaleFormInfo " + appName + " null cursor returned from query.");
-        return;
-      }
-
-      if (c.moveToFirst()) {
-        do {
-          String tableId = CursorUtils.getIndexAsString(c, c.getColumnIndex(FormsColumns.TABLE_ID));
-          String formId = CursorUtils.getIndexAsString(c, c.getColumnIndex(FormsColumns.FORM_ID));
-          Uri otherUri = Uri.withAppendedPath(
-              Uri.withAppendedPath(Uri.withAppendedPath(formsProviderContentUri, appName), tableId),
-              formId);
-
-          String examString = appContext.getString(R.string.examining_form, tableId, formId);
-          getSupervisor().publishProgress(examString, null);
-
-          String formDir = ODKFileUtils.getFormFolder(appName, tableId, formId);
-          File f = new File(formDir);
-          File formDefJson = new File(f, ODKFileUtils.FORMDEF_JSON_FILENAME);
-          if (!f.exists() || !f.isDirectory() || !formDefJson.exists() || !formDefJson.isFile()) {
-            // the form definition does not exist
-            badEntries.add(otherUri);
-          } else {
-            // ////////////////////////////////
-            // formdef.json exists. See if it is
-            // unchanged...
-            String json_md5 = CursorUtils
-                .getIndexAsString(c, c.getColumnIndex(FormsColumns.JSON_MD5_HASH));
-            String fileMd5 = ODKFileUtils.getMd5Hash(appName, formDefJson);
-            if (json_md5 != null && json_md5.equals(fileMd5)) {
-              // it is unchanged -- no need to rescan it
-              discoveredFormDefDirs.remove(f);
-            }
-          }
-        } while (c.moveToNext());
-      }
-    } catch (Exception e) {
-      WebLogger.getLogger(appName)
-          .e(TAG, "removeStaleFormInfo " + appName + " exception: " + e.toString());
-      WebLogger.getLogger(appName).printStackTrace(e);
-    } finally {
-      if (c != null && !c.isClosed()) {
-        c.close();
-      }
-    }
-
-    // delete the other entries (and directories)
-    for (Uri badUri : badEntries) {
-      WebLogger.getLogger(appName)
-          .i(TAG, "removeStaleFormInfo: " + appName + " deleting: " + badUri.toString());
-      try {
-        appContext.getContentResolver().delete(badUri, null, null);
-      } catch (Exception e) {
-        WebLogger.getLogger(appName)
-            .e(TAG, "removeStaleFormInfo " + appName + " exception: " + e.toString());
-        WebLogger.getLogger(appName).printStackTrace(e);
-        // and continue -- don't throw an error
-      }
-    }
-    WebLogger.getLogger(appName).i(TAG, "removeStaleFormInfo " + appName + " end");
-  }
-
-  /**
-   * Construct a directory name that is unused in the stale path and move
-   * mediaPath there.
-   *
-   * @param mediaPath
-   * @param baseStaleMediaPath -- the stale directory corresponding to the mediaPath container
-   * @return the directory within the stale directory that the mediaPath was
-   * renamed to.
-   * @throws IOException
-   */
-  private File moveToStaleDirectory(File mediaPath, String baseStaleMediaPath) throws IOException {
-    // we have a 'framework' form in the forms directory.
-    // Move it to the stale directory.
-    // Delete all records referring to this directory.
-    int i = 0;
-    File tempMediaPath = new File(
-        baseStaleMediaPath + mediaPath.getName() + "_" + Integer.toString(i));
-    while (tempMediaPath.exists()) {
-      ++i;
-      tempMediaPath = new File(
-          baseStaleMediaPath + mediaPath.getName() + "_" + Integer.toString(i));
-    }
-    ODKFileUtils.moveDirectory(mediaPath, tempMediaPath);
-    return tempMediaPath;
-  }
-
   private void updateTableDirs(InitializationOutcome pendingOutcome)
       throws ServicesAvailabilityException {
     // /////////////////////////////////////////
@@ -379,6 +282,7 @@ public class InitializationUtil {
       }
     });
 
+    List<String> tableIdsWithDefinitions = new ArrayList<String>();
     for (int i = 0; i < tableIdDirs.length; ++i) {
       File tableIdDir = tableIdDirs[i];
       String tableId = tableIdDir.getName();
@@ -398,6 +302,7 @@ public class InitializationUtil {
 
         try {
           util.updateTablePropertiesFromCsv(tableId);
+          tableIdsWithDefinitions.add(tableId);
         } catch (IOException e) {
           pendingOutcome.add(appContext.getString(R.string.defining_tableid_error, tableId));
           WebLogger.getLogger(appName).e(TAG, "Unexpected error during update from csv");
@@ -409,12 +314,18 @@ public class InitializationUtil {
     try {
       db = getSupervisor().getDatabase().openDatabase(appName);
       getSupervisor().getDatabase().deleteAppAndTableLevelManifestSyncETags(appName, db);
+      List<String> tableIds = getSupervisor().getDatabase().getAllTableIds(appName, db);
+      Set<String> tableIdsWithoutDefinitions = new HashSet<String>();
+      tableIdsWithoutDefinitions.addAll(tableIds);
+      tableIdsWithoutDefinitions.removeAll(tableIdsWithDefinitions);
+      for (String tableId : tableIdsWithoutDefinitions) {
+        getSupervisor().getDatabase().deleteTableAndAllData(appName, db, tableId);
+      }
     } finally {
       if (db != null) {
         getSupervisor().getDatabase().closeDatabase(appName, db);
       }
     }
-
   }
 
   private void initTables(final InitializationOutcome pendingOutcome)
@@ -583,7 +494,8 @@ public class InitializationUtil {
   }
   //private Map<String, Boolean> importStatus = new TreeMap<>();
 
-  private void updateFormDirs(InitializationOutcome pendingOutcome) {
+  private void updateFormDirs(InitializationOutcome pendingOutcome)
+      throws ServicesAvailabilityException {
 
     // /////////////////////////////////////////
     // /////////////////////////////////////////
@@ -593,170 +505,41 @@ public class InitializationUtil {
     String completionString = appContext.getString(R.string.searching_for_form_defs);
     getSupervisor().publishProgress(completionString, null);
 
-    File tablesDir = new File(ODKFileUtils.getTablesFolder(appName));
-
-    File[] tableIdDirs = tablesDir.listFiles(new FileFilter() {
-
-      @Override
-      public boolean accept(File pathname) {
-        return pathname.isDirectory();
-      }
-    });
-
-    List<File> formDirs = new ArrayList<>();
-    for (File tableIdDir : tableIdDirs) {
-      String tableId = tableIdDir.getName();
-
-      File formDir = new File(ODKFileUtils.getFormsFolder(appName, tableId));
-      File[] formIdDirs = formDir.listFiles(new FileFilter() {
-
-        @Override
-        public boolean accept(File pathname) {
-          File formDef = new File(pathname, ODKFileUtils.FORMDEF_JSON_FILENAME);
-          return pathname.isDirectory() && formDef.exists() && formDef.isFile();
-        }
-      });
-
-      if (formIdDirs != null) {
-        formDirs.addAll(Arrays.asList(formIdDirs));
-      }
-    }
-
-    // /////////////////////////////////////////
-    // remove forms that no longer exist
-    // remove the forms that haven't changed
-    // from the discovered list
-    removeStaleFormInfo(formDirs);
-
-    // this is the complete list of forms we need to scan and possibly add
-    // to the FormsProvider
-    for (int i = 0; i < formDirs.size(); ++i) {
-      File formDir = formDirs.get(i);
-
-      String formId = formDir.getName();
-      String tableId = formDir.getParentFile().getParentFile().getName();
-
-      // specifically target this form...
-      WebLogger.getLogger(appName).i(TAG, "updateFormInfo: form: " + formDir.getAbsolutePath());
-
-      String examString = appContext
-          .getString(R.string.updating_form_information, formDir.getName(), i + 1, formDirs.size());
-      getSupervisor().publishProgress(examString, null);
-
-      updateFormDir(tableId, formId, formDir,
-          ODKFileUtils.getPendingDeletionTablesFolder(appName) + File.separator, pendingOutcome);
-    }
-
-  }
-
-  /**
-   * Scan the given formDir and update the Forms database. If it is the
-   * formsFolder, then any 'framework' forms should be forbidden. If it is not
-   * the formsFolder, only 'framework' forms should be allowed
-   *
-   * @param tableId
-   * @param formId
-   * @param formDir
-   * @param baseStaleMediaPath -- path prefix to the stale forms/framework directory.
-   */
-  private void updateFormDir(String tableId, String formId, File formDir, String baseStaleMediaPath,
-      InitializationOutcome pendingOutcome) {
-    Uri formsProviderContentUri = Uri.parse("content://" + FormsProviderAPI.AUTHORITY);
-    String formDirectoryPath = formDir.getAbsolutePath();
-    WebLogger.getLogger(appName).i(TAG, "updateFormDir: " + formDirectoryPath);
-
-    String successMessage = appContext.getString(R.string.form_register_success, tableId, formId);
-    String failureMessage = appContext.getString(R.string.form_register_failure, tableId, formId);
-
-    Cursor c = null;
+    DbHandle dbHandle = null;
     try {
-      String selection = FormsColumns.TABLE_ID + "=? AND " + FormsColumns.FORM_ID + "=?";
-      String[] selectionArgs = { tableId, formId };
-      c = appContext.getContentResolver()
-          .query(Uri.withAppendedPath(formsProviderContentUri, appName), null, selection,
-              selectionArgs, null);
+      dbHandle = getSupervisor().getDatabase().openDatabase(appName);
+      List<String> tableIds = getSupervisor().getDatabase().getAllTableIds(appName, dbHandle);
 
-      if (c == null) {
-        WebLogger.getLogger(appName)
-            .w(TAG, "updateFormDir: " + formDirectoryPath + " null cursor -- cannot update!");
-        pendingOutcome.add(failureMessage);
-        pendingOutcome.problemDefiningForms = true;
-        return;
+      for ( int i = 0 ; i < tableIds.size() ; ++i ) {
+        String tableId = tableIds.get(i);
+
+        // specifically target this tableId...
+        WebLogger.getLogger(appName).i(TAG, "updateFormInfo: tableid: " + tableId);
+
+        String examString = appContext
+            .getString(R.string.updating_table_form_information, tableId, i + 1, tableIds.size());
+        getSupervisor().publishProgress(examString, null);
+
+
+        boolean outcome = getSupervisor().getDatabase().rescanTableFormDefs(appName, dbHandle,
+            tableId);
+        if ( outcome ) {
+
+          String successMessage = appContext.getString(R.string.table_forms_register_success,
+              tableId);
+          pendingOutcome.add(successMessage);
+        } else {
+          String failureMessage = appContext.getString(R.string.table_forms_register_failure,
+              tableId);
+          pendingOutcome.add(failureMessage);
+          pendingOutcome.problemDefiningForms = true;
+        }
       }
-
-      if (c.getCount() > 1) {
-        c.close();
-        WebLogger.getLogger(appName).w(TAG, "updateFormDir: " + formDirectoryPath
-            + " multiple records from cursor -- delete all and restore!");
-        // we have multiple records for this one directory.
-        // Rename the directory. Delete the records, and move the
-        // directory back.
-        File tempMediaPath = moveToStaleDirectory(formDir, baseStaleMediaPath);
-
-        appContext.getContentResolver()
-            .delete(Uri.withAppendedPath(formsProviderContentUri, appName), selection,
-                selectionArgs);
-
-        ODKFileUtils.moveDirectory(tempMediaPath, formDir);
-
-        ContentValues cv = new ContentValues();
-        cv.put(FormsColumns.TABLE_ID, tableId);
-        cv.put(FormsColumns.FORM_ID, formId);
-        appContext.getContentResolver()
-            .insert(Uri.withAppendedPath(formsProviderContentUri, appName), cv);
-      } else if (c.getCount() == 1) {
-        c.close();
-        ContentValues cv = new ContentValues();
-        cv.put(FormsColumns.TABLE_ID, tableId);
-        cv.put(FormsColumns.FORM_ID, formId);
-        appContext.getContentResolver()
-            .update(Uri.withAppendedPath(formsProviderContentUri, appName), cv, null, null);
-      } else if (c.getCount() == 0) {
-        c.close();
-        ContentValues cv = new ContentValues();
-        cv.put(FormsColumns.TABLE_ID, tableId);
-        cv.put(FormsColumns.FORM_ID, formId);
-        appContext.getContentResolver()
-            .insert(Uri.withAppendedPath(formsProviderContentUri, appName), cv);
-      }
-    } catch (IOException e) {
-      WebLogger.getLogger(appName).printStackTrace(e);
-      WebLogger.getLogger(appName)
-          .e(TAG, "updateFormDir: " + formDirectoryPath + " exception: " + e.toString());
-      pendingOutcome.add(failureMessage);
-      pendingOutcome.problemDefiningForms = true;
-      return;
-    } catch (IllegalArgumentException e) {
-      WebLogger.getLogger(appName).printStackTrace(e);
-      WebLogger.getLogger(appName)
-          .e(TAG, "updateFormDir: " + formDirectoryPath + " exception: " + e.toString());
-      try {
-        ODKFileUtils.deleteDirectory(formDir);
-        WebLogger.getLogger(appName).i(TAG,
-            "updateFormDir: " + formDirectoryPath + " Removing -- unable to parse formDef file: "
-                + e.toString());
-      } catch (IOException e1) {
-        WebLogger.getLogger(appName).printStackTrace(e1);
-        WebLogger.getLogger(appName).i(TAG,
-            "updateFormDir: " + formDirectoryPath + " Removing -- unable to delete form directory: "
-                + formDir.getName() + " error: " + e.toString());
-      }
-      pendingOutcome.add(failureMessage);
-      pendingOutcome.problemDefiningForms = true;
-      return;
-    } catch (Exception e) {
-      WebLogger.getLogger(appName).printStackTrace(e);
-      WebLogger.getLogger(appName)
-          .e(TAG, "updateFormDir: " + formDirectoryPath + " exception: " + e.toString());
-      pendingOutcome.add(failureMessage);
-      pendingOutcome.problemDefiningForms = true;
-      return;
     } finally {
-      if (c != null && !c.isClosed()) {
-        c.close();
+      if (dbHandle != null) {
+        getSupervisor().getDatabase().closeDatabase(appName, dbHandle);
       }
     }
-    pendingOutcome.add(successMessage);
   }
 
   private interface ZipAction {
