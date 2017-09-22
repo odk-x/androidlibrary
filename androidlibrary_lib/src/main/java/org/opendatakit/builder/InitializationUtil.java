@@ -14,25 +14,33 @@
 
 package org.opendatakit.builder;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.res.Resources;
-import android.database.Cursor;
-import android.net.Uri;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.database.service.DbHandle;
-import org.opendatakit.database.utilities.CursorUtils;
 import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.listener.ImportListener;
 import org.opendatakit.logging.WebLogger;
-import org.opendatakit.provider.FormsColumns;
-import org.opendatakit.provider.FormsProviderAPI;
 import org.opendatakit.utilities.ODKFileUtils;
 
-import java.io.*;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import android.content.Context;
+import android.content.res.Resources;
 
 /**
  * Background task for exploding the built-in zipfile resource into the
@@ -398,9 +406,10 @@ public class InitializationUtil {
         CsvUtil cu = new CsvUtil(getSupervisor(), appName);
         for (String key : keys) {
           curFileCount++;
-          String filename = prop.getProperty(key + KEY_SUFFIX_CSV_FILENAME);
+          String srcFilename = prop.getProperty(key + KEY_SUFFIX_CSV_FILENAME);
           //this.importStatus.put(key, false);
-          file = new File(ODKFileUtils.getAppFolder(appName), filename);
+          file = new File(ODKFileUtils.getAppFolder(appName), srcFilename);
+          String filename = ODKFileUtils.asRelativePath(appName, file);
           mKeyToFileMap.put(key, filename);
           if (!file.exists()) {
             pendingOutcome.assetsCsvFileNotFoundSet.add(key);

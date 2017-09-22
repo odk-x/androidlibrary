@@ -63,10 +63,11 @@ abstract class PropertiesSingletonFactory {
     }
 
     if ( gSingleton == null || gAppName == null || !gAppName.equals(appName) ) {
+      // verify of directories needs to occur before we create the singleton.
+      verifyDirectories(appName);
       gSingleton = new PropertiesSingleton(context, appName, mGeneralDefaults, mDeviceDefaults,
         mSecureDefaults);
       gAppName = appName;
-      verifyDirectories(appName);
     }
     return gSingleton;
   }

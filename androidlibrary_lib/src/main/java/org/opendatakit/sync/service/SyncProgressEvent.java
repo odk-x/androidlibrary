@@ -30,7 +30,7 @@ public class SyncProgressEvent implements Parcelable {
   @SuppressWarnings("WeakerAccess")
   public final int maxProgressBar;
 
-  protected SyncProgressEvent(String progressMessageText, SyncProgressState progressState,
+  public SyncProgressEvent(String progressMessageText, SyncProgressState progressState,
       int curProgressBar, int maxProgressBar) {
     this.progressMessageText = progressMessageText;
     this.progressState = progressState;

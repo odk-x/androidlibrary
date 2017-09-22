@@ -20,11 +20,10 @@ import android.os.Environment;
 import android.support.annotation.CheckResult;
 import android.util.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.CharEncoding;
-import org.opendatakit.consts.WebkitServerConsts;
+import org.opendatakit.consts.CharsetConsts;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.FormsColumns;
 import org.w3c.dom.Node;
@@ -142,6 +141,15 @@ public final class ODKFileUtils {
   private static final Pattern VALID_FOLDER_PATTERN = Pattern
       .compile("^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)+$");
 
+  private static final Pattern FORWARD_SLASH_PATTERN = Pattern.compile("/");
+  private static final Pattern FILE_SEPARATOR_PATTERN;
+  static {
+	  if ( File.separator.equals("/") ) {
+		  FILE_SEPARATOR_PATTERN = Pattern.compile(File.separator);
+	  } else {
+		  FILE_SEPARATOR_PATTERN = Pattern.compile(File.separator + File.separator);
+	  }
+  }
   /**
    * Do not instantiate this class
    */
@@ -183,7 +191,7 @@ public final class ODKFileUtils {
       return null;
     }
 
-    String[] parts = uriFragment.split("/");
+    String[] parts = FORWARD_SLASH_PATTERN.split(uriFragment);
     if (parts.length > 1) {
       switch (parts[0]) {
       case CONFIG_FOLDER_NAME:
@@ -417,7 +425,7 @@ public final class ODKFileUtils {
     try {
       fs = new FileOutputStream(versionFile, false);
       //noinspection deprecation
-      w = new OutputStreamWriter(fs, Charsets.UTF_8);
+      w = new OutputStreamWriter(fs, CharsetConsts.UTF_8);
       bw = new BufferedWriter(w);
       bw.write(apkVersion);
       bw.write("\n");
@@ -484,7 +492,7 @@ public final class ODKFileUtils {
     try {
       fs = new FileInputStream(versionFile);
       //noinspection deprecation
-      r = new InputStreamReader(fs, Charsets.UTF_8);
+      r = new InputStreamReader(fs, CharsetConsts.UTF_8);
       br = new BufferedReader(r);
       versionLine = br.readLine();
     } catch (IOException e) {
@@ -524,7 +532,7 @@ public final class ODKFileUtils {
   }
 
   private static File fromAppPath(String appPath) {
-    String[] terms = appPath.split(File.separator);
+    String[] terms = FILE_SEPARATOR_PATTERN.split(appPath);
     if (terms.length < 1) {
       return null;
     }
