@@ -24,6 +24,7 @@ import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Properties are in 3 classes:
@@ -66,6 +67,7 @@ public final class PropertiesSingleton {
   public final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT;
 
   private final String mAppName;
+  private final ReentrantLock mAppLock;
   private final boolean mHasSecureStorage;
   private final File mSecureStorageDir;
   private final TreeMap<String, String> mGeneralDefaults;
@@ -78,9 +80,12 @@ public final class PropertiesSingleton {
   private int currentRevision = INVALID_REVISION;
   private String mInstallationId;
 
-  PropertiesSingleton(Context context, String appName, TreeMap<String, String> plainDefaults,
-      TreeMap<String, String> deviceDefaults, TreeMap<String, String> secureDefaults) {
+  PropertiesSingleton(Context context, String appName, ReentrantLock appLock,
+                      TreeMap<String, String> plainDefaults,
+                      TreeMap<String, String> deviceDefaults,
+                      TreeMap<String, String> secureDefaults) {
     mAppName = appName;
+    mAppLock = appLock;
     mHasSecureStorage = context.getPackageName()
         .equals(IntentConsts.AppProperties.APPLICATION_NAME);
     if (mHasSecureStorage) {
@@ -305,7 +310,7 @@ public final class PropertiesSingleton {
        * Manipulate revision within lock to ensure we get the latest
        * update state without any revisions in progress.
        */
-      GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
       try {
         currentRevision = getCurrentRevision();
         currentRevision = incrementAndWriteRevision(currentRevision);
@@ -557,7 +562,7 @@ public final class PropertiesSingleton {
        * Access revision within lock to ensure we get the latest
        * update state after any revisions that are in progress.
        */
-      GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
       try {
         newRevision = getCurrentRevision();
       } finally {
@@ -576,7 +581,7 @@ public final class PropertiesSingleton {
     WebLogger.getLogger(mAppName)
         .i("PropertiesSingleton", "readProperties(" + includingGlobalDeviceProps + ")");
 
-    GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+    GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
     try {
       // OK. Now access files...
       FileInputStream configFileInputStream = null;
@@ -713,10 +718,40 @@ public final class PropertiesSingleton {
     }
   }
 
+  private File backupFile(File toBeOverwritten, int counter) {
+    File tempPendingDelete = new File( toBeOverwritten.getParentFile(), 
+        toBeOverwritten.getName() + ".del" + Integer.toString(counter));
+    return tempPendingDelete;
+  }
+  
+  private void replaceFile(File newFile, File toBeOverwritten) throws IOException {
+    int counter = 0;
+    File tempPendingDelete = backupFile(toBeOverwritten, counter++);
+    boolean fileSuccess = true;
+    while ( tempPendingDelete.exists() && !tempPendingDelete.delete()) {
+      tempPendingDelete = backupFile(toBeOverwritten, counter++);
+    }
+    fileSuccess = toBeOverwritten.renameTo(tempPendingDelete);
+    if (!fileSuccess) {
+      WebLogger.getLogger(mAppName).i(TAG, "File Rename to Backup Failed! " +
+          toBeOverwritten.getName() );
+      throw new IOException("Unable to rename configuration file");
+    } else {
+      fileSuccess = newFile.renameTo(toBeOverwritten);
+      if (!fileSuccess) {
+        WebLogger.getLogger(mAppName).i(TAG, "Temporary to Permanent File Rename Failed! " +
+            toBeOverwritten.getName() );
+        // try to restore the file we were attempting to replace
+        tempPendingDelete.renameTo(toBeOverwritten);
+        throw new IOException("Unable to replace configuration file");
+      }
+    }
+  }
+
   private void writeProperties(boolean updatedSecureProps, boolean updatedDeviceProps,
       boolean updatedGeneralProps) {
 
-    GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+    GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
     try {
       currentRevision = incrementAndWriteRevision(currentRevision);
 
@@ -732,11 +767,7 @@ public final class PropertiesSingleton {
           File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName),
               GENERAL_PROPERTIES_FILENAME);
 
-          boolean fileSuccess = tempConfigFile.renameTo(configFile);
-
-          if (!fileSuccess) {
-            WebLogger.getLogger(mAppName).i(TAG, "Temporary General Config File Rename Failed!");
-          }
+          replaceFile(tempConfigFile, configFile);
 
         } catch (Exception e) {
           WebLogger.getLogger(mAppName).printStackTrace(e);
@@ -755,11 +786,7 @@ public final class PropertiesSingleton {
           File configFile = new File(ODKFileUtils.getDataFolder(mAppName),
               DEVICE_PROPERTIES_FILENAME);
 
-          boolean fileSuccess = tempConfigFile.renameTo(configFile);
-
-          if (!fileSuccess) {
-            WebLogger.getLogger(mAppName).i(TAG, "Temporary Device Config File Rename Failed!");
-          }
+          replaceFile(tempConfigFile, configFile);
 
         } catch (Exception e) {
           WebLogger.getLogger(mAppName).printStackTrace(e);
@@ -776,11 +803,7 @@ public final class PropertiesSingleton {
 
           File configFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME);
 
-          boolean fileSuccess = tempConfigFile.renameTo(configFile);
-
-          if (!fileSuccess) {
-            WebLogger.getLogger(mAppName).i(TAG, "Temporary Secure Config File Rename Failed!");
-          }
+          replaceFile(tempConfigFile, configFile);
 
         } catch (Exception e) {
           WebLogger.getLogger(mAppName).printStackTrace(e);
@@ -797,7 +820,7 @@ public final class PropertiesSingleton {
   @SuppressWarnings("unused")
   public void clearSettings() {
     try {
-      GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
 
       try {
         currentRevision = incrementAndWriteRevision(currentRevision);
