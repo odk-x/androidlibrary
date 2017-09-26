@@ -726,24 +726,41 @@ public final class PropertiesSingleton {
   
   private void replaceFile(File newFile, File toBeOverwritten) throws IOException {
     int counter = 0;
+    // find a file that we can use as a backup file
+    // if there is an old backup file, try to remove it
+    // before generating yet another backup filename.
     File tempPendingDelete = backupFile(toBeOverwritten, counter++);
-    boolean fileSuccess = true;
     while ( tempPendingDelete.exists() && !tempPendingDelete.delete()) {
       tempPendingDelete = backupFile(toBeOverwritten, counter++);
     }
-    fileSuccess = toBeOverwritten.renameTo(tempPendingDelete);
-    if (!fileSuccess) {
-      WebLogger.getLogger(mAppName).i(TAG, "File Rename to Backup Failed! " +
-          toBeOverwritten.getName() );
-      throw new IOException("Unable to rename configuration file");
-    } else {
-      fileSuccess = newFile.renameTo(toBeOverwritten);
+
+    if ( toBeOverwritten.exists() ) {
+      // rename the current file as the backup filename.
+      boolean fileSuccess = toBeOverwritten.renameTo(tempPendingDelete);
+      if (!fileSuccess) {
+        WebLogger.getLogger(mAppName).i(TAG, "File Rename to Backup Failed! " + toBeOverwritten.getName());
+        throw new IOException("Unable to rename configuration file");
+      }
+    }
+
+    try {
+      // rename the new file to the current file
+      boolean fileSuccess = newFile.renameTo(toBeOverwritten);
       if (!fileSuccess) {
         WebLogger.getLogger(mAppName).i(TAG, "Temporary to Permanent File Rename Failed! " +
             toBeOverwritten.getName() );
         // try to restore the file we were attempting to replace
-        tempPendingDelete.renameTo(toBeOverwritten);
+        // by renaming the file pending delete back to the current file.
+        if ( tempPendingDelete.exists() ) {
+          tempPendingDelete.renameTo(toBeOverwritten);
+        }
         throw new IOException("Unable to replace configuration file");
+      }
+    } finally {
+      // and if we get here, if the backup file exists, attempt to delete it.
+      // (keeps the clutter at bay).
+      if ( tempPendingDelete.exists() ) {
+        tempPendingDelete.delete();
       }
     }
   }
