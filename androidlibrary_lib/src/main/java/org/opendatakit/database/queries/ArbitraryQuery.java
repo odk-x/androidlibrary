@@ -15,6 +15,9 @@
  */
 package org.opendatakit.database.queries;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * This is a basic query with the typical building blocks.
  */
@@ -24,6 +27,8 @@ public class ArbitraryQuery extends ResumableQuery {
     * The the abstract SQL command
     */
    private final String mSqlCommand;
+
+   private final String mMetaDataRev;
 
    /**
     * Constructor the query
@@ -35,7 +40,7 @@ public class ArbitraryQuery extends ResumableQuery {
     * @param offset     The offset to start counting the limit from
     */
    public ArbitraryQuery(String tableId, BindArgs bindArgs, String sqlCommand, Integer limit,
-       Integer offset) {
+       Integer offset, String metaDataRev) {
       super(tableId, bindArgs, limit, offset);
 
       if (sqlCommand == null) {
@@ -43,6 +48,7 @@ public class ArbitraryQuery extends ResumableQuery {
       }
 
       this.mSqlCommand = sqlCommand;
+      this.mMetaDataRev = metaDataRev;
    }
 
    /**
@@ -54,14 +60,45 @@ public class ArbitraryQuery extends ResumableQuery {
     */
    @SuppressWarnings("unused")
    public ArbitraryQuery(String tableId, BindArgs bindArgs, String sqlCommand,
-       QueryBounds bounds) {
+       QueryBounds bounds, String metaDataRev) {
 
       this(tableId, bindArgs, sqlCommand, bounds != null ? bounds.mLimit : -1,
-          bounds != null ? bounds.mOffset : -1);
+          bounds != null ? bounds.mOffset : -1, metaDataRev);
+   }
+
+
+   public ArbitraryQuery(Parcel in) {
+      super(in);
+
+      this.mSqlCommand = readStringFromParcel(in);
+      this.mMetaDataRev = readStringFromParcel(in);
    }
 
    public String getSqlCommand() {
       return mSqlCommand;
    }
+
+   public String getMetaDataRev() {
+      return mMetaDataRev;
+   }
+
+   @Override
+   public void writeToParcel(Parcel dest, int flags) {
+      super.writeToParcel(dest, flags);
+
+      writeStringToParcel(dest, mSqlCommand);
+      writeStringToParcel(dest, mMetaDataRev);
+   }
+
+   public static final Parcelable.Creator<ArbitraryQuery> CREATOR =
+           new Parcelable.Creator<ArbitraryQuery>() {
+              public ArbitraryQuery createFromParcel(Parcel in) {
+                 return new ArbitraryQuery(in);
+              }
+
+              public ArbitraryQuery[] newArray(int size) {
+                 return new ArbitraryQuery[size];
+              }
+           };
 
 }
