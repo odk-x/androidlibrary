@@ -271,30 +271,47 @@ public final class PropertiesSingleton {
       if (value == null) {
         // remove from map
         if (isSecureProperty(propertyName)) {
-          mSecureProps.remove(propertyName);
-          updatedSecureProps = true;
+          if ( mSecureProps.containsKey(propertyName) ) {
+            mSecureProps.remove(propertyName);
+            updatedSecureProps = true;
+          }
         } else if (isDeviceProperty(propertyName)) {
-          mDeviceProps.remove(propertyName);
-          updatedDeviceProps = true;
+          if ( mDeviceProps.containsKey(propertyName) ) {
+            mDeviceProps.remove(propertyName);
+            updatedDeviceProps = true;
+          }
         } else {
-          mGeneralProps.remove(propertyName);
-          updatedGeneralProps = true;
+          if ( mGeneralProps.containsKey(propertyName) ) {
+            mGeneralProps.remove(propertyName);
+            updatedGeneralProps = true;
+          }
         }
       } else {
         // set into map
         if (isSecureProperty(propertyName)) {
-          mSecureProps.setProperty(propertyName, value);
-          updatedSecureProps = true;
+          String existingValue  = mSecureProps.getProperty(propertyName);
+          if ( existingValue == null || !existingValue.equals(value) ) {
+            mSecureProps.setProperty(propertyName, value);
+            updatedSecureProps = true;
+          }
         } else if (isDeviceProperty(propertyName)) {
-          mDeviceProps.setProperty(propertyName, value);
-          updatedDeviceProps = true;
+          String existingValue  = mDeviceProps.getProperty(propertyName);
+          if ( existingValue == null || !existingValue.equals(value) ) {
+            mDeviceProps.setProperty(propertyName, value);
+            updatedDeviceProps = true;
+          }
         } else {
-          mGeneralProps.setProperty(propertyName, value);
-          updatedGeneralProps = true;
+          String existingValue  = mGeneralProps.getProperty(propertyName);
+          if ( existingValue == null || !existingValue.equals(value) ) {
+            mGeneralProps.setProperty(propertyName, value);
+            updatedGeneralProps = true;
+          }
         }
       }
     }
-    writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
+    if (updatedSecureProps || updatedDeviceProps || updatedGeneralProps) {
+      writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
+    }
   }
 
   /**
@@ -559,15 +576,20 @@ public final class PropertiesSingleton {
 
     {
       /*
-       * Access revision within lock to ensure we get the latest
-       * update state after any revisions that are in progress.
+       * Fetch the disk revision outside of a GainPropertiesLock. 
+       * This is a fast-and-loose fetch. 
+       * 
+       * writeProperties() gains the lock and immediately updates the 
+       * revision file before writing any updates.
+       *  
+       * If we detect any new revision here, outside of the lock, then 
+       * readProperties(...) will gain the lock and obtain the actual
+       * revision on disk, which might have changed from our newRevision
+       * value, because multiple writeProperties() calls might have 
+       * intervened between this fast-and-loose fetch and the current
+       * thread gaining an exclusive lock within readProperties(...). 
        */
-      GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
-      try {
-        newRevision = getCurrentRevision();
-      } finally {
-        theLock.release();
-      }
+      newRevision = getCurrentRevision();
     }
     
     if (newRevision == INVALID_REVISION || newRevision != currentRevision) {
