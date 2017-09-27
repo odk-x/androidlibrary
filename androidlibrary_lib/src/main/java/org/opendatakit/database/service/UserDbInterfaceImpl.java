@@ -842,7 +842,6 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public BaseTable arbitrarySqlQuery(String appName, DbHandle dbHandleName, String tableId,
       String sqlCommand, BindArgs bindArgs, Integer limit, Integer offset)
       throws ServicesAvailabilityException {
-    // TODO: Does this need metadata revision?
 
     ArbitraryQuery query = new ArbitraryQuery(tableId, bindArgs, sqlCommand, limit, offset);
 
