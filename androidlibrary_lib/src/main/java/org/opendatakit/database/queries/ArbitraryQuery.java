@@ -28,8 +28,6 @@ public class ArbitraryQuery extends ResumableQuery {
     */
    private final String mSqlCommand;
 
-   private final String mMetaDataRev;
-
    /**
     * Constructor the query
     *
@@ -40,7 +38,7 @@ public class ArbitraryQuery extends ResumableQuery {
     * @param offset     The offset to start counting the limit from
     */
    public ArbitraryQuery(String tableId, BindArgs bindArgs, String sqlCommand, Integer limit,
-       Integer offset, String metaDataRev) {
+       Integer offset) {
       super(tableId, bindArgs, limit, offset);
 
       if (sqlCommand == null) {
@@ -48,7 +46,6 @@ public class ArbitraryQuery extends ResumableQuery {
       }
 
       this.mSqlCommand = sqlCommand;
-      this.mMetaDataRev = metaDataRev;
    }
 
    /**
@@ -60,10 +57,10 @@ public class ArbitraryQuery extends ResumableQuery {
     */
    @SuppressWarnings("unused")
    public ArbitraryQuery(String tableId, BindArgs bindArgs, String sqlCommand,
-       QueryBounds bounds, String metaDataRev) {
+       QueryBounds bounds) {
 
       this(tableId, bindArgs, sqlCommand, bounds != null ? bounds.mLimit : -1,
-          bounds != null ? bounds.mOffset : -1, metaDataRev);
+          bounds != null ? bounds.mOffset : -1);
    }
 
 
@@ -71,15 +68,10 @@ public class ArbitraryQuery extends ResumableQuery {
       super(in);
 
       this.mSqlCommand = readStringFromParcel(in);
-      this.mMetaDataRev = readStringFromParcel(in);
    }
 
    public String getSqlCommand() {
       return mSqlCommand;
-   }
-
-   public String getMetaDataRev() {
-      return mMetaDataRev;
    }
 
    @Override
@@ -87,7 +79,6 @@ public class ArbitraryQuery extends ResumableQuery {
       super.writeToParcel(dest, flags);
 
       writeStringToParcel(dest, mSqlCommand);
-      writeStringToParcel(dest, mMetaDataRev);
    }
 
    public static final Parcelable.Creator<ArbitraryQuery> CREATOR =

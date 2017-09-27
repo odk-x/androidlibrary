@@ -844,7 +844,7 @@ public class UserDbInterfaceImpl implements UserDbInterface {
       throws ServicesAvailabilityException {
     // TODO: Does this need metadata revision?
 
-    ArbitraryQuery query = new ArbitraryQuery(tableId, bindArgs, sqlCommand, limit, offset, null);
+    ArbitraryQuery query = new ArbitraryQuery(tableId, bindArgs, sqlCommand, limit, offset);
 
     BaseTable baseTable = internalUserDbInterface
         .simpleQuery(appName, dbHandleName, query.getSqlCommand(), query.getSqlBindArgs(),
