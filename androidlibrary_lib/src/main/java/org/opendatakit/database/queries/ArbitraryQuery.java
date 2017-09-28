@@ -15,6 +15,9 @@
  */
 package org.opendatakit.database.queries;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * This is a basic query with the typical building blocks.
  */
@@ -60,8 +63,33 @@ public class ArbitraryQuery extends ResumableQuery {
           bounds != null ? bounds.mOffset : -1);
    }
 
+
+   public ArbitraryQuery(Parcel in) {
+      super(in);
+
+      this.mSqlCommand = readStringFromParcel(in);
+   }
+
    public String getSqlCommand() {
       return mSqlCommand;
    }
+
+   @Override
+   public void writeToParcel(Parcel dest, int flags) {
+      super.writeToParcel(dest, flags);
+
+      writeStringToParcel(dest, mSqlCommand);
+   }
+
+   public static final Parcelable.Creator<ArbitraryQuery> CREATOR =
+           new Parcelable.Creator<ArbitraryQuery>() {
+              public ArbitraryQuery createFromParcel(Parcel in) {
+                 return new ArbitraryQuery(in);
+              }
+
+              public ArbitraryQuery[] newArray(int size) {
+                 return new ArbitraryQuery[size];
+              }
+           };
 
 }

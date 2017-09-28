@@ -15,6 +15,9 @@
  */
 package org.opendatakit.database.queries;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.opendatakit.database.utilities.QueryUtil;
 
 /**
@@ -25,27 +28,27 @@ public class SimpleQuery extends ResumableQuery {
    /**
     * The WHERE arguments for the SQL command
     */
-   private final String mWhereClause;
+   protected final String mWhereClause;
 
    /**
     * The GROUP BY arguments for the SQL command
     */
-   private final String[] mGroupByArgs;
+   protected final String[] mGroupByArgs;
 
    /**
     * The HAVING argument for the SQL command
     */
-   private final String mHavingClause;
+   protected final String mHavingClause;
 
    /**
     * The ORDER BY arguments
     */
-   private final String[] mOrderByColNames;
+   protected final String[] mOrderByColNames;
 
    /**
     * The direction of each ORDER BY argument
     */
-   private final String[] mOrderByDirections;
+   protected final String[] mOrderByDirections;
 
 
 
@@ -87,6 +90,16 @@ public class SimpleQuery extends ResumableQuery {
       this(tableId, bindArgs, whereClause, groupByArgs, havingClause, orderByColNames,
           orderByDirections, bounds != null ? bounds.mLimit : -1,
           bounds != null ? bounds.mOffset : -1);
+   }
+
+   public SimpleQuery(Parcel in) {
+      super(in);
+
+      this.mWhereClause = readStringFromParcel(in);
+      this.mGroupByArgs = readStringArrFromParcel(in);
+      this.mHavingClause = readStringFromParcel(in);
+      this.mOrderByColNames = readStringArrFromParcel(in);
+      this.mOrderByDirections = readStringArrFromParcel(in);
    }
 
 
@@ -138,4 +151,26 @@ public class SimpleQuery extends ResumableQuery {
    public String[] getOrderByDirections() {
       return mOrderByDirections != null ? mOrderByDirections.clone() : null;
    }
+
+   @Override
+   public void writeToParcel(Parcel dest, int flags) {
+      super.writeToParcel(dest, flags);
+
+      writeStringToParcel(dest, mWhereClause);
+      writeStringArrToParcel(dest, mGroupByArgs);
+      writeStringToParcel(dest, mHavingClause);
+      writeStringArrToParcel(dest, mOrderByColNames);
+      writeStringArrToParcel(dest, mOrderByDirections);
+   }
+
+   public static final Parcelable.Creator<SimpleQuery> CREATOR =
+           new Parcelable.Creator<SimpleQuery>() {
+              public SimpleQuery createFromParcel(Parcel in) {
+                 return new SimpleQuery(in);
+              }
+
+              public SimpleQuery[] newArray(int size) {
+                 return new SimpleQuery[size];
+              }
+           };
 }
