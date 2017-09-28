@@ -17,7 +17,11 @@ package org.opendatakit.properties;
 import android.content.Context;
 
 import org.opendatakit.utilities.ODKFileUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Used in CommonToolProperties
@@ -30,6 +34,7 @@ abstract class PropertiesSingletonFactory {
 
   private String gAppName = null;
   private PropertiesSingleton gSingleton = null;
+  private Map<String,ReentrantLock> gAppLockMap = new HashMap<String,ReentrantLock>();
   
   PropertiesSingletonFactory(TreeMap<String, String> generalDefaults,
       TreeMap<String, String> deviceDefaults, TreeMap<String, String> secureDefaults) {
@@ -65,8 +70,13 @@ abstract class PropertiesSingletonFactory {
     if ( gSingleton == null || gAppName == null || !gAppName.equals(appName) ) {
       // verify of directories needs to occur before we create the singleton.
       verifyDirectories(appName);
-      gSingleton = new PropertiesSingleton(context, appName, mGeneralDefaults, mDeviceDefaults,
-        mSecureDefaults);
+      ReentrantLock appLock = gAppLockMap.get(appName);
+      if ( appLock == null ) {
+        appLock = new ReentrantLock();
+        gAppLockMap.put(appName, appLock);
+      }
+      gSingleton = new PropertiesSingleton(context, appName, appLock,
+          mGeneralDefaults, mDeviceDefaults, mSecureDefaults);
       gAppName = appName;
     }
     return gSingleton;
