@@ -51,11 +51,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -199,9 +197,7 @@ public class CsvUtil {
       cw.writeNext(columns.toArray(new String[columns.size()]));
       String[] row = new String[columns.size()];
       for (int i = 0; i < table.getNumberOfRows(); i++) {
-        if (i % 5 == 0) {
-          exportListener.updateProgressDetail(i);
-        }
+        exportListener.updateProgressDetail(i, table.getNumberOfRows());
         Row dataRow = table.getRowAtIndex(i);
         for (int j = 0; j < columns.size(); ++j) {
           row[j] = dataRow.getDataByKey(columns.get(j));
@@ -450,6 +446,27 @@ public class CsvUtil {
                 + ".csv");
         FileInputStream in = new FileInputStream(file);
         input = new InputStreamReader(in, CharEncoding.UTF_8);
+        int total = 0;
+        char[] buf = new char[1024];
+        int read;
+        while ((read = input.read(buf)) > 0) {
+          int i = 0;
+          // while not for because we change i in the loop
+          while (i < read) {
+            if (buf[i] == '\r' || buf[i] == '\n') {
+              if (i + 1 < buf.length && (buf[i + 1] == '\r' || buf[i + 1] == '\n')) {
+                i++;
+              }
+              total++;
+            }
+            i++;
+          }
+        }
+        input.close();
+        in.close();
+        in = new FileInputStream(file);
+        input = new InputStreamReader(in, CharEncoding.UTF_8);
+        //int total = r.getLineNumber();
         RFC4180CsvReader cr = new RFC4180CsvReader(input);
         // don't have to worry about quotes in elementKeys...
         String[] columnsInFile = cr.readNext();
@@ -475,9 +492,7 @@ public class CsvUtil {
         while (true) {
           row = cr.readNext();
           rowCount++;
-          if (rowCount % 5 == 0) {
-            importListener.updateProgressDetail(rowCount);
-          }
+          importListener.updateProgressDetail(rowCount, total);
           if (row == null || countUpToLastNonNullElement(row) == 0) {
             break;
           }

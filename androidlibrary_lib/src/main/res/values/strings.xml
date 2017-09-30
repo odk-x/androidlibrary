@@ -61,13 +61,16 @@
 	<string name="import_csv_success">Success: CSV intialization for tableId %1$s</string>
 	<string name="import_csv_failure">Failure: CSV intialization for tableId %1$s</string>
 	<string name="import_success">CSV File import was successful.</string>
-	<string name="import_in_progress">Importing row %1$d</string>
+	<string name="import_in_progress">Importing row %1$d of about %2$d</string>
 
 	<string name="searching_for_form_defs">Searching for new form definitions &#8230;</string>
-	<string name="updating_form_information">Updating form information for form %1$s (%2$d of %3$d)</string>
-	<string name="form_register_success">Success: Defining formId %2$s for tableId %1$s</string>
-	<string name="form_register_failure">Failure: Defining formId %2$s for tableId %1$s</string>
+	<string
+name="updating_table_form_information">Updating form information for table %1$s (%2$d of %3$d)</string>
+	<string name="table_forms_register_success">Success: Processed forms for tableId %1$s</string>
+	<string name="table_forms_register_failure">Failure: Processing forms for tableId %1$s</string>
 
 	<string name="abort_error_accessing_database">Aborted: Error accessing database</string>
+
+	<string name="permission_rational_title">Permission Request</string>
 
 </resources>

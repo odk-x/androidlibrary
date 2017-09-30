@@ -61,19 +61,27 @@ public final class PRNGFixes {
     }
 
     try {
+	  // because the seed is a byte[] 
+	  // and invoke's 2nd argument is Varargs
+	  // we need to supply it as an object
+	  // array of arguments, the first of which
+	  // is the byte[] array.
+	  Object[] args = new Object[1];
+	  args[0] = generateSeed();
       // Mix in the device- and invocation-specific seed.
-      byte[] seed = generateSeed();
-      Object[] args = new Object[seed.length + 1];
-      System.arraycopy(seed, 0, args, 1, seed.length);
-      args[0] = null;
       Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
-          .getMethod("RAND_seed", byte[].class).invoke(args);
+          .getMethod("RAND_seed", byte[].class)
+          .invoke(null, args);
 
       // Mix output of Linux PRNG into OpenSSL's PRNG
-      int bytesRead = (Integer) Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
-          .getMethod("RAND_load_file", String.class, long.class).invoke(null, "/dev/urandom", 1024);
+      int bytesRead = (Integer) Class.forName(
+          "org.apache.harmony.xnet.provider.jsse.NativeCrypto")
+          .getMethod("RAND_load_file", String.class, long.class)
+          .invoke(null, "/dev/urandom", 1024);
       if (bytesRead != 1024) {
-        throw new IOException("Unexpected number of bytes read from Linux PRNG: " + bytesRead);
+        throw new IOException(
+            "Unexpected number of bytes read from Linux PRNG: "
+                + bytesRead);
       }
     } catch (Exception e) {
       throw new SecurityException("Failed to seed OpenSSL PRNG", e);
@@ -196,8 +204,11 @@ public final class PRNGFixes {
   /**
    * {@link SecureRandomSpi} which passes all requests to the Linux PRNG
    * ({@code /dev/urandom}).
+   *
+   * NOTE: needs to be public so that it can be created via reflection from
+   * within the security provider layer.
    */
-  private static class LinuxPRNGSecureRandom extends SecureRandomSpi {
+  public static class LinuxPRNGSecureRandom extends SecureRandomSpi {
 
         /*
          * IMPLEMENTATION NOTE: Requests to generate bytes and to mix in a seed
@@ -234,7 +245,10 @@ public final class PRNGFixes {
      * each instance needs to seed itself if the client does not explicitly
      * seed it.
      */
-    private boolean mSeeded;
+    private boolean mSeeded = false;
+
+    public LinuxPRNGSecureRandom() {
+    }
 
     @Override
     protected void engineSetSeed(byte[] bytes) {
@@ -265,6 +279,8 @@ public final class PRNGFixes {
         DataInputStream in;
         synchronized (urandomMutex) {
           in = getUrandomInputStream();
+        }
+        synchronized (in) {
           in.readFully(bytes);
         }
       } catch (IOException e) {

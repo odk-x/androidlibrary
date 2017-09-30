@@ -14,6 +14,9 @@
 
 package org.opendatakit.logging;
 
+import android.util.Log;
+import org.opendatakit.utilities.ODKFileUtils;
+
 /**
  * Factory implementation that returns a WebLoggerImpl object
  * for the WebLoggerIf.
@@ -27,6 +30,16 @@ class WebLoggerFactoryImpl implements WebLoggerFactoryIf {
       // log to just the system log...
       return new WebLoggerAppNameUnknownImpl();
     } else {
+
+      // ensure we have the directories created...
+      try {
+        ODKFileUtils.verifyExternalStorageAvailability();
+        ODKFileUtils.assertDirectoryStructure(appName);
+      } catch (Exception e) {
+        Log.e("WebLoggerFactoryImpl", "Unable to create logging directory");
+        Log.e("WebLoggerFactoryImpl", Log.getStackTraceString(e), e);
+        return new WebLoggerAppNameUnknownImpl();
+      }
       return new WebLoggerImpl(appName);
     }
   }

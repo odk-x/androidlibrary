@@ -63,11 +63,6 @@ public class BaseTable implements Parcelable {
    */
   private WrapperTable mWrapper;
   /**
-   * Table metadata rev_id. If this differs from your cached value, you need to requery the
-   * metadata.
-   */
-  private String mMetaDataRev = null;
-  /**
    * True if the user has the permissions to create a row.
    * Defaults to false.
    */
@@ -94,7 +89,7 @@ public class BaseTable implements Parcelable {
     mQuery = query;
 
     if (elementKeyForIndex == null) {
-      throw new IllegalStateException("elementKeyForIndex cannot be null");
+      throw new IllegalArgumentException("elementKeyForIndex cannot be null");
     }
     mElementKeyForIndex = elementKeyForIndex;
 
@@ -138,7 +133,6 @@ public class BaseTable implements Parcelable {
     mElementKeyForIndex = table.mElementKeyForIndex;
     mElementKeyToIndex = table.mElementKeyToIndex;
     mWrapper = null; // Set this with register
-    mMetaDataRev = null;
   }
 
   public BaseTable(Parcel in) {
@@ -167,7 +161,6 @@ public class BaseTable implements Parcelable {
     // The parent and the query are not parceled
     mWrapper = null;
     mQuery = null;
-    mMetaDataRev = null;
   }
 
   /**
@@ -290,25 +283,6 @@ public class BaseTable implements Parcelable {
 
   public void addRow(Row row) {
     mRows.add(row);
-  }
-
-  /**
-   * Gets the metadata revision
-   * Used in UserTable but that's it, no reason to be public
-   * @return the metadata revision
-   */
-  @SuppressWarnings("WeakerAccess")
-  public String getMetaDataRev() {
-    return mMetaDataRev;
-  }
-
-  /**
-   * Used in ODKDatabaseImplUtils
-   * @param metaDataRev the new revision
-   */
-  @SuppressWarnings("unused")
-  public void setMetaDataRev(String metaDataRev) {
-    mMetaDataRev = metaDataRev;
   }
 
   public Row getRowAtIndex(int index) {

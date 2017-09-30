@@ -15,13 +15,11 @@
  */
 package org.opendatakit.utilities;
 
-import android.os.Build;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.apache.commons.io.Charsets;
+import org.opendatakit.consts.CharsetConsts;
 import org.opendatakit.logging.WebLogger;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,11 +63,7 @@ public final class LocalizationUtils {
         String value;
         try {
           stream = new FileInputStream(commonFile);
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-          } else {
-            reader = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
-          }
+          reader = new BufferedReader(new InputStreamReader(stream, CharsetConsts.UTF_8));
           int ch = reader.read();
           while (ch != -1 && ch != '{') {
             ch = reader.read();
@@ -119,11 +113,7 @@ public final class LocalizationUtils {
         BufferedReader reader = null;
         try {
           stream = new FileInputStream(tableFile);
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-          } else {
-            reader = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
-          }
+          reader = new BufferedReader(new InputStreamReader(stream, CharsetConsts.UTF_8));
           reader.mark(1);
           int ch = reader.read();
           while (ch != -1 && ch != '{') {

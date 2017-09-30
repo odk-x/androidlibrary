@@ -24,6 +24,7 @@ import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Properties are in 3 classes:
@@ -43,9 +44,10 @@ import java.util.*;
  * general (syncable) settings. You need to Reset the device configuration to
  * re-initialize these.
  */
-public class PropertiesSingleton {
+public final class PropertiesSingleton {
 
   private static final String TAG = PropertiesSingleton.class.getSimpleName();
+  private static final int INVALID_REVISION = -1;
 
   private static final String PROPERTIES_REVISION_FILENAME = "properties.revision";
   private static final String GENERAL_PROPERTIES_FILENAME = "app.properties";
@@ -65,6 +67,7 @@ public class PropertiesSingleton {
   public final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT;
 
   private final String mAppName;
+  private final ReentrantLock mAppLock;
   private final boolean mHasSecureStorage;
   private final File mSecureStorageDir;
   private final TreeMap<String, String> mGeneralDefaults;
@@ -74,12 +77,15 @@ public class PropertiesSingleton {
   private final Properties mGlobalDeviceProps;
   private final Properties mDeviceProps;
   private final Properties mSecureProps;
-  private int currentRevision = invalidRevision();
+  private int currentRevision = INVALID_REVISION;
   private String mInstallationId;
 
-  PropertiesSingleton(Context context, String appName, TreeMap<String, String> plainDefaults,
-      TreeMap<String, String> deviceDefaults, TreeMap<String, String> secureDefaults) {
+  PropertiesSingleton(Context context, String appName, ReentrantLock appLock,
+                      TreeMap<String, String> plainDefaults,
+                      TreeMap<String, String> deviceDefaults,
+                      TreeMap<String, String> secureDefaults) {
     mAppName = appName;
+    mAppLock = appLock;
     mHasSecureStorage = context.getPackageName()
         .equals(IntentConsts.AppProperties.APPLICATION_NAME);
     if (mHasSecureStorage) {
@@ -105,10 +111,6 @@ public class PropertiesSingleton {
 
     // call init
     init();
-  }
-
-  private static int invalidRevision() {
-    return -1;
   }
 
   private static String toolInitializationPropertyName(String toolName) {
@@ -269,30 +271,72 @@ public class PropertiesSingleton {
       if (value == null) {
         // remove from map
         if (isSecureProperty(propertyName)) {
-          mSecureProps.remove(propertyName);
-          updatedSecureProps = true;
+          if ( mSecureProps.containsKey(propertyName) ) {
+            mSecureProps.remove(propertyName);
+            updatedSecureProps = true;
+          }
         } else if (isDeviceProperty(propertyName)) {
-          mDeviceProps.remove(propertyName);
-          updatedDeviceProps = true;
+          if ( mDeviceProps.containsKey(propertyName) ) {
+            mDeviceProps.remove(propertyName);
+            updatedDeviceProps = true;
+          }
         } else {
-          mGeneralProps.remove(propertyName);
-          updatedGeneralProps = true;
+          if ( mGeneralProps.containsKey(propertyName) ) {
+            mGeneralProps.remove(propertyName);
+            updatedGeneralProps = true;
+          }
         }
       } else {
         // set into map
         if (isSecureProperty(propertyName)) {
-          mSecureProps.setProperty(propertyName, value);
-          updatedSecureProps = true;
+          String existingValue  = mSecureProps.getProperty(propertyName);
+          if ( existingValue == null || !existingValue.equals(value) ) {
+            mSecureProps.setProperty(propertyName, value);
+            updatedSecureProps = true;
+          }
         } else if (isDeviceProperty(propertyName)) {
-          mDeviceProps.setProperty(propertyName, value);
-          updatedDeviceProps = true;
+          String existingValue  = mDeviceProps.getProperty(propertyName);
+          if ( existingValue == null || !existingValue.equals(value) ) {
+            mDeviceProps.setProperty(propertyName, value);
+            updatedDeviceProps = true;
+          }
         } else {
-          mGeneralProps.setProperty(propertyName, value);
-          updatedGeneralProps = true;
+          String existingValue  = mGeneralProps.getProperty(propertyName);
+          if ( existingValue == null || !existingValue.equals(value) ) {
+            mGeneralProps.setProperty(propertyName, value);
+            updatedGeneralProps = true;
+          }
         }
       }
     }
-    writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
+    if (updatedSecureProps || updatedDeviceProps || updatedGeneralProps) {
+      writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
+    }
+  }
+
+  /**
+   * Called during sync to re-read the properties files since they may have changed
+   * during the sync process (i.e., due to updates of app.properties pulled down from the
+   * server). After re-reading the properties files, this increments the properties
+   * revision file so that survey, tables, etc. will also pick up the latest changes.
+   */
+  public void signalPropertiesChange() {
+    // read the current revision and increment it
+    {
+      /*
+       * Manipulate revision within lock to ensure we get the latest
+       * update state without any revisions in progress.
+       */
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
+      try {
+        currentRevision = getCurrentRevision();
+        currentRevision = incrementAndWriteRevision(currentRevision);
+      } finally {
+        theLock.release();
+      }
+    }
+    // forcibly reload the properties
+    readProperties(false);
   }
 
   /**
@@ -307,7 +351,7 @@ public class PropertiesSingleton {
   @SuppressWarnings("unused")
   public boolean shouldRunInitializationTask(String toolName) {
     // this is stored in the device properties
-    init();
+    readPropertiesIfModified();
     String value = mDeviceProps.getProperty(toolInitializationPropertyName(toolName));
     return value == null || value.isEmpty();
   }
@@ -377,7 +421,7 @@ public class PropertiesSingleton {
   private void init() {
     // (re)set values to defaults
 
-    currentRevision = invalidRevision();
+    currentRevision = INVALID_REVISION;
 
     mGeneralProps.clear();
     mGlobalDeviceProps.clear();
@@ -438,17 +482,8 @@ public class PropertiesSingleton {
     }
   }
 
-  private void verifyDirectories() {
-    try {
-      ODKFileUtils.verifyExternalStorageAvailability();
-      ODKFileUtils.assertDirectoryStructure(mAppName);
-    } catch (Exception ignored) {
-      throw new IllegalArgumentException("External storage not available");
-    }
-  }
-
   private int getCurrentRevision() {
-    int noResult = 0;
+    int noResult = INVALID_REVISION;
     try {
       File dataFolder = new File(ODKFileUtils.getDataFolder(mAppName));
       String[] timestampNames = dataFolder.list(new FilenameFilter() {
@@ -537,20 +572,38 @@ public class PropertiesSingleton {
 
   private void readPropertiesIfModified() {
 
-    int newRevision = getCurrentRevision();
-    if (newRevision != currentRevision) {
+    int newRevision = INVALID_REVISION;
+
+    {
+      /*
+       * Fetch the disk revision outside of a GainPropertiesLock. 
+       * This is a fast-and-loose fetch. 
+       * 
+       * writeProperties() gains the lock and immediately updates the 
+       * revision file before writing any updates.
+       *  
+       * If we detect any new revision here, outside of the lock, then 
+       * readProperties(...) will gain the lock and obtain the actual
+       * revision on disk, which might have changed from our newRevision
+       * value, because multiple writeProperties() calls might have 
+       * intervened between this fast-and-loose fetch and the current
+       * thread gaining an exclusive lock within readProperties(...). 
+       */
+      newRevision = getCurrentRevision();
+    }
+    
+    if (newRevision == INVALID_REVISION || newRevision != currentRevision) {
       readProperties(false);
     }
 
   }
 
   private void readProperties(boolean includingGlobalDeviceProps) {
-    verifyDirectories();
 
     WebLogger.getLogger(mAppName)
         .i("PropertiesSingleton", "readProperties(" + includingGlobalDeviceProps + ")");
 
-    GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+    GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
     try {
       // OK. Now access files...
       FileInputStream configFileInputStream = null;
@@ -561,6 +614,7 @@ public class PropertiesSingleton {
         if (configFile.exists()) {
           configFileInputStream = new FileInputStream(configFile);
 
+          mGeneralProps.clear();
           mGeneralProps.loadFromXML(configFileInputStream);
         }
       } catch (Exception e) {
@@ -586,6 +640,7 @@ public class PropertiesSingleton {
           if (configFile.exists()) {
             configFileInputStream = new FileInputStream(configFile);
 
+            mGlobalDeviceProps.clear();
             mGlobalDeviceProps.loadFromXML(configFileInputStream);
           }
         } catch (Exception e) {
@@ -610,6 +665,7 @@ public class PropertiesSingleton {
         if (configFile.exists()) {
           configFileInputStream = new FileInputStream(configFile);
 
+          mDeviceProps.clear();
           mDeviceProps.loadFromXML(configFileInputStream);
         }
       } catch (Exception e) {
@@ -633,6 +689,7 @@ public class PropertiesSingleton {
           if (configFile.exists()) {
             configFileInputStream = new FileInputStream(configFile);
 
+            mSecureProps.clear();
             mSecureProps.loadFromXML(configFileInputStream);
           }
         } catch (Exception e) {
@@ -683,11 +740,57 @@ public class PropertiesSingleton {
     }
   }
 
+  private File backupFile(File toBeOverwritten, int counter) {
+    File tempPendingDelete = new File( toBeOverwritten.getParentFile(), 
+        toBeOverwritten.getName() + ".del" + Integer.toString(counter));
+    return tempPendingDelete;
+  }
+  
+  private void replaceFile(File newFile, File toBeOverwritten) throws IOException {
+    int counter = 0;
+    // find a file that we can use as a backup file
+    // if there is an old backup file, try to remove it
+    // before generating yet another backup filename.
+    File tempPendingDelete = backupFile(toBeOverwritten, counter++);
+    while ( tempPendingDelete.exists() && !tempPendingDelete.delete()) {
+      tempPendingDelete = backupFile(toBeOverwritten, counter++);
+    }
+
+    if ( toBeOverwritten.exists() ) {
+      // rename the current file as the backup filename.
+      boolean fileSuccess = toBeOverwritten.renameTo(tempPendingDelete);
+      if (!fileSuccess) {
+        WebLogger.getLogger(mAppName).i(TAG, "File Rename to Backup Failed! " + toBeOverwritten.getName());
+        throw new IOException("Unable to rename configuration file");
+      }
+    }
+
+    try {
+      // rename the new file to the current file
+      boolean fileSuccess = newFile.renameTo(toBeOverwritten);
+      if (!fileSuccess) {
+        WebLogger.getLogger(mAppName).i(TAG, "Temporary to Permanent File Rename Failed! " +
+            toBeOverwritten.getName() );
+        // try to restore the file we were attempting to replace
+        // by renaming the file pending delete back to the current file.
+        if ( tempPendingDelete.exists() ) {
+          tempPendingDelete.renameTo(toBeOverwritten);
+        }
+        throw new IOException("Unable to replace configuration file");
+      }
+    } finally {
+      // and if we get here, if the backup file exists, attempt to delete it.
+      // (keeps the clutter at bay).
+      if ( tempPendingDelete.exists() ) {
+        tempPendingDelete.delete();
+      }
+    }
+  }
+
   private void writeProperties(boolean updatedSecureProps, boolean updatedDeviceProps,
       boolean updatedGeneralProps) {
-    verifyDirectories();
 
-    GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
+    GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
     try {
       currentRevision = incrementAndWriteRevision(currentRevision);
 
@@ -703,11 +806,7 @@ public class PropertiesSingleton {
           File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName),
               GENERAL_PROPERTIES_FILENAME);
 
-          boolean fileSuccess = tempConfigFile.renameTo(configFile);
-
-          if (!fileSuccess) {
-            WebLogger.getLogger(mAppName).i(TAG, "Temporary General Config File Rename Failed!");
-          }
+          replaceFile(tempConfigFile, configFile);
 
         } catch (Exception e) {
           WebLogger.getLogger(mAppName).printStackTrace(e);
@@ -726,11 +825,7 @@ public class PropertiesSingleton {
           File configFile = new File(ODKFileUtils.getDataFolder(mAppName),
               DEVICE_PROPERTIES_FILENAME);
 
-          boolean fileSuccess = tempConfigFile.renameTo(configFile);
-
-          if (!fileSuccess) {
-            WebLogger.getLogger(mAppName).i(TAG, "Temporary Device Config File Rename Failed!");
-          }
+          replaceFile(tempConfigFile, configFile);
 
         } catch (Exception e) {
           WebLogger.getLogger(mAppName).printStackTrace(e);
@@ -747,11 +842,7 @@ public class PropertiesSingleton {
 
           File configFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME);
 
-          boolean fileSuccess = tempConfigFile.renameTo(configFile);
-
-          if (!fileSuccess) {
-            WebLogger.getLogger(mAppName).i(TAG, "Temporary Secure Config File Rename Failed!");
-          }
+          replaceFile(tempConfigFile, configFile);
 
         } catch (Exception e) {
           WebLogger.getLogger(mAppName).printStackTrace(e);
@@ -768,10 +859,11 @@ public class PropertiesSingleton {
   @SuppressWarnings("unused")
   public void clearSettings() {
     try {
-      GainPropertiesLock theLock = new GainPropertiesLock(mAppName);
-      currentRevision = incrementAndWriteRevision(currentRevision);
+      GainPropertiesLock theLock = new GainPropertiesLock(mAppName, mAppLock);
 
       try {
+        currentRevision = incrementAndWriteRevision(currentRevision);
+
         File f;
         f = new File(ODKFileUtils.getDataFolder(mAppName), DEVICE_PROPERTIES_FILENAME);
         if (f.exists()) {

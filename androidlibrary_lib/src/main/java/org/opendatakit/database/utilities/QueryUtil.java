@@ -89,5 +89,12 @@ public final class QueryUtil {
 
     return s.toString();
   }
+
+  // TODO: This is generally used to convert single string order by arguments into arrays. It should
+  // be plumped all the way to the Javascript so that this conversion isn't necessary
+  public static String[] convertStringToArray(String arg) {
+    String[] emptyArray = {};
+    return (arg == null ? emptyArray : new String[]{arg});
+  }
 }
 

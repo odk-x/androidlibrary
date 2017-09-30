@@ -557,6 +557,26 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
   }
 
   /**
+   * Rescan the config directory tree of the given tableId and update the forms table
+   * with revised information from the formDef.json files that it contains.
+   *
+   * @param appName
+   * @param dbHandleName
+   * @param tableId
+   * @return true if there were no problems
+   */
+  @Override
+  public boolean rescanTableFormDefs(String appName, DbHandle dbHandleName, String tableId)
+      throws ServicesAvailabilityException {
+    try {
+      return dbInterface.rescanTableFormDefs(appName, dbHandleName, tableId);
+    } catch (Exception e) {
+      rethrowAlwaysAllowedRemoteException(e);
+      throw new IllegalStateException("unreachable - keep IDE happy");
+    }
+  }
+
+  /**
    * The deletion filter includes all non-null arguments. If all arguments
    * (except the db) are null, then all properties are removed.
    *
