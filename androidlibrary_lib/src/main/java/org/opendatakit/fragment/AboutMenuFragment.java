@@ -62,6 +62,18 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
    */
   private String mLicenseText = null;
 
+  @SuppressWarnings("deprecation")
+  private Spanned licenseTextFormattedAsHtml() {
+    Spanned html;
+    if (Build.VERSION.SDK_INT >= 24) {
+      html = Html.fromHtml(mLicenseText, Html.FROM_HTML_MODE_LEGACY);
+    } else {
+      //noinspection deprecation
+      html = Html.fromHtml(mLicenseText);
+    }
+    return html;
+  }
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -108,13 +120,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
 
     if (savedInstanceState != null && savedInstanceState.containsKey(LICENSE_TEXT)) {
       mLicenseText = savedInstanceState.getString(LICENSE_TEXT);
-      Spanned html;
-      if (Build.VERSION.SDK_INT >= 24) {
-        html = Html.fromHtml(mLicenseText, Html.FROM_HTML_MODE_LEGACY);
-      } else {
-        //noinspection deprecation
-        html = Html.fromHtml(mLicenseText);
-      }
+      Spanned html = licenseTextFormattedAsHtml();
       mTextView.setText(html);
     } else {
       readLicenseFile();
@@ -130,19 +136,14 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public void readLicenseComplete(String result) {
     IAppAwareActivity activity = (IAppAwareActivity) getActivity();
     WebLogger.getLogger(activity.getAppName()).i(TAG, "Read license complete");
     if (result != null) {
       // Read license file successfully
       mLicenseText = result;
-      Spanned html;
-      if (Build.VERSION.SDK_INT >= 24) {
-        html = Html.fromHtml(result, Html.FROM_HTML_MODE_LEGACY);
-      } else {
-        //noinspection deprecation
-        html = Html.fromHtml(result);
-      }
+      Spanned html = licenseTextFormattedAsHtml();
       mTextView.setText(html);
     } else {
       // had some failures

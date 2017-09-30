@@ -110,6 +110,10 @@ public interface InternalUserDbInterface {
        throws IllegalStateException, IllegalArgumentException, SQLiteException,
        ServicesAvailabilityException;
 
+   boolean rescanTableFormDefs(String appName, DbHandle dbHandleName, String tableId)
+        throws IllegalStateException, IllegalArgumentException, SQLiteException,
+        ServicesAvailabilityException;
+
    void deleteTableMetadata(String appName, DbHandle dbHandleName, String tableId, String partition,
                             String aspect, String key)
        throws IllegalStateException, IllegalArgumentException, SQLiteException,

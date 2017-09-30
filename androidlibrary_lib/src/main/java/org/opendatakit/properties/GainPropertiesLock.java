@@ -25,6 +25,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.FileLockInterruptionException;
 import java.nio.channels.OverlappingFileLockException;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Manage a fileLock to control read and write access to the properties files.
@@ -35,13 +36,15 @@ import java.nio.channels.OverlappingFileLockException;
  */
 class GainPropertiesLock {
   private static final String LOCK_FILENAME = "properties.lock";
-  private String mAppName;
+  private final String mAppName;
+  private final ReentrantLock mAppLock;
 
   private FileOutputStream lockStream = null;
   private FileLock lockFileLock = null;
 
-  GainPropertiesLock(String appName) {
+  GainPropertiesLock(String appName, ReentrantLock appLock) {
     mAppName = appName;
+    mAppLock = appLock;
     File lockFile = new File(ODKFileUtils.getDataFolder(mAppName), LOCK_FILENAME);
     int count = 0;
     do {
@@ -93,10 +96,17 @@ class GainPropertiesLock {
         }
       }
     }
+    // at this point, we own the file lock.
+    // now gain the ReentrantLock for this appName
+    mAppLock.lock();
   }
 
    void release() {
     if (lockFileLock != null) {
+      // we hold the file lock
+      // release the ReentrantLock
+      mAppLock.unlock();
+      // and release the file lock.
       try {
         lockFileLock.release();
       } catch (IOException e) {
