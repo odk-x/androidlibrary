@@ -19,6 +19,8 @@ public class IntentConsts {
   public static final String INTENT_KEY_APP_NAME = "appName";
   public static final String INTENT_KEY_TABLE_ID = "tableId";
   public static final String INTENT_KEY_INSTANCE_ID = "instanceId";
+  public static final String INTENT_KEY_ROW_ID = "rowId";
+  public static final String INTENT_KEY_DEFAULT_ROW_ID = "defaultRowId";
   // for rowpath and/or configpath
   public static final String INTENT_KEY_URI_FRAGMENT = "uriFragment";
   public static final String INTENT_KEY_CONTENT_TYPE = "contentType";
