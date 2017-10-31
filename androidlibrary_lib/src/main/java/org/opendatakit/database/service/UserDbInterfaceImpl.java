@@ -200,10 +200,6 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public OrderedColumns createLocalOnlyTableWithColumns(String appName, DbHandle dbHandleName,
       String tableId, ColumnList columns) throws ServicesAvailabilityException {
 
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
-
     return internalUserDbInterface
         .createLocalOnlyTableWithColumns(appName, dbHandleName, tableId, columns);
   }
@@ -219,10 +215,6 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   @Override
   public void deleteLocalOnlyTable(String appName, DbHandle dbHandleName, String tableId)
       throws ServicesAvailabilityException {
-
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
 
     internalUserDbInterface.deleteLocalOnlyTable(appName, dbHandleName, tableId);
   }
@@ -240,10 +232,6 @@ public class UserDbInterfaceImpl implements UserDbInterface {
   public void insertLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
       ContentValues rowValues) throws ServicesAvailabilityException {
 
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
-
     internalUserDbInterface.insertLocalOnlyRow(appName, dbHandleName, tableId, rowValues);
   }
 
@@ -259,16 +247,12 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @throws ServicesAvailabilityException if the database is down
    */
   @Override
-  public void updateLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
+  public void updateLocalOnlyRows(String appName, DbHandle dbHandleName, String tableId,
       ContentValues rowValues, String whereClause, BindArgs bindArgs)
       throws ServicesAvailabilityException {
 
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
-
     internalUserDbInterface
-        .updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause, bindArgs);
+        .updateLocalOnlyRows(appName, dbHandleName, tableId, rowValues, whereClause, bindArgs);
   }
 
   /**
@@ -283,15 +267,11 @@ public class UserDbInterfaceImpl implements UserDbInterface {
    * @throws ServicesAvailabilityException if the database is down
    */
   @Override
-  public void deleteLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
+  public void deleteLocalOnlyRows(String appName, DbHandle dbHandleName, String tableId,
       String whereClause, BindArgs bindArgs) throws ServicesAvailabilityException {
 
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
-
     internalUserDbInterface
-        .deleteLocalOnlyRow(appName, dbHandleName, tableId, whereClause, bindArgs);
+        .deleteLocalOnlyRows(appName, dbHandleName, tableId, whereClause, bindArgs);
   }
 
   /**

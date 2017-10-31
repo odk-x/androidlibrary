@@ -70,12 +70,12 @@ public interface InternalUserDbInterface {
        throws IllegalStateException, IllegalArgumentException, SQLiteException,
        ServicesAvailabilityException;
 
-   void updateLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
+   void updateLocalOnlyRows(String appName, DbHandle dbHandleName, String tableId,
                            ContentValues rowValues, String whereClause, BindArgs bindArgs)
        throws IllegalStateException, IllegalArgumentException, SQLiteException,
        ServicesAvailabilityException;
 
-   void deleteLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
+   void deleteLocalOnlyRows(String appName, DbHandle dbHandleName, String tableId,
                            String whereClause, BindArgs bindArgs)
        throws IllegalStateException, IllegalArgumentException, SQLiteException,
        ServicesAvailabilityException;
