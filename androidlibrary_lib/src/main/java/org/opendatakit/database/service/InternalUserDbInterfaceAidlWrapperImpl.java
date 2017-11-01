@@ -257,10 +257,6 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
                                                         String tableId, ColumnList columns)
       throws ServicesAvailabilityException {
 
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
-
     try {
       return fetchAndRebuildChunks(
           dbInterface.createLocalOnlyTableWithColumns(appName, dbHandleName, tableId, columns),
@@ -283,10 +279,6 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
   public void deleteLocalOnlyTable(String appName, DbHandle dbHandleName, String tableId)
       throws ServicesAvailabilityException {
 
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
-
     try {
       dbInterface.deleteLocalOnlyTable(appName, dbHandleName, tableId);
     } catch (Exception e) {
@@ -308,10 +300,6 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
   public void insertLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
                                  ContentValues rowValues) throws ServicesAvailabilityException {
 
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
-
     try {
       dbInterface.insertLocalOnlyRow(appName, dbHandleName, tableId, rowValues);
     } catch (Exception e) {
@@ -332,13 +320,9 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
    * @throws ServicesAvailabilityException
    */
   @Override
-  public void updateLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
+  public void updateLocalOnlyRows(String appName, DbHandle dbHandleName, String tableId,
                                  ContentValues rowValues, String whereClause, BindArgs bindArgs)
       throws ServicesAvailabilityException {
-
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
 
     try {
       dbInterface.updateLocalOnlyRow(appName, dbHandleName, tableId, rowValues, whereClause,
@@ -360,13 +344,9 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
    * @throws ServicesAvailabilityException
    */
   @Override
-  public void deleteLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
+  public void deleteLocalOnlyRows(String appName, DbHandle dbHandleName, String tableId,
                                  String whereClause, BindArgs bindArgs)
       throws ServicesAvailabilityException {
-
-    if (!tableId.startsWith("L_")) {
-      tableId = "L_" + tableId;
-    }
 
     try {
       dbInterface
