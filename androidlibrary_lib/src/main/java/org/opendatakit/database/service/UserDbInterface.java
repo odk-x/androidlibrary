@@ -111,7 +111,7 @@ public interface UserDbInterface {
       throws ServicesAvailabilityException;
 
   /**
-   * Insert a row into a local only table
+   * Insert rows into a local only table
    *
    * @param appName
    * @param dbHandleName
@@ -123,7 +123,7 @@ public interface UserDbInterface {
                           ContentValues rowValues) throws ServicesAvailabilityException;
 
   /**
-   * Update a row in a local only table
+   * Update rows in a local only table
    *
    * @param appName
    * @param dbHandleName
@@ -133,12 +133,12 @@ public interface UserDbInterface {
    * @param bindArgs
    * @throws ServicesAvailabilityException
    */
-  void updateLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId,
+  void updateLocalOnlyRows(String appName, DbHandle dbHandleName, String tableId,
                           ContentValues rowValues, String whereClause, BindArgs bindArgs)
       throws ServicesAvailabilityException;
 
   /**
-   * Delete a row in a local only table
+   * Delete rows in a local only table
    *
    * @param appName
    * @param dbHandleName
@@ -147,7 +147,7 @@ public interface UserDbInterface {
    * @param bindArgs
    * @throws ServicesAvailabilityException
    */
-  void deleteLocalOnlyRow(String appName, DbHandle dbHandleName, String tableId, String whereClause,
+  void deleteLocalOnlyRows(String appName, DbHandle dbHandleName, String tableId, String whereClause,
                           BindArgs bindArgs) throws ServicesAvailabilityException;
 
   /**
