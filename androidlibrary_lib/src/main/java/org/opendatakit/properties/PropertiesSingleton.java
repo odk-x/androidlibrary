@@ -121,6 +121,10 @@ public final class PropertiesSingleton {
     return toolName.endsWith(TOOL_INITIALIZATION_SUFFIX);
   }
 
+  private static String appInitializationPropertyName() {
+    return CommonToolProperties.KEY_COMMON_INITIALIZATION;
+  }
+
   /**
    * Used in CommonToolProperties and survey's SplashScreenActivity.
    *
@@ -356,6 +360,12 @@ public final class PropertiesSingleton {
     return value == null || value.isEmpty();
   }
 
+  public boolean shouldRunCommonInitializationTask() {
+    readPropertiesIfModified();
+    String value = mDeviceProps.getProperty(CommonToolProperties.KEY_COMMON_INITIALIZATION);
+    return value == null || value.isEmpty();
+  }
+
   /**
    * Indicate that the initialization task for this given tool has been run.
    * Used mostly in the same places as shouldRunInitializationTask
@@ -368,6 +378,13 @@ public final class PropertiesSingleton {
     readPropertiesIfModified();
     mDeviceProps.setProperty(toolInitializationPropertyName(toolName),
         TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()));
+    writeProperties(false, true, false);
+  }
+
+  public void clearRunCommonInitializationTask() {
+    readPropertiesIfModified();
+    mDeviceProps.setProperty(CommonToolProperties.KEY_COMMON_INITIALIZATION,
+      TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()));
     writeProperties(false, true, false);
   }
 
@@ -384,6 +401,8 @@ public final class PropertiesSingleton {
     for (Object okey : mDeviceProps.keySet()) {
       String theKey = (String) okey;
       if (isToolInitializationPropertyName(theKey)) {
+        keysToRemove.add(theKey);
+      } else if (theKey.equals(appInitializationPropertyName())) {
         keysToRemove.add(theKey);
       }
     }
