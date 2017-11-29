@@ -17,7 +17,7 @@
     <string name="sent_on_date_at_time">\'Enviado en \' EEE, MMM dd, yyyy \' a las \' HH:mm</string><!-- http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html -->
     <string name="sending_failed_on_date_at_time">\'Error al enviar en \' EEE, MMM dd, yyyy \' a las \' HH:mm</string><!-- http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html -->
 
-    <string name="default_sync_server_url">https://open-data-kit.appspot.com</string>
+    <string name="default_sync_server_url">https://opendatakit-simpledemo.appspot.com</string>
     <string name="default_legacy_server_url">https://opendatakit-2.appspot.com</string>
 
     <string name="still_reading_license_file">Cargando licensias…</string>
