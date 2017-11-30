@@ -80,17 +80,7 @@ android {
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
     }
-
-    variantFilter { variant ->
-        def names = variant.flavors*.name
-        if(gradle.ext.odkPublishConfig) {
-            if (names.contains(gradle.ext.odkPublishConfigName)) {
-                variant.setIgnore(false)
-            } else {
-                variant.setIgnore(true)
-            }
-        }
-    }
+    
 }
 
 
