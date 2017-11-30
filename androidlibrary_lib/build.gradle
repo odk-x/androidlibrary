@@ -33,17 +33,27 @@ android {
     publishNonDefault(gradle.ext.odkPublishConfig.toBoolean())
     defaultPublishConfig(gradle.ext.odkDefaultPublishConfig)
 
+    flavorDimensions "stage", "testing"
+
     productFlavors {
         demo {
+            dimension 'stage'
         }
 
         master {
+            dimension 'stage'
         }
 
         snapshot {
+            dimension 'stage'
+        }
+
+        basic {
+            dimension 'testing'
         }
 
         uitest {
+            dimension 'testing'
         }
     }
 
@@ -51,10 +61,12 @@ android {
         release {
             minifyEnabled(minify)
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            matchingFallbacks = ['debug']
         }
         debug {
             debuggable(true)
             testCoverageEnabled(testCoverage) // Allows AndroidTest JaCoCo reports to be generated
+            matchingFallbacks = ['release']
         }
     }
 
@@ -97,13 +109,14 @@ allprojects {
 
 
 dependencies {
-    compile fileTree(include: '*.jar', dir: 'libs')
-    compile 'com.android.support:support-annotations:25.4.0'
-    compile 'com.android.support:support-v13:25.4.0'
+    api fileTree(include: '*.jar', dir: 'libs')
+    api 'net.jcip:jcip-annotations:1.0'
+    api 'com.android.support:support-annotations:27.0.1'
+    api 'com.android.support:support-v13:27.0.1'
 
     // Testing dependencies
-    testCompile 'junit:junit:4.12'
-    androidTestCompile 'com.android.support.test:rules:1.0.0'
-    androidTestCompile 'com.android.support.test:runner:1.0.0'
-    compile 'net.jcip:jcip-annotations:1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+
 }
