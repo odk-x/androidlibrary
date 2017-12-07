@@ -14,7 +14,6 @@ libraryScripts.each {
 
 apply plugin: 'com.android.library'
 apply plugin: "com.jfrog.artifactory"
-//apply plugin: "ivy-publish"
 apply plugin: "maven-publish"
 
 group = groupId
