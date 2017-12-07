@@ -14,6 +14,18 @@
 
 package org.opendatakit.builder;
 
+import android.content.Context;
+import android.content.res.Resources;
+
+import org.opendatakit.androidlibrary.R;
+import org.opendatakit.database.service.DbHandle;
+import org.opendatakit.exception.ServicesAvailabilityException;
+import org.opendatakit.listener.ImportListener;
+import org.opendatakit.logging.WebLogger;
+import org.opendatakit.properties.CommonToolProperties;
+import org.opendatakit.properties.PropertiesSingleton;
+import org.opendatakit.utilities.ODKFileUtils;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -31,16 +43,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import org.opendatakit.androidlibrary.R;
-import org.opendatakit.database.service.DbHandle;
-import org.opendatakit.exception.ServicesAvailabilityException;
-import org.opendatakit.listener.ImportListener;
-import org.opendatakit.logging.WebLogger;
-import org.opendatakit.utilities.ODKFileUtils;
-
-import android.content.Context;
-import android.content.res.Resources;
 
 /**
  * Background task for exploding the built-in zipfile resource into the
@@ -75,21 +77,36 @@ public class InitializationUtil {
 
     // ///////////////////////////////////////////////
     // check that the framework zip has been exploded
+    // This will be dependent upon the tool itself
     String toolName = getSupervisor().getToolName();
     if (toolName != null && !ODKFileUtils
-        .isConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString())) {
+            .isConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString())) {
       getSupervisor()
-          .publishProgress(appContext.getString(R.string.expansion_unzipping_begins), null);
+              .publishProgress(appContext.getString(R.string.expansion_unzipping_begins), null);
 
       extractFromRawZip(appContext.getResources(), getSupervisor().getSystemZipResourceId(), true,
-          pendingOutcome);
+              pendingOutcome);
       extractFromRawZip(appContext.getResources(), getSupervisor().getConfigZipResourceId(), false,
-          pendingOutcome);
+              pendingOutcome);
 
       ODKFileUtils
-          .assertConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString());
+              .assertConfiguredToolApp(appName, toolName, getSupervisor().getVersionCodeString());
     }
 
+    // Check if common initialization has completed successfully and
+    PropertiesSingleton propertiesSingleton = CommonToolProperties.get(appContext, appName);
+    boolean shouldRunCommonInitTask = propertiesSingleton.shouldRunCommonInitializationTask();
+    if (!shouldRunCommonInitTask) {
+      return pendingOutcome;
+    }
+
+    return commonInitialization(pendingOutcome, propertiesSingleton);
+  }
+
+
+
+  private InitializationOutcome commonInitialization(InitializationOutcome pendingOutcome,
+                                                     PropertiesSingleton propertiesSingleton) {
     try {
       updateTableDirs(pendingOutcome);
 
@@ -118,6 +135,8 @@ public class InitializationUtil {
       pendingOutcome.add(appContext.getString(R.string.abort_error_accessing_database));
       return pendingOutcome;
     }
+
+    propertiesSingleton.clearRunCommonInitializationTask();
 
     return pendingOutcome;
   }

@@ -124,6 +124,11 @@ public final class CommonToolProperties {
   @SuppressWarnings("unused")
   public static final String KEY_USE_HOME_SCREEN = "tables.custom_home_screen";
 
+  /**
+   * Used to perform initialization common to all tools
+   */
+  public static final String KEY_COMMON_INITIALIZATION = "common.initialization";
+
   //******************
   // Admin Settings
   /**
@@ -259,6 +264,7 @@ public final class CommonToolProperties {
       deviceProperties.put(KEY_AUTHENTICATION_TYPE, "none");
       deviceProperties.put(KEY_ACCOUNT, "");
       deviceProperties.put(KEY_USERNAME, "");
+      deviceProperties.put(KEY_COMMON_INITIALIZATION, "");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("survey"), "");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("scan"), "");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("tables"), "");
