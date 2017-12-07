@@ -1,5 +1,5 @@
 /**************************************************************************************************
-                                        GRADLE CONFIG
+ GRADLE CONFIG
  *************************************************************************************************/
 
 if ((new File(gradle.local)).exists()) {
@@ -13,6 +13,9 @@ libraryScripts.each {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: "com.jfrog.artifactory"
+//apply plugin: "ivy-publish"
+apply plugin: "maven-publish"
 
 group = groupId
 
@@ -30,7 +33,6 @@ android {
     }
 
     // set by command line arguments
-    publishNonDefault(gradle.ext.odkPublishConfig.toBoolean())
     defaultPublishConfig(gradle.ext.odkDefaultPublishConfig)
 
     flavorDimensions "stage", "testing"
@@ -80,7 +82,6 @@ android {
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
     }
-    
 }
 
 
@@ -110,3 +111,47 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
 
 }
+
+publishing {
+    publications {
+        aarRelease(MavenPublication) {}
+        aarDebug(MavenPublication) {}
+    }
+    repositories {
+        ivy {
+            ivyPattern('[organisation]/[module]/[revision]/ivy-[revision].xml')
+            artifactPattern('[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]')
+        }
+    }
+}
+
+task updateClassifierSnapshotBasic {
+    doLast {
+        bundleSnapshotBasicRelease.classifier snapshotRelease
+        bundleSnapshotBasicDebug.classifier snapshotDebug
+
+        publishing.publications.aarRelease.artifact bundleSnapshotBasicRelease
+        publishing.publications.aarDebug.artifact bundleSnapshotBasicDebug
+
+        project.getArtifacts().add("default", bundleSnapshotBasicDebug)
+    }
+}
+
+task updateClassifierDemoBasic {
+    doLast {
+        bundleSnapshotBasicRelease.classifier demoRelease
+        bundleSnapshotBasicDebug.classifier demoDebug
+
+        publishing.publications.aarRelease.artifact bundleDemoBasicRelease
+        publishing.publications.aarDebug.artifact bundleDemoBasicDebug
+
+        project.getArtifacts().add("default", bundleDemoBasicDebug)
+    }
+}
+
+
+task spawnSnapshotBasicArchives(dependsOn: ['snapshotVersion', 'assembleSnapshotBasicDebug',
+                                            'assembleSnapshotBasicRelease', 'updateClassifierSnapshotBasic'])
+
+task spawnDemoBasicArchives(dependsOn: ['snapshotVersion', 'assembleDemoBasicDebug',
+                                            'assembleDemoBasicRelease', 'updateClassifierDemoBasic'])
