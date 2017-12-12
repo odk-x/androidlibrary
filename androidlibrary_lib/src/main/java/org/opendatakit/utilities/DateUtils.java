@@ -18,6 +18,7 @@ package org.opendatakit.utilities;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
+import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
@@ -210,7 +211,7 @@ public class DateUtils {
     }
   }
 
-  public String formatDateTimeForDb(DateTime dt) {
+  public String formatDateTimeForDb(ReadableInstant dt) {
     return TableConstants.nanoSecondsFromMillis(dt.getMillis());
   }
 }

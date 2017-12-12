@@ -14,6 +14,8 @@
 
 package org.opendatakit.provider;
 
+import android.provider.BaseColumns;
+
 /**
  * Holds the columns and create sql for the table of tables
  */

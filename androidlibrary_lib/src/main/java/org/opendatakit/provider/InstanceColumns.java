@@ -24,7 +24,7 @@ import android.provider.BaseColumns;
  * Tracks the upload status of each row in each data table.
  */
 @SuppressWarnings("unused")
-public final class InstanceColumns implements BaseColumns {
+public final class InstanceColumns {
   // saved status from row in data table:
   public static final String STATUS_INCOMPLETE = "INCOMPLETE";
   public static final String STATUS_COMPLETE = "COMPLETE";
@@ -88,7 +88,7 @@ public final class InstanceColumns implements BaseColumns {
   public static String getTableCreateSql(String tableName) {
     //@formatter:off
     return "CREATE TABLE IF NOT EXISTS " + tableName + " ("
-        + _ID + " integer primary key, "
+        + BaseColumns._ID + " integer primary key, "
         + DATA_INSTANCE_ID + " text, "
         + DATA_TABLE_TABLE_ID + " text, "
         + DATA_INSTANCE_NAME + " text, "
