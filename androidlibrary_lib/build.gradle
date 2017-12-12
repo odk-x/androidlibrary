@@ -1,5 +1,5 @@
 /**************************************************************************************************
-                                        GRADLE CONFIG
+ GRADLE CONFIG
  *************************************************************************************************/
 
 if ((new File(gradle.local)).exists()) {
@@ -13,6 +13,8 @@ libraryScripts.each {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: "com.jfrog.artifactory"
+apply plugin: "maven-publish"
 
 group = groupId
 
@@ -30,20 +32,30 @@ android {
     }
 
     // set by command line arguments
-    publishNonDefault(gradle.ext.odkPublishConfig.toBoolean())
     defaultPublishConfig(gradle.ext.odkDefaultPublishConfig)
+
+    flavorDimensions "stage", "testing"
 
     productFlavors {
         demo {
+            dimension 'stage'
         }
 
         master {
+            dimension 'stage'
         }
 
         snapshot {
+            dimension 'stage'
+        }
+
+        basic {
+            dimension 'testing'
         }
 
         uitest {
+            minSdkVersion(uitestMinSDK)
+            dimension 'testing'
         }
     }
 
@@ -51,10 +63,12 @@ android {
         release {
             minifyEnabled(minify)
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            matchingFallbacks = ['debug']
         }
         debug {
             debuggable(true)
             testCoverageEnabled(testCoverage) // Allows AndroidTest JaCoCo reports to be generated
+            matchingFallbacks = ['release']
         }
     }
 
@@ -67,17 +81,6 @@ android {
     compileOptions {
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
-    }
-
-    variantFilter { variant ->
-        def names = variant.flavors*.name
-        if(gradle.ext.odkPublishConfig) {
-            if (names.contains(gradle.ext.odkPublishConfigName)) {
-                variant.setIgnore(false)
-            } else {
-                variant.setIgnore(true)
-            }
-        }
     }
 }
 
@@ -97,13 +100,58 @@ allprojects {
 
 
 dependencies {
-    compile fileTree(include: '*.jar', dir: 'libs')
-    compile 'com.android.support:support-annotations:25.4.0'
-    compile 'com.android.support:support-v13:25.4.0'
+    api fileTree(include: '*.jar', dir: 'libs')
+    api 'net.jcip:jcip-annotations:1.0'
+    api 'com.android.support:support-annotations:27.0.2'
+    api 'com.android.support:support-v13:27.0.2'
 
     // Testing dependencies
-    testCompile 'junit:junit:4.12'
-    androidTestCompile 'com.android.support.test:rules:1.0.0'
-    androidTestCompile 'com.android.support.test:runner:1.0.0'
-    compile 'net.jcip:jcip-annotations:1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+
 }
+
+publishing {
+    publications {
+        aarRelease(MavenPublication) {}
+        aarDebug(MavenPublication) {}
+    }
+    repositories {
+        ivy {
+            ivyPattern('[organisation]/[module]/[revision]/ivy-[revision].xml')
+            artifactPattern('[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]')
+        }
+    }
+}
+
+task updateClassifierSnapshotBasic {
+    doLast {
+        bundleSnapshotBasicRelease.classifier snapshotRelease
+        bundleSnapshotBasicDebug.classifier snapshotDebug
+
+        publishing.publications.aarRelease.artifact bundleSnapshotBasicRelease
+        publishing.publications.aarDebug.artifact bundleSnapshotBasicDebug
+
+        project.getArtifacts().add("default", bundleSnapshotBasicDebug)
+    }
+}
+
+task updateClassifierDemoBasic {
+    doLast {
+        bundleDemoBasicRelease.classifier demoRelease
+        bundleDemoBasicDebug.classifier demoDebug
+
+        publishing.publications.aarRelease.artifact bundleDemoBasicRelease
+        publishing.publications.aarDebug.artifact bundleDemoBasicDebug
+
+        project.getArtifacts().add("default", bundleDemoBasicDebug)
+    }
+}
+
+
+task spawnSnapshotBasicArchives(dependsOn: ['snapshotVersion', 'assembleSnapshotBasicDebug',
+                                            'assembleSnapshotBasicRelease', 'updateClassifierSnapshotBasic'])
+
+task spawnDemoBasicArchives(dependsOn: ['snapshotVersion', 'assembleDemoBasicDebug',
+                                            'assembleDemoBasicRelease', 'updateClassifierDemoBasic'])
