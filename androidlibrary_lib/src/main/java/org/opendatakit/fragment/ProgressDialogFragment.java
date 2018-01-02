@@ -14,10 +14,7 @@
 
 package org.opendatakit.fragment;
 
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.ProgressDialog;
+import android.app.*;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
@@ -31,28 +28,67 @@ import org.opendatakit.androidlibrary.R;
 @SuppressWarnings("unused")
 public class ProgressDialogFragment extends DialogFragment {
 
+  public static final String BUNDLE_KEY_TITLE = "title";
+  public static final String BUNDLE_KEY_MESSAGE = "message";
+  public static final String BUNDLE_KEY_DISMISSABLE = "canDismiss";
+
   /**
    * Returns a new ProgressDialogFragment with the given title and message
    *
    * @param title   the title to be displayed in the dialog
    * @param message the message to be displayed in the dialog
+   * @param canDismissDialog the user can dismiss the dialog
    * @return a ProgressDialogFragment with the cirrect arguments set
    */
-  public static ProgressDialogFragment newInstance(String title, String message) {
+  public static ProgressDialogFragment newInstance(String title, String message, boolean
+      canDismissDialog) {
     ProgressDialogFragment frag = new ProgressDialogFragment();
     Bundle args = new Bundle();
-    args.putString("title", title);
-    args.putString("message", message);
+    args.putString(BUNDLE_KEY_TITLE, title);
+    args.putString(BUNDLE_KEY_MESSAGE, message);
+    args.putBoolean(BUNDLE_KEY_DISMISSABLE, false);
+    // TOOD: change arugments
     frag.setArguments(args);
     return frag;
   }
 
+  private String title;
+  private String message;
+  private boolean canDismissDialog;
+
+  @Override
+  public void onCreate (Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    Bundle args = getArguments();
+
+    title = args.getString(BUNDLE_KEY_TITLE);
+    message = args.getString(BUNDLE_KEY_MESSAGE);
+    canDismissDialog = args.getBoolean(BUNDLE_KEY_DISMISSABLE);
+  }
   /**
    * Updates the message on the dialog
    * @param message the new mssage
    */
   public void setMessage(String message) {
-    ((ProgressDialog) this.getDialog()).setMessage(message);
+    Dialog dialog = getDialog();
+    if(dialog instanceof ProgressDialog) {
+      ((ProgressDialog) dialog).setMessage(message);
+    }
+  }
+
+  public void setMessage(String message, int progress, int max) {
+    if(getDialog() instanceof ProgressDialog) {
+      ProgressDialog dlg = (ProgressDialog) this.getDialog();
+      dlg.setMessage(message);
+      if (progress == -1) {
+        dlg.setIndeterminate(true);
+      } else {
+        dlg.setIndeterminate(false);
+        dlg.setMax(max);
+        dlg.setProgress(progress);
+      }
+    }
   }
 
   /**
@@ -62,53 +98,63 @@ public class ProgressDialogFragment extends DialogFragment {
    */
   @Override
   public Dialog onCreateDialog(Bundle savedInstanceState) {
-    String title = getArguments().getString("title");
-    String message = getArguments().getString("message");
-
-    DialogInterface.OnClickListener loadingButtonListener = new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(DialogInterface dialog, int which) {
-        Fragment f = ProgressDialogFragment.this;
-
-        if (f instanceof CancelProgressDialog) {
-          // user code should dismiss the dialog
-          // since this is a cancellation action...
-          // dialog.dismiss();
-          ((CancelProgressDialog) f).cancelProgressDialog();
-        }
-      }
-    };
-    DialogInterface.OnShowListener showButtonListener = new DialogInterface.OnShowListener() {
-      @Override
-      public void onShow(DialogInterface dialog) {
-        Fragment f = ProgressDialogFragment.this;
-
-        // If the client code wants to get an event when the user dismisses the dialog, allow the
-        // user to dismiss the dialog by showing them the button. Otherwise, the client code will
-        // dismiss the dialog, so don't let the user do it and hide the button
-        if (f instanceof CancelProgressDialog) {
-          ((ProgressDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
-              .setVisibility(View.VISIBLE);
-        } else {
-          ((ProgressDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE)
-              .setVisibility(View.GONE);
-        }
-
-      }
-    };
-
     ProgressDialog mProgressDialog = new ProgressDialog(getActivity(), getTheme());
     mProgressDialog.setTitle(title);
     mProgressDialog.setMessage(message);
-    mProgressDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
     mProgressDialog.setIndeterminate(true);
     mProgressDialog.setCancelable(false);
     mProgressDialog.setCanceledOnTouchOutside(false);
-    mProgressDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.cancel),
-        loadingButtonListener);
-    mProgressDialog.setOnShowListener(showButtonListener);
+
+    if(canDismissDialog) {
+      mProgressDialog.setIcon(android.R.drawable.ic_dialog_info);
+    } else {
+      DialogInterface.OnClickListener loadingButtonListener = new DialogInterface.OnClickListener() {
+        @Override public void onClick(DialogInterface dialog, int which) {
+          Fragment f = ProgressDialogFragment.this;
+
+          if (f instanceof CancelProgressDialog) {
+            // user code should dismiss the dialog
+            // since this is a cancellation action...
+            // dialog.dismiss();
+            ((CancelProgressDialog) f).cancelProgressDialog();
+          }
+        }
+      };
+      DialogInterface.OnShowListener showButtonListener = new DialogInterface.OnShowListener() {
+        @Override public void onShow(DialogInterface dialog) {
+          Fragment f = ProgressDialogFragment.this;
+
+          // If the client code wants to get an event when the user dismisses the dialog, allow the
+          // user to dismiss the dialog by showing them the button. Otherwise, the client code will
+          // dismiss the dialog, so don't let the user do it and hide the button
+          if (f instanceof CancelProgressDialog) {
+            ((ProgressDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE).setVisibility(View.VISIBLE);
+          } else {
+            ((ProgressDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE).setVisibility(View.GONE);
+          }
+
+        }
+      };
+
+
+      mProgressDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+      mProgressDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.cancel),
+          loadingButtonListener);
+      mProgressDialog.setOnShowListener(showButtonListener);
+    }
 
     return mProgressDialog;
+  }
+
+  @Override public void onDismiss(DialogInterface dialog) {
+    super.onDismiss(dialog);
+    if(canDismissDialog) {
+      Activity a = getActivity();
+      if (a != null) {
+        a.setResult(Activity.RESULT_CANCELED);
+        a.finish();
+      }
+    }
   }
 
   /**
