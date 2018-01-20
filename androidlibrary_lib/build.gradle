@@ -104,6 +104,10 @@ dependencies {
     api 'net.jcip:jcip-annotations:1.0'
     api 'com.android.support:support-annotations:27.0.2'
     api 'com.android.support:support-v13:27.0.2'
+    api 'com.fasterxml.jackson.core:jackson-core:2.8.8'
+    api 'com.fasterxml.jackson.core:jackson-annotations:2.8.8'
+    api 'com.fasterxml.jackson.core:jackson-databind:2.8.8'
+    api 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.8.8'
 
     // Testing dependencies
     testImplementation 'junit:junit:4.12'
