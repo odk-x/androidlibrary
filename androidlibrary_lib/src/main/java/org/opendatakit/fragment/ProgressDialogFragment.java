@@ -66,9 +66,9 @@ import org.opendatakit.logging.WebLogger;
     * @param title              the title to be displayed in the dialog
     * @param message            the message to be displayed in the dialog
     * @param canDismissDialog   the user can dismiss the dialog
-    * @param positiveButtonText if non-null, willl create a button with that name
-    * @param negativeButtonText if non-null, willl create a button with that name
-    * @param neutralButtonText  if non-null, willl create a button with that name
+    * @param positiveButtonText if non-null, will create a button with that name
+    * @param negativeButtonText if non-null, will create a button with that name
+    * @param neutralButtonText  if non-null, will create a button with that name
     * @return a ProgressDialogFragment with the correct arguments set
     */
    public static ProgressDialogFragment newInstance(String title, String message,
