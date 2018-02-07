@@ -15,7 +15,6 @@
 package org.opendatakit.properties;
 
 import android.content.Context;
-
 import org.opendatakit.utilities.ODKFileUtils;
 
 import java.util.HashMap;

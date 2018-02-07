@@ -3,7 +3,6 @@ package org.opendatakit.fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import org.opendatakit.logging.WebLogger;
 
 /**
@@ -297,7 +296,7 @@ public class AlertNProgessMsgFragmentMger {
       mDialogState = DialogState.Progress;
 
       progressDialogFragment = ProgressDialogFragment.eitherReuseOrCreateNew(
-          progressDialogTag, fragmentManager, currentTitle, currentMessage, false);
+          progressDialogTag, progressDialogFragment, fragmentManager, currentTitle, currentMessage, false);
 
       if(!progressDialogFragment.isAdded()) {
          progressDialogFragment.show(fragmentManager, progressDialogTag);
@@ -321,7 +320,7 @@ public class AlertNProgessMsgFragmentMger {
 
       mDialogState = DialogState.Alert;
 
-      alertDialogFragment = AlertDialogFragment.eitherReuseOrCreateNew(alertDialogTag,
+      alertDialogFragment = AlertDialogFragment.eitherReuseOrCreateNew(alertDialogTag, alertDialogFragment,
           fragmentManager, fragmentId, currentTitle, currentMessage);
 
       alertDialogFragment.show(fragmentManager, alertDialogTag);

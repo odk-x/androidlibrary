@@ -14,15 +14,19 @@
 
 package org.opendatakit.fragment;
 
-import android.app.*;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Bundle;
 import android.util.Log;
 import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.properties.RequestCodes;
-
-import android.content.DialogInterface;
-import android.os.Bundle;
 
 /**
  * Alert dialog implemented as a fragment for notifying user of a problem.
@@ -127,9 +131,7 @@ public class AlertDialogFragment extends DialogFragment {
    ///////////////////////////////////////////////////////////////////////////////////////
 
    public static AlertDialogFragment eitherReuseOrCreateNew(String alertDialogTag,
-       FragmentManager fragmentManager, int fragmentId, String title, String message) {
-
-      AlertDialogFragment alertDialogFragment = null;
+       AlertDialogFragment alertDialogFragment, FragmentManager fragmentManager, int fragmentId, String title, String message) {
 
       Log.e(t, "WRB: in eitherReuseOrCreateNew");
 

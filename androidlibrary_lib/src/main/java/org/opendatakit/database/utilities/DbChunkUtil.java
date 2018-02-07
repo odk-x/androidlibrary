@@ -18,7 +18,6 @@ package org.opendatakit.database.utilities;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-
 import org.opendatakit.database.service.DbChunk;
 
 import java.io.ByteArrayInputStream;

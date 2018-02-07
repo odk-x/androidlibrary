@@ -14,12 +14,16 @@
 
 package org.opendatakit.fragment;
 
-import android.app.*;
+import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.logging.WebLogger;
@@ -286,18 +290,17 @@ import org.opendatakit.logging.WebLogger;
    /////////////////   STATIC HELPER FUNCTIONS TO AVOID DUPLICATE CODE   /////////////////
    ///////////////////////////////////////////////////////////////////////////////////////
    public static ProgressDialogFragment eitherReuseOrCreateNew(String progressDialogTag,
-       FragmentManager fragmentManager, String title, String message, boolean canDismissDialog) {
-      return ProgressDialogFragment.eitherReuseOrCreateNew(progressDialogTag,
+       ProgressDialogFragment progressDialogFragment, FragmentManager fragmentManager, String title,
+       String message, boolean canDismissDialog) {
+      return ProgressDialogFragment.eitherReuseOrCreateNew(progressDialogTag, progressDialogFragment,
           fragmentManager, title, message, canDismissDialog,
       null, null,null);
    }
 
 
    public static ProgressDialogFragment eitherReuseOrCreateNew(String progressDialogTag,
-       FragmentManager fragmentManager, String title, String message, boolean canDismissDialog,
+       ProgressDialogFragment progressDialogFragment, FragmentManager fragmentManager, String title, String message, boolean canDismissDialog,
        String positiveButtonText, String negativeButtonText, String neutralButtonText) {
-
-      ProgressDialogFragment progressDialogFragment = null;
 
       Log.e(t, "WRB: in eitherReuseOrCreateNew");
 
