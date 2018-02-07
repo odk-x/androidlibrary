@@ -33,7 +33,8 @@ import org.opendatakit.properties.RequestCodes;
  *
  * @author mitchellsundt@gmail.com
  */
-public class AlertDialogFragment extends DialogFragment {
+public class AlertDialogFragment extends DialogFragment implements DialogInterface
+    .OnClickListener {
 
    private static final String t = AlertDialogFragment.class.getSimpleName();
    private static final String FRAGMENT_MANAGER_NULL_ERROR = "FragmentManager cannot be null";
@@ -41,15 +42,18 @@ public class AlertDialogFragment extends DialogFragment {
    private static final String FRAGMENT_ID_KEY = "ADF_fragmentId";
    private static final String TITLE_KEY = "ADF_title";
    private static final String MESSAGE_KEY = "ADF_message";
+   private static final String DISMISS_ACTIVITY_KEY = "ADF_dismiss_activity";
+   private static final String OK_INVOKED_KEY = "ADF_okInvoked";
 
    public interface ConfirmAlertDialog {
       void okAlertDialog();
    }
 
-   public static AlertDialogFragment newInstance(int fragmentId, String title, String message) {
+   public static AlertDialogFragment newInstance(int fragmentId, boolean dismissActivity, String title, String message) {
       AlertDialogFragment frag = new AlertDialogFragment();
       Bundle args = new Bundle();
       args.putInt(FRAGMENT_ID_KEY, fragmentId);
+      args.putBoolean(DISMISS_ACTIVITY_KEY, dismissActivity);
       args.putString(TITLE_KEY, title);
       args.putString(MESSAGE_KEY, message);
       frag.setArguments(args);
@@ -58,6 +62,14 @@ public class AlertDialogFragment extends DialogFragment {
 
    private String appName;
    private boolean dismissCalled;
+
+   private boolean ok_invoked;
+
+   private int fragmentId;
+   private boolean dismissActivity;
+   private String title;
+   private String message;
+
 
    /**
     * Override the Fragment.onAttach() method to get appName and initailize variables
@@ -68,6 +80,7 @@ public class AlertDialogFragment extends DialogFragment {
       super.onAttach(context);
 
       dismissCalled = false;
+      ok_invoked = false;
 
       Activity activity = getActivity();
 
@@ -78,6 +91,47 @@ public class AlertDialogFragment extends DialogFragment {
          throw new RuntimeException("The activity that ProgressDialogListener is attaching to is "
              + "NOT an IAppAwareActivity");
       }
+   }
+
+   @Override public void onCreate(Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+
+      // first set internal state based on arugments
+      initState(getArguments());
+
+      // second update internal state based on any saved date
+      initState(savedInstanceState);
+   }
+
+   private void initState(Bundle bundle) {
+      if (bundle != null) {
+         if (bundle.containsKey(FRAGMENT_ID_KEY)) {
+            fragmentId = bundle.getInt(FRAGMENT_ID_KEY);
+         }
+         if (bundle.containsKey(DISMISS_ACTIVITY_KEY)) {
+            dismissActivity = bundle.getBoolean(DISMISS_ACTIVITY_KEY);
+         }
+         if (bundle.containsKey(TITLE_KEY)) {
+            title = bundle.getString(TITLE_KEY);
+         }
+         if (bundle.containsKey(MESSAGE_KEY)) {
+            message = bundle.getString(MESSAGE_KEY);
+         }
+         if (bundle.containsKey(OK_INVOKED_KEY)) {
+            ok_invoked = bundle.getBoolean(OK_INVOKED_KEY);
+         }
+      }
+   }
+
+   @Override public void onSaveInstanceState(Bundle outState) {
+      Log.e(t, "WRB: onSaveInstanceState called on AlertDialogFragment");
+      dismissCalled = true;
+      outState.putInt(FRAGMENT_ID_KEY, fragmentId);
+      outState.putBoolean(DISMISS_ACTIVITY_KEY, dismissActivity);
+      outState.putString(TITLE_KEY, title);
+      outState.putString(MESSAGE_KEY, message);
+      outState.putBoolean(OK_INVOKED_KEY, ok_invoked);
+      super.onSaveInstanceState(outState);
    }
 
    public boolean dismissWasCalled() {
@@ -98,32 +152,38 @@ public class AlertDialogFragment extends DialogFragment {
       Fragment f = mgr.findFragmentById(fragmentId);
       setTargetFragment(f, RequestCodes.ALERT_DIALOG.ordinal());
 
-      DialogInterface.OnClickListener quitListener = new DialogInterface.OnClickListener() {
-         @Override public void onClick(DialogInterface dialog, int i) {
-            switch (i) {
-            case DialogInterface.BUTTON_POSITIVE: // ok
-               FragmentManager mgr = getFragmentManager();
-               Fragment f = mgr.findFragmentById(fragmentId);
-
-               if (f instanceof ConfirmAlertDialog) {
-                  ((ConfirmAlertDialog) f).okAlertDialog();
-               }
-               dialog.dismiss();
-               break;
-            }
-         }
-      };
-
       AlertDialog dlg = new AlertDialog.Builder(getActivity())
           .setIcon(android.R.drawable.ic_dialog_info).setTitle(title).setMessage(message)
-          .setCancelable(false).setPositiveButton(getString(R.string.ok), quitListener).create();
+          .setCancelable(false).setPositiveButton(getString(R.string.ok), this).create();
       dlg.setCanceledOnTouchOutside(false);
       return dlg;
+   }
+
+   @Override public void onClick(DialogInterface dialog, int i) {
+      ok_invoked = true;
+      switch (i) {
+      case DialogInterface.BUTTON_POSITIVE: // ok
+         FragmentManager mgr = getFragmentManager();
+         Fragment f = mgr.findFragmentById(fragmentId);
+
+         if (f instanceof ConfirmAlertDialog) {
+            ((ConfirmAlertDialog) f).okAlertDialog();
+         }
+         dialog.dismiss();
+         break;
+      }
    }
 
    @Override public void onDismiss(DialogInterface dialog) {
       dismissCalled = true;
       super.onDismiss(dialog);
+      if ( !ok_invoked  && dismissActivity) {
+         Activity a = getActivity();
+         if ( a != null ) {
+            a.setResult(Activity.RESULT_CANCELED);
+            a.finish();
+         }
+      }
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////
@@ -131,7 +191,8 @@ public class AlertDialogFragment extends DialogFragment {
    ///////////////////////////////////////////////////////////////////////////////////////
 
    public static AlertDialogFragment eitherReuseOrCreateNew(String alertDialogTag,
-       AlertDialogFragment alertDialogFragment, FragmentManager fragmentManager, int fragmentId, String title, String message) {
+       AlertDialogFragment alertDialogFragment, FragmentManager fragmentManager,
+       boolean dismissActivity, int fragmentId, String title, String message) {
 
       Log.e(t, "WRB: in eitherReuseOrCreateNew");
 
@@ -158,7 +219,7 @@ public class AlertDialogFragment extends DialogFragment {
 
       // if no-prexising fragment create one, update the message
       if (alertDialogFragment == null) {
-         alertDialogFragment = AlertDialogFragment.newInstance(fragmentId, title, message);
+         alertDialogFragment = AlertDialogFragment.newInstance(fragmentId, dismissActivity, title, message);
       } else {
          alertDialogFragment.getDialog().setTitle(title);
          alertDialogFragment.setMessage(message);

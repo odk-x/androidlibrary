@@ -21,6 +21,10 @@ public class AlertNProgessMsgFragmentMger {
    private static final String APPNAME_KEY = "IMappNameKey";
    private static final String ALERT_TAG_KEY = "IMalertDialogKey";
    private static final String PROGRESS_TAG_KEY = "IMprogressDialogKey";
+   private static final String ALERT_DISMISS_KEY = "IMalertDismissKey";
+   private static final String PROGRESS_DISMISS_KEY = "IMprogessDismissKey";
+   private static final String PROGRESS_VALUE_KEY = "IMprogessValueKey";
+   private static final String PROGRESS_MAX_VALUE_KEY = "IMprogessMAXValueKey";
 
    /***
     * Static funtion used to restore AlertNProgessMsgFragmentMger. NOTE: AlertNProgessMsgFragmentMger will
@@ -35,8 +39,7 @@ public class AlertNProgessMsgFragmentMger {
     * @return
     */
    public static final AlertNProgessMsgFragmentMger restoreInitMessaging(@NonNull String appName,
-       @NonNull String initAlertDialogTag, @NonNull String initDialogProgressTag,
-       Bundle savedInstanceState) {
+       @NonNull String initAlertDialogTag, @NonNull String initDialogProgressTag, Bundle savedInstanceState) {
 
       if (appName == null || initAlertDialogTag == null || initDialogProgressTag == null) {
          throw new IllegalArgumentException(
@@ -49,6 +52,8 @@ public class AlertNProgessMsgFragmentMger {
          String bundleAppName = savedInstanceState.getString(APPNAME_KEY);
          String bundleAlertTag = savedInstanceState.getString(ALERT_TAG_KEY);
          String bundleProgressTag = savedInstanceState.getString(PROGRESS_TAG_KEY);
+         boolean alertDismissActivity = savedInstanceState.getBoolean(ALERT_DISMISS_KEY);
+         boolean progressDismissActivity = savedInstanceState.getBoolean(PROGRESS_DISMISS_KEY);
 
          // verify appName, AlertTag, and ProgressTag before proceed with recreating
          // AlertNProgessMsgFragmentMger
@@ -56,11 +61,13 @@ public class AlertNProgessMsgFragmentMger {
              && initDialogProgressTag.equals(bundleProgressTag)) {
 
             AlertNProgessMsgFragmentMger restore = new AlertNProgessMsgFragmentMger(appName,
-                bundleAlertTag, bundleProgressTag);
+                bundleAlertTag, bundleProgressTag, alertDismissActivity, progressDismissActivity);
             restore.currentTitle = savedInstanceState.getString(TITLE_KEY);
             restore.currentMessage = savedInstanceState.getString(MSG_KEY);
             restore.mDialogState = DialogState
                 .valueOf(savedInstanceState.getString(DIALOG_STATE_KEY));
+            restore.progressValue = savedInstanceState.getInt(PROGRESS_VALUE_KEY);
+            restore.maxValue = savedInstanceState.getInt(PROGRESS_MAX_VALUE_KEY);
             return restore;
          }
       }
@@ -76,6 +83,8 @@ public class AlertNProgessMsgFragmentMger {
    private String currentTitle;
    private String currentMessage;
    private DialogState mDialogState;
+   private int progressValue;
+   private int maxValue;
 
    // member variables not saved
    private String appName;
@@ -86,6 +95,9 @@ public class AlertNProgessMsgFragmentMger {
    private AlertDialogFragment alertDialogFragment;
 
    private boolean dialogsClearedForFragmentShutdown;
+
+   private boolean alertDismissActivity;
+   private boolean progressDismissActivity;
 
    // Make default constructor private
    private AlertNProgessMsgFragmentMger() {
@@ -98,12 +110,15 @@ public class AlertNProgessMsgFragmentMger {
     * @param initDialogProgressTag the unique tag used to identify the alert dialog fragment
     */
    public AlertNProgessMsgFragmentMger(String appName, String initAlertDialogTag,
-       String initDialogProgressTag) {
+       String initDialogProgressTag, boolean alertDismissActivity, boolean
+       progressDismissActivity) {
       mDialogState = DialogState.None;
       dialogsClearedForFragmentShutdown = false;
       this.appName = appName;
       this.alertDialogTag = initAlertDialogTag;
       this.progressDialogTag = initDialogProgressTag;
+      this.alertDismissActivity = alertDismissActivity;
+      this.progressDismissActivity = progressDismissActivity;
    }
 
    /**
@@ -118,6 +133,10 @@ public class AlertNProgessMsgFragmentMger {
       bundleOfState.putString(TITLE_KEY, currentTitle);
       bundleOfState.putString(MSG_KEY, currentMessage);
       bundleOfState.putString(DIALOG_STATE_KEY, mDialogState.name());
+      bundleOfState.putBoolean(ALERT_DISMISS_KEY, alertDismissActivity);
+      bundleOfState.putBoolean(PROGRESS_DISMISS_KEY, progressDismissActivity);
+      bundleOfState.putInt(PROGRESS_VALUE_KEY, progressValue);
+      bundleOfState.putInt(PROGRESS_MAX_VALUE_KEY, maxValue);
    }
 
    /**
@@ -240,6 +259,41 @@ public class AlertNProgessMsgFragmentMger {
    }
 
    /**
+    * Sets the message based on the passed message
+    *
+    * @param message         the message to show in the progress dialog
+    * @param progressStep    the current progress, a value between 0 and maxStep
+    * @param maxStep         the maximum of the scale for progressStep
+    * @param fragmentManager reference to fragment manager
+    */
+   public void updateProgressDialogMessage(String message, int progressStep, int maxStep,
+       FragmentManager fragmentManager) {
+      WebLogger.getLogger(appName)
+          .d(TAG, "in private void updateProgressDialogMessage(String message) {");
+
+      if (fragmentManager == null) {
+         throw new IllegalArgumentException("FragmentManager cannot be null");
+      }
+
+      if(dialogsClearedForFragmentShutdown) {
+         throw new IllegalStateException("Getting an update when the dialogs have been cleared "
+             + "for shutdown, should check displayingProgressDialog()");
+      }
+
+      if (mDialogState == DialogState.Progress) {
+         if (progressDialogFragment == null) {
+            restoreProgressDialog(fragmentManager);
+         }
+         currentMessage = message;
+         progressValue = progressStep;
+         maxValue = maxStep;
+         progressDialogFragment.setMessage(message, progressValue, maxValue);
+      } else {
+         throw new IllegalStateException("No Progress Dialog is currently showing");
+      }
+   }
+
+   /**
     * Tries to find and dismiss a progressDialog
     *
     * @param fragmentManager reference to fragment manager
@@ -296,7 +350,7 @@ public class AlertNProgessMsgFragmentMger {
       mDialogState = DialogState.Progress;
 
       progressDialogFragment = ProgressDialogFragment.eitherReuseOrCreateNew(
-          progressDialogTag, progressDialogFragment, fragmentManager, currentTitle, currentMessage, false);
+          progressDialogTag, progressDialogFragment, fragmentManager, currentTitle, currentMessage, progressDismissActivity);
 
       if(!progressDialogFragment.isAdded()) {
          progressDialogFragment.show(fragmentManager, progressDialogTag);
@@ -321,8 +375,10 @@ public class AlertNProgessMsgFragmentMger {
       mDialogState = DialogState.Alert;
 
       alertDialogFragment = AlertDialogFragment.eitherReuseOrCreateNew(alertDialogTag, alertDialogFragment,
-          fragmentManager, fragmentId, currentTitle, currentMessage);
+          fragmentManager, alertDismissActivity, fragmentId, currentTitle, currentMessage);
 
-      alertDialogFragment.show(fragmentManager, alertDialogTag);
+      if(!alertDialogFragment.isAdded()) {
+         alertDialogFragment.show(fragmentManager, alertDialogTag);
+      }
    }
 }
