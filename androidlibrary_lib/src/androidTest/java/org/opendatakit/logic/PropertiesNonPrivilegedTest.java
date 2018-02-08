@@ -73,8 +73,6 @@ public class PropertiesNonPrivilegedTest {
         // non-default value for font size
         properties.put(CommonToolProperties.KEY_FONT_SIZE, "29");
         // these are stored in devices
-        properties.put(CommonToolProperties.KEY_AUTHENTICATION_TYPE,
-            context.getString(R.string.credential_type_google_account));
         properties.put(CommonToolProperties.KEY_ACCOUNT, "mitchs.test@gmail.com");
 
         props.setProperties(properties);
@@ -83,8 +81,6 @@ public class PropertiesNonPrivilegedTest {
 
         props = CommonToolProperties.get(context, APPNAME);
         assertEquals(props.getProperty(CommonToolProperties.KEY_FONT_SIZE), "29");
-        assertEquals(props.getProperty(CommonToolProperties.KEY_AUTHENTICATION_TYPE),
-                context.getString(R.string.credential_type_google_account));
         assertEquals(props.getProperty(CommonToolProperties.KEY_ACCOUNT),
                 "mitchs.test@gmail.com");
     }
