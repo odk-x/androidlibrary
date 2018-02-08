@@ -73,8 +73,6 @@ public final class PropertiesSingleton {
   public final String CREDENTIAL_TYPE_NONE;
   @SuppressWarnings("WeakerAccess")
   public final String CREDENTIAL_TYPE_USERNAME_PASSWORD;
-  @SuppressWarnings("WeakerAccess")
-  public final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT;
 
   private final String mAppName;
   private final ReentrantLock mAppLock;
@@ -107,7 +105,6 @@ public final class PropertiesSingleton {
     CREDENTIAL_TYPE_NONE = context.getString(R.string.credential_type_none);
     CREDENTIAL_TYPE_USERNAME_PASSWORD = context
         .getString(R.string.credential_type_username_password);
-    CREDENTIAL_TYPE_GOOGLE_ACCOUNT = context.getString(R.string.credential_type_google_account);
 
     mGeneralDefaults = plainDefaults;
     mDeviceDefaults = deviceDefaults;
