@@ -27,6 +27,7 @@ import android.util.Log;
 import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.logging.WebLogger;
+import org.opendatakit.utilities.AppNameUtil;
 
 /**
  * Fragment-version of Progress dialog, used all over the place
@@ -124,17 +125,15 @@ import org.opendatakit.logging.WebLogger;
          progressDialogListener = (ProgressDialogListener) activity;
       }
 
-      // get the appName from the ODK app aware infrastructure
-      if (activity instanceof IAppAwareActivity) {
-         appName = ((IAppAwareActivity) activity).getAppName();
-      } else {
-         throw new RuntimeException("The activity that ProgressDialogListener is attaching to is "
-             + "NOT an IAppAwareActivity");
-      }
+      appName = AppNameUtil.getAppNameFromActivity(activity);
    }
 
    @Override public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
+
+      if(appName == null) {
+         appName = AppNameUtil.getAppNameFromActivity(getActivity());
+      }
 
       // first set internal state based on arugments
       initState(getArguments());

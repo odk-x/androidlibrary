@@ -69,6 +69,8 @@ public class AlertNProgessMsgFragmentMger {
             restore.progressValue = savedInstanceState.getInt(PROGRESS_VALUE_KEY);
             restore.maxValue = savedInstanceState.getInt(PROGRESS_MAX_VALUE_KEY);
             return restore;
+         } else {
+            throw new RuntimeException("Some how retrieved saved date for the WRONG dialog!!!");
          }
       }
       return null;

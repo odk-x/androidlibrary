@@ -27,6 +27,7 @@ import android.util.Log;
 import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.properties.RequestCodes;
+import org.opendatakit.utilities.AppNameUtil;
 
 /**
  * Alert dialog implemented as a fragment for notifying user of a problem.
@@ -81,20 +82,15 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
 
       dismissCalled = false;
       ok_invoked = false;
-
-      Activity activity = getActivity();
-
-      // get the appName from the ODK app aware infrastructure
-      if (activity instanceof IAppAwareActivity) {
-         appName = ((IAppAwareActivity) activity).getAppName();
-      } else {
-         throw new RuntimeException("The activity that ProgressDialogListener is attaching to is "
-             + "NOT an IAppAwareActivity");
-      }
+      appName = AppNameUtil.getAppNameFromActivity(getActivity());
    }
 
    @Override public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
+
+      if(appName == null) {
+         appName = AppNameUtil.getAppNameFromActivity(getActivity());
+      }
 
       // first set internal state based on arugments
       initState(getArguments());
