@@ -80,10 +80,6 @@ public final class CommonToolProperties {
 
   // account identity
   /**
-   * gmail account
-   */
-  public static final String KEY_ACCOUNT = "common.account";
-  /**
    * ODK Aggregate username
    * Used in VerifyServerSettingsFragment, SyncFragment, LoginFragment, InstanceUploaderTask,
    * AbsBaseWebActivity, ServerSettingsFragment, SubmissionProvider, MainMenuActivity,
@@ -163,14 +159,6 @@ public final class CommonToolProperties {
 
   ////////////////////
   // General Settings
-
-  /**
-   * gmail account OAuth 2.0 token
-   * These five are used all over the place, LoginActivity, SyncFragment, SyncExecutionContext,
-   * etc..
-   */
-  @SuppressWarnings("WeakerAccess")
-  public static final String KEY_AUTH = "common.auth";
   /**
    * Roles that the user is known to have. JSON encoded list of strings
    */
@@ -262,7 +250,6 @@ public final class CommonToolProperties {
     // will be left in the syncable file.
     if (deviceProperties != null) {
       deviceProperties.put(KEY_AUTHENTICATION_TYPE, "none");
-      deviceProperties.put(KEY_ACCOUNT, "");
       deviceProperties.put(KEY_USERNAME, "");
       deviceProperties.put(KEY_COMMON_INITIALIZATION, "");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("survey"), "");
@@ -281,7 +268,6 @@ public final class CommonToolProperties {
     // I.e., that is a lazy way to distribute these values, but it is not robustly secure.
     //
     if (secureProperties != null) {
-      secureProperties.put(KEY_AUTH, "");
       secureProperties.put(KEY_PASSWORD, "");
       secureProperties.put(KEY_AUTHENTICATED_USER_ID, "");
       secureProperties.put(KEY_DEFAULT_GROUP, "");
