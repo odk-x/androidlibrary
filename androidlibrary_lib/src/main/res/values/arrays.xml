@@ -27,19 +27,16 @@
 
     <string name="credential_type_none" tools:ignore="MissingTranslation">none</string>
     <string name="credential_type_username_password" tools:ignore="MissingTranslation">username_password</string>
-    <string name="credential_type_google_account" tools:ignore="MissingTranslation">google_account</string>
     <!-- DO NOT alter credential_entry_values - used internally in preferences activity -->
     <!-- DO NOT REORDER assumed ordering in SyncFragment -->
     <string-array tools:ignore="MissingTranslation"
                   name="credential_entry_values">
         <item>@string/credential_type_none</item>
         <item>@string/credential_type_username_password</item>
-        <item>@string/credential_type_google_account</item>
     </string-array>
     <string-array
             name="credential_entries">
         <item>@string/credential_none</item>
         <item>@string/credential_username_password</item>
-        <item>@string/credential_google_account</item>
     </string-array>
 </resources>

@@ -40,7 +40,6 @@
 
     <string name="credential_none">Ningunos (Acceso Anonimo)</string>
     <string name="credential_username_password">Nombre de usuario</string>
-    <string name="credential_google_account">Cuenta de Google</string>
 
     <string name="expansion_unzipping_begins">Decomprimiendo archivos. Buscando archivos zip.</string>
     <string name="expansion_unzipping_without_detail">Descomprimiendo archivos. Descomprimiendo %1$s (%2$d de %3$d)</string>

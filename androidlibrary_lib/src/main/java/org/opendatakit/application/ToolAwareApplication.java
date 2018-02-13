@@ -19,10 +19,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.util.Log;
-
+import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.ODKFileUtils;
 import org.opendatakit.utilities.PRNGFixes;
-import org.opendatakit.logging.WebLogger;
 
 /**
  * Move some of the functionality of CommonApplication up into androidlibrary

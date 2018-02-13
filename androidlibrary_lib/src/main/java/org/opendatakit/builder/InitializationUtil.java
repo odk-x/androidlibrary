@@ -16,7 +16,6 @@ package org.opendatakit.builder;
 
 import android.content.Context;
 import android.content.res.Resources;
-
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.database.service.DbHandle;
 import org.opendatakit.exception.ServicesAvailabilityException;
