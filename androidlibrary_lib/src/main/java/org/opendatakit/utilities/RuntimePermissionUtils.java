@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v13.app.ActivityCompat;
-
 import org.opendatakit.androidlibrary.R;
 
 public class RuntimePermissionUtils {

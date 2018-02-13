@@ -18,7 +18,12 @@ package org.opendatakit.utilities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.opendatakit.logging.WebLogger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**

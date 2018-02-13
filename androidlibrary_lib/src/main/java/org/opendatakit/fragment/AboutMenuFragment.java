@@ -26,14 +26,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.opendatakit.androidlibrary.R;
 import org.opendatakit.activities.IAppAwareActivity;
+import org.opendatakit.androidlibrary.R;
 import org.opendatakit.application.ToolAwareApplication;
 import org.opendatakit.listener.LicenseReaderListener;
+import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.task.LicenseReaderTask;
-import org.opendatakit.logging.WebLogger;
 
 /**
  * Used in ConflictResolutionActivity, CheckpointResolutionActivity,

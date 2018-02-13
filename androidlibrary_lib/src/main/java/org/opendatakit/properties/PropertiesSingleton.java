@@ -22,8 +22,18 @@ import org.opendatakit.consts.IntentConsts;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.ODKFileUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -63,8 +73,6 @@ public final class PropertiesSingleton {
   public final String CREDENTIAL_TYPE_NONE;
   @SuppressWarnings("WeakerAccess")
   public final String CREDENTIAL_TYPE_USERNAME_PASSWORD;
-  @SuppressWarnings("WeakerAccess")
-  public final String CREDENTIAL_TYPE_GOOGLE_ACCOUNT;
 
   private final String mAppName;
   private final ReentrantLock mAppLock;
@@ -97,7 +105,6 @@ public final class PropertiesSingleton {
     CREDENTIAL_TYPE_NONE = context.getString(R.string.credential_type_none);
     CREDENTIAL_TYPE_USERNAME_PASSWORD = context
         .getString(R.string.credential_type_username_password);
-    CREDENTIAL_TYPE_GOOGLE_ACCOUNT = context.getString(R.string.credential_type_google_account);
 
     mGeneralDefaults = plainDefaults;
     mDeviceDefaults = deviceDefaults;

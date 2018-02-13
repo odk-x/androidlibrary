@@ -18,7 +18,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import org.opendatakit.logging.WebLogger;
 
-import java.io.*;
+import java.io.File;
 
 /**
  * Isolate bitmap resizing to its own utility class.

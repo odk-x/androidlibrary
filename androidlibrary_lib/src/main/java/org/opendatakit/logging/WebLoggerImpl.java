@@ -20,7 +20,15 @@ import org.apache.commons.lang3.CharEncoding;
 import org.joda.time.DateTime;
 import org.opendatakit.utilities.ODKFileUtils;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Implementation of WebLoggerIf for android that emits logs to the
