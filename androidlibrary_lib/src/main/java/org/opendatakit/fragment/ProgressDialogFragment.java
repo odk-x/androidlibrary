@@ -166,7 +166,6 @@ import org.opendatakit.utilities.AppNameUtil;
    }
 
    @Override public void onSaveInstanceState(Bundle outState) {
-      Log.e(t, "WRB: onSaveInstanceState called on ProgressDialogFragment");
       dismissCalled = true;
       outState.putString(BUNDLE_KEY_TITLE, title);
       outState.putString(BUNDLE_KEY_MESSAGE, message);
@@ -273,7 +272,6 @@ import org.opendatakit.utilities.AppNameUtil;
 
    @Override public void onDismiss(DialogInterface dialog) {
       dismissCalled = true;
-      Log.e(t, "WRB: onDimiss called on ProgressDialogFragment");
       super.onDismiss(dialog);
 
       if (canDismissDialog) {
@@ -301,23 +299,18 @@ import org.opendatakit.utilities.AppNameUtil;
        ProgressDialogFragment progressDialogFragment, FragmentManager fragmentManager, String title, String message, boolean canDismissDialog,
        String positiveButtonText, String negativeButtonText, String neutralButtonText) {
 
-      Log.e(t, "WRB: in eitherReuseOrCreateNew");
-
       if (fragmentManager == null) {
          throw new IllegalArgumentException(FRAGMENT_MANAGER_NULL_ERROR);
       }
 
       Fragment dialog = fragmentManager.findFragmentByTag(progressDialogTag);
-      Log.e(t, "WRB: search for pre-exising dialog");
       // attempt to get the pre-existing fragment that has not already been dismissed
       if (dialog != null && (dialog instanceof ProgressDialogFragment)) {
-         Log.e(t, "WRB:FOUND pre-exising dialog");
          progressDialogFragment = (ProgressDialogFragment) dialog;
          if (progressDialogFragment.dismissWasCalled()) {
             progressDialogFragment = null;
          }
       } else {
-         Log.e(t, "WRB: NOT found pre-exising dialog");
          // failed to find the progress dialog, dismiss the dangling reference if dismiss
          // wasn't previously called, probably unnecessary
          if (progressDialogFragment != null && !progressDialogFragment.dismissWasCalled()) {
@@ -328,12 +321,10 @@ import org.opendatakit.utilities.AppNameUtil;
 
       // if no-prexising fragment create one, else update the message
       if (progressDialogFragment == null) {
-         Log.e(t, "WRB: creating NEW progress dialog");
          progressDialogFragment = ProgressDialogFragment
              .newInstance(title, message, canDismissDialog, positiveButtonText, negativeButtonText,
                  neutralButtonText);
       } else {
-         Log.e(t, "WRB: REUSING progress dialog");
          progressDialogFragment.getDialog().setTitle(title);
          progressDialogFragment.setMessage(message);
       }

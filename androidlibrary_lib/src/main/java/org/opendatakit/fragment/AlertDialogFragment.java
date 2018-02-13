@@ -120,7 +120,6 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
    }
 
    @Override public void onSaveInstanceState(Bundle outState) {
-      Log.e(t, "WRB: onSaveInstanceState called on AlertDialogFragment");
       dismissCalled = true;
       outState.putInt(FRAGMENT_ID_KEY, fragmentId);
       outState.putBoolean(DISMISS_ACTIVITY_KEY, dismissActivity);
@@ -189,8 +188,6 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
    public static AlertDialogFragment eitherReuseOrCreateNew(String alertDialogTag,
        AlertDialogFragment alertDialogFragment, FragmentManager fragmentManager,
        boolean dismissActivity, int fragmentId, String title, String message) {
-
-      Log.e(t, "WRB: in eitherReuseOrCreateNew");
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException(FRAGMENT_MANAGER_NULL_ERROR);
