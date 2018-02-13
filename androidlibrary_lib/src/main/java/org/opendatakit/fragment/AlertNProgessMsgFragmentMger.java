@@ -103,7 +103,6 @@ public class AlertNProgessMsgFragmentMger {
 
    // Make default constructor private
    private AlertNProgessMsgFragmentMger() {
-      ;
    }
 
    /**
