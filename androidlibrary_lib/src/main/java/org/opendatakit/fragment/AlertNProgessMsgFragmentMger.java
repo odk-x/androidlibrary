@@ -17,7 +17,7 @@ public class AlertNProgessMsgFragmentMger {
    // keys for the data being retained
    private static final String TITLE_KEY = "IMdialogTitleKey";
    private static final String MSG_KEY = "IMdialogMsgKey";
-   private static final String DIALOG_STATE_KEY = "IMdialogMsgKey";
+   private static final String DIALOG_STATE_KEY = "IMdialogStateKey";
    private static final String APPNAME_KEY = "IMappNameKey";
    private static final String ALERT_TAG_KEY = "IMalertDialogKey";
    private static final String PROGRESS_TAG_KEY = "IMprogressDialogKey";
