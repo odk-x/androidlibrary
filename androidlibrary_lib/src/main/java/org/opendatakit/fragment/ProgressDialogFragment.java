@@ -106,28 +106,11 @@ import org.opendatakit.utilities.AppNameUtil;
       return dismissCalled;
    }
 
-   /**
-    * Override the Fragment.onAttach() method to get appName, initailize variables,
-    * and instantiate the NoticeDialogListener
-    *
-    * @param context
-    */
-   @Override public void onAttach(Context context) {
-      super.onAttach(context);
-
-      dismissCalled = false;
-
-      if(appName == null) {
-         appName = AppNameUtil.getAppNameFromActivity(getActivity());
-      }
-   }
 
    @Override public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
-      if(appName == null) {
-         appName = AppNameUtil.getAppNameFromActivity(getActivity());
-      }
+      dismissCalled = false;
 
       // first set internal state based on arugments
       initState(getArguments());
@@ -140,6 +123,10 @@ import org.opendatakit.utilities.AppNameUtil;
       super.onActivityCreated(savedInstanceState);
 
       Activity activity = getActivity();
+
+      if(appName == null) {
+         appName = AppNameUtil.getAppNameFromActivity(activity);
+      }
 
       // Verify that the host activity implements the listener callback interface
       if (activity instanceof ProgressDialogListener) {
