@@ -117,15 +117,9 @@ import org.opendatakit.utilities.AppNameUtil;
 
       dismissCalled = false;
 
-      Activity activity = getActivity();
-
-      // Verify that the host activity implements the listener callback interface
-      if (activity instanceof ProgressDialogListener) {
-         // Instantiate the the listener so we can send events to the host
-         progressDialogListener = (ProgressDialogListener) activity;
+      if(appName == null) {
+         appName = AppNameUtil.getAppNameFromActivity(getActivity());
       }
-
-      appName = AppNameUtil.getAppNameFromActivity(activity);
    }
 
    @Override public void onCreate(Bundle savedInstanceState) {
@@ -140,6 +134,20 @@ import org.opendatakit.utilities.AppNameUtil;
 
       // second update internal state based on any saved date
       initState(savedInstanceState);
+   }
+
+   @Override public void onActivityCreated (Bundle savedInstanceState) {
+      super.onActivityCreated(savedInstanceState);
+
+      Activity activity = getActivity();
+
+      // Verify that the host activity implements the listener callback interface
+      if (activity instanceof ProgressDialogListener) {
+         // Instantiate the the listener so we can send events to the host
+         progressDialogListener = (ProgressDialogListener) activity;
+         WebLogger.getLogger(appName)
+             .i(t, t + "progressDialogListener established reference to an activity");
+      }
    }
 
    private void initState(Bundle bundle) {
@@ -241,6 +249,7 @@ import org.opendatakit.utilities.AppNameUtil;
       if (progressDialogListener == null) {
          WebLogger.getLogger(appName)
              .i(t, t + "progressDialogListener is null so cannot " + "dispatch an onClickEvent");
+         return;
       }
       switch (whichButton) {
       case DialogInterface.BUTTON_POSITIVE:
