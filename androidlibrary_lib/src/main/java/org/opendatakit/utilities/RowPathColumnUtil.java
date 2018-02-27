@@ -19,7 +19,11 @@ import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.database.data.ColumnDefinition;
 import org.opendatakit.database.data.OrderedColumns;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 final class RowPathColumnUtil {
 

@@ -15,7 +15,13 @@
 package org.opendatakit.database.service;
 
 import android.content.ContentValues;
-import org.opendatakit.database.data.*;
+import org.opendatakit.database.data.BaseTable;
+import org.opendatakit.database.data.ColumnList;
+import org.opendatakit.database.data.KeyValueStoreEntry;
+import org.opendatakit.database.data.OrderedColumns;
+import org.opendatakit.database.data.TableDefinitionEntry;
+import org.opendatakit.database.data.TableMetaDataEntries;
+import org.opendatakit.database.data.UserTable;
 import org.opendatakit.database.queries.BindArgs;
 import org.opendatakit.database.queries.ResumableQuery;
 import org.opendatakit.exception.ActionNotAuthorizedException;

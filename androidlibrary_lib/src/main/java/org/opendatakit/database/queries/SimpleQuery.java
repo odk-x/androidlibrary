@@ -17,7 +17,6 @@ package org.opendatakit.database.queries;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import org.opendatakit.database.utilities.QueryUtil;
 
 /**
