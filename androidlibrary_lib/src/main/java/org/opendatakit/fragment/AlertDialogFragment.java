@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.util.Log;
 import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.androidlibrary.R;
+import org.opendatakit.logging.WebLogger;
 import org.opendatakit.properties.RequestCodes;
 import org.opendatakit.utilities.AppNameUtil;
 
@@ -70,33 +71,29 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
    private boolean dismissActivity;
    private String title;
    private String message;
-
-
-   /**
-    * Override the Fragment.onAttach() method to get appName and initailize variables
-    *
-    * @param context
-    */
-   @Override public void onAttach(Context context) {
-      super.onAttach(context);
-
-      dismissCalled = false;
-      ok_invoked = false;
-      appName = AppNameUtil.getAppNameFromActivity(getActivity());
-   }
-
+   
    @Override public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
-      if(appName == null) {
-         appName = AppNameUtil.getAppNameFromActivity(getActivity());
-      }
+      dismissCalled = false;
+      ok_invoked = false;
 
       // first set internal state based on arugments
       initState(getArguments());
 
       // second update internal state based on any saved date
       initState(savedInstanceState);
+   }
+
+   @Override public void onActivityCreated (Bundle savedInstanceState) {
+      super.onActivityCreated(savedInstanceState);
+
+      Activity activity = getActivity();
+
+      if(appName == null) {
+         appName = AppNameUtil.getAppNameFromActivity(activity);
+      }
+
    }
 
    private void initState(Bundle bundle) {
