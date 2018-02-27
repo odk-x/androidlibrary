@@ -106,40 +106,35 @@ import org.opendatakit.utilities.AppNameUtil;
       return dismissCalled;
    }
 
-   /**
-    * Override the Fragment.onAttach() method to get appName, initailize variables,
-    * and instantiate the NoticeDialogListener
-    *
-    * @param context
-    */
-   @Override public void onAttach(Context context) {
-      super.onAttach(context);
-
-      dismissCalled = false;
-
-      Activity activity = getActivity();
-
-      // Verify that the host activity implements the listener callback interface
-      if (activity instanceof ProgressDialogListener) {
-         // Instantiate the the listener so we can send events to the host
-         progressDialogListener = (ProgressDialogListener) activity;
-      }
-
-      appName = AppNameUtil.getAppNameFromActivity(activity);
-   }
 
    @Override public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
-      if(appName == null) {
-         appName = AppNameUtil.getAppNameFromActivity(getActivity());
-      }
+      dismissCalled = false;
 
       // first set internal state based on arugments
       initState(getArguments());
 
       // second update internal state based on any saved date
       initState(savedInstanceState);
+   }
+
+   @Override public void onActivityCreated (Bundle savedInstanceState) {
+      super.onActivityCreated(savedInstanceState);
+
+      Activity activity = getActivity();
+
+      if(appName == null) {
+         appName = AppNameUtil.getAppNameFromActivity(activity);
+      }
+
+      // Verify that the host activity implements the listener callback interface
+      if (activity instanceof ProgressDialogListener) {
+         // Instantiate the the listener so we can send events to the host
+         progressDialogListener = (ProgressDialogListener) activity;
+         WebLogger.getLogger(appName)
+             .i(t, t + "progressDialogListener established reference to an activity");
+      }
    }
 
    private void initState(Bundle bundle) {
@@ -241,6 +236,7 @@ import org.opendatakit.utilities.AppNameUtil;
       if (progressDialogListener == null) {
          WebLogger.getLogger(appName)
              .i(t, t + "progressDialogListener is null so cannot " + "dispatch an onClickEvent");
+         return;
       }
       switch (whichButton) {
       case DialogInterface.BUTTON_POSITIVE:
