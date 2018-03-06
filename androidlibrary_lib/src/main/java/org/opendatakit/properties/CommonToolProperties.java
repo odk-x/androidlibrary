@@ -93,6 +93,12 @@ public final class CommonToolProperties {
   // general settings
 
   /**
+   * Used in MainActivity
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static final String KEY_FIRST_LAUNCH = "services.first_launch";
+
+  /**
    * null if we should use Android system locale
    * Used in PropertiesSingleton, CommonTranslationsLocaleScreen, OdkCommon, DeviceSettingsFragment
    */
@@ -228,7 +234,7 @@ public final class CommonToolProperties {
     if (generalProperties != null) {
       generalProperties
           .put(KEY_SYNC_SERVER_URL, context.getString(R.string.default_sync_server_url));
-
+      generalProperties.put(KEY_FIRST_LAUNCH, "true");
       generalProperties.put(KEY_FONT_SIZE, Integer.toString(DEFAULT_FONT_SIZE));
       generalProperties.put(KEY_SHOW_SPLASH, "true");
       generalProperties.put(KEY_SPLASH_PATH, "ODK Default");
