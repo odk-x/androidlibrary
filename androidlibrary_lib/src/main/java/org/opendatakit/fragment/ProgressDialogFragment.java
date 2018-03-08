@@ -194,16 +194,14 @@ import org.opendatakit.utilities.AppNameUtil;
    }
 
    public void setMessage(String message, int progress, int max) {
-      if (getDialog() instanceof ProgressDialog) {
-         ProgressDialog dlg = (ProgressDialog) this.getDialog();
-         dlg.setMessage(message);
-         if (progress == -1) {
-            dlg.setIndeterminate(true);
-         } else {
-            dlg.setIndeterminate(false);
-            dlg.setMax(max);
-            dlg.setProgress(progress);
-         }
+      ProgressDialog dlg = getProgressDialog();
+      dlg.setMessage(message);
+      if (progress == -1) {
+         dlg.setIndeterminate(true);
+      } else {
+         dlg.setIndeterminate(false);
+         dlg.setMax(max);
+         dlg.setProgress(progress);
       }
    }
 
