@@ -20,11 +20,8 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
-import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.AppNameUtil;
@@ -171,16 +168,29 @@ import org.opendatakit.utilities.AppNameUtil;
       super.onSaveInstanceState(outState);
    }
 
+   private ProgressDialog getProgressDialog() {
+      Dialog dialog = getDialog();
+      if (dialog instanceof ProgressDialog) {
+         return (ProgressDialog) dialog;
+      } else {
+         throw new IllegalStateException("Somehow an ProgressDialogFrament does not have an "
+             + "ProgressDialog");
+      }
+   }
+
    /**
     * Updates the message on the dialog
     *
-    * @param message the new mssage
+    * @param newMessage the new mssage
     */
-   public void setMessage(String message) {
-      Dialog dialog = getDialog();
-      if (dialog instanceof ProgressDialog) {
-         ((ProgressDialog) dialog).setMessage(message);
-      }
+   public void setMessage(String newMessage) {
+      message = newMessage;
+      getProgressDialog().setMessage(message);
+   }
+
+   private void setTitle(String newTitle) {
+      title = newTitle;
+      getProgressDialog().setMessage(title);
    }
 
    public void setMessage(String message, int progress, int max) {
@@ -292,52 +302,55 @@ import org.opendatakit.utilities.AppNameUtil;
 
 
    public static ProgressDialogFragment eitherReuseOrCreateNew(String progressDialogTag,
-       ProgressDialogFragment progressDialogFragment, FragmentManager fragmentManager, String title, String message, boolean canDismissDialog,
+       ProgressDialogFragment inputProgressDialogFragment, FragmentManager fragmentManager, String
+       title, String message, boolean canDismissDialog,
        String positiveButtonText, String negativeButtonText, String neutralButtonText) {
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException(FRAGMENT_MANAGER_NULL_ERROR);
       }
 
+      ProgressDialogFragment outputProgressDialogFragment = null;
+
       Fragment dialog = fragmentManager.findFragmentByTag(progressDialogTag);
       // attempt to get the pre-existing fragment that has not already been dismissed
       if (dialog != null && (dialog instanceof ProgressDialogFragment)) {
-         progressDialogFragment = (ProgressDialogFragment) dialog;
-         if (progressDialogFragment.dismissWasCalled()) {
-            progressDialogFragment = null;
+         outputProgressDialogFragment = (ProgressDialogFragment) dialog;
+         if (outputProgressDialogFragment.dismissWasCalled()) {
+            outputProgressDialogFragment = null;
          }
       } else {
          // failed to find the progress dialog, dismiss the dangling reference if dismiss
          // wasn't previously called, probably unnecessary
-         if (progressDialogFragment != null && !progressDialogFragment.dismissWasCalled()) {
-            progressDialogFragment.dismiss();
+         if (inputProgressDialogFragment != null && !inputProgressDialogFragment.dismissWasCalled()) {
+            inputProgressDialogFragment.dismiss();
          }
-         progressDialogFragment = null;
+         outputProgressDialogFragment = null;
       }
 
-      // if no-prexising fragment create one, else update the message
-      if (progressDialogFragment == null) {
-         progressDialogFragment = ProgressDialogFragment
+      // if no pre-existing fragment create one, else update the message
+      if (outputProgressDialogFragment == null) {
+         outputProgressDialogFragment = ProgressDialogFragment
              .newInstance(title, message, canDismissDialog, positiveButtonText, negativeButtonText,
                  neutralButtonText);
       } else {
-         progressDialogFragment.getDialog().setTitle(title);
-         progressDialogFragment.setMessage(message);
+         outputProgressDialogFragment.setTitle(title);
+         outputProgressDialogFragment.setMessage(message);
       }
 
-      return progressDialogFragment;
+      return outputProgressDialogFragment;
    }
 
    public static void dismissDialogs(String progressDialogTag,
-       ProgressDialogFragment progressDialogFragment, FragmentManager fragmentManager) {
+       ProgressDialogFragment inputProgressDialogFragment, FragmentManager fragmentManager) {
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException(FRAGMENT_MANAGER_NULL_ERROR);
       }
 
       // dismiss the provided reference reference
-      if (progressDialogFragment != null && !progressDialogFragment.dismissWasCalled()) {
-         progressDialogFragment.dismiss();
+      if (inputProgressDialogFragment != null && !inputProgressDialogFragment.dismissWasCalled()) {
+         inputProgressDialogFragment.dismiss();
       }
 
       // then try to find any dangling reference that has not been dismissed
