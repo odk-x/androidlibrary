@@ -200,6 +200,9 @@ public final class CommonToolProperties {
   @SuppressWarnings("WeakerAccess")
   public static final String KEY_PASSWORD = "common.password";
 
+  // key used to sort forms in survery
+  public static final String KEY_SURVEY_SORT_ORDER = "survey.sort_order";
+
   static {
     // register a state-reset manipulator for 'commonPropertiesSingletonFactory' field.
     StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {
@@ -233,6 +236,7 @@ public final class CommonToolProperties {
       generalProperties.put(KEY_SHOW_SPLASH, "true");
       generalProperties.put(KEY_SPLASH_PATH, "ODK Default");
 
+
       // the properties that are managed through the admin settings pages.
 
       generalProperties.put(KEY_CHANGE_SYNC_SERVER, "true");
@@ -260,6 +264,7 @@ public final class CommonToolProperties {
       deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("scan"), "");
       deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("tables"), "");
       deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("sensors"), "");
+      deviceProperties.put(KEY_SURVEY_SORT_ORDER,"sortByName");
     }
     // handle the secure properties. If these are in the incoming syncable general
     // property file, those values will be used to initialize these fields (if there is not an
