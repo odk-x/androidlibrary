@@ -93,10 +93,10 @@ public final class CommonToolProperties {
   // general settings
 
   /**
-   * Used in MainActivity
+   * Used in SyncActivity
    */
   @SuppressWarnings("WeakerAccess")
-  public static final String KEY_FIRST_LAUNCH = "services.first_launch";
+  public static final String KEY_FIRST_LAUNCH = "common.first_launch";
 
   /**
    * null if we should use Android system locale
@@ -206,6 +206,9 @@ public final class CommonToolProperties {
   @SuppressWarnings("WeakerAccess")
   public static final String KEY_PASSWORD = "common.password";
 
+  // key used to sort forms in survery
+  public static final String KEY_SURVEY_SORT_ORDER = "survey.sort_order";
+
   static {
     // register a state-reset manipulator for 'commonPropertiesSingletonFactory' field.
     StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {
@@ -234,10 +237,10 @@ public final class CommonToolProperties {
     if (generalProperties != null) {
       generalProperties
           .put(KEY_SYNC_SERVER_URL, context.getString(R.string.default_sync_server_url));
-      generalProperties.put(KEY_FIRST_LAUNCH, "true");
       generalProperties.put(KEY_FONT_SIZE, Integer.toString(DEFAULT_FONT_SIZE));
       generalProperties.put(KEY_SHOW_SPLASH, "true");
       generalProperties.put(KEY_SPLASH_PATH, "ODK Default");
+
 
       // the properties that are managed through the admin settings pages.
 
@@ -258,6 +261,7 @@ public final class CommonToolProperties {
       deviceProperties.put(KEY_AUTHENTICATION_TYPE, "none");
       deviceProperties.put(KEY_USERNAME, "");
       deviceProperties.put(KEY_COMMON_INITIALIZATION, "");
+	  deviceProperties.put(KEY_FIRST_LAUNCH, "true");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("survey"), "");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("scan"), "");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("tables"), "");
@@ -266,6 +270,7 @@ public final class CommonToolProperties {
       deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("scan"), "");
       deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("tables"), "");
       deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("sensors"), "");
+      deviceProperties.put(KEY_SURVEY_SORT_ORDER,"sortByName");
     }
     // handle the secure properties. If these are in the incoming syncable general
     // property file, those values will be used to initialize these fields (if there is not an
