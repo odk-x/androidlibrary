@@ -102,8 +102,8 @@ allprojects {
 dependencies {
     api fileTree(include: '*.jar', dir: 'libs')
     api 'net.jcip:jcip-annotations:1.0'
-    api 'com.android.support:support-annotations:27.0.2'
-    api 'com.android.support:support-v13:27.0.2'
+    api 'com.android.support:support-annotations:27.1.0'
+    api 'com.android.support:support-v13:27.1.0'
 
     // Testing dependencies
     testImplementation 'junit:junit:4.12'
