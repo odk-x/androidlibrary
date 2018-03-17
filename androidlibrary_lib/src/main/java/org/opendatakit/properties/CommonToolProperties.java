@@ -206,6 +206,12 @@ public final class CommonToolProperties {
   @SuppressWarnings("WeakerAccess")
   public static final String KEY_PASSWORD = "common.password";
 
+  /**
+   * ODK Tables : Key used to store sort order as Device Property
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static final String KEY_PERF_TABLES_SORT_BY_ORDER = "org.opendatakit.tables.list.sortbyorder";
+
   // key used to sort forms in survery
   public static final String KEY_SURVEY_SORT_ORDER = "survey.sort_order";
 
@@ -271,6 +277,7 @@ public final class CommonToolProperties {
       deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("tables"), "");
       deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("sensors"), "");
       deviceProperties.put(KEY_SURVEY_SORT_ORDER,"sortByName");
+      deviceProperties.put(KEY_PERF_TABLES_SORT_BY_ORDER,"SORT_ASC");
     }
     // handle the secure properties. If these are in the incoming syncable general
     // property file, those values will be used to initialize these fields (if there is not an
