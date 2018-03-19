@@ -20,13 +20,9 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
-import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.androidlibrary.R;
-import org.opendatakit.logging.WebLogger;
 import org.opendatakit.properties.RequestCodes;
 import org.opendatakit.utilities.AppNameUtil;
 
@@ -130,8 +126,29 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       return dismissCalled;
    }
 
-   public void setMessage(String message) {
-      ((AlertDialog) this.getDialog()).setMessage(message);
+   private AlertDialog getAlertDialog() {
+      Dialog dialog = getDialog();
+      if (dialog instanceof AlertDialog) {
+         return (AlertDialog) dialog;
+      } else {
+         throw new IllegalStateException("Somehow an AlertDialogFrament does not have an "
+             + "AlertDialog");
+      }
+   }
+
+   /**
+    * Updates the message on the dialog
+    *
+    * @param newMessage the new mssage
+    */
+   public void setMessage(String newMessage) {
+      message = newMessage;
+      getAlertDialog().setMessage(message);
+   }
+
+   private void setTitle(String newTitle) {
+      title = newTitle;
+      getAlertDialog().setMessage(title);
    }
 
    @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -183,51 +200,53 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
    ///////////////////////////////////////////////////////////////////////////////////////
 
    public static AlertDialogFragment eitherReuseOrCreateNew(String alertDialogTag,
-       AlertDialogFragment alertDialogFragment, FragmentManager fragmentManager,
+       AlertDialogFragment inputAlertDialogFragment, FragmentManager fragmentManager,
        boolean dismissActivity, int fragmentId, String title, String message) {
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException(FRAGMENT_MANAGER_NULL_ERROR);
       }
 
+      AlertDialogFragment outputAlertDialogFragment = null;
+
       Fragment dialog = fragmentManager.findFragmentByTag(alertDialogTag);
 
       if (dialog != null && (dialog instanceof AlertDialogFragment)) {
-         alertDialogFragment = (AlertDialogFragment) dialog;
-         if (alertDialogFragment.dismissWasCalled()) {
-            alertDialogFragment = null;
+         outputAlertDialogFragment = (AlertDialogFragment) dialog;
+         if (outputAlertDialogFragment.dismissWasCalled()) {
+            outputAlertDialogFragment = null;
          }
       } else {
 
          // failed to find the alert dialog, dimiss the dangling reference if dismiss
          // wasn't previously called
-         if (alertDialogFragment != null && !alertDialogFragment.dismissWasCalled()) {
-            alertDialogFragment.dismiss();
+         if (inputAlertDialogFragment != null && !inputAlertDialogFragment.dismissWasCalled()) {
+            inputAlertDialogFragment.dismiss();
          }
-         alertDialogFragment = null;
+         outputAlertDialogFragment = null;
       }
 
-      // if no-prexising fragment create one, update the message
-      if (alertDialogFragment == null) {
-         alertDialogFragment = AlertDialogFragment.newInstance(fragmentId, dismissActivity, title, message);
+      // if no pre-existing fragment create one, else update the message
+      if (outputAlertDialogFragment == null) {
+         outputAlertDialogFragment = AlertDialogFragment.newInstance(fragmentId, dismissActivity, title, message);
       } else {
-         alertDialogFragment.getDialog().setTitle(title);
-         alertDialogFragment.setMessage(message);
+         outputAlertDialogFragment.setTitle(title);
+         outputAlertDialogFragment.setMessage(message);
       }
 
-      return alertDialogFragment;
+      return outputAlertDialogFragment;
    }
 
    public static void dismissDialogs(String alertDialogTag,
-       AlertDialogFragment alertDialogFragment, FragmentManager fragmentManager) {
+       AlertDialogFragment inputAlertDialogFragment, FragmentManager fragmentManager) {
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException(FRAGMENT_MANAGER_NULL_ERROR);
       }
 
       // dismiss the provided reference reference
-      if (alertDialogFragment != null && !alertDialogFragment.dismissWasCalled()) {
-         alertDialogFragment.dismiss();
+      if (inputAlertDialogFragment != null && !inputAlertDialogFragment.dismissWasCalled()) {
+         inputAlertDialogFragment.dismiss();
       }
 
       // then try to find any dangling reference that has not been dismissed
