@@ -181,13 +181,18 @@ import org.opendatakit.utilities.AppNameUtil;
    /**
     * Updates the message on the dialog
     *
-    * @param newMessage the new mssage
+    * @param newMessage the new message
     */
    public void setMessage(String newMessage) {
       message = newMessage;
       getProgressDialog().setMessage(message);
    }
 
+   /**
+    * Updates the title of the dialog
+    *
+    * @param newTitle the new title
+    */
    private void setTitle(String newTitle) {
       title = newTitle;
       getProgressDialog().setMessage(title);
