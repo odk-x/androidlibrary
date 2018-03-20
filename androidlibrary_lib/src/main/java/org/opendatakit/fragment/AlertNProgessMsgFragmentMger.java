@@ -312,6 +312,7 @@ public class AlertNProgessMsgFragmentMger {
 
       ProgressDialogFragment.dismissDialogs(progressDialogTag, progressDialogFragment,
           fragmentManager);
+      progressDialogFragment = null;
    }
 
    /**
@@ -331,6 +332,7 @@ public class AlertNProgessMsgFragmentMger {
       }
 
       AlertDialogFragment.dismissDialogs(alertDialogTag, alertDialogFragment,fragmentManager);
+      alertDialogFragment = null;
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////
