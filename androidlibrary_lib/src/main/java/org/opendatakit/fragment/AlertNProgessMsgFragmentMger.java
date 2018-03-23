@@ -355,7 +355,7 @@ public class AlertNProgessMsgFragmentMger {
       progressDialogFragment = ProgressDialogFragment.eitherReuseOrCreateNew(
           progressDialogTag, progressDialogFragment, fragmentManager, currentTitle, currentMessage, progressDismissActivity);
 
-      if(!progressDialogFragment.isAdded()) {
+      if(!progressDialogFragment.isAdded() && !progressDialogFragment.isRemoving()) {
          progressDialogFragment.show(fragmentManager, progressDialogTag);
       }
    }
@@ -380,7 +380,7 @@ public class AlertNProgessMsgFragmentMger {
       alertDialogFragment = AlertDialogFragment.eitherReuseOrCreateNew(alertDialogTag, alertDialogFragment,
           fragmentManager, alertDismissActivity, fragmentId, currentTitle, currentMessage);
 
-      if(!alertDialogFragment.isAdded()) {
+      if(!alertDialogFragment.isAdded() && !alertDialogFragment.isRemoving()) {
          alertDialogFragment.show(fragmentManager, alertDialogTag);
       }
    }

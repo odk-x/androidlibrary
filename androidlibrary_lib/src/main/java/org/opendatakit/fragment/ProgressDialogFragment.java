@@ -337,6 +337,7 @@ import org.opendatakit.utilities.AppNameUtil;
              .newInstance(title, message, canDismissDialog, positiveButtonText, negativeButtonText,
                  neutralButtonText);
       } else {
+         fragmentManager.executePendingTransactions();
          outputProgressDialogFragment.setTitle(title);
          outputProgressDialogFragment.setMessage(message);
       }
