@@ -341,6 +341,9 @@ public class ProgressDialogFragment extends DialogFragment
          outputProgressDialogFragment = ProgressDialogFragment
              .newInstance(title, message, canDismissDialog, positiveButtonText, negativeButtonText,
                  neutralButtonText);
+         if(!outputProgressDialogFragment.isAdded()) {
+            outputProgressDialogFragment.show(fragmentManager, progressDialogTag);
+         }
       } else {
          fragmentManager.executePendingTransactions();
          outputProgressDialogFragment.setTitle(title);
