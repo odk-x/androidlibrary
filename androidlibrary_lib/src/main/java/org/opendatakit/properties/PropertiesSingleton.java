@@ -383,15 +383,21 @@ public final class PropertiesSingleton {
   public void clearRunInitializationTask(String toolName) {
     // this is stored in the device properties
     readPropertiesIfModified();
-    mDeviceProps.setProperty(toolInitializationPropertyName(toolName),
-        TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()));
+    mDeviceProps.setProperty(
+        toolInitializationPropertyName(toolName),
+        TableConstants.nanoSecondsFromMillis(
+            System.currentTimeMillis(), TableConstants.TIMESTAMP_LOCALE)
+    );
     writeProperties(false, true, false);
   }
 
   public void clearRunCommonInitializationTask() {
     readPropertiesIfModified();
-    mDeviceProps.setProperty(CommonToolProperties.KEY_COMMON_INITIALIZATION,
-      TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()));
+    mDeviceProps.setProperty(
+        CommonToolProperties.KEY_COMMON_INITIALIZATION,
+        TableConstants.nanoSecondsFromMillis(
+          System.currentTimeMillis(), TableConstants.TIMESTAMP_LOCALE)
+    );
     writeProperties(false, true, false);
   }
 

@@ -16,15 +16,16 @@
 package org.opendatakit.builder;
 
 import android.content.ContentValues;
+
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.ConflictType;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
-import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvWriter;
-import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.SyncState;
-import org.opendatakit.aggregate.odktables.rest.TableConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
+import org.opendatakit.builder.csvparser.Parser;
 import org.opendatakit.database.data.ColumnDefinition;
 import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.database.data.OrderedColumns;
@@ -32,28 +33,24 @@ import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.UserTable;
 import org.opendatakit.database.queries.BindArgs;
 import org.opendatakit.database.service.DbHandle;
-import org.opendatakit.database.utilities.CursorUtils;
 import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.listener.ExportListener;
 import org.opendatakit.listener.ImportListener;
 import org.opendatakit.logging.WebLogger;
+import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.provider.DataTableColumns;
-import org.opendatakit.utilities.LocalizationUtils;
 import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 /**
  * Various utilities for importing/exporting tables from/to CSV.
@@ -71,9 +68,15 @@ public class CsvUtil {
 
   private final CsvUtilSupervisor supervisor;
 
+  private final WebLoggerIf logger;
+
+  private final Parser csvParser;
+
   public CsvUtil(CsvUtilSupervisor supervisor, String appName) {
     this.supervisor = supervisor;
     this.appName = appName;
+    this.logger = WebLogger.getLogger(appName);
+    this.csvParser = new Parser();
   }
 
   // ===========================================================================================
@@ -107,12 +110,12 @@ public class CsvUtil {
    */
   @SuppressWarnings("unused")
   public boolean exportSeparable(ExportListener exportListener, DbHandle db, String tableId,
-      OrderedColumns orderedDefns, String fileQualifier) throws ServicesAvailabilityException {
+                                 OrderedColumns orderedDefns, String fileQualifier) throws ServicesAvailabilityException {
     // building array of columns to select and header row for output file
     // then we are including all the metadata columns.
     ArrayList<String> columns = new ArrayList<>();
 
-    WebLogger.getLogger(appName).i(TAG,
+    logger.i(TAG,
         "exportSeparable: tableId: " + tableId + " fileQualifier: " + (fileQualifier == null ?
             "<null>" :
             fileQualifier));
@@ -234,7 +237,7 @@ public class CsvUtil {
           outputCsv = outputCsv.getParentFile();
         }
       } catch (IOException e1) {
-        WebLogger.getLogger(appName).printStackTrace(e1);
+        logger.printStackTrace(e1);
         return false;
       }
       return false;
@@ -274,8 +277,8 @@ public class CsvUtil {
    * @throws ServicesAvailabilityException if the service was unavailable
    */
   private boolean writePropertiesCsv(DbHandle db, String tableId, OrderedColumns orderedDefns,
-      File definitionCsv, File propertiesCsv) throws ServicesAvailabilityException {
-    WebLogger.getLogger(appName).i(TAG, "writePropertiesCsv: tableId: " + tableId);
+                                     File definitionCsv, File propertiesCsv) throws ServicesAvailabilityException {
+    logger.i(TAG, "writePropertiesCsv: tableId: " + tableId);
 
     /*
      * Get all the KVS entries and scan through, replacing all choice list
@@ -394,7 +397,7 @@ public class CsvUtil {
    * @throws ServicesAvailabilityException if the database is down
    */
   public boolean importSeparable(ImportListener importListener, String tableId,
-      String fileQualifier, boolean createIfNotPresent) throws ServicesAvailabilityException {
+                                 String fileQualifier, boolean createIfNotPresent) throws ServicesAvailabilityException {
 
     DbHandle db = null;
     try {
@@ -413,334 +416,132 @@ public class CsvUtil {
       OrderedColumns orderedDefns = supervisor.getDatabase()
           .getUserDefinedColumns(appName, db, tableId);
 
-      WebLogger.getLogger(appName).i(TAG,
+      Set<String> columnNames = new HashSet<>();
+      for (Column column : orderedDefns.getColumns()) {
+        columnNames.add(column.getElementKey());
+      }
+
+      logger.i(TAG,
           "importSeparable: tableId: " + tableId + " fileQualifier: " + (fileQualifier == null ?
               "<null>" :
               fileQualifier));
 
-      // reading data
-      InputStreamReader input = null;
-      try {
+      File assetsCsvInstances = new File(
+          ODKFileUtils.getAssetsCsvInstancesFolder(appName, tableId));
+      HashSet<File> instancesHavingData = new HashSet<>();
+      if (assetsCsvInstances.exists() && assetsCsvInstances.isDirectory()) {
+        File[] subDirectories = assetsCsvInstances.listFiles(new FileFilter() {
 
-        File assetsCsvInstances = new File(
-            ODKFileUtils.getAssetsCsvInstancesFolder(appName, tableId));
-        HashSet<File> instancesHavingData = new HashSet<>();
-        if (assetsCsvInstances.exists() && assetsCsvInstances.isDirectory()) {
-          File[] subDirectories = assetsCsvInstances.listFiles(new FileFilter() {
+          @Override
+          public boolean accept(File pathname) {
+            return pathname.isDirectory() && pathname.list().length != 0;
+          }
+        });
+        instancesHavingData.addAll(Arrays.asList(subDirectories));
+      }
 
-            @Override
-            public boolean accept(File pathname) {
-              return pathname.isDirectory() && pathname.list().length != 0;
-            }
-          });
-          instancesHavingData.addAll(Arrays.asList(subDirectories));
+      // both files are read from config/assets/csv directory...
+      File assetsCsv = new File(ODKFileUtils.getAssetsCsvFolder(appName));
+
+      // read data table...
+      File file = new File(assetsCsv,
+          tableId + (fileQualifier != null && !fileQualifier.isEmpty() ? "." + fileQualifier : "")
+              + ".csv");
+
+      List<org.opendatakit.aggregate.odktables.rest.entity.Row> rows = csvParser.parse(file);
+
+      for (int i = 0; i < rows.size(); i++) {
+        importListener.updateProgressDetail(i + 1, rows.size());
+
+        org.opendatakit.aggregate.odktables.rest.entity.Row r = rows.get(i);
+
+        UserTable table = supervisor.getDatabase()
+            .privilegedGetRowsWithId(appName, db, tableId, orderedDefns, r.getRowId());
+
+        // if there are any conflicts or checkpoints on this row, we do not import
+        // this row change. Instead, silently ignore them.
+        if (table.getNumberOfRows() > 1) {
+          logger.w(TAG,
+              "importSeparable: tableId: " + tableId + " rowId: " + r.getRowId() +
+                  " has checkpoints or conflicts -- IGNORED in .csv");
+          continue;
         }
 
-        // both files are read from config/assets/csv directory...
-        File assetsCsv = new File(ODKFileUtils.getAssetsCsvFolder(appName));
-
-        // read data table...
-        File file = new File(assetsCsv,
-            tableId + (fileQualifier != null && !fileQualifier.isEmpty() ? "." + fileQualifier : "")
-                + ".csv");
-        FileInputStream in = new FileInputStream(file);
-        input = new InputStreamReader(in, CharEncoding.UTF_8);
-        int total = 0;
-        char[] buf = new char[1024];
-        int read;
-        while ((read = input.read(buf)) > 0) {
-          int i = 0;
-          // while not for because we change i in the loop
-          while (i < read) {
-            if (buf[i] == '\r' || buf[i] == '\n') {
-              if (i + 1 < buf.length && (buf[i + 1] == '\r' || buf[i + 1] == '\n')) {
-                i++;
-              }
-              total++;
-            }
-            i++;
-          }
-        }
-        input.close();
-        in.close();
-        in = new FileInputStream(file);
-        input = new InputStreamReader(in, CharEncoding.UTF_8);
-        //int total = r.getLineNumber();
-        RFC4180CsvReader cr = new RFC4180CsvReader(input);
-        // don't have to worry about quotes in elementKeys...
-        String[] columnsInFile = cr.readNext();
-        int columnsInFileLength = countUpToLastNonNullElement(columnsInFile);
-
-        String v_id;
-        String v_form_id;
-        String v_locale;
-        String v_savepoint_type;
-        String v_savepoint_creator;
-        String v_savepoint_timestamp;
-        String v_row_etag;
-        String v_default_access;
-        String v_row_owner;
-        String v_group_read_only;
-        String v_group_modify;
-        String v_group_privileged;
-
-        HashMap<String, String> valueMap = new HashMap<>();
-
-        int rowCount = 0;
-        String[] row;
-        while (true) {
-          row = cr.readNext();
-          rowCount++;
-          importListener.updateProgressDetail(rowCount, total);
-          if (row == null || countUpToLastNonNullElement(row) == 0) {
-            break;
-          }
-          int rowLength = countUpToLastNonNullElement(row);
-
-          // default values for metadata columns if not provided
-          v_id = UUID.randomUUID().toString();
-          v_form_id = null;
-          v_locale = CursorUtils.DEFAULT_LOCALE;
-          v_savepoint_type = SavepointTypeManipulator.complete();
-          v_savepoint_creator = CursorUtils.DEFAULT_CREATOR;
-          v_savepoint_timestamp = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
-          v_row_etag = null;
-          v_default_access = DataTableColumns.DEFAULT_DEFAULT_ACCESS;
-          v_row_owner = DataTableColumns.DEFAULT_ROW_OWNER;
-          v_group_read_only = DataTableColumns.DEFAULT_GROUP_READ_ONLY;
-          v_group_modify = DataTableColumns.DEFAULT_GROUP_MODDIFY;
-          v_group_privileged = DataTableColumns.DEFAULT_GROUP_PRIVILEGED;
-
-          // clear value map
-          valueMap.clear();
-
-          boolean foundId = false;
-          for (int i = 0; i < columnsInFileLength; ++i) {
-            if (i >= rowLength)
-              break;
-            String column = columnsInFile[i];
-            String tmp = row[i];
-            if (DataTableColumns.ID.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                foundId = true;
-                v_id = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.FORM_ID.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_form_id = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.LOCALE.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_locale = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.SAVEPOINT_TYPE.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_savepoint_type = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.SAVEPOINT_CREATOR.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_savepoint_creator = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.SAVEPOINT_TIMESTAMP.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_savepoint_timestamp = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.ROW_ETAG.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_row_etag = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.DEFAULT_ACCESS.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_default_access = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.ROW_OWNER.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_row_owner = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.GROUP_READ_ONLY.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_group_read_only = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.GROUP_MODIFY.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_group_modify = tmp;
-              }
-              continue;
-            }
-            if (DataTableColumns.GROUP_PRIVILEGED.equals(column)) {
-              if (tmp != null && !tmp.isEmpty()) {
-                v_group_privileged = tmp;
-              }
-              continue;
-            }
-
-            try {
-              orderedDefns.find(column);
-              valueMap.put(column, tmp);
-            } catch (IllegalArgumentException ignored) {
-              // this is OK --
-              // the csv contains an extra column
-            }
+        /*
+         * Insertion will set the SYNC_STATE to new_row.
+         *
+         * If the table is sync'd to the server, this will cause one sync
+         * interaction with the server to confirm that the server also has
+         * this record.
+         *
+         * If a record with this same rowId already exists, if it is in an
+         * new_row sync state, we update it here. Otherwise, if there were any
+         * local changes, we leave the row unchanged.
+         */
+        if (table.getNumberOfRows() == 1) {
+          String syncStateStr = table.getRowAtIndex(0).getDataByKey(DataTableColumns.SYNC_STATE);
+          if (syncStateStr == null) {
+            throw new IllegalStateException("Unexpected null syncState value");
           }
 
-          // if there are any conflicts or checkpoints on this row, we do not import
-          // this row change. Instead, silently ignore them.
-          UserTable table = supervisor.getDatabase()
-              .privilegedGetRowsWithId(appName, db, tableId, orderedDefns, v_id);
-          if (table.getNumberOfRows() > 1) {
-            WebLogger.getLogger(appName).w(TAG,
-                "importSeparable: tableId: " + tableId + " rowId: " + v_id +
-                    " has checkpoints or conflicts -- IGNORED in .csv");
+          SyncState syncState = SyncState.valueOf(syncStateStr);
+          if (syncState != SyncState.new_row) {
             continue;
           }
-
-          SyncState syncState = null;
-          if (foundId && table.getNumberOfRows() == 1) {
-            String syncStateStr = table.getRowAtIndex(0).getDataByKey(DataTableColumns.SYNC_STATE);
-            if (syncStateStr == null) {
-              throw new IllegalStateException("Unexpected null syncState value");
-            }
-            syncState = SyncState.valueOf(syncStateStr);
-          }
-
-          /*
-           * Insertion will set the SYNC_STATE to new_row.
-           *
-           * If the table is sync'd to the server, this will cause one sync
-           * interaction with the server to confirm that the server also has
-           * this record.
-           *
-           * If a record with this same rowId already exists, if it is in an
-           * new_row sync state, we update it here. Otherwise, if there were any
-           * local changes, we leave the row unchanged.
-           */
-          if (syncState != null) {
-
-            ContentValues cv = new ContentValues();
-            for (String column : valueMap.keySet()) {
-              if (column != null) {
-                cv.put(column, valueMap.get(column));
-              }
-            }
-
-            // The admin columns get added here
-            cv.put(DataTableColumns.FORM_ID, v_form_id);
-            cv.put(DataTableColumns.LOCALE, v_locale);
-            cv.put(DataTableColumns.SAVEPOINT_TYPE, v_savepoint_type);
-            cv.put(DataTableColumns.SAVEPOINT_TIMESTAMP, v_savepoint_timestamp);
-            cv.put(DataTableColumns.SAVEPOINT_CREATOR, v_savepoint_creator);
-            cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
-            cv.put(DataTableColumns.DEFAULT_ACCESS, v_default_access);
-            cv.put(DataTableColumns.ROW_OWNER, v_row_owner);
-            cv.put(DataTableColumns.GROUP_READ_ONLY, v_group_read_only);
-            cv.put(DataTableColumns.GROUP_MODIFY, v_group_modify);
-            cv.put(DataTableColumns.GROUP_PRIVILEGED, v_group_privileged);
-
-            cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
-            cv.putNull(DataTableColumns.CONFLICT_TYPE);
-
-            if (v_id != null) {
-              cv.put(DataTableColumns.ID, v_id);
-            }
-
-            if (syncState == SyncState.new_row) {
-              // delete the existing row then insert the new values for it
-              supervisor.getDatabase()
-                  .privilegedDeleteRowWithId(appName, db, tableId, orderedDefns, v_id);
-              supervisor.getDatabase()
-                  .privilegedInsertRowWithId(appName, db, tableId, orderedDefns, cv, v_id, true);
-            }
-            // otherwise, do NOT update the row.
-            // i.e., if the row has been sync'd with
-            // the server, then we don't revise it.
-
-          } else {
-
-            ContentValues cv = new ContentValues();
-            for (String column : valueMap.keySet()) {
-              if (column != null) {
-                cv.put(column, valueMap.get(column));
-              }
-            }
-
-            // The admin columns get added here
-            cv.put(DataTableColumns.FORM_ID, v_form_id);
-            cv.put(DataTableColumns.LOCALE, v_locale);
-            cv.put(DataTableColumns.SAVEPOINT_TYPE, v_savepoint_type);
-            cv.put(DataTableColumns.SAVEPOINT_TIMESTAMP, v_savepoint_timestamp);
-            cv.put(DataTableColumns.SAVEPOINT_CREATOR, v_savepoint_creator);
-            cv.put(DataTableColumns.ROW_ETAG, v_row_etag);
-            cv.put(DataTableColumns.DEFAULT_ACCESS, v_default_access);
-            cv.put(DataTableColumns.ROW_OWNER, v_row_owner);
-            cv.put(DataTableColumns.GROUP_READ_ONLY, v_group_read_only);
-            cv.put(DataTableColumns.GROUP_MODIFY, v_group_modify);
-            cv.put(DataTableColumns.GROUP_PRIVILEGED, v_group_privileged);
-
-            cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
-            cv.putNull(DataTableColumns.CONFLICT_TYPE);
-
-            if (v_id == null) {
-              v_id = LocalizationUtils.genUUID();
-            }
-
-            cv.put(DataTableColumns.ID, v_id);
-
-            // imports assume super-user level powers. Treat these as if they were
-            // directed by the server during a sync.
-            supervisor.getDatabase()
-                .privilegedInsertRowWithId(appName, db, tableId, orderedDefns, cv, v_id, true);
-          }
-
-          /*
-           * Copy all attachment files into the destination row.
-           * The attachments are in instance-id-labeled sub-directories.
-           * Anything in the corresponding subdirectory should be
-           * referenced by the valuesMap above. If it isn't, don't worry about
-           * it. This is a simplification.
-           */
-          File assetsInstanceFolder = new File(
-              ODKFileUtils.getAssetsCsvInstanceFolder(appName, tableId, v_id));
-          if (instancesHavingData.contains(assetsInstanceFolder)) {
-            File tableInstanceFolder = new File(
-                ODKFileUtils.getInstanceFolder(appName, tableId, v_id));
-            tableInstanceFolder.mkdirs();
-            ODKFileUtils.copyDirectory(assetsInstanceFolder, tableInstanceFolder);
-            instancesHavingData.remove(assetsInstanceFolder);
-          }
-
         }
-        cr.close();
-        return true;
-      } catch (IOException ignored) {
-        return false;
-      } finally {
-        try {
-          input.close();
-        } catch (IOException ignored) {
-          // we never even opened the file
+
+        ContentValues cv = new ContentValues();
+
+        for (DataKeyValue dataKeyValue : r.getValues()) {
+          if (columnNames.contains(dataKeyValue.column)) {
+            cv.put(dataKeyValue.column, dataKeyValue.value);
+          }
+        }
+
+        // The admin columns get added here
+        cv.put(DataTableColumns.ID, r.getRowId());
+        cv.put(DataTableColumns.FORM_ID, r.getFormId());
+        cv.put(DataTableColumns.LOCALE, r.getLocale());
+        cv.put(DataTableColumns.SAVEPOINT_TYPE, r.getSavepointType());
+        cv.put(DataTableColumns.SAVEPOINT_TIMESTAMP, r.getSavepointTimestamp());
+        cv.put(DataTableColumns.SAVEPOINT_CREATOR, r.getSavepointCreator());
+        cv.put(DataTableColumns.ROW_ETAG, r.getRowETag());
+        cv.put(DataTableColumns.DEFAULT_ACCESS, r.getRowFilterScope().getDefaultAccess().name());
+        cv.put(DataTableColumns.ROW_OWNER, r.getRowFilterScope().getRowOwner());
+        cv.put(DataTableColumns.GROUP_READ_ONLY, r.getRowFilterScope().getGroupReadOnly());
+        cv.put(DataTableColumns.GROUP_MODIFY, r.getRowFilterScope().getGroupModify());
+        cv.put(DataTableColumns.GROUP_PRIVILEGED, r.getRowFilterScope().getGroupPrivileged());
+
+        cv.put(DataTableColumns.SYNC_STATE, SyncState.new_row.name());
+        cv.putNull(DataTableColumns.CONFLICT_TYPE);
+
+        // delete the existing row then insert the new values for it
+        supervisor.getDatabase()
+            .privilegedDeleteRowWithId(appName, db, tableId, orderedDefns, r.getRowId());
+        supervisor.getDatabase()
+            .privilegedInsertRowWithId(appName, db, tableId, orderedDefns, cv, r.getRowId(), true);
+
+        /*
+         * Copy all attachment files into the destination row.
+         * The attachments are in instance-id-labeled sub-directories.
+         * Anything in the corresponding subdirectory should be
+         * referenced by the valuesMap above. If it isn't, don't worry about
+         * it. This is a simplification.
+         */
+        File assetsInstanceFolder = new File(
+            ODKFileUtils.getAssetsCsvInstanceFolder(appName, tableId, r.getRowId()));
+        if (instancesHavingData.contains(assetsInstanceFolder)) {
+          File tableInstanceFolder = new File(
+              ODKFileUtils.getInstanceFolder(appName, tableId, r.getRowId()));
+          tableInstanceFolder.mkdirs();
+          ODKFileUtils.copyDirectory(assetsInstanceFolder, tableInstanceFolder);
+          instancesHavingData.remove(assetsInstanceFolder);
         }
       }
-    } catch (IOException ignored) {
+
+      return true;
+    } catch (IOException | IllegalArgumentException ignored) {
+      logger.printStackTrace(ignored);
       return false;
     } finally {
       if (db != null) {
@@ -748,5 +549,4 @@ public class CsvUtil {
       }
     }
   }
-
 }

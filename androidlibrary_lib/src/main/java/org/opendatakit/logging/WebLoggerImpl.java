@@ -18,6 +18,7 @@ import android.os.FileObserver;
 import android.util.Log;
 import org.apache.commons.lang3.CharEncoding;
 import org.joda.time.DateTime;
+import org.opendatakit.androidlibrary.BuildConfig;
 import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.BufferedOutputStream;
@@ -351,7 +352,9 @@ class WebLoggerImpl implements WebLoggerIf {
   }
 
   public void printStackTrace(Throwable e) {
-    //e.printStackTrace();
+    if (BuildConfig.DEBUG) {
+      e.printStackTrace();
+    }
     ByteArrayOutputStream ba = new ByteArrayOutputStream();
     PrintStream w;
     try {
