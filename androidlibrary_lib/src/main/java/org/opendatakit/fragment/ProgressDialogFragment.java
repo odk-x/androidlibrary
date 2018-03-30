@@ -344,6 +344,7 @@ public class ProgressDialogFragment extends DialogFragment
          if(!outputProgressDialogFragment.isAdded()) {
             outputProgressDialogFragment.show(fragmentManager, progressDialogTag);
          }
+         fragmentManager.executePendingTransactions();
       } else {
          fragmentManager.executePendingTransactions();
          outputProgressDialogFragment.setTitle(title);
