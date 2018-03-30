@@ -149,6 +149,10 @@ public class Parser {
       scope.setGroupReadOnly(RowFilterScope.EMPTY_ROW_FILTER.getGroupReadOnly());
     }
 
+    if (scope.getGroupModify() == null || scope.getGroupModify().isEmpty()) {
+      scope.setGroupModify(RowFilterScope.EMPTY_ROW_FILTER.getGroupModify());
+    }
+
     if (scope.getGroupPrivileged() == null || scope.getGroupPrivileged().isEmpty()) {
       scope.setGroupPrivileged(RowFilterScope.EMPTY_ROW_FILTER.getGroupPrivileged());
     }
