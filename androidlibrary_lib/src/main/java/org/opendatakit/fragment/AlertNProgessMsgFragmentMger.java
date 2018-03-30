@@ -162,6 +162,25 @@ public class AlertNProgessMsgFragmentMger {
       return mDialogState == DialogState.Progress && !dialogsClearedForFragmentShutdown;
    }
 
+   public boolean hasDialogBeenCreated() {
+      switch (mDialogState) {
+      case Progress:
+         if(progressDialogFragment != null) {
+            return progressDialogFragment.createDialogCalled();
+         }
+         break;
+      case Alert:
+         if(alertDialogFragment != null) {
+            return alertDialogFragment.createDialogCalled();
+         }
+         break;
+      default:
+      case None:
+         return true;
+      }
+     return false;
+   }
+
    public void clearDialogsAndRetainCurrentState(FragmentManager fragmentManager) {
       if (fragmentManager == null) {
          throw new IllegalArgumentException("FragmentManager cannot be null");

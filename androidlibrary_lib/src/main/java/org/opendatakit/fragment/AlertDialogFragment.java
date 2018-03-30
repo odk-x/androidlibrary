@@ -59,8 +59,9 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
    }
 
    private String appName;
-   private boolean dismissCalled;
 
+   private boolean dismissCalled;
+   private boolean createDialogCalled;
    private boolean ok_invoked;
 
    private int fragmentId;
@@ -72,6 +73,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       super.onCreate(savedInstanceState);
 
       dismissCalled = false;
+      createDialogCalled = false;
       ok_invoked = false;
 
       // first set internal state based on arugments
@@ -126,6 +128,8 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       return dismissCalled;
    }
 
+   public boolean createDialogCalled() { return createDialogCalled; }
+
    private AlertDialog getAlertDialog() {
       Dialog dialog = getDialog();
       if (dialog instanceof AlertDialog) {
@@ -165,6 +169,9 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
           .setIcon(android.R.drawable.ic_dialog_info).setTitle(title).setMessage(message)
           .setCancelable(false).setPositiveButton(getString(R.string.ok), this).create();
       dlg.setCanceledOnTouchOutside(false);
+
+      createDialogCalled = true;
+
       return dlg;
    }
 
@@ -229,7 +236,11 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       // if no pre-existing fragment create one, else update the message
       if (outputAlertDialogFragment == null) {
          outputAlertDialogFragment = AlertDialogFragment.newInstance(fragmentId, dismissActivity, title, message);
+         if(!outputAlertDialogFragment.isAdded()) {
+            outputAlertDialogFragment.show(fragmentManager, alertDialogTag);
+         }
       } else {
+         fragmentManager.executePendingTransactions();
          outputAlertDialogFragment.setTitle(title);
          outputAlertDialogFragment.setMessage(message);
       }
