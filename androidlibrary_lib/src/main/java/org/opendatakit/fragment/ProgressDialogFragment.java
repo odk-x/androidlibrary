@@ -31,7 +31,7 @@ import org.opendatakit.utilities.AppNameUtil;
  *
  * @author mitchellsundt@gmail.com
  */
-@SuppressWarnings("unused") public class ProgressDialogFragment extends DialogFragment
+public class ProgressDialogFragment extends DialogFragment
     implements DialogInterface.OnClickListener {
 
    private static final String t = ProgressDialogFragment.class.getSimpleName();
@@ -95,6 +95,7 @@ import org.opendatakit.utilities.AppNameUtil;
    private String neutralButtonText;
 
    private boolean dismissCalled;
+   private boolean createDialogCalled;
 
    // Use this instance of the interface to deliver action events
    private ProgressDialogListener progressDialogListener;
@@ -103,11 +104,13 @@ import org.opendatakit.utilities.AppNameUtil;
       return dismissCalled;
    }
 
+   public boolean createDialogCalled() { return createDialogCalled; }
 
    @Override public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
       dismissCalled = false;
+      createDialogCalled = false;
 
       // first set internal state based on arugments
       initState(getArguments());
@@ -241,6 +244,8 @@ import org.opendatakit.utilities.AppNameUtil;
       } else {
          mProgressDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
       }
+
+      createDialogCalled = true;
 
       return mProgressDialog;
    }
