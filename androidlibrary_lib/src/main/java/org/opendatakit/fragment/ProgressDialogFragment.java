@@ -342,6 +342,7 @@ public class ProgressDialogFragment extends DialogFragment
              .newInstance(title, message, canDismissDialog, positiveButtonText, negativeButtonText,
                  neutralButtonText);
       } else {
+         fragmentManager.executePendingTransactions();
          outputProgressDialogFragment.setTitle(title);
          outputProgressDialogFragment.setMessage(message);
       }
