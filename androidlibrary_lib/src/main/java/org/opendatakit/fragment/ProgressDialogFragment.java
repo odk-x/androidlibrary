@@ -343,10 +343,9 @@ public class ProgressDialogFragment extends DialogFragment
                  neutralButtonText);
          if(!outputProgressDialogFragment.isAdded()) {
             outputProgressDialogFragment.show(fragmentManager, progressDialogTag);
+            fragmentManager.executePendingTransactions();
          }
-         fragmentManager.executePendingTransactions();
       } else {
-         fragmentManager.executePendingTransactions();
          outputProgressDialogFragment.setTitle(title);
          outputProgressDialogFragment.setMessage(message);
       }

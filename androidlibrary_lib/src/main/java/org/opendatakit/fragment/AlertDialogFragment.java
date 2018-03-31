@@ -238,10 +238,9 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
          outputAlertDialogFragment = AlertDialogFragment.newInstance(fragmentId, dismissActivity, title, message);
          if(!outputAlertDialogFragment.isAdded()) {
             outputAlertDialogFragment.show(fragmentManager, alertDialogTag);
+           fragmentManager.executePendingTransactions();
          }
-         fragmentManager.executePendingTransactions();
       } else {
-         fragmentManager.executePendingTransactions();
          outputAlertDialogFragment.setTitle(title);
          outputAlertDialogFragment.setMessage(message);
       }
