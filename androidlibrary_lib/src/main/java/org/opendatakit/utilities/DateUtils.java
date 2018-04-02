@@ -211,6 +211,6 @@ public class DateUtils {
   }
 
   public String formatDateTimeForDb(DateTime dt) {
-    return TableConstants.nanoSecondsFromMillis(dt.getMillis());
+    return TableConstants.nanoSecondsFromMillis(dt.getMillis(), TableConstants.TIMESTAMP_LOCALE);
   }
 }
