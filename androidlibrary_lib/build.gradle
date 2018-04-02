@@ -105,6 +105,12 @@ dependencies {
     api 'com.android.support:support-annotations:27.1.0'
     api 'com.android.support:support-v4:27.1.0'
 
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.4'
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.4'
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: '2.9.4'
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.9.4'
+
     // Testing dependencies
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:rules:1.0.1'
