@@ -503,7 +503,8 @@ public class CsvUtil {
           v_locale = CursorUtils.DEFAULT_LOCALE;
           v_savepoint_type = SavepointTypeManipulator.complete();
           v_savepoint_creator = CursorUtils.DEFAULT_CREATOR;
-          v_savepoint_timestamp = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
+          v_savepoint_timestamp = TableConstants.nanoSecondsFromMillis(
+              System.currentTimeMillis(), TableConstants.TIMESTAMP_LOCALE);
           v_row_etag = null;
           v_default_access = DataTableColumns.DEFAULT_DEFAULT_ACCESS;
           v_row_owner = DataTableColumns.DEFAULT_ROW_OWNER;
