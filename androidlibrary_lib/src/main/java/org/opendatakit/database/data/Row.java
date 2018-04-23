@@ -190,8 +190,8 @@ public final class Row implements Parcelable {
       if (clazz == Long.class) {
         Long l = Long.parseLong(value);
         return (T) l;
-      } else if (clazz == Integer.class) {
-        Integer l = Integer.parseInt(value);
+      } else if (clazz == Long.class) {
+        Long l = Long.parseLong(value);
         return (T) l;
       } else if (clazz == Double.class) {
         Double d = Double.parseDouble(value);

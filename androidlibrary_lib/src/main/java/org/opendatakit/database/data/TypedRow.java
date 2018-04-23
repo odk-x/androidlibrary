@@ -89,9 +89,9 @@ public final class TypedRow {
       }
       try {
          if (ElementDataType.string.equals(dataType)) {
-            return row.getDataType(key, String.class);
+            return row.getRawStringByKey(key);
          } else if (ElementDataType.integer.equals(dataType)) {
-            return row.getDataType(key, Integer.class);
+            return row.getDataType(key, Long.class);
          } else if (ElementDataType.number.equals(dataType)) {
             return row.getDataType(key, Double.class);
          } else if (ElementDataType.bool.equals(dataType)) {
@@ -99,9 +99,9 @@ public final class TypedRow {
          } else if (ElementDataType.array.equals(dataType)) {
             return row.getDataType(key, ArrayList.class);
          } else if (ElementDataType.rowpath.equals(dataType)) {
-            return row.getDataType(key, String.class);
+            return row.getRawStringByKey(key);
          } else if (ElementDataType.configpath.equals(dataType)) {
-            return row.getDataType(key, String.class);
+            return row.getRawStringByKey(key);
          } else if (ElementDataType.object.equals(dataType)) {
             return row.getDataType(key, HashMap.class);
          } else {
@@ -133,9 +133,9 @@ public final class TypedRow {
       }
       try {
          if (ElementDataType.string.equals(dataType)) {
-            return row.getDataType(cellIndex, String.class);
+            return row.getRawStringByIndex(cellIndex);
          } else if (ElementDataType.integer.equals(dataType)) {
-            return row.getDataType(cellIndex, Integer.class);
+            return row.getDataType(cellIndex, Long.class);
          } else if (ElementDataType.number.equals(dataType)) {
             return row.getDataType(cellIndex, Double.class);
          } else if (ElementDataType.bool.equals(dataType)) {
@@ -143,9 +143,9 @@ public final class TypedRow {
          } else if (ElementDataType.array.equals(dataType)) {
             return row.getDataType(cellIndex, ArrayList.class);
          } else if (ElementDataType.rowpath.equals(dataType)) {
-            return row.getDataType(cellIndex, String.class);
+            return row.getRawStringByIndex(cellIndex);
          } else if (ElementDataType.configpath.equals(dataType)) {
-            return row.getDataType(cellIndex, String.class);
+            return row.getRawStringByIndex(cellIndex);
          } else if (ElementDataType.object.equals(dataType)) {
             return row.getDataType(cellIndex, HashMap.class);
          } else {
@@ -178,7 +178,7 @@ public final class TypedRow {
          if (ElementDataType.string.equals(dataType)) {
             return row.getRawStringByKey(key); 
          } else if (ElementDataType.integer.equals(dataType)) {
-            Integer i = row.getDataType(key, Integer.class);
+            Long i = row.getDataType(key, Long.class);
             return (i == null ? null : i.toString());
          } else if (ElementDataType.number.equals(dataType)) {
             Double d = row.getDataType(key, Double.class);
