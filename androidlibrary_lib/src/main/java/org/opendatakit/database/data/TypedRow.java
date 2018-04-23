@@ -18,9 +18,19 @@ public final class TypedRow {
 
    private final OrderedColumns columns;
 
+   private String [] colNames;
+
    public TypedRow(Row rowData, OrderedColumns orderedColumns) {
       this.row = rowData;
       this.columns = orderedColumns;
+      this.colNames = null;
+   }
+
+   private ElementDataType getColumnDataTypeFromIndex(int index) {
+      if(colNames == null) {
+         colNames = row.getElementKeyForIndexMap(); // not a Map, bad naming
+      }
+      return getColumnDataType(colNames[index]);
    }
 
    private ElementDataType getColumnDataType(String key) {
@@ -104,6 +114,58 @@ public final class TypedRow {
    }
 
 
+   /**
+    * Return the Typed object representing the contents of the cell given cellIndex column position
+    * <p>
+    * Null values are returned as nulls.
+    *
+    * @param cellIndex column position in table
+    * @return String representation of contents of column. Null values are
+    * returned as null.
+    */
+   public final Object getDataByIndex(int cellIndex) {
+      ElementDataType dataType = getColumnDataTypeFromIndex(cellIndex);
+      if(dataType == null) {
+         return null;
+      }
+      try {
+         if (ElementDataType.string.equals(dataType)) {
+            return row.getDataType(cellIndex, String.class);
+         } else if (ElementDataType.integer.equals(dataType)) {
+            return row.getDataType(cellIndex, Integer.class);
+         } else if (ElementDataType.number.equals(dataType)) {
+            return row.getDataType(cellIndex, Double.class);
+         } else if (ElementDataType.bool.equals(dataType)) {
+            return row.getDataType(cellIndex, Boolean.class);
+         } else if (ElementDataType.array.equals(dataType)) {
+            return row.getDataType(cellIndex, ArrayList.class);
+         } else if (ElementDataType.rowpath.equals(dataType)) {
+            return row.getDataType(cellIndex, Integer.class);  // WRB: no idea
+         } else if (ElementDataType.configpath.equals(dataType)) {
+            return row.getDataType(cellIndex, Integer.class);  // WRB: no idea
+         } else if (ElementDataType.object.equals(dataType)) {
+            return row.getDataType(cellIndex, Integer.class); // WRB: no idea
+         } else {
+            throw new IllegalStateException("Unexpected data type in SQLite table");
+         }
+      } catch (ClassCastException e) {
+         // JsonParseException and JsonMappingException extends IOException and will be caught here
+         WebLogger.getLogger(null).printStackTrace(e);
+         throw new IllegalStateException(
+             "Unexpected data type conversion failure " + e + " on SQLite table");
+      }
+
+   }
+
+   /**
+    * Return the string representing the Typed contents of the cell in the "key" column.
+    * <p>
+    * Null values are returned as nulls.
+    *
+    * @param key The name of the column holding the desired data
+    * @return String representation of the Typed contents of column. Null values are
+    * returned as null.
+    */
    public final String getStringValueByKey(String key) {
       ElementDataType dataType = getColumnDataType(key);
       if(dataType == null) {
@@ -114,13 +176,13 @@ public final class TypedRow {
             return row.getDataType(key, String.class);
          } else if (ElementDataType.integer.equals(dataType)) {
             Integer i = row.getDataType(key, Integer.class);
-            return i.toString();
+            return (i == null ? null : i.toString());
          } else if (ElementDataType.number.equals(dataType)) {
             Double d = row.getDataType(key, Double.class);
-            return d.toString();
+            return (d == null ? null : d.toString());
          } else if (ElementDataType.bool.equals(dataType)) {
             Boolean bool = row.getDataType(key, Boolean.class);
-            return bool.toString();
+            return (bool == null ? null : bool.toString());
          } else if (ElementDataType.array.equals(dataType)) {
             return row.getRawStringByKey(key); // WRB: no idea
          } else if (ElementDataType.rowpath.equals(dataType)) {

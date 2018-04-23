@@ -100,6 +100,9 @@ public final class DataTableColumns implements BaseColumns {
   private static final List<String> ADMIN_COLUMNS;
 
   static {
+    // everything is a STRING except for
+    // CONFLICT_TYPE which is an INTEGER
+    // see OdkDatabaseImplUtils.getUserDefinedTableCreationStatement()
     ArrayList<String> adminColumns = new ArrayList<String>();
     adminColumns.add(ID);
     adminColumns.add(ROW_ETAG);

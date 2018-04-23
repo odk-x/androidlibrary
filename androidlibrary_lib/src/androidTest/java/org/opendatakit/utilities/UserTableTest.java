@@ -345,7 +345,7 @@ public class UserTableTest {
     elementKeyForIndex[i] = THEIR_COL;
     assertEquals(retentionColumnNames.get(i), elementKeyForIndex[i]);
     elementKeyToIndex.put(THEIR_COL, i++);
-    rowValues1[i] = Integer.toString(DataHelper.boolToInt(true));
+    rowValues1[i] = Boolean.toString(true);
     rowValues2[i] = null;
     elementKeyForIndex[i] = YOUR_BOOLEAN_COL;
     assertEquals(retentionColumnNames.get(i), elementKeyForIndex[i]);
@@ -510,10 +510,10 @@ public class UserTableTest {
     assertEquals(rbt2.getDataByKey(DataTableColumns.ID), table.getRowId(1));
     for ( i = 0 ; i < table.getWidth() ; ++i ) {
       String elementKey = table.getElementKey(i);
-      assertEquals(rowValues1[i], rat1.getDataByKey(elementKey));
-      assertEquals(rowValues1[i], rbt1.getDataByKey(elementKey));
-      assertEquals(rowValues2[i], rat2.getDataByKey(elementKey));
-      assertEquals(rowValues2[i], rbt2.getDataByKey(elementKey));
+      assertEquals(rowValues1[i], rat1.getStringValueByKey(elementKey));
+      assertEquals(rowValues1[i], rbt1.getStringValueByKey(elementKey));
+      assertEquals(rowValues2[i], rat2.getStringValueByKey(elementKey));
+      assertEquals(rowValues2[i], rbt2.getStringValueByKey(elementKey));
       try {
         assertEquals(table.getDisplayTextOfData(0, table.getColumnDefinitions().find(elementKey)
             .getType(), elementKey), t.getDisplayTextOfData(0, t.getColumnDefinitions().find
@@ -749,10 +749,10 @@ public class UserTableTest {
     assertEquals(rbt2.getDataByKey(DataTableColumns.ID), table.getRowId(1));
     for ( i = 0 ; i < table.getWidth() ; ++i ) {
       String elementKey = table.getElementKey(i);
-      assertEquals(rowValues1[i], rat1.getDataByKey(elementKey));
-      assertEquals(rowValues1[i], rbt1.getDataByKey(elementKey));
-      assertEquals(rowValues2[i], rat2.getDataByKey(elementKey));
-      assertEquals(rowValues2[i], rbt2.getDataByKey(elementKey));
+      assertEquals(rowValues1[i], rat1.getStringValueByKey(elementKey));
+      assertEquals(rowValues1[i], rbt1.getStringValueByKey(elementKey));
+      assertEquals(rowValues2[i], rat2.getStringValueByKey(elementKey));
+      assertEquals(rowValues2[i], rbt2.getStringValueByKey(elementKey));
     }
 
     assertFalse(table.hasCheckpointRows());
@@ -936,10 +936,10 @@ public class UserTableTest {
     assertEquals(rbt2.getDataByKey(DataTableColumns.ID), table.getRowId(1));
     for ( i = 0 ; i < table.getWidth() ; ++i ) {
       String elementKey = table.getElementKey(i);
-      assertEquals(rowValues1[i], rat1.getDataByKey(elementKey));
-      assertEquals(rowValues1[i], rbt1.getDataByKey(elementKey));
-      assertEquals(rowValues2[i], rat2.getDataByKey(elementKey));
-      assertEquals(rowValues2[i], rbt2.getDataByKey(elementKey));
+      assertEquals(rowValues1[i], rat1.getStringValueByKey(elementKey));
+      assertEquals(rowValues1[i], rbt1.getStringValueByKey(elementKey));
+      assertEquals(rowValues2[i], rat2.getStringValueByKey(elementKey));
+      assertEquals(rowValues2[i], rbt2.getStringValueByKey(elementKey));
     }
 
     assertFalse(table.hasCheckpointRows());
