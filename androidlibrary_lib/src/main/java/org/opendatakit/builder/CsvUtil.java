@@ -29,6 +29,7 @@ import org.opendatakit.database.data.ColumnDefinition;
 import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.database.data.OrderedColumns;
 import org.opendatakit.database.data.Row;
+import org.opendatakit.database.data.TypedRow;
 import org.opendatakit.database.data.UserTable;
 import org.opendatakit.database.queries.BindArgs;
 import org.opendatakit.database.service.DbHandle;
@@ -197,9 +198,9 @@ public class CsvUtil {
       String[] row = new String[columns.size()];
       for (int i = 0; i < table.getNumberOfRows(); i++) {
         exportListener.updateProgressDetail(i, table.getNumberOfRows());
-        Row dataRow = table.getRowAtIndex(i);
+        TypedRow dataRow = table.getRowAtIndex(i);
         for (int j = 0; j < columns.size(); ++j) {
-          row[j] = dataRow.getDataByKey(columns.get(j));
+          row[j] = dataRow.getStringValueByKey(columns.get(j));
         }
         cw.writeNext(row);
         /*
@@ -617,7 +618,7 @@ public class CsvUtil {
 
           SyncState syncState = null;
           if (foundId && table.getNumberOfRows() == 1) {
-            String syncStateStr = table.getRowAtIndex(0).getDataByKey(DataTableColumns.SYNC_STATE);
+            String syncStateStr = table.getRowAtIndex(0).getRawStringByKey(DataTableColumns.SYNC_STATE);
             if (syncStateStr == null) {
               throw new IllegalStateException("Unexpected null syncState value");
             }

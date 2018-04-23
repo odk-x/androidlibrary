@@ -17,9 +17,13 @@ package org.opendatakit.database.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import org.opendatakit.aggregate.odktables.rest.ElementDataType;
+import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.logging.WebLogger;
+import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.utilities.ODKFileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,6 +99,7 @@ public final class Row implements Parcelable {
     throw new IllegalStateException("Row invalid constructor");
   }
 
+
   /**
    * Return the String representing the contents of the cellIndex'th column
    * <p>
@@ -104,7 +109,7 @@ public final class Row implements Parcelable {
    * @return String representation of contents of column. Null values are
    * returned as null. Note that boolean values are reported as "1" or "0"
    */
-  public String getDataByIndex(int cellIndex) {
+  public String getRawStringByIndex(int cellIndex) {
     return this.mRowData[cellIndex];
   }
 
@@ -117,15 +122,16 @@ public final class Row implements Parcelable {
    * @return String representation of contents of column. Null values are
    * returned as null. Note that boolean values are reported as "1" or "0"
    */
-  public String getDataByKey(String key) {
+  public String getRawStringByKey(String key) {
     String result;
     Integer cell = getCellIndexByKey(key);
     if (cell == null) {
       return null;
     }
-    result = getDataByIndex(cell);
+    result = getRawStringByIndex(cell);
     return result;
   }
+
 
   /**
    * Return the index of the "key" column.
@@ -177,7 +183,7 @@ public final class Row implements Parcelable {
   public final <T> T getDataType(int cellIndex, Class<T> clazz) throws IllegalStateException {
     // If you add additional return types here be sure to modify the javadoc.
     try {
-      String value = getDataByIndex(cellIndex);
+      String value = getRawStringByIndex(cellIndex);
       if (value == null) {
         return null;
       }
@@ -240,4 +246,5 @@ public final class Row implements Parcelable {
       out.writeStringArray(mRowData);
     }
   }
+
 }

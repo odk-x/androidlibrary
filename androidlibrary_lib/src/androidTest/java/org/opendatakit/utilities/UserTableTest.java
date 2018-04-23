@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.database.data.ColumnDefinition;
 import org.opendatakit.database.data.OrderedColumns;
 import org.opendatakit.database.data.Row;
+import org.opendatakit.database.data.TypedRow;
 import org.opendatakit.database.data.UserTable;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
@@ -494,10 +495,10 @@ public class UserTableTest {
     assertEquals(0, t.getRowNumFromId(INSTANCE_ID_1));
     assertEquals(1, table.getRowNumFromId(INSTANCE_ID_2));
     assertEquals(1, t.getRowNumFromId(INSTANCE_ID_2));
-    Row rat1 = table.getRowAtIndex(0);
-    Row rat2 = table.getRowAtIndex(1);
-    Row rbt1 = t.getRowAtIndex(0);
-    Row rbt2 = t.getRowAtIndex(1);
+    TypedRow rat1 = table.getRowAtIndex(0);
+    TypedRow rat2 = table.getRowAtIndex(1);
+    TypedRow rbt1 = t.getRowAtIndex(0);
+    TypedRow rbt2 = t.getRowAtIndex(1);
 
     assertEquals(rat1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
     assertEquals(rbt1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
@@ -733,10 +734,10 @@ public class UserTableTest {
     assertEquals(0, t.getRowNumFromId(INSTANCE_ID_1));
     assertEquals(1, table.getRowNumFromId(INSTANCE_ID_2));
     assertEquals(1, t.getRowNumFromId(INSTANCE_ID_2));
-    Row rat1 = table.getRowAtIndex(0);
-    Row rat2 = table.getRowAtIndex(1);
-    Row rbt1 = t.getRowAtIndex(0);
-    Row rbt2 = t.getRowAtIndex(1);
+    TypedRow rat1 = table.getRowAtIndex(0);
+    TypedRow rat2 = table.getRowAtIndex(1);
+    TypedRow rbt1 = t.getRowAtIndex(0);
+    TypedRow rbt2 = t.getRowAtIndex(1);
 
     assertEquals(rat1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
     assertEquals(rbt1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
@@ -920,10 +921,10 @@ public class UserTableTest {
     assertEquals(0, t.getRowNumFromId(INSTANCE_ID_1));
     assertEquals(1, table.getRowNumFromId(INSTANCE_ID_2));
     assertEquals(1, t.getRowNumFromId(INSTANCE_ID_2));
-    Row rat1 = table.getRowAtIndex(0);
-    Row rat2 = table.getRowAtIndex(1);
-    Row rbt1 = t.getRowAtIndex(0);
-    Row rbt2 = t.getRowAtIndex(1);
+    TypedRow rat1 = table.getRowAtIndex(0);
+    TypedRow rat2 = table.getRowAtIndex(1);
+    TypedRow rbt1 = t.getRowAtIndex(0);
+    TypedRow rbt2 = t.getRowAtIndex(1);
 
     assertEquals(rat1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
     assertEquals(rbt1.getDataByKey(DataTableColumns.ID), INSTANCE_ID_1);
