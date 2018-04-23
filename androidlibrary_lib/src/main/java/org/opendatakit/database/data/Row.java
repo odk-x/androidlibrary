@@ -187,17 +187,14 @@ public final class Row implements Parcelable {
       if (value == null) {
         return null;
       }
-      if (clazz == Long.class) {
-        Long l = Long.parseLong(value);
-        return (T) l;
-      } else if (clazz == Long.class) {
-        Long l = Long.parseLong(value);
-        return (T) l;
+      if (clazz == String.class) {
+        return (T) value;
       } else if (clazz == Double.class) {
         Double d = Double.parseDouble(value);
         return (T) d;
-      } else if (clazz == String.class) {
-        return (T) value;
+      } else if (clazz == Long.class) {
+        Long l = Long.parseLong(value);
+        return (T) l;
       } else if (clazz == Boolean.class) {
         // booleans are stored as integer 1 or 0 in user tables.
         Boolean b = !"0".equals(value);
