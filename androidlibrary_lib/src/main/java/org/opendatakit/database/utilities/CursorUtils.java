@@ -237,9 +237,6 @@ public final class CursorUtils {
       if (clazz == Long.class) {
         Long l = c.getLong(i);
         return (T) l;
-      } else if (clazz == Integer.class) {
-        Integer l = c.getInt(i);
-        return (T) l;
       } else if (clazz == Double.class) {
         Double d = c.getDouble(i);
         return (T) d;
