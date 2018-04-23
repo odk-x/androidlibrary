@@ -192,8 +192,6 @@ public class UserTable implements Parcelable, WrapperTable {
 
   public String getDisplayTextOfData(int rowIndex, ElementType type, String elementKey) {
     // TODO: share processing with CollectUtil.writeRowDataToBeEdited(...)
-    // WRB: no idea
-    // SINCE THIS IS SIMPLY TEXT LEAVING FOR NOW, COULD COMBINE WITH THE NEW STRING
     Row row = mBaseTable.getRowAtIndex(rowIndex);
     String raw = row.getRawStringByKey(elementKey);
     String rowId = row.getRawStringByKey(DataTableColumns.ID);

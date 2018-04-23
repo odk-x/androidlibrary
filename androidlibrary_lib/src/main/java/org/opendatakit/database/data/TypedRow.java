@@ -1,5 +1,7 @@
 package org.opendatakit.database.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.logging.WebLogger;
@@ -10,7 +12,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
 
 public final class TypedRow {
 
@@ -19,6 +20,8 @@ public final class TypedRow {
    private final OrderedColumns columns;
 
    private String [] colNames;
+
+   private static final ObjectMapper mapper = new ObjectMapper();
 
    public TypedRow(Row rowData, OrderedColumns orderedColumns) {
       this.row = rowData;
@@ -96,11 +99,11 @@ public final class TypedRow {
          } else if (ElementDataType.array.equals(dataType)) {
             return row.getDataType(key, ArrayList.class);
          } else if (ElementDataType.rowpath.equals(dataType)) {
-            return row.getDataType(key, Integer.class);  // WRB: no idea
+            return row.getDataType(key, String.class);
          } else if (ElementDataType.configpath.equals(dataType)) {
-            return row.getDataType(key, Integer.class);  // WRB: no idea
+            return row.getDataType(key, String.class);
          } else if (ElementDataType.object.equals(dataType)) {
-            return row.getDataType(key, Integer.class); // WRB: no idea
+            return row.getDataType(key, HashMap.class);
          } else {
             throw new IllegalStateException("Unexpected data type in SQLite table");
          }
@@ -140,11 +143,11 @@ public final class TypedRow {
          } else if (ElementDataType.array.equals(dataType)) {
             return row.getDataType(cellIndex, ArrayList.class);
          } else if (ElementDataType.rowpath.equals(dataType)) {
-            return row.getDataType(cellIndex, Integer.class);  // WRB: no idea
+            return row.getDataType(cellIndex, String.class);
          } else if (ElementDataType.configpath.equals(dataType)) {
-            return row.getDataType(cellIndex, Integer.class);  // WRB: no idea
+            return row.getDataType(cellIndex, String.class);
          } else if (ElementDataType.object.equals(dataType)) {
-            return row.getDataType(cellIndex, Integer.class); // WRB: no idea
+            return row.getDataType(cellIndex, HashMap.class);
          } else {
             throw new IllegalStateException("Unexpected data type in SQLite table");
          }
@@ -173,7 +176,7 @@ public final class TypedRow {
       }
       try {
          if (ElementDataType.string.equals(dataType)) {
-            return row.getDataType(key, String.class);
+            return row.getRawStringByKey(key); 
          } else if (ElementDataType.integer.equals(dataType)) {
             Integer i = row.getDataType(key, Integer.class);
             return (i == null ? null : i.toString());
@@ -184,17 +187,19 @@ public final class TypedRow {
             Boolean bool = row.getDataType(key, Boolean.class);
             return (bool == null ? null : bool.toString());
          } else if (ElementDataType.array.equals(dataType)) {
-            return row.getRawStringByKey(key); // WRB: no idea
+            ArrayList<String> a = row.getDataType(key, ArrayList.class);
+            return (a == null ? null : mapper.writeValueAsString(a));
          } else if (ElementDataType.rowpath.equals(dataType)) {
-            return row.getRawStringByKey(key); // WRB: no idea
+            return row.getRawStringByKey(key);
          } else if (ElementDataType.configpath.equals(dataType)) {
-            return row.getRawStringByKey(key); // WRB: no idea
+            return row.getRawStringByKey(key);
          } else if (ElementDataType.object.equals(dataType)) {
-            return row.getRawStringByKey(key); // WRB: no idea
+            HashMap<String, String> h = row.getDataType(key, HashMap.class);
+            return (h == null ? null : mapper.writeValueAsString(h));
          } else {
             throw new IllegalStateException("Unexpected data type in SQLite table");
          }
-      } catch (ClassCastException e) {
+      } catch (ClassCastException | JsonProcessingException e ) {
          // JsonParseException and JsonMappingException extends IOException and will be caught here
          WebLogger.getLogger(null).printStackTrace(e);
          throw new IllegalStateException(
