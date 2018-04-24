@@ -38,9 +38,15 @@ public final class TypedRow {
 
    private ElementDataType getColumnDataType(String key) {
       List<String> adminColumns = DataTableColumns.getAdminColumns();
+
       if(adminColumns.contains(key)) {
          return ElementDataType.string;
       }
+
+      if (DataTableColumns.EFFECTIVE_ACCESS.equals(key)) {
+         return ElementDataType.string;
+      }
+
       ColumnDefinition def = columns.find(key);
       ElementType type = def.getType();
       return type.getDataType();
