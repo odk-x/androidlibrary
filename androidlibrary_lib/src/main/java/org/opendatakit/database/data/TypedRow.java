@@ -10,7 +10,6 @@ import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public final class TypedRow {
@@ -109,7 +108,7 @@ public final class TypedRow {
          } else if (ElementDataType.configpath.equals(dataType)) {
             return row.getRawStringByKey(key);
          } else if (ElementDataType.object.equals(dataType)) {
-            return row.getDataType(key, HashMap.class);
+            return row.getRawStringByKey(key);
          } else {
             throw new IllegalStateException("Unexpected data type in SQLite table");
          }
@@ -152,7 +151,7 @@ public final class TypedRow {
          } else if (ElementDataType.configpath.equals(dataType)) {
             return row.getRawStringByIndex(cellIndex);
          } else if (ElementDataType.object.equals(dataType)) {
-            return row.getDataType(cellIndex, HashMap.class);
+            return row.getRawStringByIndex(cellIndex);
          } else {
             throw new IllegalStateException("Unexpected data type in SQLite table");
          }
@@ -237,8 +236,7 @@ public final class TypedRow {
          } else if (ElementDataType.configpath.equals(dataType)) {
             return row.getRawStringByKey(key);
          } else if (ElementDataType.object.equals(dataType)) {
-            HashMap<String, String> h = row.getDataType(key, HashMap.class);
-            return (h == null ? null : mapper.writeValueAsString(h));
+            return row.getRawStringByKey(key);
          } else {
             throw new IllegalStateException("Unexpected data type in SQLite table");
          }
