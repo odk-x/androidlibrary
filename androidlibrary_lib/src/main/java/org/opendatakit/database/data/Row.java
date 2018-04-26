@@ -19,6 +19,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
+import org.opendatakit.database.DatabaseConstants;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.utilities.ODKFileUtils;
@@ -197,7 +198,7 @@ public final class Row implements Parcelable {
         return (T) l;
       } else if (clazz == Boolean.class) {
         // booleans are stored as integer 1 or 0 in user tables.
-        Boolean b = !"0".equals(value);
+        Boolean b = !DatabaseConstants.INT_FALSE_STRING.equals(value);
         return (T) b;
       } else if (clazz == ArrayList.class) {
         // json deserialization of an array

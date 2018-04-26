@@ -122,7 +122,6 @@ public final class TypedRow {
 
    }
 
-
    /**
     * Return the Typed object representing the contents of the cell given cellIndex column position
     * <p>
@@ -165,6 +164,44 @@ public final class TypedRow {
       }
 
    }
+
+
+   /**
+    * Return the Typed object representing the contents of the cell in the "key" column.
+    * <p>
+    * Null values are returned as nulls.
+    *
+    * @param key The name of the column holding the desired data
+    * @return String representation of contents of column. Null values are
+    * returned as null. Note that boolean values are reported as "1" or "0"
+    */
+   public final Object getOdkDataIfDataByKey(String key) {
+      ElementDataType dataType = getColumnDataType(key);
+      if(dataType == null) {
+         return null;
+      }
+      return getDataType(key, getOdkDataIfType(dataType));
+
+   }
+
+   /**
+    * Return the Typed object representing the contents of the cell given cellIndex column position
+    * <p>
+    * Null values are returned as nulls.
+    *
+    * @param cellIndex column position in table
+    * @return String representation of contents of column. Null values are
+    * returned as null.
+    */
+   public final Object getOdkDataIfDataByIndex(int cellIndex) {
+      ElementDataType dataType = getColumnDataTypeFromIndex(cellIndex);
+      if(dataType == null) {
+         return null;
+      }
+      return getDataType(cellIndex, getOdkDataIfType(dataType));
+
+   }
+
 
    /**
     * Return the string representing the Typed contents of the cell in the "key" column.
@@ -215,6 +252,31 @@ public final class TypedRow {
    }
 
    /**
+    * These are the data type mappings used across the odkData Javascript interface.
+    * NOTE: integer data types are mapped to Long values.
+    * This is consistent with the support for Long values in Javascript.
+    *
+    * @param dataType
+    * @return
+    */
+   public Class<?> getOdkDataIfType(ElementDataType dataType) {
+
+      if ( dataType == ElementDataType.integer ) {
+         return Long.class;
+      }
+
+      if ( dataType == ElementDataType.number ) {
+         return Double.class;
+      }
+
+      if ( dataType == ElementDataType.bool ) {
+         return Boolean.class;
+      }
+
+      return String.class;
+   }
+
+   /**
     * Return a pointer to the table this row belongs to
     * Used in AggregateSynchronizer and BaseTable
     *
@@ -247,4 +309,5 @@ public final class TypedRow {
    public final <T> T getDataType(String elementKey, Class<T> clazz) {
       return row.getDataType(elementKey, clazz);
    }
+
 }

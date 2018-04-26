@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.logging.WebLogger;
-import org.opendatakit.utilities.DataHelper;
 import org.opendatakit.utilities.ODKFileUtils;
 
 import java.io.IOException;
@@ -100,12 +99,21 @@ public final class KeyValueStoreUtils {
       return null;
     }
     // allow for true/false
-    if (entry.value.compareToIgnoreCase("true") == 0) {
+    if (entry.value.compareToIgnoreCase(Boolean.TRUE.toString()) == 0) {
       return true;
-    } else if (entry.value.compareToIgnoreCase("false") == 0) {
+    } else if (entry.value.compareToIgnoreCase(Boolean.FALSE.toString()) == 0) {
       return false;
     }
-    return null;
+
+    // otherwise, assume it is a 0/1 value.
+    try {
+      return (Integer.parseInt(entry.value) != 0);
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("requested boolean entry for " + "key: " + entry.key
+          + ", but the value in the store failed to parse to type: " + ElementDataType.bool
+          .name());
+    }
+
   }
 
   public static String getString(KeyValueStoreEntry entry)
