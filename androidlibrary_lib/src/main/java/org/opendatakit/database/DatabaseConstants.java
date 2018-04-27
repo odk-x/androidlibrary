@@ -61,7 +61,7 @@ public final class DatabaseConstants {
   public static final String FORMS_TABLE_NAME = "_formDefs";
 
   /**
-   * For ODK Sync (only)
+   * For Sync (only)
    * 
    * Tracks the ETag values for manifests and files.
    */
@@ -78,6 +78,9 @@ public final class DatabaseConstants {
 
   // The size of data chunks to pass across the AIDL wire.
   public static final int PARCEL_SIZE = 946176; // 100 KB shy of 1 MB, the max size
+
+  public static final String INT_TRUE_STRING = "1";
+  public static final String INT_FALSE_STRING = "0";
 
   /**
    * Do not instantiate this class

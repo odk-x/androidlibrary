@@ -18,6 +18,7 @@ package org.opendatakit.data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.database.data.Row;
+import org.opendatakit.database.data.TypedRow;
 import org.opendatakit.logging.WebLogger;
 
 import java.util.TreeMap;
@@ -291,10 +292,10 @@ public class ColorRule {
     this.mElementKey = elementKey;
   }
 
-  public boolean checkMatch(ElementDataType type, Row row) {
+  public boolean checkMatch(ElementDataType type, TypedRow row) {
     try {
       // Get the value we're testing against.
-      String testValue = row.getDataByKey(mElementKey);
+      String testValue = row.getRawStringByKey(mElementKey);
       
       // nulls are never matched (mValue is never null)
       if (testValue == null) {

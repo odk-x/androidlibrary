@@ -18,6 +18,10 @@ import android.provider.BaseColumns;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Metadata Columns added to the user-defined data tables.
  *
@@ -92,6 +96,35 @@ public final class DataTableColumns implements BaseColumns {
       .getGroupPrivileged();
   // the default _savepoint_creator is: PropertiesSingleton.getActiveUser()
   // the default _locale is: PropertiesSingleton.getLocale()
+
+  private static final List<String> ADMIN_COLUMNS;
+
+  static {
+    // everything is a STRING except for
+    // CONFLICT_TYPE which is an INTEGER
+    // see OdkDatabaseImplUtils.getUserDefinedTableCreationStatement()
+    ArrayList<String> adminColumns = new ArrayList<String>();
+    adminColumns.add(ID);
+    adminColumns.add(ROW_ETAG);
+    adminColumns.add(SYNC_STATE); // not exportable
+    adminColumns.add(CONFLICT_TYPE); // not exportable
+    adminColumns.add(DEFAULT_ACCESS);
+    adminColumns.add(ROW_OWNER);
+    adminColumns.add(GROUP_READ_ONLY);
+    adminColumns.add(GROUP_MODIFY);
+    adminColumns.add(GROUP_PRIVILEGED);
+    adminColumns.add(FORM_ID);
+    adminColumns.add(LOCALE);
+    adminColumns.add(SAVEPOINT_TYPE);
+    adminColumns.add(SAVEPOINT_TIMESTAMP);
+    adminColumns.add(SAVEPOINT_CREATOR);
+    Collections.sort(adminColumns);
+    ADMIN_COLUMNS = Collections.unmodifiableList(adminColumns);
+  }
+
+  public static List<String> getAdminColumns() {
+    return ADMIN_COLUMNS;
+  }
 
   /**
    * This class cannot be instantiated

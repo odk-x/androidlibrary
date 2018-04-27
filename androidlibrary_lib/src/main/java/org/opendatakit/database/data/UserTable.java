@@ -125,8 +125,8 @@ public class UserTable implements Parcelable, WrapperTable {
     return mBaseTable.getEffectiveAccessCreateRow();
   }
 
-  public Row getRowAtIndex(int index) {
-    return mBaseTable.getRowAtIndex(index);
+  public TypedRow getRowAtIndex(int index) {
+    return new TypedRow(mBaseTable.getRowAtIndex(index), mColumnDefns);
   }
 
   public String getElementKey(int colNum) {
@@ -187,14 +187,14 @@ public class UserTable implements Parcelable, WrapperTable {
   }
 
   public String getRowId(int rowIndex) {
-    return getRowAtIndex(rowIndex).getDataByKey(DataTableColumns.ID);
+    return mBaseTable.getRowAtIndex(rowIndex).getRawStringByKey(DataTableColumns.ID);
   }
 
   public String getDisplayTextOfData(int rowIndex, ElementType type, String elementKey) {
     // TODO: share processing with CollectUtil.writeRowDataToBeEdited(...)
-    Row row = getRowAtIndex(rowIndex);
-    String raw = row.getDataByKey(elementKey);
-    String rowId = row.getDataByKey(DataTableColumns.ID);
+    Row row = mBaseTable.getRowAtIndex(rowIndex);
+    String raw = row.getRawStringByKey(elementKey);
+    String rowId = row.getRawStringByKey(DataTableColumns.ID);
 
     if (raw == null) {
       return null;
@@ -231,7 +231,7 @@ public class UserTable implements Parcelable, WrapperTable {
   public boolean hasCheckpointRows() {
     List<Row> rows = mBaseTable.getRows();
     for (Row row : rows) {
-      String type = row.getDataByKey(DataTableColumns.SAVEPOINT_TYPE);
+      String type = row.getRawStringByKey(DataTableColumns.SAVEPOINT_TYPE);
       if (type == null || type.isEmpty()) {
         return true;
       }
@@ -242,7 +242,7 @@ public class UserTable implements Parcelable, WrapperTable {
   public boolean hasConflictRows() {
     List<Row> rows = mBaseTable.getRows();
     for (Row row : rows) {
-      String conflictType = row.getDataByKey(DataTableColumns.CONFLICT_TYPE);
+      String conflictType = row.getRawStringByKey(DataTableColumns.CONFLICT_TYPE);
       if (conflictType != null && !conflictType.isEmpty()) {
         return true;
       }
