@@ -531,9 +531,9 @@ public class UserTableTest {
     Long vb = rbt1.getDataType(cellIndex, Long.class);
     assertEquals(va, Long.valueOf(15));
     assertEquals(va, vb);
-    Integer vai = rat1.getDataType(cellIndex, Integer.class);
-    Integer vbi = rbt1.getDataType(cellIndex, Integer.class);
-    assertEquals(vai, Integer.valueOf(15));
+    Long vai = rat1.getDataType(cellIndex, Long.class);
+    Long vbi = rbt1.getDataType(cellIndex, Long.class);
+    assertEquals(vai, Long.valueOf(15));
     assertEquals(vai, vbi);
     cellIndex = table.getColumnIndexOfElementKey(geopointCells.get(2));
     Double vad = rat1.getDataType(cellIndex, Double.class);
