@@ -165,8 +165,8 @@ public class OdkBaseTableTest {
     Row rbt2 = t.getRowAtIndex(1);
 
     for (int j = 0; j < TABLE_WIDTH; j++) {
-      assertEquals(rat1.getDataByIndex(j), rat2.getDataByIndex(j));
-      assertEquals(rbt2.getDataByIndex(j), rbt1.getDataByIndex(j));
+      assertEquals(rat1.getRawStringByIndex(j), rat2.getRawStringByIndex(j));
+      assertEquals(rbt2.getRawStringByIndex(j), rbt1.getRawStringByIndex(j));
     }
   }
 
