@@ -28,7 +28,6 @@ import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.database.data.ColumnDefinition;
 import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.database.data.OrderedColumns;
-import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.TypedRow;
 import org.opendatakit.database.data.UserTable;
 import org.opendatakit.database.queries.BindArgs;
@@ -54,6 +53,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -637,13 +637,7 @@ public class CsvUtil {
            * local changes, we leave the row unchanged.
            */
           if (syncState != null) {
-
-            ContentValues cv = new ContentValues();
-            for (String column : valueMap.keySet()) {
-              if (column != null) {
-                cv.put(column, valueMap.get(column));
-              }
-            }
+            ContentValues cv = valueMapToContentValues(valueMap, orderedDefns);
 
             // The admin columns get added here
             cv.put(DataTableColumns.FORM_ID, v_form_id);
@@ -677,13 +671,7 @@ public class CsvUtil {
             // the server, then we don't revise it.
 
           } else {
-
-            ContentValues cv = new ContentValues();
-            for (String column : valueMap.keySet()) {
-              if (column != null) {
-                cv.put(column, valueMap.get(column));
-              }
-            }
+            ContentValues cv = valueMapToContentValues(valueMap, orderedDefns);
 
             // The admin columns get added here
             cv.put(DataTableColumns.FORM_ID, v_form_id);
@@ -751,4 +739,36 @@ public class CsvUtil {
     }
   }
 
+  /**
+   * Populates a ContentValue instance with data from a map of column to value
+   * and using type information from OrderedColumns
+   *
+   * @param valueMap Map from column name to value (represents 1 row)
+   * @param columns OrderedColumns
+   * @return ContentValues with data contained in valueMap
+   */
+  ContentValues valueMapToContentValues(Map<String, String> valueMap, OrderedColumns columns) {
+    ContentValues cv = new ContentValues();
+
+    for (Map.Entry<String, String> colValuePair : valueMap.entrySet()) {
+      if (colValuePair.getValue() == null) {
+        cv.putNull(colValuePair.getValue());
+      }
+
+      ElementDataType type = columns.find(colValuePair.getKey()).getType().getDataType();
+
+      if (ElementDataType.string.equals(type)) {
+        cv.put(colValuePair.getKey(), colValuePair.getValue());
+      } else if (ElementDataType.integer.equals(type)) {
+        cv.put(colValuePair.getKey(), Long.parseLong(colValuePair.getValue()));
+      } else if (ElementDataType.number.equals(type)) {
+        cv.put(colValuePair.getKey(), Double.parseDouble(colValuePair.getValue()));
+      } else {
+        // for all other data types, String would be sufficient
+        cv.put(colValuePair.getKey(), colValuePair.getValue());
+      }
+    }
+
+    return cv;
+  }
 }
