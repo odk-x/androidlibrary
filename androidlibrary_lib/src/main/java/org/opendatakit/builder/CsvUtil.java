@@ -752,7 +752,8 @@ public class CsvUtil {
 
     for (Map.Entry<String, String> colValuePair : valueMap.entrySet()) {
       if (colValuePair.getValue() == null) {
-        cv.putNull(colValuePair.getValue());
+        cv.putNull(colValuePair.getKey());
+        continue;
       }
 
       ElementDataType type = columns.find(colValuePair.getKey()).getType().getDataType();
