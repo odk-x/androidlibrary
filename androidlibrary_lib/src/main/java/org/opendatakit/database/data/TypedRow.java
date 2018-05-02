@@ -1,5 +1,8 @@
 package org.opendatakit.database.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
@@ -12,7 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class TypedRow {
+public final class TypedRow implements Parcelable {
 
    private final Row row;
 
@@ -27,6 +30,24 @@ public final class TypedRow {
       this.columns = orderedColumns;
       this.colNames = null;
    }
+
+   protected TypedRow(Parcel in) {
+      row = in.readParcelable(Row.class.getClassLoader());
+      columns = in.readParcelable(OrderedColumns.class.getClassLoader());
+      colNames = in.createStringArray();
+   }
+
+   public static final Creator<TypedRow> CREATOR = new Creator<TypedRow>() {
+      @Override
+      public TypedRow createFromParcel(Parcel in) {
+         return new TypedRow(in);
+      }
+
+      @Override
+      public TypedRow[] newArray(int size) {
+         return new TypedRow[size];
+      }
+   };
 
    private ElementDataType getColumnDataTypeFromIndex(int index) {
       if(colNames == null) {
@@ -308,4 +329,15 @@ public final class TypedRow {
       return row.getDataType(elementKey, clazz);
    }
 
+   @Override
+   public int describeContents() {
+      return 0;
+   }
+
+   @Override
+   public void writeToParcel(Parcel dest, int flags) {
+      dest.writeParcelable(row, flags);
+      dest.writeParcelable(columns, flags);
+      dest.writeStringArray(colNames);
+   }
 }
