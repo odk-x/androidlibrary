@@ -57,19 +57,24 @@ public final class TypedRow implements Parcelable {
    }
 
    private ElementDataType getColumnDataType(String key) {
+      if (DataTableColumns.CONFLICT_TYPE.equals(key)) {
+         return ElementDataType.integer;
+      }
+
       List<String> adminColumns = DataTableColumns.getAdminColumns();
 
       if(adminColumns.contains(key)) {
          return ElementDataType.string;
       }
 
-      if (DataTableColumns.EFFECTIVE_ACCESS.equals(key)) {
+      ColumnDefinition def;
+      try {
+         def = columns.find(key);
+         ElementType type = def.getType();
+         return type.getDataType();
+      } catch (IllegalArgumentException e) {
          return ElementDataType.string;
       }
-
-      ColumnDefinition def = columns.find(key);
-      ElementType type = def.getType();
-      return type.getDataType();
    }
 
    /**
