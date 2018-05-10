@@ -9,9 +9,7 @@ import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.DataTableColumns;
-import org.opendatakit.utilities.ODKFileUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -205,7 +203,7 @@ public final class TypedRow implements Parcelable {
       if(dataType == null) {
          return null;
       }
-      return getDataType(key, getOdkDataIfType(dataType));
+      return getDataType(key, getOdkDataWebIfType(dataType));
 
    }
 
@@ -223,7 +221,7 @@ public final class TypedRow implements Parcelable {
       if(dataType == null) {
          return null;
       }
-      return getDataType(cellIndex, getOdkDataIfType(dataType));
+      return getDataType(cellIndex, getOdkDataWebIfType(dataType));
 
    }
 
@@ -283,7 +281,7 @@ public final class TypedRow implements Parcelable {
     * @param dataType
     * @return
     */
-   public Class<?> getOdkDataIfType(ElementDataType dataType) {
+   public static Class<?> getOdkDataWebIfType(ElementDataType dataType) {
 
       if ( dataType == ElementDataType.integer ) {
          return Long.class;
