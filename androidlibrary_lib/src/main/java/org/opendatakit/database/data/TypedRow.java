@@ -55,6 +55,7 @@ public final class TypedRow implements Parcelable {
    }
 
    private ElementDataType getColumnDataType(String key) {
+      // if you change this function make sure to update TypeColumnWebIfCache
       if (DataTableColumns.CONFLICT_TYPE.equals(key)) {
          return ElementDataType.integer;
       }
