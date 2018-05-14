@@ -7,6 +7,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class ParcelableRowResource extends RowResource implements Parcelable {
+  public ParcelableRowResource(Row row) {
+    super(row);
+  }
+
   protected ParcelableRowResource(Parcel in) {
     super(ParcelableRow.CREATOR.createFromParcel(in));
     setSelfUri(in.readString());
@@ -14,7 +18,7 @@ public class ParcelableRowResource extends RowResource implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    ((ParcelableRow) ((Row) this)).writeToParcel(dest, flags);
+    ParcelableRow.writeToParcel(this, dest, flags);
     dest.writeString(getSelfUri());
   }
 

@@ -1,16 +1,18 @@
 package org.opendatakit.sync.service.entity;
 
-import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
-import org.opendatakit.aggregate.odktables.rest.entity.Row;
-import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
 
 public class ParcelableRow extends Row implements Parcelable {
+  public ParcelableRow() {
+  }
+
+  public ParcelableRow(Row r) {
+    super(r);
+  }
+
   protected ParcelableRow(Parcel in) {
     setCreateUser(in.readString());
     setDataETagAtModification(in.readString());
@@ -19,7 +21,7 @@ public class ParcelableRow extends Row implements Parcelable {
     setLastUpdateUser(in.readString());
     setLocale(in.readString());
     setRowETag(in.readString());
-    setRowFilterScope(((RowFilterScope) in.readParcelable(ParcelableRowFilterScope.class.getClassLoader())));
+    setRowFilterScope(ParcelableRowFilterScope.CREATOR.createFromParcel(in));
     setRowId(in.readString());
     setSavepointCreator(in.readString());
     setSavepointTimestamp(in.readString());
@@ -29,24 +31,37 @@ public class ParcelableRow extends Row implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(getCreateUser());
-    dest.writeString(getDataETagAtModification());
-    dest.writeByte((byte) (isDeleted() ? 1 : 0));
-    dest.writeString(getFormId());
-    dest.writeString(getLastUpdateUser());
-    dest.writeString(getLocale());
-    dest.writeString(getRowETag());
-    dest.writeParcelable(((ParcelableRowFilterScope) getRowFilterScope()), flags);
-    dest.writeString(getRowId());
-    dest.writeString(getSavepointCreator());
-    dest.writeString(getSavepointTimestamp());
-    dest.writeString(getSavepointType());
+//    dest.writeString(getCreateUser());
+//    dest.writeString(getDataETagAtModification());
+//    dest.writeByte((byte) (isDeleted() ? 1 : 0));
+//    dest.writeString(getFormId());
+//    dest.writeString(getLastUpdateUser());
+//    dest.writeString(getLocale());
+//    dest.writeString(getRowETag());
+//    ParcelableRowFilterScope.writeToParcel(getRowFilterScope(), dest, flags);
+//    dest.writeString(getRowId());
+//    dest.writeString(getSavepointCreator());
+//    dest.writeString(getSavepointTimestamp());
+//    dest.writeString(getSavepointType());
+//    dest.writeList(getValues());
 
-    List<ParcelableDataKeyValue> pDkvl = new ArrayList<>();
-    for (DataKeyValue dataKeyValue : getValues()) {
-      pDkvl.add(((ParcelableDataKeyValue) dataKeyValue));
-    }
-    dest.writeTypedList(pDkvl);
+    writeToParcel(this, dest, flags);
+  }
+
+  public static void writeToParcel(Row row, Parcel dest, int flags) {
+    dest.writeString(row.getCreateUser());
+    dest.writeString(row.getDataETagAtModification());
+    dest.writeByte((byte) (row.isDeleted() ? 1 : 0));
+    dest.writeString(row.getFormId());
+    dest.writeString(row.getLastUpdateUser());
+    dest.writeString(row.getLocale());
+    dest.writeString(row.getRowETag());
+    ParcelableRowFilterScope.writeToParcel(row.getRowFilterScope(), dest, flags);
+    dest.writeString(row.getRowId());
+    dest.writeString(row.getSavepointCreator());
+    dest.writeString(row.getSavepointTimestamp());
+    dest.writeString(row.getSavepointType());
+    dest.writeList(row.getValues());
   }
 
   @Override

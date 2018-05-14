@@ -16,9 +16,13 @@ public class ParcelableTableEntry extends TableEntry implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(getTableId());
-    dest.writeString(getDataETag());
-    dest.writeString(getSchemaETag());
+    writeToParcel(this, dest, flags);
+  }
+
+  public static void writeToParcel(TableEntry tableEntry, Parcel dest, int flags) {
+    dest.writeString(tableEntry.getTableId());
+    dest.writeString(tableEntry.getDataETag());
+    dest.writeString(tableEntry.getSchemaETag());
   }
 
   @Override

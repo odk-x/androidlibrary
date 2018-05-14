@@ -6,6 +6,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class ParcelableDataKeyValue extends DataKeyValue implements Parcelable {
+  public ParcelableDataKeyValue() {
+  }
+
+  public ParcelableDataKeyValue(String column, String value) {
+    super(column, value);
+  }
+
   protected ParcelableDataKeyValue(Parcel in) {
     super(in.readString(), in.readString());
   }

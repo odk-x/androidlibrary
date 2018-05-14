@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParcelableRowResourceList extends RowResourceList implements Parcelable {
+  public ParcelableRowResourceList(ArrayList<RowResource> rows, String dataETag, String tableUri, String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
+    super(rows, dataETag, tableUri, refetchCursor, backCursor, resumeCursor, hasMore, hasPrior);
+  }
+
   protected ParcelableRowResourceList(Parcel in) {
     super(
         in.readArrayList(ParcelableRowResource.class.getClassLoader()),
@@ -25,12 +29,7 @@ public class ParcelableRowResourceList extends RowResourceList implements Parcel
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    List<ParcelableRowResource> pRowResourceList = new ArrayList<>();
-    for (RowResource rowResource : getRows()) {
-      pRowResourceList.add(((ParcelableRowResource) rowResource));
-    }
-    dest.writeTypedList(pRowResourceList);
-
+    dest.writeList(getRows());
     dest.writeString(getDataETag());
     dest.writeString(getTableUri());
     dest.writeString(getWebSafeRefetchCursor());

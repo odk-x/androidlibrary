@@ -6,9 +6,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class ParcelableRowFilterScope extends RowFilterScope implements Parcelable {
+  public ParcelableRowFilterScope(Access access, String rowOwner, String groupReadOnly, String groupModify, String groupPrivileged) {
+    super(access, rowOwner, groupReadOnly, groupModify, groupPrivileged);
+  }
+
   protected ParcelableRowFilterScope(Parcel in) {
     super(
-        ((Access) in.readSerializable()),
+        Access.valueOf(in.readString()),
         in.readString(),
         in.readString(),
         in.readString(),
@@ -18,11 +22,15 @@ public class ParcelableRowFilterScope extends RowFilterScope implements Parcelab
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    dest.writeSerializable(getDefaultAccess());
-    dest.writeString(getRowOwner());
-    dest.writeString(getGroupReadOnly());
-    dest.writeString(getGroupModify());
-    dest.writeString(getGroupPrivileged());
+    writeToParcel(this, dest, flags);
+  }
+
+  public static void writeToParcel(RowFilterScope scope, Parcel dest, int flags) {
+    dest.writeString(scope.getDefaultAccess().name());
+    dest.writeString(scope.getRowOwner());
+    dest.writeString(scope.getGroupReadOnly());
+    dest.writeString(scope.getGroupModify());
+    dest.writeString(scope.getGroupPrivileged());
   }
 
   @Override

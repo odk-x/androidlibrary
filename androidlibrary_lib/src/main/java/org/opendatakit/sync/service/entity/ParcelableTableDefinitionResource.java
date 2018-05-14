@@ -1,13 +1,20 @@
 package org.opendatakit.sync.service.entity;
 
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 public class ParcelableTableDefinitionResource extends TableDefinitionResource implements Parcelable {
-  protected ParcelableTableDefinitionResource(Parcel in) {
+  public ParcelableTableDefinitionResource(String tableId, String schemaETag, ArrayList<Column> columns) {
+    super(tableId, schemaETag, columns);
+  }
+
+  public ParcelableTableDefinitionResource(Parcel in) {
     super(ParcelableTableDefinition.CREATOR.createFromParcel(in));
 
     setSelfUri(in.readString());
@@ -16,7 +23,7 @@ public class ParcelableTableDefinitionResource extends TableDefinitionResource i
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    dest.writeParcelable(((ParcelableTableDefinition) ((TableDefinition) this)), flags);
+    ParcelableTableDefinition.writeToParcel(this, dest, flags);
 
     dest.writeString(getSelfUri());
     dest.writeString(getTableId());

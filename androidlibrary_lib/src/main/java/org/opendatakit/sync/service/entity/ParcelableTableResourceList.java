@@ -11,6 +11,7 @@ import java.util.List;
 
 public class ParcelableTableResourceList extends TableResourceList implements Parcelable {
   public ParcelableTableResourceList() {
+    super();
   }
 
   protected ParcelableTableResourceList(Parcel in) {
@@ -26,12 +27,7 @@ public class ParcelableTableResourceList extends TableResourceList implements Pa
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    List<ParcelableTableResource> pTableResourceList = new ArrayList<>();
-    for (TableResource tableResource : getTables()) {
-      pTableResourceList.add(((ParcelableTableResource) tableResource));
-    }
-    dest.writeTypedList(pTableResourceList);
-
+    dest.writeList(getTables());
     dest.writeString(getWebSafeRefetchCursor());
     dest.writeString(getWebSafeBackwardCursor());
     dest.writeString(getWebSafeResumeCursor());

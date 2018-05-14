@@ -27,7 +27,7 @@ import org.opendatakit.sync.service.entity.ParcelableUserInfoList;
 import org.opendatakit.sync.service.logic.FileManifestDocument;
 import org.opendatakit.sync.service.logic.CommonFileAttachmentTerms;
 import org.opendatakit.database.data.OrderedColumns;
-import org.opendatakit.database.data.Row;
+import org.opendatakit.database.data.TypedRow;
 import org.opendatakit.sync.service.SyncAttachmentState;
 import org.opendatakit.sync.service.SyncProgressState;
 
@@ -235,7 +235,7 @@ interface IAidlSynchronizer {
    * @throws HttpClientWebException
    * @throws IOException
    */
-  ParcelableRowOutcomeList pushLocalRows(in ParcelableTableResource tableResource, in OrderedColumns orderedColumns, in List<Row> rowsToInsertUpdateOrDelete);
+  ParcelableRowOutcomeList pushLocalRows(in ParcelableTableResource tableResource, in OrderedColumns orderedColumns, in List<TypedRow> rowsToInsertUpdateOrDelete);
 
   /**
    * Request the app-level manifest. This uses a NOT_MODIFIED header to detect

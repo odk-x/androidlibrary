@@ -11,7 +11,7 @@ public class ParcelableRowOutcome extends RowOutcome implements Parcelable {
     super(ParcelableRow.CREATOR.createFromParcel(in));
 
     setSelfUri(in.readString());
-    setOutcome(((OutcomeType) in.readSerializable()));
+    setOutcome(OutcomeType.valueOf(in.readString()));
   }
 
   @Override
@@ -19,7 +19,7 @@ public class ParcelableRowOutcome extends RowOutcome implements Parcelable {
     ((ParcelableRow) ((Row) this)).writeToParcel(dest, flags);
 
     dest.writeString(getSelfUri());
-    dest.writeSerializable(getOutcome());
+    dest.writeString(getOutcome().toString());
   }
 
   @Override

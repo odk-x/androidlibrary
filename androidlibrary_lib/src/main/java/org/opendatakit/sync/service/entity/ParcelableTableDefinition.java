@@ -20,14 +20,18 @@ public class ParcelableTableDefinition extends TableDefinition implements Parcel
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(getTableId());
-    dest.writeString(getSchemaETag());
+    writeToParcel(this, dest, flags);
+  }
+
+  public static void writeToParcel(TableDefinition tableDefinition, Parcel dest, int flags) {
+    dest.writeString(tableDefinition.getTableId());
+    dest.writeString(tableDefinition.getSchemaETag());
 
     List<ParcelableColumn> pColumns = new ArrayList<>();
-    for (Column column : getColumns()) {
-      pColumns.add(((ParcelableColumn) column));
+    for (Column column : tableDefinition.getColumns()) {
+      pColumns.add(new ParcelableColumn(column));
     }
-    dest.writeTypedList(pColumns);
+    dest.writeList(pColumns);
   }
 
   @Override

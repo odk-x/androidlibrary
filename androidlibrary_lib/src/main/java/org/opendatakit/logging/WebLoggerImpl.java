@@ -351,7 +351,7 @@ class WebLoggerImpl implements WebLoggerIf {
   }
 
   public void printStackTrace(Throwable e) {
-    //e.printStackTrace();
+    e.printStackTrace();
     ByteArrayOutputStream ba = new ByteArrayOutputStream();
     PrintStream w;
     try {

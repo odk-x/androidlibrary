@@ -6,6 +6,15 @@ import android.os.Parcelable;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 
 public class ParcelableColumn extends Column implements Parcelable {
+  public ParcelableColumn(Column column) {
+    super(
+        column.getElementKey(),
+        column.getElementName(),
+        column.getElementType(),
+        column.getListChildElementKeys()
+    );
+  }
+
   protected ParcelableColumn(Parcel in) {
     super(
         in.readString(),
