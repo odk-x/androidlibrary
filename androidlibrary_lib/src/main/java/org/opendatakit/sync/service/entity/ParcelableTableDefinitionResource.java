@@ -14,6 +14,13 @@ public class ParcelableTableDefinitionResource extends TableDefinitionResource i
     super(tableId, schemaETag, columns);
   }
 
+  public ParcelableTableDefinitionResource(TableDefinitionResource tableDefinitionResource) {
+    super(tableDefinitionResource);
+
+    setSelfUri(tableDefinitionResource.getSelfUri());
+    setTableUri(tableDefinitionResource.getTableUri());
+  }
+
   public ParcelableTableDefinitionResource(Parcel in) {
     super(ParcelableTableDefinition.CREATOR.createFromParcel(in));
 

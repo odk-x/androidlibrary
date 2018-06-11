@@ -11,6 +11,18 @@ public class ParcelableTableResource extends TableResource implements Parcelable
     super(entry);
   }
 
+  public ParcelableTableResource(TableResource tableResource) {
+    super(new TableEntry(tableResource.getTableId(), tableResource.getDataETag(), tableResource.getSchemaETag()));
+
+    setSelfUri(tableResource.getSelfUri());
+    setDefinitionUri(tableResource.getDefinitionUri());
+    setDataUri(tableResource.getDataUri());
+    setInstanceFilesUri(tableResource.getInstanceFilesUri());
+    setDiffUri(tableResource.getDiffUri());
+    setAclUri(tableResource.getAclUri());
+    setTableLevelManifestETag(tableResource.getTableLevelManifestETag());
+  }
+
   protected ParcelableTableResource(Parcel in) {
     super(ParcelableTableEntry.CREATOR.createFromParcel(in));
 
@@ -25,15 +37,19 @@ public class ParcelableTableResource extends TableResource implements Parcelable
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    ParcelableTableEntry.writeToParcel(this, dest, flags);
+    writeToParcel(this, dest, flags);
+  }
 
-    dest.writeString(getSelfUri());
-    dest.writeString(getDefinitionUri());
-    dest.writeString(getDataUri());
-    dest.writeString(getInstanceFilesUri());
-    dest.writeString(getDiffUri());
-    dest.writeString(getAclUri());
-    dest.writeString(getTableLevelManifestETag());
+  public static void writeToParcel(TableResource tableResource, Parcel dest, int flags) {
+    ParcelableTableEntry.writeToParcel(tableResource, dest, flags);
+
+    dest.writeString(tableResource.getSelfUri());
+    dest.writeString(tableResource.getDefinitionUri());
+    dest.writeString(tableResource.getDataUri());
+    dest.writeString(tableResource.getInstanceFilesUri());
+    dest.writeString(tableResource.getDiffUri());
+    dest.writeString(tableResource.getAclUri());
+    dest.writeString(tableResource.getTableLevelManifestETag());
   }
 
   @Override

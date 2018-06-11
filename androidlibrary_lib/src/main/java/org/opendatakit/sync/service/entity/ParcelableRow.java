@@ -3,7 +3,10 @@ package org.opendatakit.sync.service.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+
+import java.util.ArrayList;
 
 public class ParcelableRow extends Row implements Parcelable {
   public ParcelableRow() {
@@ -26,25 +29,11 @@ public class ParcelableRow extends Row implements Parcelable {
     setSavepointCreator(in.readString());
     setSavepointTimestamp(in.readString());
     setSavepointType(in.readString());
-    setValues(in.readArrayList(ParcelableDataKeyValue.class.getClassLoader()));
+    setValues(readValues(in));
   }
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-//    dest.writeString(getCreateUser());
-//    dest.writeString(getDataETagAtModification());
-//    dest.writeByte((byte) (isDeleted() ? 1 : 0));
-//    dest.writeString(getFormId());
-//    dest.writeString(getLastUpdateUser());
-//    dest.writeString(getLocale());
-//    dest.writeString(getRowETag());
-//    ParcelableRowFilterScope.writeToParcel(getRowFilterScope(), dest, flags);
-//    dest.writeString(getRowId());
-//    dest.writeString(getSavepointCreator());
-//    dest.writeString(getSavepointTimestamp());
-//    dest.writeString(getSavepointType());
-//    dest.writeList(getValues());
-
     writeToParcel(this, dest, flags);
   }
 
@@ -61,7 +50,34 @@ public class ParcelableRow extends Row implements Parcelable {
     dest.writeString(row.getSavepointCreator());
     dest.writeString(row.getSavepointTimestamp());
     dest.writeString(row.getSavepointType());
-    dest.writeList(row.getValues());
+    writeValues(row.getValues(), dest, flags);
+  }
+
+  private static void writeValues(ArrayList<DataKeyValue> values, Parcel dest, int flags) {
+    if (values == null) {
+      dest.writeInt(-1);
+      return;
+    }
+
+    dest.writeInt(values.size());
+    for (DataKeyValue dkv : values) {
+      ParcelableDataKeyValue.writeToParcel(dkv, dest, flags);
+    }
+  }
+
+  private ArrayList<DataKeyValue> readValues(Parcel in) {
+    int size = in.readInt();
+
+    if (size < 0) {
+      return null;
+    }
+
+    ArrayList<DataKeyValue> list = new ArrayList<>();
+    for (int i = 0; i < size; i++) {
+      list.add(new ParcelableDataKeyValue(in));
+    }
+
+    return list;
   }
 
   @Override

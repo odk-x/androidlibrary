@@ -10,13 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParcelableRowResourceList extends RowResourceList implements Parcelable {
+  public ParcelableRowResourceList() {
+    super();
+  }
+
   public ParcelableRowResourceList(ArrayList<RowResource> rows, String dataETag, String tableUri, String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
     super(rows, dataETag, tableUri, refetchCursor, backCursor, resumeCursor, hasMore, hasPrior);
   }
 
   protected ParcelableRowResourceList(Parcel in) {
     super(
-        in.readArrayList(ParcelableRowResource.class.getClassLoader()),
+        null,
         in.readString(),
         in.readString(),
         in.readString(),
@@ -25,11 +29,12 @@ public class ParcelableRowResourceList extends RowResourceList implements Parcel
         in.readByte() == 1,
         in.readByte() == 1
     );
+
+    setRows(readRows(in));
   }
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    dest.writeList(getRows());
     dest.writeString(getDataETag());
     dest.writeString(getTableUri());
     dest.writeString(getWebSafeRefetchCursor());
@@ -37,6 +42,34 @@ public class ParcelableRowResourceList extends RowResourceList implements Parcel
     dest.writeString(getWebSafeResumeCursor());
     dest.writeByte((byte) (isHasMoreResults() ? 1 : 0));
     dest.writeByte((byte) (isHasPriorResults() ? 1 : 0));
+    writeRows(dest, flags);
+  }
+
+  private void writeRows(Parcel dest, int flags) {
+    if (getRows() == null) {
+      dest.writeInt(-1);
+      return;
+    }
+
+    dest.writeInt(getRows().size());
+    for (RowResource rowResource : getRows()) {
+      ParcelableRowResource.writeToParcel(rowResource, dest, flags);
+    }
+  }
+
+  private ArrayList<RowResource> readRows(Parcel in) {
+    int size = in.readInt();
+
+    if (size < 0) {
+      return null;
+    }
+
+    ArrayList<RowResource> list = new ArrayList<>();
+    for (int i = 0; i < size; i++) {
+      list.add(new ParcelableRowResource(in));
+    }
+
+    return list;
   }
 
   @Override

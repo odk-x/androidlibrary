@@ -18,8 +18,12 @@ public class ParcelableRowResource extends RowResource implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    ParcelableRow.writeToParcel(this, dest, flags);
-    dest.writeString(getSelfUri());
+    writeToParcel(this, dest, flags);
+  }
+
+  public static void writeToParcel(RowResource rowResource, Parcel dest, int flags) {
+    ParcelableRow.writeToParcel(rowResource, dest, flags);
+    dest.writeString(rowResource.getSelfUri());
   }
 
   @Override

@@ -7,6 +7,7 @@ import android.os.Parcelable;
 
 public class ParcelableDataKeyValue extends DataKeyValue implements Parcelable {
   public ParcelableDataKeyValue() {
+    super();
   }
 
   public ParcelableDataKeyValue(String column, String value) {
@@ -19,8 +20,12 @@ public class ParcelableDataKeyValue extends DataKeyValue implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(column);
-    dest.writeString(value);
+    writeToParcel(this, dest, flags);
+  }
+
+  public static void writeToParcel(DataKeyValue dataKeyValue, Parcel dest, int flags) {
+    dest.writeString(dataKeyValue.column);
+    dest.writeString(dataKeyValue.value);
   }
 
   @Override
