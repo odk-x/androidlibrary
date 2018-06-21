@@ -10,25 +10,56 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParcelableRowOutcomeList extends RowOutcomeList implements Parcelable {
-  protected ParcelableRowOutcomeList(Parcel in) {
-    super(
-        in.readArrayList(ParcelableRowOutcome.class.getClassLoader()),
-        in.readString()
-    );
+  public ParcelableRowOutcomeList() {
+    super();
+  }
 
+  public ParcelableRowOutcomeList(RowOutcomeList rowOutcomeList) {
+    setRows(rowOutcomeList.getRows());
+    setDataETag(rowOutcomeList.getDataETag());
+    setTableUri(rowOutcomeList.getTableUri());
+  }
+
+  protected ParcelableRowOutcomeList(Parcel in) {
+    super();
+
+    setRows(readRows(in));
+    setDataETag(in.readString());
     setTableUri(in.readString());
   }
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    List<ParcelableRowOutcome> pRowOutcomeList = new ArrayList<>();
-    for (RowOutcome rowOutcome : getRows()) {
-      pRowOutcomeList.add(((ParcelableRowOutcome) rowOutcome));
-    }
-    dest.writeTypedList(pRowOutcomeList);
-
+    writeRows(dest, flags);
     dest.writeString(getDataETag());
     dest.writeString(getTableUri());
+  }
+
+  private void writeRows(Parcel dest, int flags) {
+    if (getRows() == null) {
+      dest.writeInt(-1);
+      return;
+    }
+
+    dest.writeInt(getRows().size());
+    for (RowOutcome rowOutcome : getRows()) {
+      ParcelableRowOutcome.writeToParcel(rowOutcome, dest, flags);
+    }
+  }
+
+  private ArrayList<RowOutcome> readRows(Parcel in) {
+    int size = in.readInt();
+
+    if (size < 0) {
+      return null;
+    }
+
+    ArrayList<RowOutcome> rows = new ArrayList<>();
+    for (int i = 0; i < size; i++) {
+      rows.add(ParcelableRowOutcome.CREATOR.createFromParcel(in));
+    }
+
+    return rows;
   }
 
   @Override

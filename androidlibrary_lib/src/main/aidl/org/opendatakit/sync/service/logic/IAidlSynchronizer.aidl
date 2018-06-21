@@ -235,7 +235,7 @@ interface IAidlSynchronizer {
    * @throws HttpClientWebException
    * @throws IOException
    */
-  ParcelableRowOutcomeList pushLocalRows(in ParcelableTableResource tableResource, in OrderedColumns orderedColumns, in List<TypedRow> rowsToInsertUpdateOrDelete);
+  ParcelableRowOutcomeList pushLocalRows(in ParcelableTableResource tableResource, in OrderedColumns orderedColumns, in List<String> rowsToInsertUpdateOrDelete);
 
   /**
    * Request the app-level manifest. This uses a NOT_MODIFIED header to detect

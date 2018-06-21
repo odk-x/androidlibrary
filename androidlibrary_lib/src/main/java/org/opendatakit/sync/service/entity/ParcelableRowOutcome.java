@@ -1,12 +1,17 @@
 package org.opendatakit.sync.service.entity;
 
-import org.opendatakit.aggregate.odktables.rest.entity.Row;
-import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
+
 public class ParcelableRowOutcome extends RowOutcome implements Parcelable {
+  public ParcelableRowOutcome(ParcelableRow row, OutcomeType outcomeType) {
+    super(row);
+
+    setOutcome(outcomeType);
+  }
+
   protected ParcelableRowOutcome(Parcel in) {
     super(ParcelableRow.CREATOR.createFromParcel(in));
 
@@ -16,10 +21,14 @@ public class ParcelableRowOutcome extends RowOutcome implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    ((ParcelableRow) ((Row) this)).writeToParcel(dest, flags);
+    writeToParcel(this, dest, flags);
+  }
 
-    dest.writeString(getSelfUri());
-    dest.writeString(getOutcome().toString());
+  public static void writeToParcel(RowOutcome rowOutcome, Parcel dest, int flags) {
+    ParcelableRow.writeToParcel(rowOutcome, dest, flags);
+    dest.writeString(rowOutcome.getSelfUri());
+    dest.writeString(rowOutcome.getOutcome().toString());
+
   }
 
   @Override
