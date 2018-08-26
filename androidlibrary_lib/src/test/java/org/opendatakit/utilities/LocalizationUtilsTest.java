@@ -15,9 +15,10 @@
 package org.opendatakit.utilities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 
@@ -27,6 +28,7 @@ import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(JUnit4.class)
 public class LocalizationUtilsTest {
 
   String appName = "default";

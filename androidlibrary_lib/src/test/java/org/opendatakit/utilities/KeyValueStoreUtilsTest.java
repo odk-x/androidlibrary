@@ -15,14 +15,15 @@
 package org.opendatakit.utilities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
+import org.opendatakit.database.data.KeyValueStoreEntry;
 import org.opendatakit.database.utilities.KeyValueStoreUtils;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
-import org.opendatakit.database.data.KeyValueStoreEntry;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -30,6 +31,7 @@ import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(JUnit4.class)
 public class KeyValueStoreUtilsTest {
 
    public static final String APP_NAME = "keyValueTests";

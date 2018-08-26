@@ -15,14 +15,16 @@
 package org.opendatakit.data;
 
 import android.graphics.Color;
-
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendatakit.utilities.StaticStateManipulator;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
+import org.opendatakit.utilities.StaticStateManipulator;
 
+@RunWith(JUnit4.class)
 public class ColorRuleTest {
 
    @BeforeClass

@@ -15,9 +15,10 @@
 package org.opendatakit.database.data;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.logging.WebLogger;
@@ -35,6 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(JUnit4.class)
 public class ColumnDefinitionTest {
 
    @BeforeClass
