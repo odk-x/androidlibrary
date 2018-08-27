@@ -32,6 +32,8 @@ import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.logging.WebLogger;
 import org.sqlite.database.sqlite.SQLiteException;
 
+import org.opendatakit.database.service.IDbInterface;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,9 +49,9 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
 
   private static final String TAG = InternalUserDbInterfaceAidlWrapperImpl.class.getSimpleName();
 
-  private AidlDbInterface dbInterface;
+  private IDbInterface dbInterface;
 
-  public InternalUserDbInterfaceAidlWrapperImpl(AidlDbInterface dbInterface) throws IllegalArgumentException {
+  public InternalUserDbInterfaceAidlWrapperImpl(IDbInterface dbInterface) throws IllegalArgumentException {
     if (dbInterface == null) {
       throw new IllegalArgumentException("Database Interface must not be null");
     }
@@ -57,11 +59,11 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
     this.dbInterface = dbInterface;
   }
 
-  public AidlDbInterface getDbInterface() {
+  public IDbInterface getDbInterface() {
     return dbInterface;
   }
 
-  public void setDbInterface(AidlDbInterface dbInterface) {
+  public void setDbInterface(IDbInterface dbInterface) {
     if (dbInterface == null) {
       throw new IllegalArgumentException("Database Interface must not be null");
     }
@@ -73,7 +75,7 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
       throws IllegalArgumentException, IllegalStateException, SQLiteException,
       ActionNotAuthorizedException, ServicesAvailabilityException {
     if ((e instanceof IllegalStateException) || (e instanceof RemoteException)) {
-      String prefix = "via RemoteException on AidlDbInterface: ";
+      String prefix = "via RemoteException on IDbInterface: ";
       String msg = e.getMessage();
       int idx = msg.indexOf(':');
       if (idx == -1) {
@@ -99,7 +101,7 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
       throw new IllegalStateException(prefix + msg);
     } else {
       throw new IllegalStateException(
-          "not IllegalStateException or RemoteException on AidlDbInterface: " + e.getClass()
+          "not IllegalStateException or RemoteException on IDbInterface: " + e.getClass()
               .getName() + ": " + e.toString());
     }
   }
@@ -108,7 +110,7 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
       throws IllegalArgumentException, IllegalStateException, SQLiteException,
       ServicesAvailabilityException {
     if ((e instanceof IllegalStateException) || (e instanceof RemoteException)) {
-      String prefix = "via RemoteException on AidlDbInterface: ";
+      String prefix = "via RemoteException on IDbInterface: ";
       String msg = e.getMessage();
       if (msg == null) {
         throw new IllegalStateException(prefix + e.toString());
@@ -134,7 +136,7 @@ public class InternalUserDbInterfaceAidlWrapperImpl implements InternalUserDbInt
       throw new IllegalStateException(prefix + msg);
     } else {
       throw new IllegalStateException(
-          "not IllegalStateException or RemoteException on AidlDbInterface: " + e.getClass()
+          "not IllegalStateException or RemoteException on IDbInterface: " + e.getClass()
               .getName() + ": " + e.toString());
     }
   }

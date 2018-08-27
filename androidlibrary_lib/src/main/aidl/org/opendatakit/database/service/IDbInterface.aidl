@@ -37,7 +37,7 @@ import org.opendatakit.database.data.KeyValueStoreEntry;
 * (2) InitializationTask
 * (3) CSV Import
 */
-interface AidlDbInterface {
+interface IDbInterface {
 
  /**
    * Return the active user or "anonymous" if the user
