@@ -20,7 +20,7 @@ import org.opendatakit.sync.service.SyncProgressEvent;
 import org.opendatakit.sync.service.SyncAttachmentState;
 import org.opendatakit.sync.service.SyncOverallResult;
 
-interface OdkSyncServiceInterface {
+interface IOdkSyncServiceInterface {
 
   /**
    * Verify the server settings and obtain the user's permissions (roles) on that server.

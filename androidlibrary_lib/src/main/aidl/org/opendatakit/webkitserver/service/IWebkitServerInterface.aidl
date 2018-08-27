@@ -14,7 +14,7 @@
 
 package org.opendatakit.webkitserver.service;
 
-interface WebkitServerInterface {
+interface IWebkitServerInterface {
 		
 	boolean restart();
 
