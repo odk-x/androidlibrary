@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
@@ -409,8 +410,8 @@ public class UserTableTest {
     rowValues2[i] = "wrb";
     elementKeyForIndex[i] = DataTableColumns.SAVEPOINT_CREATOR;
     elementKeyToIndex.put(DataTableColumns.SAVEPOINT_CREATOR, i++);
-    rowValues1[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
-    rowValues2[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
+    rowValues1[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis(), Locale.ROOT);
+    rowValues2[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis(), Locale.ROOT);
     elementKeyForIndex[i] = DataTableColumns.SAVEPOINT_TIMESTAMP;
     elementKeyToIndex.put(DataTableColumns.SAVEPOINT_TIMESTAMP, i++);
     rowValues1[i] = SavepointTypeManipulator.complete();
@@ -648,8 +649,8 @@ public class UserTableTest {
     rowValues2[i] = "wrb";
     elementKeyForIndex[i] = DataTableColumns.SAVEPOINT_CREATOR;
     elementKeyToIndex.put(DataTableColumns.SAVEPOINT_CREATOR, i++);
-    rowValues1[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
-    rowValues2[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
+    rowValues1[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis(), Locale.ROOT);
+    rowValues2[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis(), Locale.ROOT);
     elementKeyForIndex[i] = DataTableColumns.SAVEPOINT_TIMESTAMP;
     elementKeyToIndex.put(DataTableColumns.SAVEPOINT_TIMESTAMP, i++);
     rowValues1[i] = SavepointTypeManipulator.complete();
@@ -841,8 +842,8 @@ public class UserTableTest {
     rowValues2[i] = "wrb";
     elementKeyForIndex[i] = DataTableColumns.SAVEPOINT_CREATOR;
     elementKeyToIndex.put(DataTableColumns.SAVEPOINT_CREATOR, i++);
-    rowValues1[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
-    rowValues2[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis());
+    rowValues1[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis(), Locale.ROOT);
+    rowValues2[i] = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis(), Locale.ROOT);
     elementKeyForIndex[i] = DataTableColumns.SAVEPOINT_TIMESTAMP;
     elementKeyToIndex.put(DataTableColumns.SAVEPOINT_TIMESTAMP, i++);
     rowValues1[i] = SavepointTypeManipulator.complete();
