@@ -2,18 +2,23 @@
 <resources>
     <!-- ActionBar style -->
     <style name="OdkActionBar"
-           parent="@android:style/Widget.DeviceDefault.Light.ActionBar.Solid">
+           parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
         <item name="android:displayOptions">useLogo|showHome</item>
         <item name="android:background">#ffffff</item>
     </style>
     
-    <style name="Opendatakit" parent="android:style/Theme.DeviceDefault.Light">
+    <style name="Opendatakit" parent="Theme.AppCompat.Light.DarkActionBar">
 	    <item name="android:scrollbarThumbHorizontal">@drawable/thumb</item>
 	    <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
 	    <item name="android:scrollbarSize">2.5mm</item>
 	    <item name="android:scrollbarAlwaysDrawVerticalTrack">true</item>
 	    <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
         <item name="android:actionBarStyle">@style/OdkActionBar</item>
+    </style>
+
+    <style name="Opendatakit.NoActionBar">
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">true</item>
     </style>
     
 </resources>
