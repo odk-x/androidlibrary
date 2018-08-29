@@ -105,4 +105,16 @@ public class IntentConsts {
     public static final String PACKAGE_NAME = "org.opendatakit.services";
     public static final String MAIN_ACTIVITY = "org.opendatakit.services.MainActivity";
   }
+
+  public class SubmitLocalSync {
+    public static final String PACKAGE_NAME = "org.opendatakit.submit";
+    public static final String SERVICE_CLASS_NAME = "org.opendatakit.submit.service.local.LocalSyncService";
+    public static final String URI_SCHEME = "submit://";
+  }
+
+  public class SubmitPeerSync {
+    public static final String PACKAGE_NAME = "org.opendatakit.submit";
+    public static final String SERVICE_CLASS_NAME = "org.opendatakit.submit.service.peer.PeerSyncService";
+    public static final String URI_SCHEME = "peer://";
+  }
 }
