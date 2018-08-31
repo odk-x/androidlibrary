@@ -30,7 +30,7 @@ import org.opendatakit.utilities.PRNGFixes;
  *
  * @author mitchellsundt@gmail.com
  */
-public abstract class ToolAwareApplication extends Application {
+public abstract class ToolAwareApplication extends Application implements IToolAwareApplication {
 
   private static final String t = ToolAwareApplication.class.getSimpleName();
 
@@ -52,13 +52,6 @@ public abstract class ToolAwareApplication extends Application {
     super();
     PRNGFixes.apply();
   }
-
-  /**
-   * Return the resource id for the friendly name of this application.
-   *
-   * @return
-   */
-  public abstract int getApkDisplayNameResourceId();
 
   @Override
   public void onCreate() {
@@ -85,12 +78,14 @@ public abstract class ToolAwareApplication extends Application {
    * 
    * @return the tool name.
    */
+  @Override
   public String getToolName() {
     String packageName = getPackageName();
     String[] parts = packageName.split("\\.");
     return parts[2];
   }
 
+  @Override
   public String getVersionCodeString() {
     try {
       PackageInfo pinfo;
@@ -103,6 +98,7 @@ public abstract class ToolAwareApplication extends Application {
     }
   }
 
+  @Override
   public String getVersionDetail() {
     String versionDetail = "";
     try {
@@ -116,6 +112,7 @@ public abstract class ToolAwareApplication extends Application {
     return versionDetail;
   }
 
+  @Override
   public String getVersionedToolName() {
     String versionDetail = this.getVersionDetail();
     return getString(getApkDisplayNameResourceId()) + versionDetail;
