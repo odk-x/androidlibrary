@@ -28,7 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import org.opendatakit.activities.IAppAwareActivity;
 import org.opendatakit.androidlibrary.R;
-import org.opendatakit.application.ToolAwareApplication;
+import org.opendatakit.application.IToolAwareApplication;
 import org.opendatakit.listener.LicenseReaderListener;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.WebLoggerIf;
@@ -79,7 +79,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     View aboutMenuView = inflater.inflate(ID, container, false);
 
     TextView versionBox = (TextView) aboutMenuView.findViewById(R.id.versionText);
-    versionBox.setText(((ToolAwareApplication) getActivity().getApplication()).getVersionedToolName());
+    versionBox.setText(((IToolAwareApplication) getActivity().getApplication()).getVersionedToolName());
 
     {
       IAppAwareActivity appAwareActivity = (IAppAwareActivity) getActivity();
@@ -157,7 +157,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
 
     if ( licenseReaderTask == null ) {
       LicenseReaderTask lrt = new LicenseReaderTask();
-      lrt.setApplication((ToolAwareApplication) getActivity().getApplication());
+      lrt.setApplication(getActivity().getApplication());
       lrt.setAppName(appName);
       lrt.setLicenseReaderListener(this);
       licenseReaderTask = lrt;
