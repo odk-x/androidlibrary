@@ -147,9 +147,9 @@ public final class ODKFileUtils {
    * Filename holding table-specific definitions (just translations for now).
    */
   private static final String TABLE_SPECIFIC_DEFINITIONS_JS = "tableSpecificDefinitions.js";
-  private static final Pattern VALID_INSTANCE_ID_FOLDER_NAME_PATTERN = Pattern
+  public static final Pattern VALID_INSTANCE_ID_FOLDER_NAME_PATTERN = Pattern
       .compile("(\\p{P}|\\p{Z})");
-  private static final Pattern VALID_FOLDER_PATTERN = Pattern
+  public static final Pattern VALID_FOLDER_PATTERN = Pattern
       .compile("^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)+$");
 
   private static final Pattern FORWARD_SLASH_PATTERN = Pattern.compile("/");
