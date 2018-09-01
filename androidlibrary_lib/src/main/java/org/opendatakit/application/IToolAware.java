@@ -1,6 +1,6 @@
 package org.opendatakit.application;
 
-public interface IToolAwareApplication {
+public interface IToolAware {
   /**
    * Return the resource id for the friendly name of this application.
    *

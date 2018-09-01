@@ -30,7 +30,7 @@ import org.opendatakit.utilities.PRNGFixes;
  *
  * @author mitchellsundt@gmail.com
  */
-public abstract class ToolAwareApplication extends Application implements IToolAwareApplication {
+public abstract class ToolAwareApplication extends Application implements IToolAware {
 
   private static final String t = ToolAwareApplication.class.getSimpleName();
 
