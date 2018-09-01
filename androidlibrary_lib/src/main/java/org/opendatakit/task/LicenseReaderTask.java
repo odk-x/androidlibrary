@@ -18,8 +18,6 @@ package org.opendatakit.task;
 import android.app.Application;
 import android.os.AsyncTask;
 import org.opendatakit.androidlibrary.R;
-import org.opendatakit.application.IToolAwareApplication;
-import org.opendatakit.application.ToolAwareApplication;
 import org.opendatakit.listener.LicenseReaderListener;
 
 import java.io.BufferedReader;
