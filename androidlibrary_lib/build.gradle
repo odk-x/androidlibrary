@@ -133,8 +133,8 @@ task updateClassifierSnapshotBasic {
         bundleSnapshotBasicRelease.classifier snapshotRelease
         bundleSnapshotBasicDebug.classifier snapshotDebug
 
-        publishing.publications.aarRelease.artifact bundleSnapshotBasicRelease
-        publishing.publications.aarDebug.artifact bundleSnapshotBasicDebug
+        publishing.publications.aarRelease.artifact bundleSnapshotBasicReleaseAar
+        publishing.publications.aarDebug.artifact bundleSnapshotBasicDebugAar
 
         project.getArtifacts().add("default", bundleSnapshotBasicDebug)
     }
