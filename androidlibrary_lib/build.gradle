@@ -145,8 +145,8 @@ task updateClassifierDemoBasic {
         bundleDemoBasicRelease.classifier demoRelease
         bundleDemoBasicDebug.classifier demoDebug
 
-        publishing.publications.aarRelease.artifact bundleDemoBasicRelease
-        publishing.publications.aarDebug.artifact bundleDemoBasicDebug
+        publishing.publications.aarRelease.artifact bundleDemoBasicReleaseAar
+        publishing.publications.aarDebug.artifact bundleDemoBasicDebugAar
 
         project.getArtifacts().add("default", bundleDemoBasicDebug)
     }
