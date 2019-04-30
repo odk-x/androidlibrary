@@ -16,6 +16,8 @@
 package org.opendatakit.builder;
 
 import android.content.ContentValues;
+import android.util.Log;
+
 import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.ConflictType;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
@@ -398,6 +400,7 @@ public class CsvUtil {
       String fileQualifier, boolean createIfNotPresent) throws ServicesAvailabilityException {
 
     DbHandle db = null;
+    Log.e("KEVIN", "Kevin is awesome!!!!!");
     try {
       db = supervisor.getDatabase().openDatabase(appName);
       if (!supervisor.getDatabase().hasTableId(appName, db, tableId)) {
@@ -555,6 +558,33 @@ public class CsvUtil {
             }
             if (DataTableColumns.SAVEPOINT_TIMESTAMP.equals(column)) {
               if (tmp != null && !tmp.isEmpty()) {
+                System.err.println("HELLO taking action");
+
+                // first convert string format of v_savepoint_timestamp
+                // to Long format so we can compare
+                Long savepoint_timestamp = TableConstants.milliSecondsFromNanos(v_savepoint_timestamp, TableConstants.TIMESTAMP_LOCALE);
+
+                // convert current data point of timestamp in csv file from string format to Long
+                Long timestamp;
+                try {
+                  timestamp = TableConstants.milliSecondsFromNanos(tmp, TableConstants.TIMESTAMP_LOCALE);
+                } catch (IllegalArgumentException e) {
+                  // illegal timestamp format, continue
+                  // current v_savepoint_timestamp is already current time
+                  // so we can go on
+                  continue;
+                }
+
+
+                if (timestamp > savepoint_timestamp) {
+                  // user-entered timestamp is greater than current time. so just correct
+                  // to current time. In this case we do nothing since it v_save is already
+                  // current time
+                  continue;
+                }
+
+                // otherwise, the date is valid, so we just import the timestamp with
+                // whatever it was.
                 v_savepoint_timestamp = tmp;
               }
               continue;
