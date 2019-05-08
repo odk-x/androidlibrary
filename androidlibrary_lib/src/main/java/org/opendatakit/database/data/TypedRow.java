@@ -241,6 +241,9 @@ public final class TypedRow implements Parcelable {
       if(dataType == null) {
          return null;
       }
+      if (row == null) {
+         return null;
+      }
       try {
          if (ElementDataType.string.equals(dataType)) {
             return row.getRawStringByKey(key); 
