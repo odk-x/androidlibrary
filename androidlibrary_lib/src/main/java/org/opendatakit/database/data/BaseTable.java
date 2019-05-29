@@ -290,7 +290,8 @@ public class BaseTable implements Parcelable {
   }
 
   public Row getRowAtIndex(int index) {
-    return mRows.get(index);
+    boolean inBounds = (index >= 0) && (index < mRows.size());
+    return inBounds ? mRows.get(index) : null;
   }
 
   /**
