@@ -6,9 +6,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
-import android.support.v4.app.ActivityCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.core.app.ActivityCompat;
 import org.opendatakit.androidlibrary.R;
 
 public class RuntimePermissionUtils {

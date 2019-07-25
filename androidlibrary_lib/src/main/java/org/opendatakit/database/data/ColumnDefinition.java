@@ -15,7 +15,7 @@
  */
 package org.opendatakit.database.data;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
