@@ -15,11 +15,9 @@
 package org.opendatakit.utilities;
 
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
@@ -47,7 +45,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
-@RunWith(AndroidJUnit4.class)
 public class UserTableTest {
 
   /*

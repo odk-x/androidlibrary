@@ -16,11 +16,9 @@
 package org.opendatakit.provider;
 
 import android.net.Uri;
-import android.support.test.runner.AndroidJUnit4;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 import org.opendatakit.utilities.StaticStateManipulator;
@@ -37,7 +35,7 @@ import static org.junit.Assert.assertNull;
  *
  * @author mitchellsundt@gmail.com
  */
-@RunWith(AndroidJUnit4.class)
+
 public class FormProviderUtilsTest {
 
    private static final String APPNAME = "fpuTest";
