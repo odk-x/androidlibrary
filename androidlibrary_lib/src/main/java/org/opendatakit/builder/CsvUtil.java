@@ -400,7 +400,6 @@ public class CsvUtil {
       String fileQualifier, boolean createIfNotPresent) throws ServicesAvailabilityException {
 
     DbHandle db = null;
-    Log.e("KEVIN", "Kevin is awesome!!!!!");
     try {
       db = supervisor.getDatabase().openDatabase(appName);
       if (!supervisor.getDatabase().hasTableId(appName, db, tableId)) {
@@ -558,7 +557,6 @@ public class CsvUtil {
             }
             if (DataTableColumns.SAVEPOINT_TIMESTAMP.equals(column)) {
               if (tmp != null && !tmp.isEmpty()) {
-                System.err.println("HELLO taking action");
 
                 // first convert string format of v_savepoint_timestamp
                 // to Long format so we can compare
