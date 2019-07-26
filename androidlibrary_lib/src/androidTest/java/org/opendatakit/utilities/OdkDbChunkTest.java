@@ -16,11 +16,9 @@ package org.opendatakit.utilities;
 
 import android.os.Bundle;
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opendatakit.database.service.DbChunk;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
@@ -35,7 +33,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 
-@RunWith(AndroidJUnit4.class)
+
 public class OdkDbChunkTest {
 
   /**

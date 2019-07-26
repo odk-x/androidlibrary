@@ -15,12 +15,9 @@
 package org.opendatakit.utilities;
 
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.BaseTable;
 import org.opendatakit.logging.WebLogger;
@@ -31,7 +28,6 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-@RunWith(AndroidJUnit4.class)
 public class OdkBaseTableTest {
 
   /* Test data */

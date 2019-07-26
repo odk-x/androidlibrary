@@ -19,7 +19,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public enum SyncAttachmentState implements Parcelable {
-  SYNC, UPLOAD, DOWNLOAD, NONE;
+  SYNC, UPLOAD, DOWNLOAD, NONE, REDUCED_SYNC, RE_DOWNLOAD;
 
   @Override
   public int describeContents() {
