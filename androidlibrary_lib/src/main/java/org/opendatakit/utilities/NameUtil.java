@@ -17,6 +17,7 @@ package org.opendatakit.utilities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.opendatakit.logging.WebLogger;
+import org.opendatakit.provider.DataTableColumns;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,9 +67,9 @@ public final class NameUtil {
      * ODK Metadata reserved names
      */
     reservedNames.addAll(Arrays
-        .asList("ROW_ETAG", "SYNC_STATE", "CONFLICT_TYPE", "SAVEPOINT_TIMESTAMP",
-            "SAVEPOINT_CREATOR", "SAVEPOINT_TYPE", "DEFAULT_ACCESS", "ROW_OWNER", "GROUP_READ_ONLY",
-            "GROUP_MODIFY", "GROUP_PRIVILEGED", "FORM_ID", "LOCALE"));
+        .asList(DataTableColumns.ROW_ETAG, DataTableColumns.SYNC_STATE, DataTableColumns.CONFLICT_TYPE, DataTableColumns.SAVEPOINT_TIMESTAMP,
+                DataTableColumns.SAVEPOINT_CREATOR, DataTableColumns.SAVEPOINT_TYPE, DataTableColumns.DEFAULT_ACCESS, DataTableColumns.ROW_OWNER, DataTableColumns.GROUP_READ_ONLY,
+                DataTableColumns.GROUP_MODIFY, DataTableColumns.GROUP_PRIVILEGED, DataTableColumns.FORM_ID, DataTableColumns.LOCALE));
     /**
      * SQLite keywords ( http://www.sqlite.org/lang_keywords.html )
      */
