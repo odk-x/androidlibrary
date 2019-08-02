@@ -107,13 +107,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.preference:preference:1.0.0'
     implementation 'androidx.fragment:fragment:1.2.0-alpha01'
-    implementation 'commons-io:commons-io:2.6'
-    implementation 'org.apache.commons:commons-lang3:3.5'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.9'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.9.9'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9.2'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.9'
-    implementation 'joda-time:joda-time:2.10.3'
 
     // Testing dependencies
     testImplementation 'junit:junit:4.12'
