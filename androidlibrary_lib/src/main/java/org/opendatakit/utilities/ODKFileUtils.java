@@ -17,7 +17,7 @@ package org.opendatakit.utilities;
 
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.CheckResult;
+import androidx.annotation.CheckResult;
 import android.util.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
