@@ -17,15 +17,12 @@ package org.opendatakit.logic;
 
 import android.Manifest;
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.rule.GrantPermissionRule;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.rule.GrantPermissionRule;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.opendatakit.androidlibrary.R;
 import org.opendatakit.utilities.ODKFileUtils;
 import org.opendatakit.utilities.StaticStateManipulator;
 import org.opendatakit.logging.WebLogger;
@@ -44,7 +41,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author mitchellsundt@gmail.com
  */
-@RunWith(AndroidJUnit4.class)
+
 public class PropertiesNonPrivilegedTest {
 
     private static final String APPNAME = "unittestProp";

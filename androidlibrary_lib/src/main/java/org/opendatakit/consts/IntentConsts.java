@@ -30,6 +30,7 @@ public class IntentConsts {
   public static final String INTENT_KEY_SETTINGS_ADMIN_ENABLED = "adminEnabled";
 
   public static final String INTENT_KEY_PERMISSION_ONLY = "permissionOnly";
+  public static final String INTENT_KEY_REDOWNLOAD_ATTACHMENT = "reDownload";
   /**
    * Intent Extras:
    * <ol><li>INTENT_KEY_APP_NAME</li>

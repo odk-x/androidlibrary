@@ -1,8 +1,7 @@
 package org.opendatakit.utilities;
 
-import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+
 
 import java.io.File;
 
@@ -12,7 +11,6 @@ import static org.junit.Assert.assertEquals;
  * Tests for ODKFileUtils
  */
 
-@RunWith(AndroidJUnit4.class)
 public class ODKFileUtilsTest {
   static final String appName;
   static final File appDir;

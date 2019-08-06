@@ -1,8 +1,8 @@
 package org.opendatakit.fragment;
 
-import android.support.v4.app.FragmentManager;
+import androidx.fragment.app.FragmentManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import org.opendatakit.logging.WebLogger;
 
 /**

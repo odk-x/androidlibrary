@@ -14,7 +14,7 @@
 
 package org.opendatakit.fragment;
 
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
