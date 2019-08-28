@@ -154,8 +154,12 @@ task updateClassifierDemoBasic {
 }
 
 
-task spawnSnapshotBasicArchives(dependsOn: ['snapshotVersion', 'assembleSnapshotBasicDebug',
-                                            'assembleSnapshotBasicRelease', 'updateClassifierSnapshotBasic'])
+task spawnSnapshotBasicArchives {
+    dependsOn(['snapshotVersion', 'assembleSnapshotBasicDebug',
+                'assembleSnapshotBasicRelease', 'updateClassifierSnapshotBasic'])
+}
 
-task spawnDemoBasicArchives(dependsOn: ['snapshotVersion', 'assembleDemoBasicDebug',
-                                            'assembleDemoBasicRelease', 'updateClassifierDemoBasic'])
+task spawnDemoBasicArchives {
+    dependsOn(['snapshotVersion', 'assembleDemoBasicDebug',
+                    'assembleDemoBasicRelease', 'updateClassifierDemoBasic'])
+}
