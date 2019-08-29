@@ -159,3 +159,6 @@ task spawnDemoBasicArchives {
         project.getArtifacts().add("default", bundleDemoBasicDebugAar)
     }
 }
+
+artifactoryPublish.mustRunAfter('spawnSnapshotBasicArchives')
+artifactoryPublish.mustRunAfter('spawnDemoBasicArchives')
