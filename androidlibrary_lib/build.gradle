@@ -129,7 +129,11 @@ publishing {
     }
 }
 
-task updateClassifierSnapshotBasic {
+
+task spawnSnapshotBasicArchives {
+    dependsOn('snapshotVersion')
+    dependsOn('assembleSnapshotBasicDebug')
+    dependsOn('assembleSnapshotBasicRelease')
     doLast {
         bundleSnapshotBasicReleaseAar.classifier snapshotRelease
         bundleSnapshotBasicDebugAar.classifier snapshotDebug
@@ -141,7 +145,10 @@ task updateClassifierSnapshotBasic {
     }
 }
 
-task updateClassifierDemoBasic {
+task spawnDemoBasicArchives {
+    dependsOn('snapshotVersion')
+    dependsOn('assembleDemoBasicDebug')
+    dependsOn('assembleDemoBasicRelease')
     doLast {
         bundleDemoBasicReleaseAar.classifier demoRelease
         bundleDemoBasicDebugAar.classifier demoDebug
@@ -151,15 +158,4 @@ task updateClassifierDemoBasic {
 
         project.getArtifacts().add("default", bundleDemoBasicDebugAar)
     }
-}
-
-
-task spawnSnapshotBasicArchives {
-    dependsOn(['snapshotVersion', 'assembleSnapshotBasicDebug',
-                'assembleSnapshotBasicRelease', 'updateClassifierSnapshotBasic'])
-}
-
-task spawnDemoBasicArchives {
-    dependsOn(['snapshotVersion', 'assembleDemoBasicDebug',
-                    'assembleDemoBasicRelease', 'updateClassifierDemoBasic'])
 }
