@@ -162,4 +162,5 @@ task spawnDemoBasicArchives {
 
 artifactoryPublish.mustRunAfter('spawnSnapshotBasicArchives')
 artifactoryPublish.mustRunAfter('spawnDemoBasicArchives')
-artifactoryPublish.mustRunAfter('connectedAndroidTest')
+artifactoryPublish.mustRunAfter('connectedSnapshotBasicDebugAndroidTest')
+artifactoryPublish.mustRunAfter('connectedDemoBasicDebugAndroidTest')
