@@ -106,7 +106,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.preference:preference:1.0.0'
-    implementation 'androidx.fragment:fragment:1.2.0-alpha01'
+    implementation 'androidx.fragment:fragment:1.2.0-alpha02'
 
     // Testing dependencies
     testImplementation 'junit:junit:4.12'
@@ -129,7 +129,11 @@ publishing {
     }
 }
 
-task updateClassifierSnapshotBasic {
+
+task spawnSnapshotBasicArchives {
+    dependsOn('snapshotVersion')
+    dependsOn('assembleSnapshotBasicDebug')
+    dependsOn('assembleSnapshotBasicRelease')
     doLast {
         bundleSnapshotBasicReleaseAar.classifier snapshotRelease
         bundleSnapshotBasicDebugAar.classifier snapshotDebug
@@ -141,7 +145,10 @@ task updateClassifierSnapshotBasic {
     }
 }
 
-task updateClassifierDemoBasic {
+task spawnDemoBasicArchives {
+    dependsOn('snapshotVersion')
+    dependsOn('assembleDemoBasicDebug')
+    dependsOn('assembleDemoBasicRelease')
     doLast {
         bundleDemoBasicReleaseAar.classifier demoRelease
         bundleDemoBasicDebugAar.classifier demoDebug
@@ -153,9 +160,7 @@ task updateClassifierDemoBasic {
     }
 }
 
-
-task spawnSnapshotBasicArchives(dependsOn: ['snapshotVersion', 'assembleSnapshotBasicDebug',
-                                            'assembleSnapshotBasicRelease', 'updateClassifierSnapshotBasic'])
-
-task spawnDemoBasicArchives(dependsOn: ['snapshotVersion', 'assembleDemoBasicDebug',
-                                            'assembleDemoBasicRelease', 'updateClassifierDemoBasic'])
+artifactoryPublish.mustRunAfter('spawnSnapshotBasicArchives')
+artifactoryPublish.mustRunAfter('spawnDemoBasicArchives')
+artifactoryPublish.mustRunAfter('connectedSnapshotBasicDebugAndroidTest')
+artifactoryPublish.mustRunAfter('connectedDemoBasicDebugAndroidTest')
