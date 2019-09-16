@@ -101,6 +101,8 @@ public class AlertNProgessMsgFragmentMger {
    private boolean alertDismissActivity;
    private boolean progressDismissActivity;
 
+   private boolean onSaveInstanceStateCalled;
+
    // Make default constructor private
    private AlertNProgessMsgFragmentMger() {
    }
@@ -115,6 +117,7 @@ public class AlertNProgessMsgFragmentMger {
        progressDismissActivity) {
       mDialogState = DialogState.None;
       dialogsClearedForFragmentShutdown = false;
+      onSaveInstanceStateCalled = false;
       this.appName = appName;
       this.alertDialogTag = initAlertDialogTag;
       this.progressDialogTag = initDialogProgressTag;
@@ -128,6 +131,7 @@ public class AlertNProgessMsgFragmentMger {
     * @param bundleOfState
     */
    public void addStateToSaveStateBundle(Bundle bundleOfState) {
+      onSaveInstanceStateCalled = true;
       bundleOfState.putString(APPNAME_KEY, appName);
       bundleOfState.putString(ALERT_TAG_KEY, alertDialogTag);
       bundleOfState.putString(PROGRESS_TAG_KEY, progressDialogTag);
@@ -145,6 +149,7 @@ public class AlertNProgessMsgFragmentMger {
     */
    public void restoreDialog(FragmentManager fragmentManager, int fragmentId) {
       dialogsClearedForFragmentShutdown = false;
+      onSaveInstanceStateCalled = false;
       switch (mDialogState) {
       case Progress:
          restoreProgressDialog(fragmentManager);
@@ -159,7 +164,7 @@ public class AlertNProgessMsgFragmentMger {
    }
 
    public boolean displayingProgressDialog() {
-      return mDialogState == DialogState.Progress && !dialogsClearedForFragmentShutdown;
+      return mDialogState == DialogState.Progress && !dialogsClearedForFragmentShutdown && !onSaveInstanceStateCalled;
    }
 
    public boolean hasDialogBeenCreated() {
@@ -219,6 +224,7 @@ public class AlertNProgessMsgFragmentMger {
       currentTitle = title;
       currentMessage = message;
       dialogsClearedForFragmentShutdown = false;
+      onSaveInstanceStateCalled = false;
       restoreAlertDialog(fragmentManager, fragmentId);
    }
 
@@ -245,6 +251,7 @@ public class AlertNProgessMsgFragmentMger {
       currentTitle = title;
       currentMessage = message;
       dialogsClearedForFragmentShutdown = false;
+      onSaveInstanceStateCalled = false;
       restoreProgressDialog(fragmentManager);
    }
 
@@ -260,6 +267,11 @@ public class AlertNProgessMsgFragmentMger {
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException("FragmentManager cannot be null");
+      }
+
+      if(onSaveInstanceStateCalled) {
+         // we are in the middle of shutting down, update will be lost
+         return;
       }
 
       if(dialogsClearedForFragmentShutdown) {
@@ -293,6 +305,11 @@ public class AlertNProgessMsgFragmentMger {
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException("FragmentManager cannot be null");
+      }
+
+      if(onSaveInstanceStateCalled) {
+         // we are in the middle of shutting down, update will be lost
+         return;
       }
 
       if(dialogsClearedForFragmentShutdown) {
