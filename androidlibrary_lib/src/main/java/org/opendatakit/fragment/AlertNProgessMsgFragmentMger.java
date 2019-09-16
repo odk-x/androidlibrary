@@ -217,14 +217,22 @@ public class AlertNProgessMsgFragmentMger {
          throw new IllegalArgumentException("FragmentManager cannot be null");
       }
 
+      if(dialogsClearedForFragmentShutdown) {
+         throw new IllegalStateException("Getting an create" +
+                 "alert when the dialogs have been cleared for shutdown");
+      }
+
+      if(onSaveInstanceStateCalled) {
+         WebLogger.getLogger(appName).e(TAG, "Trying to create an Alert Dialog after" +
+                 "onSaveStateInstance is called");
+      }
+
       if (mDialogState == DialogState.Progress) {
          dismissProgressDialog(fragmentManager);
       }
 
       currentTitle = title;
       currentMessage = message;
-      dialogsClearedForFragmentShutdown = false;
-      onSaveInstanceStateCalled = false;
       restoreAlertDialog(fragmentManager, fragmentId);
    }
 
@@ -244,14 +252,22 @@ public class AlertNProgessMsgFragmentMger {
          throw new IllegalArgumentException("FragmentManager cannot be null");
       }
 
+      if(dialogsClearedForFragmentShutdown) {
+         throw new IllegalStateException("Getting an create" +
+              "progress when the dialogs have been cleared for shutdown");
+      }
+
+      if(onSaveInstanceStateCalled) {
+         WebLogger.getLogger(appName).e(TAG, "Trying to create an Progress Dialog after" +
+                 "onSaveStateInstance is called");
+      }
+
       if (mDialogState == DialogState.Alert) {
          dismissAlertDialog(fragmentManager);
       }
 
       currentTitle = title;
       currentMessage = message;
-      dialogsClearedForFragmentShutdown = false;
-      onSaveInstanceStateCalled = false;
       restoreProgressDialog(fragmentManager);
    }
 
