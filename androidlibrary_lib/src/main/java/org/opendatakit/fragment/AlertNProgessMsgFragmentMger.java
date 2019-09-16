@@ -287,7 +287,8 @@ public class AlertNProgessMsgFragmentMger {
 
       if(onSaveInstanceStateCalled) {
          // we are in the middle of shutting down, update will be lost
-         return;
+         WebLogger.getLogger(appName).e(TAG, "Trying to Update an Progress Dialog after" +
+                 "onSaveStateInstance is called");
       }
 
       if(dialogsClearedForFragmentShutdown) {
@@ -325,6 +326,8 @@ public class AlertNProgessMsgFragmentMger {
 
       if(onSaveInstanceStateCalled) {
          // we are in the middle of shutting down, update will be lost
+         WebLogger.getLogger(appName).e(TAG, "Trying to Update an Progress Dialog after" +
+                 "onSaveStateInstance is called");
          return;
       }
 
