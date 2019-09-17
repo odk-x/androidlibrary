@@ -104,9 +104,9 @@ dependencies {
     implementation 'net.jcip:jcip-annotations:1.0'
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.preference:preference:1.0.0'
-    implementation 'androidx.fragment:fragment:1.2.0-alpha02'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'androidx.fragment:fragment:1.2.0-alpha03'
 
     // Testing dependencies
     testImplementation 'junit:junit:4.12'
