@@ -20,9 +20,9 @@ import android.os.Parcel;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.database.service.DbChunk;
+import org.opendatakit.database.utilities.DbChunkUtil;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
-import org.opendatakit.database.utilities.DbChunkUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +31,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class OdkDbChunkTest {

@@ -17,18 +17,19 @@ package org.opendatakit.logic;
 
 import android.Manifest;
 import android.content.Context;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.GrantPermissionRule;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.opendatakit.utilities.ODKFileUtils;
-import org.opendatakit.utilities.StaticStateManipulator;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 import org.opendatakit.properties.CommonToolProperties;
 import org.opendatakit.properties.PropertiesSingleton;
+import org.opendatakit.utilities.ODKFileUtils;
+import org.opendatakit.utilities.StaticStateManipulator;
 
 import java.util.Collections;
 import java.util.HashMap;

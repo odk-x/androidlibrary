@@ -18,8 +18,8 @@ import android.os.Parcel;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.BaseTable;
+import org.opendatakit.database.data.Row;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 
