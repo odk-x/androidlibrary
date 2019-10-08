@@ -21,7 +21,6 @@ import android.content.res.Configuration;
 import android.util.Log;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.ODKFileUtils;
-import org.opendatakit.utilities.PRNGFixes;
 
 /**
  * Move some of the functionality of CommonApplication up into androidlibrary
@@ -50,7 +49,6 @@ public abstract class ToolAwareApplication extends Application implements IToolA
 
   public ToolAwareApplication() {
     super();
-    PRNGFixes.apply();
   }
 
   @Override

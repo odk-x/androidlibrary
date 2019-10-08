@@ -16,7 +16,6 @@ package org.opendatakit.utilities;
 
 import android.Manifest;
 
-
 import androidx.test.rule.GrantPermissionRule;
 
 import org.junit.Before;

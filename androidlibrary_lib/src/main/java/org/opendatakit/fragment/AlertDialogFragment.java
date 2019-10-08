@@ -161,7 +161,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
 
       final Integer fragmentId = getArguments().getInt(FRAGMENT_ID_KEY);
 
-      FragmentManager mgr = getFragmentManager();
+      FragmentManager mgr = getParentFragmentManager();
       Fragment f = mgr.findFragmentById(fragmentId);
       setTargetFragment(f, RequestCodes.ALERT_DIALOG.ordinal());
 
@@ -179,7 +179,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       ok_invoked = true;
       switch (i) {
       case DialogInterface.BUTTON_POSITIVE: // ok
-         FragmentManager mgr = getFragmentManager();
+         FragmentManager mgr = getParentFragmentManager();
          Fragment f = mgr.findFragmentById(fragmentId);
 
          if (f instanceof ConfirmAlertDialog) {
