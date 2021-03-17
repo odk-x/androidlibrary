@@ -15,13 +15,23 @@
 package org.opendatakit.fragment;
 
 import android.app.Activity;
-import android.app.Dialog;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.AppNameUtil;
@@ -171,16 +181,6 @@ public class ProgressDialogFragment extends DialogFragment
       super.onSaveInstanceState(outState);
    }
 
-   private ProgressDialog getProgressDialog() {
-      Dialog dialog = getDialog();
-      if (dialog instanceof ProgressDialog) {
-         return (ProgressDialog) dialog;
-      } else {
-         throw new IllegalStateException("Somehow an ProgressDialogFrament does not have an "
-             + "ProgressDialog");
-      }
-   }
-
    /**
     * Updates the message on the dialog
     *
@@ -188,7 +188,7 @@ public class ProgressDialogFragment extends DialogFragment
     */
    public void setMessage(String newMessage) {
       message = newMessage;
-      getProgressDialog().setMessage(message);
+      tvMessage.setText(message);
    }
 
    /**
@@ -198,56 +198,86 @@ public class ProgressDialogFragment extends DialogFragment
     */
    private void setTitle(String newTitle) {
       title = newTitle;
-      getProgressDialog().setMessage(title);
+      tvTitle.setText(title);
    }
 
    public void setMessage(String message, int progress, int max) {
-      ProgressDialog dlg = getProgressDialog();
-      dlg.setMessage(message);
-      if (progress == -1) {
-         dlg.setIndeterminate(true);
-      } else {
-         dlg.setIndeterminate(false);
-         dlg.setMax(max);
-         dlg.setProgress(progress);
+      tvMessage.setText(message);
+      if(progress<=0)
+         progressIndicator.setIndeterminate(true);
+      else {
+         progressIndicator.setIndeterminate(false);
+         progressIndicator.setMax(max);
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            progressIndicator.setProgress(progress,true);
+         }
+         else
+            progressIndicator.setProgress(progress);
       }
    }
 
-   /**
-    * Called from onCreate when a dialog object needs to be created
-    *
-    * @param savedInstanceState unused
-    * @return a Dialog object with the correct message and title
-    */
-   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-      ProgressDialog mProgressDialog = new ProgressDialog(getActivity(), getTheme());
-      mProgressDialog.setTitle(title);
-      mProgressDialog.setMessage(message);
-      mProgressDialog.setIndeterminate(true);
-      mProgressDialog.setCancelable(false);
-      mProgressDialog.setCanceledOnTouchOutside(false);
+   TextView tvTitle, tvMessage;
+   LinearProgressIndicator progressIndicator;
+   ImageView iconImage;
+   Button btnNeutral, btnPositive, btnNegative;
 
-      if (positiveButtonText != null) {
-         mProgressDialog.setButton(DialogInterface.BUTTON_POSITIVE, positiveButtonText, this);
+   @Nullable
+   @Override
+   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+      return inflater.inflate(R.layout.progress_indicator_layout,container);
+   }
+
+   @Override
+   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+      super.onViewCreated(view, savedInstanceState);
+
+      tvTitle=view.findViewById(R.id.tvTitle);
+      tvMessage=view.findViewById(R.id.tvMessage);
+      progressIndicator=view.findViewById(R.id.progress_indicator);
+      iconImage=view.findViewById(R.id.iconImage);
+      btnNeutral=view.findViewById(R.id.neutralButton);
+      btnPositive=view.findViewById(R.id.positiveButton);
+      btnNegative=view.findViewById(R.id.negativeButton);
+
+      btnNeutral.setVisibility(View.GONE);
+      btnPositive.setVisibility(View.GONE);
+      btnNegative.setVisibility(View.GONE);
+
+      if(neutralButtonText!=null){
+         btnNeutral.setVisibility(View.VISIBLE);
+         btnNeutral.setText(neutralButtonText);
       }
 
-      if (negativeButtonText != null) {
-         mProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, negativeButtonText, this);
+      if(positiveButtonText!=null){
+         btnPositive.setVisibility(View.VISIBLE);
+         btnPositive.setText(positiveButtonText);
       }
 
-      if (neutralButtonText != null) {
-         mProgressDialog.setButton(DialogInterface.BUTTON_NEUTRAL, neutralButtonText, this);
+      if(negativeButtonText!=null){
+         btnNegative.setVisibility(View.VISIBLE);
+         btnNegative.setText(negativeButtonText);
       }
 
-      if (canDismissDialog) {
-         mProgressDialog.setIcon(android.R.drawable.ic_dialog_info);
-      } else {
-         mProgressDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+      tvTitle.setText(title);
+      tvMessage.setText(message);
+      progressIndicator.setIndeterminate(true);
+      createDialogCalled=true;
+
+      if(canDismissDialog){
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            iconImage.setImageDrawable(getActivity().getDrawable(android.R.drawable.ic_dialog_info));
+         else
+            iconImage.setVisibility(View.GONE);
+      }
+      else{
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            iconImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_info_outline_black_24dp));
+         else
+            iconImage.setVisibility(View.GONE);
       }
 
-      createDialogCalled = true;
-
-      return mProgressDialog;
+      getDialog().setCanceledOnTouchOutside(false);
+      getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
    }
 
    @Override public void onClick(DialogInterface dialog, int whichButton) {
