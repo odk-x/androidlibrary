@@ -15,23 +15,22 @@
 package org.opendatakit.fragment;
 
 import android.app.Activity;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.app.Dialog;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.AppNameUtil;
@@ -181,6 +180,16 @@ public class ProgressDialogFragment extends DialogFragment
       super.onSaveInstanceState(outState);
    }
 
+   private AlertDialog getProgressDialog() {
+      Dialog dialog = getDialog();
+      if (dialog instanceof AlertDialog) {
+         return (AlertDialog) dialog;
+      } else {
+         throw new IllegalStateException("Somehow an ProgressDialogFrament does not have an "
+             + "ProgressDialog");
+      }
+   }
+
    /**
     * Updates the message on the dialog
     *
@@ -198,10 +207,11 @@ public class ProgressDialogFragment extends DialogFragment
     */
    private void setTitle(String newTitle) {
       title = newTitle;
-      tvTitle.setText(title);
+      getProgressDialog().setTitle(title);
    }
 
    public void setMessage(String message, int progress, int max) {
+      this.message=message;
       tvMessage.setText(message);
       if(progress<=0)
          progressIndicator.setIndeterminate(true);
@@ -216,68 +226,49 @@ public class ProgressDialogFragment extends DialogFragment
       }
    }
 
-   TextView tvTitle, tvMessage;
+   TextView tvMessage;
    LinearProgressIndicator progressIndicator;
-   ImageView iconImage;
-   Button btnNeutral, btnPositive, btnNegative;
 
-   @Nullable
-   @Override
-   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-      return inflater.inflate(R.layout.progress_indicator_layout,container);
-   }
+   /**
+    * Called from onCreate when a dialog object needs to be created
+    *
+    * @param savedInstanceState unused
+    * @return a Dialog object with the correct message and title
+    */
+   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-   @Override
-   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-      super.onViewCreated(view, savedInstanceState);
+      LayoutInflater inflater=getLayoutInflater();
+      View view=inflater.inflate(R.layout.progress_indicator_layout,null);
 
-      tvTitle=view.findViewById(R.id.tvTitle);
+      AlertDialog dialog=new MaterialAlertDialogBuilder(getActivity(),R.style.Theme_MaterialComponents_Light_Dialog_Alert)
+              .setTitle(title)
+              .setCancelable(false)
+              .setView(view)
+              .create();
+
       tvMessage=view.findViewById(R.id.tvMessage);
       progressIndicator=view.findViewById(R.id.progress_indicator);
-      iconImage=view.findViewById(R.id.iconImage);
-      btnNeutral=view.findViewById(R.id.neutralButton);
-      btnPositive=view.findViewById(R.id.positiveButton);
-      btnNegative=view.findViewById(R.id.negativeButton);
 
-      btnNeutral.setVisibility(View.GONE);
-      btnPositive.setVisibility(View.GONE);
-      btnNegative.setVisibility(View.GONE);
-
-      if(neutralButtonText!=null){
-         btnNeutral.setVisibility(View.VISIBLE);
-         btnNeutral.setText(neutralButtonText);
-      }
-
-      if(positiveButtonText!=null){
-         btnPositive.setVisibility(View.VISIBLE);
-         btnPositive.setText(positiveButtonText);
-      }
-
-      if(negativeButtonText!=null){
-         btnNegative.setVisibility(View.VISIBLE);
-         btnNegative.setText(negativeButtonText);
-      }
-
-      tvTitle.setText(title);
       tvMessage.setText(message);
       progressIndicator.setIndeterminate(true);
-      createDialogCalled=true;
 
-      if(canDismissDialog){
-         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            iconImage.setImageDrawable(getActivity().getDrawable(android.R.drawable.ic_dialog_info));
-         else
-            iconImage.setVisibility(View.GONE);
-      }
-      else{
-         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            iconImage.setImageDrawable(getActivity().getDrawable(R.drawable.ic_info_outline_black_24dp));
-         else
-            iconImage.setVisibility(View.GONE);
+      dialog.setCanceledOnTouchOutside(false);
+
+      if (positiveButtonText != null) {
+         dialog.setButton(DialogInterface.BUTTON_POSITIVE, positiveButtonText, this);
       }
 
-      getDialog().setCanceledOnTouchOutside(false);
-      getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+      if (negativeButtonText != null) {
+         dialog.setButton(DialogInterface.BUTTON_NEGATIVE, negativeButtonText, this);
+      }
+
+      if (neutralButtonText != null) {
+         dialog.setButton(DialogInterface.BUTTON_NEUTRAL, neutralButtonText, this);
+      }
+
+      createDialogCalled = true;
+
+      return dialog;
    }
 
    @Override public void onClick(DialogInterface dialog, int whichButton) {

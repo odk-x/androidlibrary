@@ -22,7 +22,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
+
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.properties.RequestCodes;
 import org.opendatakit.utilities.AppNameUtil;
