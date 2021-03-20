@@ -1,7 +1,6 @@
 package org.opendatakit.sync.service.entity;
 
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 
 import android.os.Parcel;
