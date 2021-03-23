@@ -218,11 +218,7 @@ public class ProgressDialogFragment extends DialogFragment
       else {
          progressIndicator.setIndeterminate(false);
          progressIndicator.setMax(max);
-         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            progressIndicator.setProgress(progress,true);
-         }
-         else
-            progressIndicator.setProgress(progress);
+         progressIndicator.setProgressCompat(progress,true);
       }
    }
 

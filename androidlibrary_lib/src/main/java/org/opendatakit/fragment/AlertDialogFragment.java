@@ -133,10 +133,10 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
 
    public boolean createDialogCalled() { return createDialogCalled; }
 
-   private AlertDialog getAlertDialog() {
+   private androidx.appcompat.app.AlertDialog getAlertDialog() {
       Dialog dialog = getDialog();
-      if (dialog instanceof AlertDialog) {
-         return (AlertDialog) dialog;
+      if (dialog instanceof androidx.appcompat.app.AlertDialog) {
+         return (androidx.appcompat.app.AlertDialog) dialog;
       } else {
          throw new IllegalStateException("Somehow an AlertDialogFrament does not have an "
              + "AlertDialog");
