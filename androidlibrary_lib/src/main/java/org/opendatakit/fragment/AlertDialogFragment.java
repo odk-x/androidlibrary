@@ -15,7 +15,7 @@
 package org.opendatakit.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -133,10 +133,10 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
 
    public boolean createDialogCalled() { return createDialogCalled; }
 
-   private androidx.appcompat.app.AlertDialog getAlertDialog() {
+   private AlertDialog getAlertDialog() {
       Dialog dialog = getDialog();
-      if (dialog instanceof androidx.appcompat.app.AlertDialog) {
-         return (androidx.appcompat.app.AlertDialog) dialog;
+      if (dialog instanceof AlertDialog) {
+         return (AlertDialog) dialog;
       } else {
          throw new IllegalStateException("Somehow an AlertDialogFrament does not have an "
              + "AlertDialog");
@@ -168,7 +168,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       Fragment f = mgr.findFragmentById(fragmentId);
       setTargetFragment(f, RequestCodes.ALERT_DIALOG.ordinal());
 
-      androidx.appcompat.app.AlertDialog alertDialog=new MaterialAlertDialogBuilder(getActivity(), R.style.Theme_MaterialComponents_Light_Dialog_Alert)
+      AlertDialog alertDialog=new MaterialAlertDialogBuilder(getActivity(), R.style.Theme_MaterialComponents_Light_Dialog_Alert)
               .setTitle(title)
               .setMessage(message)
               .setCancelable(false)
