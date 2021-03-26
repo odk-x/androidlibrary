@@ -17,7 +17,6 @@ package org.opendatakit.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
-import org.opendatakit.database.data.Row;
 import org.opendatakit.database.data.TypedRow;
 import org.opendatakit.logging.WebLogger;
 

@@ -7,7 +7,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ParcelableRowResourceList extends RowResourceList implements Parcelable {
   public ParcelableRowResourceList() {
