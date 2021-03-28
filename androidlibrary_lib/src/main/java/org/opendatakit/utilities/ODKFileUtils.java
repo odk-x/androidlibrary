@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.consts.CharsetConsts;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.provider.FormsColumns;
@@ -45,6 +44,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -1377,7 +1377,7 @@ public final class ODKFileUtils {
       if (file instanceof File) {
         is = new FileInputStream((File) file);
       } else {
-        is = new ByteArrayInputStream(((String) file).getBytes(CharEncoding.UTF_8));
+        is = new ByteArrayInputStream(((String) file).getBytes(StandardCharsets.UTF_8));
       }
 
       int l;

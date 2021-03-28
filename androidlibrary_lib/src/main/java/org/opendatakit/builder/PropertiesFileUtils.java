@@ -15,7 +15,6 @@
  */
 package org.opendatakit.builder;
 
-import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvWriter;
@@ -37,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -90,7 +90,7 @@ public final class PropertiesFileUtils {
     try {
       // emit definition.csv table...
       out = new FileOutputStream(definitionCsv);
-      output = new OutputStreamWriter(out, CharEncoding.UTF_8);
+      output = new OutputStreamWriter(out, StandardCharsets.UTF_8);
       cw = new RFC4180CsvWriter(output);
 
       // Emit ColumnDefinitions
@@ -120,7 +120,7 @@ public final class PropertiesFileUtils {
 
       // emit properties.csv...
       out = new FileOutputStream(propertiesCsv);
-      output = new OutputStreamWriter(out, CharEncoding.UTF_8);
+      output = new OutputStreamWriter(out, StandardCharsets.UTF_8);
       cw = new RFC4180CsvWriter(output);
 
       // Emit KeyValueStore
@@ -254,7 +254,7 @@ public final class PropertiesFileUtils {
     try {
       file = new File(ODKFileUtils.getTableDefinitionCsvFile(appName, tableId));
       in = new FileInputStream(file);
-      input = new InputStreamReader(in, CharEncoding.UTF_8);
+      input = new InputStreamReader(in, StandardCharsets.UTF_8);
       cr = new RFC4180CsvReader(input);
 
       String[] row;
@@ -313,7 +313,7 @@ public final class PropertiesFileUtils {
 
       file = new File(ODKFileUtils.getTablePropertiesCsvFile(appName, tableId));
       in = new FileInputStream(file);
-      input = new InputStreamReader(in, CharEncoding.UTF_8);
+      input = new InputStreamReader(in, StandardCharsets.UTF_8);
       cr = new RFC4180CsvReader(input);
       // Read KeyValueStore
       // read the column headers
