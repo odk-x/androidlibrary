@@ -15,7 +15,6 @@
 package org.opendatakit.properties;
 
 import android.content.Context;
-import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.consts.IntentConsts;
@@ -27,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
@@ -832,7 +832,7 @@ public final class PropertiesSingleton {
               GENERAL_PROPERTIES_FILENAME + ".temp");
           FileOutputStream configFileOutputStream = new FileOutputStream(tempConfigFile, false);
 
-          mGeneralProps.storeToXML(configFileOutputStream, null, CharEncoding.UTF_8);
+          mGeneralProps.storeToXML(configFileOutputStream, null, StandardCharsets.UTF_8.name());
           configFileOutputStream.close();
 
           File configFile = new File(ODKFileUtils.getAssetsFolder(mAppName),
@@ -851,7 +851,7 @@ public final class PropertiesSingleton {
               DEVICE_PROPERTIES_FILENAME + ".temp");
           FileOutputStream configFileOutputStream = new FileOutputStream(tempConfigFile, false);
 
-          mDeviceProps.storeToXML(configFileOutputStream, null, CharEncoding.UTF_8);
+          mDeviceProps.storeToXML(configFileOutputStream, null, StandardCharsets.UTF_8.name());
           configFileOutputStream.close();
 
           File configFile = new File(ODKFileUtils.getDataFolder(mAppName),
@@ -869,7 +869,7 @@ public final class PropertiesSingleton {
           File tempConfigFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME + ".temp");
           FileOutputStream configFileOutputStream = new FileOutputStream(tempConfigFile, false);
 
-          mSecureProps.storeToXML(configFileOutputStream, null, CharEncoding.UTF_8);
+          mSecureProps.storeToXML(configFileOutputStream, null, StandardCharsets.UTF_8.name());
           configFileOutputStream.close();
 
           File configFile = new File(mSecureStorageDir, SECURE_PROPERTIES_FILENAME);
