@@ -16,12 +16,21 @@ package org.opendatakit.fragment;
 
 import android.app.Activity;
 import android.app.Dialog;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
+
 import org.opendatakit.androidlibrary.R;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.utilities.AppNameUtil;
@@ -171,10 +180,10 @@ public class ProgressDialogFragment extends DialogFragment
       super.onSaveInstanceState(outState);
    }
 
-   private ProgressDialog getProgressDialog() {
+   private AlertDialog getProgressDialog() {
       Dialog dialog = getDialog();
-      if (dialog instanceof ProgressDialog) {
-         return (ProgressDialog) dialog;
+      if (dialog instanceof AlertDialog) {
+         return (AlertDialog) dialog;
       } else {
          throw new IllegalStateException("Somehow an ProgressDialogFrament does not have an "
              + "ProgressDialog");
@@ -188,7 +197,7 @@ public class ProgressDialogFragment extends DialogFragment
     */
    public void setMessage(String newMessage) {
       message = newMessage;
-      getProgressDialog().setMessage(message);
+      tvMessage.setText(message);
    }
 
    /**
@@ -198,20 +207,23 @@ public class ProgressDialogFragment extends DialogFragment
     */
    private void setTitle(String newTitle) {
       title = newTitle;
-      getProgressDialog().setMessage(title);
+      getProgressDialog().setTitle(title);
    }
 
    public void setMessage(String message, int progress, int max) {
-      ProgressDialog dlg = getProgressDialog();
-      dlg.setMessage(message);
-      if (progress == -1) {
-         dlg.setIndeterminate(true);
-      } else {
-         dlg.setIndeterminate(false);
-         dlg.setMax(max);
-         dlg.setProgress(progress);
+      this.message=message;
+      tvMessage.setText(message);
+      if(progress<=0)
+         progressIndicator.setIndeterminate(true);
+      else {
+         progressIndicator.setIndeterminate(false);
+         progressIndicator.setMax(max);
+         progressIndicator.setProgressCompat(progress,true);
       }
    }
+
+   TextView tvMessage;
+   LinearProgressIndicator progressIndicator;
 
    /**
     * Called from onCreate when a dialog object needs to be created
@@ -220,34 +232,39 @@ public class ProgressDialogFragment extends DialogFragment
     * @return a Dialog object with the correct message and title
     */
    @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-      ProgressDialog mProgressDialog = new ProgressDialog(getActivity(), getTheme());
-      mProgressDialog.setTitle(title);
-      mProgressDialog.setMessage(message);
-      mProgressDialog.setIndeterminate(true);
-      mProgressDialog.setCancelable(false);
-      mProgressDialog.setCanceledOnTouchOutside(false);
+
+      LayoutInflater inflater=getLayoutInflater();
+      View view=inflater.inflate(R.layout.progress_indicator_layout,null);
+
+      AlertDialog dialog=new MaterialAlertDialogBuilder(getActivity(),R.style.Theme_MaterialComponents_Light_Dialog_Alert)
+              .setTitle(title)
+              .setCancelable(false)
+              .setView(view)
+              .create();
+
+      tvMessage=view.findViewById(R.id.tvMessage);
+      progressIndicator=view.findViewById(R.id.progress_indicator);
+
+      tvMessage.setText(message);
+      progressIndicator.setIndeterminate(true);
+
+      dialog.setCanceledOnTouchOutside(false);
 
       if (positiveButtonText != null) {
-         mProgressDialog.setButton(DialogInterface.BUTTON_POSITIVE, positiveButtonText, this);
+         dialog.setButton(DialogInterface.BUTTON_POSITIVE, positiveButtonText, this);
       }
 
       if (negativeButtonText != null) {
-         mProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, negativeButtonText, this);
+         dialog.setButton(DialogInterface.BUTTON_NEGATIVE, negativeButtonText, this);
       }
 
       if (neutralButtonText != null) {
-         mProgressDialog.setButton(DialogInterface.BUTTON_NEUTRAL, neutralButtonText, this);
-      }
-
-      if (canDismissDialog) {
-         mProgressDialog.setIcon(android.R.drawable.ic_dialog_info);
-      } else {
-         mProgressDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+         dialog.setButton(DialogInterface.BUTTON_NEUTRAL, neutralButtonText, this);
       }
 
       createDialogCalled = true;
 
-      return mProgressDialog;
+      return dialog;
    }
 
    @Override public void onClick(DialogInterface dialog, int whichButton) {
