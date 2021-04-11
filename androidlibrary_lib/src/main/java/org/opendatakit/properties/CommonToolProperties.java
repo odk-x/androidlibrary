@@ -215,6 +215,12 @@ public final class CommonToolProperties {
   // key used to sort forms in survery
   public static final String KEY_SURVEY_SORT_ORDER = "survey.sort_order";
 
+  // key used to store the timestamp of last successful sync in SyncFragment
+  public static final String KEY_LAST_SYNC_INFO = "common.last_sync_info";
+
+  // key used to store the sync type spinner's preference in SyncFragment
+  public static final String KEY_SYNC_ATTACHMENT_STATE = "common.sync_attachment_state";
+
   static {
     // register a state-reset manipulator for 'commonPropertiesSingletonFactory' field.
     StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {

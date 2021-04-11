@@ -16,7 +16,6 @@ package org.opendatakit.logging;
 
 import android.os.FileObserver;
 import android.util.Log;
-import org.apache.commons.lang3.CharEncoding;
 import org.joda.time.DateTime;
 import org.opendatakit.androidlibrary.BuildConfig;
 import org.opendatakit.utilities.ODKFileUtils;
@@ -30,6 +29,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Implementation of WebLoggerIf for android that emits logs to the
@@ -191,7 +191,7 @@ class WebLoggerImpl implements WebLoggerIf {
       File f = new File(loggingDirectory, curDateStamp + ".log");
       try {
         FileOutputStream fo = new FileOutputStream(f, true);
-        logFile = new OutputStreamWriter(new BufferedOutputStream(fo), CharEncoding.UTF_8);
+        logFile = new OutputStreamWriter(new BufferedOutputStream(fo), StandardCharsets.UTF_8);
         dateStamp = curDateStamp;
         // if we see a lot of these being logged, we have a problem
         logFile.write("---- starting ----\n");

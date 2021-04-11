@@ -16,9 +16,9 @@
 	<string name="not_yet_sent">Never Uploaded</string>
 	<string name="sent_on_date_at_time">\'Sent on\' EEE, MMM dd, yyyy \'at\' HH:mm</string><!-- http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html -->
 	<string name="sending_failed_on_date_at_time">\'Sending failed on\' EEE, MMM dd, yyyy \'at\' HH:mm</string><!-- http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html -->
-	
-    <string name="default_sync_server_url">https://opendatakit-simpledemo.appspot.com</string>
-	<string name="default_legacy_server_url">https://opendatakit-2.appspot.com</string>
+
+	<string name="default_sync_server_url">https://tables-demo.odk-x.org</string>
+	<string name="default_legacy_server_url">https://tables-demo.odk-x.org</string>
 
     <string name="still_reading_license_file">Sorry, the license file is still being read.</string>
  	<string name="about">About</string>
