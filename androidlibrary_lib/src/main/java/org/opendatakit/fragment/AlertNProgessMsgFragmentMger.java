@@ -2,7 +2,6 @@ package org.opendatakit.fragment;
 
 import androidx.fragment.app.FragmentManager;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import org.opendatakit.logging.WebLogger;

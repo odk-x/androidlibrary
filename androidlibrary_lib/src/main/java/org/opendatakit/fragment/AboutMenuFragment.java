@@ -78,7 +78,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
 
     View aboutMenuView = inflater.inflate(ID, container, false);
 
-    TextView versionBox = (TextView) aboutMenuView.findViewById(R.id.versionText);
+    TextView versionBox = aboutMenuView.findViewById(R.id.versionText);
     versionBox.setText(((IToolAware) getActivity().getApplication()).getVersionedToolName());
 
     {
@@ -109,11 +109,11 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
       default:
         throw new IllegalStateException("Unexpected log level filter value");
       }
-      TextView logLevelBox = (TextView) aboutMenuView.findViewById(R.id.logLevelText);
+      TextView logLevelBox = aboutMenuView.findViewById(R.id.logLevelText);
       logLevelBox.setText(suppressLevel);
     }
 
-    mTextView = (TextView) aboutMenuView.findViewById(R.id.text1);
+    mTextView = aboutMenuView.findViewById(R.id.text1);
     mTextView.setAutoLinkMask(Linkify.WEB_URLS);
     mTextView.setClickable(true);
 

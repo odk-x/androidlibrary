@@ -16,7 +16,6 @@
 package org.opendatakit.builder;
 
 import android.content.ContentValues;
-import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.ConflictType;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
@@ -48,6 +47,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -191,7 +191,7 @@ public class CsvUtil {
           tableId + (fileQualifier != null && !fileQualifier.isEmpty() ? "." + fileQualifier : "")
               + ".csv");
       FileOutputStream out = new FileOutputStream(file);
-      output = new OutputStreamWriter(out, CharEncoding.UTF_8);
+      output = new OutputStreamWriter(out, StandardCharsets.UTF_8);
       RFC4180CsvWriter cw = new RFC4180CsvWriter(output);
       // don't have to worry about quotes in elementKeys...
       cw.writeNext(columns.toArray(new String[columns.size()]));
@@ -445,7 +445,7 @@ public class CsvUtil {
             tableId + (fileQualifier != null && !fileQualifier.isEmpty() ? "." + fileQualifier : "")
                 + ".csv");
         FileInputStream in = new FileInputStream(file);
-        input = new InputStreamReader(in, CharEncoding.UTF_8);
+        input = new InputStreamReader(in, StandardCharsets.UTF_8);
         int total = 0;
         char[] buf = new char[1024];
         int read;
@@ -465,7 +465,7 @@ public class CsvUtil {
         input.close();
         in.close();
         in = new FileInputStream(file);
-        input = new InputStreamReader(in, CharEncoding.UTF_8);
+        input = new InputStreamReader(in, StandardCharsets.UTF_8);
         //int total = r.getLineNumber();
         RFC4180CsvReader cr = new RFC4180CsvReader(input);
         // don't have to worry about quotes in elementKeys...
