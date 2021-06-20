@@ -236,6 +236,15 @@ public final class CommonToolProperties {
   //Key used to store the Current User State
   public static final String KEY_CURRENT_USER_STATE="common.current_user_state";
 
+  //Value Depicting User State - Logged Out
+  public static final String USER_STATE_LOGGED_OUT="Logged Out";
+
+  //Value Depicting User State - Anonymous
+  public static final String USER_STATE_ANONYMOUS="Anonymous";
+
+  //Value Depicting User State - Authenticated User
+  public static final String USER_STATE_AUTHENTICATED_USER="Authenticated User";
+
   static {
     // register a state-reset manipulator for 'commonPropertiesSingletonFactory' field.
     StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {
@@ -288,7 +297,7 @@ public final class CommonToolProperties {
       deviceProperties.put(KEY_AUTHENTICATION_TYPE, "none");
       deviceProperties.put(KEY_USERNAME, "");
       deviceProperties.put(KEY_IS_USER_AUTHENTICATED,"false");
-      deviceProperties.put(KEY_CURRENT_USER_STATE,"Logged Out");
+      deviceProperties.put(KEY_CURRENT_USER_STATE,USER_STATE_LOGGED_OUT);
       deviceProperties.put(KEY_COMMON_INITIALIZATION, "");
 	  deviceProperties.put(KEY_FIRST_LAUNCH, "true");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("survey"), "");
