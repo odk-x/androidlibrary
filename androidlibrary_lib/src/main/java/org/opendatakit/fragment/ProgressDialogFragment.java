@@ -53,11 +53,11 @@ public class ProgressDialogFragment extends DialogFragment
     * implement this interface in order to receive event callbacks.
     */
    public interface ProgressDialogListener {
-      public void onProgressDialogPositiveButtonClick(ProgressDialogFragment dialog);
+      void onProgressDialogPositiveButtonClick(ProgressDialogFragment dialog);
 
-      public void onProgressDialogNegativeButtonClick(ProgressDialogFragment dialog);
+      void onProgressDialogNegativeButtonClick(ProgressDialogFragment dialog);
 
-      public void onProgressDialogNeutralButtonClick(ProgressDialogFragment dialog);
+      void onProgressDialogNeutralButtonClick(ProgressDialogFragment dialog);
    }
 
    public static final String BUNDLE_KEY_TITLE = "PDF_title";
