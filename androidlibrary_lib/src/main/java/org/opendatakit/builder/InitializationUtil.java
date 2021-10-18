@@ -54,6 +54,9 @@ public class InitializationUtil {
 
   private static final String TAG = "InitializationUtil";
 
+  private static final String csv = "csv";
+  private static final String properties = "properties";
+
   private Context appContext;
   private InitializationSupervisor supervisor;
   private String appName;
@@ -455,21 +458,21 @@ public class InitializationUtil {
             // get past the file separator
             String csvFilename = filename.substring(assetsCsvDirPath.length() + 1);
             String[] terms = csvFilename.split("\\.");
-            if (terms.length == 2 && terms[1].equals("csv")) {
+            if (terms.length == 2 && terms[1].equals(csv)) {
               String tableId = terms[0];
               String fileQualifier = null;
               request = new ImportRequest(tableId, fileQualifier);
-            } else if (terms.length == 3 && terms[1].equals("properties") && terms[2]
-                .equals("csv")) {
+            } else if (terms.length == 3 && terms[1].equals(properties) && terms[2]
+                .equals(csv)) {
               String tableId = terms[0];
               String fileQualifier = null;
               request = new ImportRequest(tableId, fileQualifier);
-            } else if (terms.length == 3 && terms[2].equals("csv")) {
+            } else if (terms.length == 3 && terms[2].equals(csv)) {
               String tableId = terms[0];
               String fileQualifier = terms[1];
               request = new ImportRequest(tableId, fileQualifier);
-            } else if (terms.length == 4 && terms[2].equals("properties") && terms[3]
-                .equals("csv")) {
+            } else if (terms.length == 4 && terms[2].equals(properties) && terms[3]
+                .equals(csv)) {
               String tableId = terms[0];
               String fileQualifier = terms[1];
               request = new ImportRequest(tableId, fileQualifier);
