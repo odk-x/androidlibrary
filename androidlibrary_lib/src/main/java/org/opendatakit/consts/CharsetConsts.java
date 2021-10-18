@@ -15,6 +15,7 @@
 package org.opendatakit.consts;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Added to suppress warnings about Charsets.UTF_8 deprecation
@@ -23,5 +24,5 @@ import java.nio.charset.Charset;
  */
 
 public class CharsetConsts {
-  public static final Charset UTF_8 = Charset.forName("UTF-8");
+  public static final Charset UTF_8 = StandardCharsets.UTF_8;
 }
