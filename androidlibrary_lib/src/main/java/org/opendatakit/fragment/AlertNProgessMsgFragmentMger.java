@@ -186,10 +186,14 @@ public class AlertNProgessMsgFragmentMger {
          break;
       default:
       case None:
-         return true;
+         return false;
       }
      return false;
    }
+
+    public DialogState getDialogState() {
+        return mDialogState;
+    }
 
    public void clearDialogsAndRetainCurrentState(FragmentManager fragmentManager) {
       if (fragmentManager == null) {
