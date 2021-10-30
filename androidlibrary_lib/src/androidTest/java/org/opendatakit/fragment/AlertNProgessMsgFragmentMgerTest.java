@@ -45,6 +45,7 @@ public class AlertNProgessMsgFragmentMgerTest {
     @Test
     public void testNoDialogIsCreated() {
         assertEquals(DialogState.None, systemUnderTest.getDialogState());
+        Assert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(false));
     }
 
     @Test
