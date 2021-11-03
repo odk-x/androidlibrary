@@ -5,7 +5,10 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application android:requestLegacyExternalStorage="true">
+    <application
+        android:requestLegacyExternalStorage="true"
+        android:theme="@style/Theme.AppCompat">
+        <activity android:name="org.opendatakit.test_utils.TestActivity" />
     </application>
 
 
