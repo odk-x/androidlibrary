@@ -45,7 +45,6 @@ public class AlertNProgessMsgFragmentMgerTest {
     @Test
     public void testNoDialogIsCreated() {
         assertEquals(DialogState.None, systemUnderTest.getDialogState());
-        Assert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(false));
     }
 
     @Test
@@ -101,7 +100,6 @@ public class AlertNProgessMsgFragmentMgerTest {
                 systemUnderTest.dismissProgressDialog(fragmentManager);
 
                 assertEquals(DialogState.None, systemUnderTest.getDialogState());
-                Assert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(false));
             }
         });
     }
@@ -121,7 +119,6 @@ public class AlertNProgessMsgFragmentMgerTest {
                 systemUnderTest.dismissAlertDialog(fragmentManager);
 
                 assertEquals(DialogState.None, systemUnderTest.getDialogState());
-                Assert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(false));
             }
         });
     }

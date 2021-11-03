@@ -186,7 +186,7 @@ public class AlertNProgessMsgFragmentMger {
          break;
       default:
       case None:
-         return false;
+         return true;
       }
      return false;
    }
