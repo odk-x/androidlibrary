@@ -357,5 +357,5 @@ interface IAidlSynchronizer {
    * @throws IOException
    */
   void downloadInstanceFileBatch(in List<CommonFileAttachmentTerms> filesToDownload,
-                                 in String serverInstanceFileUri, in String instanceId, in String tableId);
+                                 in String serverInstanceFileUri, in String instanceId, in String tableId, in boolean reduceImageSize);
 }
