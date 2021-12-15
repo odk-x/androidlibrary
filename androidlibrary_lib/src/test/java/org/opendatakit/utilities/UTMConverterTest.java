@@ -26,64 +26,69 @@ import static org.junit.Assert.assertTrue;
 @RunWith(JUnit4.class)
 public class UTMConverterTest {
 
-  @BeforeClass
-  public static void oneTimeSetUp() throws Exception {
-    StaticStateManipulator.get().reset();
-    WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
-  }
+    @BeforeClass
+    public static void oneTimeSetUp() {
+        StaticStateManipulator.get().reset();
+        WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
+    }
 
-  private boolean nearlySame(double a, double b) {
-    if ( a == b ) return true;
-    double big = (Math.abs(a) > Math.abs(b)) ? a : b;
-    double diffFromBig = (Math.abs(a) > Math.abs(b)) ? (a-b) : (b-a);
-    double scaledDiff = Math.abs( diffFromBig / big);
+    private boolean nearlySame(double a, double b) {
+        if (a == b) return true;
+        boolean isAgreaterThanB = Math.abs(a) > Math.abs(b);
+        double big = isAgreaterThanB ? a : b;
+        double diffFromBig = isAgreaterThanB ? (a - b) : (b - a);
+        double scaledDiff = Math.abs(diffFromBig / big);
 
-    // same if differ by less than 0.1%
-    return (scaledDiff < 0.001);
-  }
+        // same if differ by less than 0.1%
+        return (scaledDiff < 0.001);
+    }
 
-  @Test
-  public void testUTMConversion1() {
+    @Test
+    public void testUTMConversion1() {
 
-    // values taken from http://www.uwgb.edu/dutchs/usefuldata/ConvertUTMNoOZ.HTM
-    double[] results = UTMConverter.parseUTM(500000.0, 8881585.8, 38, false);
-    double[] latLong = { 80.0, 45.0 };
+        // values taken from http://www.uwgb.edu/dutchs/usefuldata/ConvertUTMNoOZ.HTM
+        double[] results = UTMConverter.parseUTM(500000.0, 8881585.8, 38, false);
+        double[] latLong = {80.0, 45.0};
 
-    assertTrue(nearlySame(latLong[0], results[0]));
-    assertTrue(nearlySame(latLong[1], results[1]));
-  }
+        assert results != null;
+        assertTrue(nearlySame(latLong[0], results[0]));
+        assertTrue(nearlySame(latLong[1], results[1]));
+    }
 
 
-  @Test
-  public void testUTMConversion2() {
+    @Test
+    public void testUTMConversion2() {
 
-    // values taken from http://www.uwgb.edu/dutchs/usefuldata/ConvertUTMNoOZ.HTM
-    double[] results = UTMConverter.parseUTM(500000.0, 8881585.8, 23, false);
-    double[] latLong = { 80.0, -45.0 };
+        // values taken from http://www.uwgb.edu/dutchs/usefuldata/ConvertUTMNoOZ.HTM
+        double[] results = UTMConverter.parseUTM(500000.0, 8881585.8, 23, false);
+        double[] latLong = {80.0, -45.0};
 
-    assertTrue(nearlySame(latLong[0], results[0]));
-    assertTrue(nearlySame(latLong[1], results[1]));
-  }
+        assert results != null;
+        assertTrue(nearlySame(latLong[0], results[0]));
+        assertTrue(nearlySame(latLong[1], results[1]));
+    }
 
-  @Test
-  public void testUTMConversion3() {
+    @Test
+    public void testUTMConversion3() {
 
-    // values taken from http://www.uwgb.edu/dutchs/usefuldata/ConvertUTMNoOZ.HTM
-    double[] results = UTMConverter.parseUTM(500000.0, 8894587.5, 23, true);
-    double[] latLong = { -10.0, -45.0 };
+        // values taken from http://www.uwgb.edu/dutchs/usefuldata/ConvertUTMNoOZ.HTM
+        double[] results = UTMConverter.parseUTM(500000.0, 8894587.5, 23, true);
+        double[] latLong = {-10.0, -45.0};
 
-    assertTrue(nearlySame(latLong[0], results[0]));
-    assertTrue(nearlySame(latLong[1], results[1]));
-  }
+        assert results != null;
+        assertTrue(nearlySame(latLong[0], results[0]));
+        assertTrue(nearlySame(latLong[1], results[1]));
+    }
 
-  @Test
-  public void testUTMConversion4() {
+    @Test
+    public void testUTMConversion4() {
 
-    // values taken from http://www.uwgb.edu/dutchs/usefuldata/ConvertUTMNoOZ.HTM
-    double[] results = UTMConverter.parseUTM(500000.0, 8894587.5, 38, true);
-    double[] latLong = { -10.0, 45.0 };
+        // values taken from http://www.uwgb.edu/dutchs/usefuldata/ConvertUTMNoOZ.HTM
+        double[] results = UTMConverter.parseUTM(500000.0, 8894587.5, 38, true);
+        double[] latLong = {-10.0, 45.0};
 
-    assertTrue(nearlySame(latLong[0], results[0]));
-    assertTrue(nearlySame(latLong[1], results[1]));
-  }
+        assert results != null;
+        assertTrue(nearlySame(latLong[0], results[0]));
+        assertTrue(nearlySame(latLong[1], results[1]));
+    }
 }
