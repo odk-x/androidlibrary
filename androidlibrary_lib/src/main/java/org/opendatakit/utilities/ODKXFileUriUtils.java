@@ -49,7 +49,7 @@ public final class ODKXFileUriUtils {
     private static final String PRIMARY_PATH= "/document/primary:opendatakit";
 
     public static String ODKXRemainingPath(String appName, Uri uri) {
-        String pathBeginning = PRIMARY_PATH + "/" + appName;
+        String pathBeginning = "/" + ODKX_FOLDER_NAME + "/" + appName;
         String uriPath = uri.getPath();
         if (uriPath.startsWith(pathBeginning)) {
             return uriPath.substring(pathBeginning.length() + 1);
