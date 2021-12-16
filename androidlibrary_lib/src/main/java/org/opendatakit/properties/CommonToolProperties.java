@@ -218,6 +218,9 @@ public final class CommonToolProperties {
   // key used to store the timestamp of last successful sync in SyncFragment
   public static final String KEY_LAST_SYNC_INFO = "common.last_sync_info";
 
+  // key used to store the AttachmentState of last successful sync
+  public static final String KEY_PREV_SYNC_ATTACHMENT_STATE = "common.prev_sync_attachment_state";
+
   // key used to store the sync type spinner's preference in SyncFragment
   public static final String KEY_SYNC_ATTACHMENT_STATE = "common.sync_attachment_state";
 
@@ -284,6 +287,7 @@ public final class CommonToolProperties {
       deviceProperties.put(PropertiesSingleton.toolFirstRunPropertyName("sensors"), "");
       deviceProperties.put(KEY_SURVEY_SORT_ORDER,"sortByName");
       deviceProperties.put(KEY_PREF_TABLES_SORT_BY_ORDER,"SORT_ASC");
+      deviceProperties.put(KEY_PREV_SYNC_ATTACHMENT_STATE, "NONE");
     }
     // handle the secure properties. If these are in the incoming syncable general
     // property file, those values will be used to initialize these fields (if there is not an

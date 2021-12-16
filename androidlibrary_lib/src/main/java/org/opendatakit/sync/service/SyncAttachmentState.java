@@ -42,4 +42,14 @@ public enum SyncAttachmentState implements Parcelable {
     }
   };
 
+  public static boolean involvesDownload(SyncAttachmentState state) {
+    return state == SYNC || state == DOWNLOAD || state == REDUCED_DOWNLOAD || state == SYNC_WITH_REDUCED_DOWNLOAD;
+  }
+  public static boolean involvesReducedImgDownload(SyncAttachmentState state) {
+    return state == REDUCED_DOWNLOAD || state == SYNC_WITH_REDUCED_DOWNLOAD;
+  }
+
+  public static boolean involvesFullSizeImgDownload(SyncAttachmentState state) {
+    return state == SYNC || state == DOWNLOAD;
+  }
 }
