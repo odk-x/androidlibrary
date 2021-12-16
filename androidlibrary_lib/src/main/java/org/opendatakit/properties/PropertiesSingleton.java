@@ -452,6 +452,7 @@ public final class PropertiesSingleton {
 
   private void init() {
     // (re)set values to defaults
+
     currentRevision = INVALID_REVISION;
 
     mGeneralProps.clear();
