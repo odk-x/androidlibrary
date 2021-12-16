@@ -191,6 +191,10 @@ public class AlertNProgessMsgFragmentMger {
      return false;
    }
 
+    public DialogState getDialogState() {
+        return mDialogState;
+    }
+
    public void clearDialogsAndRetainCurrentState(FragmentManager fragmentManager) {
       if (fragmentManager == null) {
          throw new IllegalArgumentException("FragmentManager cannot be null");
