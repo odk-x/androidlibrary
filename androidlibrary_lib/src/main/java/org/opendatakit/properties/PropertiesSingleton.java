@@ -324,7 +324,7 @@ public final class PropertiesSingleton {
       writeProperties(updatedSecureProps, updatedDeviceProps, updatedGeneralProps);
     }
   }
-  // todo omkar issue here??
+
   /**
    * Called during sync to re-read the properties files since they may have changed
    * during the sync process (i.e., due to updates of app.properties pulled down from the
@@ -452,7 +452,6 @@ public final class PropertiesSingleton {
 
   private void init() {
     // (re)set values to defaults
-    //android.os.Debug.waitForDebugger(); // todo (omkar)
     currentRevision = INVALID_REVISION;
 
     mGeneralProps.clear();

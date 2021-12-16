@@ -218,7 +218,7 @@ public final class CommonToolProperties {
   // key used to store the timestamp of last successful sync in SyncFragment
   public static final String KEY_LAST_SYNC_INFO = "common.last_sync_info";
 
-  // key used to store the AttachmentState of last successful sync
+  // key used to store the AttachmentState of last sync that involved a download
   public static final String KEY_PREV_SYNC_ATTACHMENT_STATE = "common.prev_sync_attachment_state";
 
   // key used to store the sync type spinner's preference in SyncFragment
