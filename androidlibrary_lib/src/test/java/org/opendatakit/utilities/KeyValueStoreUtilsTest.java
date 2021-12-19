@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(JUnit4.class)
 public class KeyValueStoreUtilsTest {
@@ -228,7 +229,7 @@ public class KeyValueStoreUtilsTest {
 
         ArrayList<String> returned = KeyValueStoreUtils.getArray(APP_NAME, e, String.class);
 
-        assert returned != null;
+        assertNotNull(returned);
         assertEquals(2, returned.size());
         assertEquals(values.get(0), returned.get(0));
         assertEquals(values.get(1), returned.get(1));
@@ -251,7 +252,7 @@ public class KeyValueStoreUtilsTest {
 
         ArrayList<String> returned = KeyValueStoreUtils.getArray(APP_NAME, e, String.class);
 
-        assert returned != null;
+        assertNotNull(returned);
         assertEquals(2, returned.size());
         assertEquals(values.get(0), returned.get(0));
         assertEquals(values.get(1), returned.get(1));
@@ -274,7 +275,7 @@ public class KeyValueStoreUtilsTest {
 
         ArrayList<String> returned = KeyValueStoreUtils.getArray(APP_NAME, e, String.class);
 
-        assert returned != null;
+        assertNotNull(returned);
         assertEquals(2, returned.size());
         assertEquals(values.get(0), returned.get(0));
         assertEquals(values.get(1), returned.get(1));
