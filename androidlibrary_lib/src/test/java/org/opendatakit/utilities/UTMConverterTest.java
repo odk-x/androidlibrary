@@ -21,6 +21,7 @@ import org.junit.runners.JUnit4;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
@@ -50,7 +51,7 @@ public class UTMConverterTest {
         double[] results = UTMConverter.parseUTM(500000.0, 8881585.8, 38, false);
         double[] latLong = {80.0, 45.0};
 
-        assert results != null;
+        assertNotNull(results);
         assertTrue(nearlySame(latLong[0], results[0]));
         assertTrue(nearlySame(latLong[1], results[1]));
     }
@@ -63,7 +64,7 @@ public class UTMConverterTest {
         double[] results = UTMConverter.parseUTM(500000.0, 8881585.8, 23, false);
         double[] latLong = {80.0, -45.0};
 
-        assert results != null;
+        assertNotNull(results);
         assertTrue(nearlySame(latLong[0], results[0]));
         assertTrue(nearlySame(latLong[1], results[1]));
     }
@@ -75,7 +76,7 @@ public class UTMConverterTest {
         double[] results = UTMConverter.parseUTM(500000.0, 8894587.5, 23, true);
         double[] latLong = {-10.0, -45.0};
 
-        assert results != null;
+        assertNotNull(results);
         assertTrue(nearlySame(latLong[0], results[0]));
         assertTrue(nearlySame(latLong[1], results[1]));
     }
@@ -87,7 +88,7 @@ public class UTMConverterTest {
         double[] results = UTMConverter.parseUTM(500000.0, 8894587.5, 38, true);
         double[] latLong = {-10.0, 45.0};
 
-        assert results != null;
+        assertNotNull(results);
         assertTrue(nearlySame(latLong[0], results[0]));
         assertTrue(nearlySame(latLong[1], results[1]));
     }
