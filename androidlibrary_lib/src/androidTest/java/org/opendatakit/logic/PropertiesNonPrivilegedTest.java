@@ -18,7 +18,7 @@ package org.opendatakit.logic;
 import android.Manifest;
 import android.content.Context;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.rule.GrantPermissionRule;
 
 import org.junit.Before;
@@ -53,7 +53,7 @@ public class PropertiesNonPrivilegedTest {
     public GrantPermissionRule readtimePermissionRule = GrantPermissionRule .grant(Manifest.permission.READ_EXTERNAL_STORAGE);
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ODKFileUtils.verifyExternalStorageAvailability();
         ODKFileUtils.assertDirectoryStructure(APPNAME);
 
@@ -64,10 +64,11 @@ public class PropertiesNonPrivilegedTest {
     @Test
     public void testSimpleProperties() {
 
-        Context context = InstrumentationRegistry.getContext();
+        Context context = ApplicationProvider.getApplicationContext();
+
 
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
-        Map<String,String> properties = new HashMap<String,String>();
+        Map<String,String> properties = new HashMap<>();
         // non-default value for font size
         properties.put(CommonToolProperties.KEY_FONT_SIZE, "29");
 
@@ -87,9 +88,9 @@ public class PropertiesNonPrivilegedTest {
     public void testSecureSetProperties() {
 
         StaticStateManipulator.get().reset();
-        Context context = InstrumentationRegistry.getContext();
+        Context context = ApplicationProvider.getApplicationContext();
 
-        TreeMap<String,String> secureProperties = new TreeMap<String,String>();
+        TreeMap<String,String> secureProperties = new TreeMap<>();
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
 
@@ -125,9 +126,9 @@ public class PropertiesNonPrivilegedTest {
     public void testSecureGetProperties() {
 
         StaticStateManipulator.get().reset();
-        Context context = InstrumentationRegistry.getContext();
+        Context context = ApplicationProvider.getApplicationContext();
 
-        TreeMap<String,String> secureProperties = new TreeMap<String,String>();
+        TreeMap<String,String> secureProperties = new TreeMap<>();
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
 
