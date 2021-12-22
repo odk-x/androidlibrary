@@ -33,6 +33,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -49,7 +50,7 @@ public class OdkDbChunkTest {
   private String[] testData = { "Miscellaneous", "test", "data", "to", "parcel", "and", "unpack" };
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
@@ -91,7 +92,8 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertTrue("Unexpected number of chunks", chunks.size() == 1);
+        assertNotNull(chunks);
+        assertEquals("Unexpected number of chunks", 1, chunks.size());
 
     DbChunk chunk = chunks.get(0);
     assertFalse("Single chunk shouldn't point to another", chunk.hasNextID());
@@ -107,7 +109,8 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertEquals("Unexpected unpacked string array length", results.length, testData.length);
+        assertNotNull(results);
+        assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
       assertEquals("Data unpack mismatch", testData[i], results[i]);
@@ -125,7 +128,8 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertTrue("Unexpected number of chunks", chunks.size() > 1);
+        assertNotNull(chunks);
+        assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     // Test chunk list pointers
     ListIterator<DbChunk> iterator = chunks.listIterator();
@@ -154,7 +158,8 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertEquals("Unexpected unpacked string array length", results.length, testData.length);
+        assertNotNull(results);
+        assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
       assertEquals("Data unpack mismatch", testData[i], results[i]);
@@ -183,16 +188,18 @@ public class OdkDbChunkTest {
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, largeChunkSize);
 
-    assertTrue("Unexpected number of chunks", chunks.size() == 1);
+        assertNotNull(chunks);
+        assertEquals("Unexpected number of chunks", 1, chunks.size());
 
     DbChunk chunk = chunks.get(0);
     assertFalse("Single chunk shouldn't point to another", chunk.hasNextID());
 
     Bundle results = DbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
 
-    assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
-    assertTrue("Data unpack error", results.containsKey("testData"));
-    String[] resultsTestData = results.getStringArray("testData");
+        assertNotNull(results);
+        assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
+        assertTrue("Data unpack error", results.containsKey("testData"));
+        String[] resultsTestData = results.getStringArray("testData");
 
     for (int i = 0; i < testData.length; i++) {
       assertEquals("Data unpack mismatch", testData[i], resultsTestData[i]);
@@ -207,7 +214,8 @@ public class OdkDbChunkTest {
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, smallChunkSize);
 
-    assertTrue("Unexpected number of chunks", chunks.size() > 1);
+        assertNotNull(chunks);
+        assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     // Test chunk list pointers
     ListIterator<DbChunk> iterator = chunks.listIterator();
@@ -227,9 +235,10 @@ public class OdkDbChunkTest {
     // Test unpack
     Bundle results = DbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
 
-    assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
-    assertTrue("Data unpack error", results.containsKey("testData"));
-    String[] resultsTestData = results.getStringArray("testData");
+        assertNotNull(results);
+        assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
+        assertTrue("Data unpack error", results.containsKey("testData"));
+        String[] resultsTestData = results.getStringArray("testData");
 
     for (int i = 0; i < testData.length; i++) {
       assertEquals("Data unpack mismatch", testData[i], resultsTestData[i]);
@@ -247,7 +256,8 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertTrue("Unexpected number of chunks", chunks.size() == 1);
+        assertNotNull(chunks);
+        assertEquals("Unexpected number of chunks", 1, chunks.size());
 
     DbChunk chunk = chunks.get(0);
 
@@ -264,7 +274,7 @@ public class OdkDbChunkTest {
     p.setDataPosition(0);
 
     DbChunk result = DbChunk.CREATOR.createFromParcel(p);
-    List<DbChunk> resultChunks = new ArrayList<DbChunk>();
+    List<DbChunk> resultChunks = new ArrayList<>();
     resultChunks.add(result);
 
     String[] results;
@@ -278,7 +288,8 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertEquals("Unexpected unpacked string array length", results.length, testData.length);
+        assertNotNull(results);
+        assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
       assertEquals("Data unpack mismatch", testData[i], results[i]);
@@ -296,22 +307,20 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertTrue("Unexpected number of chunks", chunks.size() > 1);
+        assertNotNull(chunks);
+        assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
-    /*
-     * Marshall the test data
-     */
-    List<byte[]> marshalledChunks = new LinkedList<byte[]>();
-    List<DbChunk> resultChunks = new LinkedList<DbChunk>();
-    ListIterator<DbChunk> iterator = chunks.listIterator();
-    while (iterator.hasNext()) {
-      DbChunk chunk = iterator.next();
-
-      Parcel p = Parcel.obtain();
-      chunk.writeToParcel(p, 0);
-      byte[] bytes = p.marshall();
-      marshalledChunks.add(bytes);
-      p.recycle();
+        /*
+         * Marshall the test data
+         */
+        List<byte[]> marshalledChunks = new LinkedList<>();
+        List<DbChunk> resultChunks = new LinkedList<>();
+        for (DbChunk chunk : chunks) {
+            Parcel p = Parcel.obtain();
+            chunk.writeToParcel(p, 0);
+            byte[] bytes = p.marshall();
+            marshalledChunks.add(bytes);
+            p.recycle();
 
       p = Parcel.obtain();
       p.unmarshall(bytes, 0, bytes.length);
@@ -332,7 +341,8 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertEquals("Unexpected unpacked string array length", results.length, testData.length);
+        assertNotNull(results);
+        assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
       assertEquals("Data unpack mismatch", testData[i], results[i]);
