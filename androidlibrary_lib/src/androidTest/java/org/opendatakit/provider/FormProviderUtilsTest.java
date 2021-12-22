@@ -59,14 +59,13 @@ public class FormProviderUtilsTest {
            "/#";
 
    @Before
-   public void setUp() throws Exception {
+   public void setUp() {
       StaticStateManipulator.get().reset();
       WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
    }
 
    @Test
-   public void testSameInstanceIdKeyField() throws UnsupportedEncodingException,
-       JsonProcessingException {
+   public void testSameInstanceIdKeyField() throws UnsupportedEncodingException {
       String encoded = FormsProviderUtils.encodeFragmentUnquotedStringValue(
           FormsProviderUtils.URI_SURVEY_QUERY_PARAM_INSTANCE_ID);
 
@@ -76,8 +75,7 @@ public class FormProviderUtilsTest {
    }
 
    @Test
-   public void testSameScreenPathKeyField() throws UnsupportedEncodingException,
-       JsonProcessingException {
+   public void testSameScreenPathKeyField() throws UnsupportedEncodingException {
       String encoded = FormsProviderUtils.encodeFragmentUnquotedStringValue(
           FormsProviderUtils.URI_SURVEY_QUERY_PARAM_SCREEN_PATH);
 
@@ -87,7 +85,7 @@ public class FormProviderUtilsTest {
    }
 
    @Test
-   public void testSaveStringField() throws UnsupportedEncodingException, JsonProcessingException {
+   public void testSaveStringField() throws UnsupportedEncodingException {
       String encoded = FormsProviderUtils.encodeFragmentUnquotedStringValue(INSTANCE_ID_SPECIAL);
 
       assertEquals(-1, encoded.indexOf("&"));
@@ -122,7 +120,7 @@ public class FormProviderUtilsTest {
    }
 
    @Test
-   public void testSurveyUriTableIdScreenPath() throws UnsupportedEncodingException {
+   public void testSurveyUriTableIdScreenPath() {
 
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, null, null, SCREEN_PATH, null);
@@ -134,7 +132,7 @@ public class FormProviderUtilsTest {
    @Test
    public void testSurveyUriTableIdEmptyKVMap() throws UnsupportedEncodingException {
 
-      Map<String,Object> elementKeyValueMap = new HashMap<String,Object>();
+      Map<String,Object> elementKeyValueMap = new HashMap<>();
 
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, null, null, null, elementKeyValueMap);
@@ -153,9 +151,9 @@ public class FormProviderUtilsTest {
    }
 
    @Test
-   public void testSurveyUriTableIdNonEmptyKVMap() throws UnsupportedEncodingException {
+   public void testSurveyUriTableIdNonEmptyKVMap() {
 
-      Map<String,Object> elementKeyValueMap = new HashMap<String,Object>();
+      Map<String,Object> elementKeyValueMap = new HashMap<>();
       elementKeyValueMap.put(MY_KEY1, MY_KEY1_VALUE);
 
       String url = FormsProviderUtils
@@ -183,9 +181,9 @@ public class FormProviderUtilsTest {
 
    @Test
    public void testSurveyUriTableIdFormIdScreenPathEmptyKVMap()
-       throws UnsupportedEncodingException, JsonProcessingException {
+       throws UnsupportedEncodingException {
 
-      Map<String,Object> elementKeyValueMap = new HashMap<String,Object>();
+      Map<String,Object> elementKeyValueMap = new HashMap<>();
 
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, FORM_ID, null, SCREEN_PATH, elementKeyValueMap);
@@ -206,7 +204,7 @@ public class FormProviderUtilsTest {
    public void testSurveyUriTableIdFormIdScreenPathNonEmptyKVMap() throws
        UnsupportedEncodingException, JsonProcessingException {
 
-      Map<String,Object> elementKeyValueMap = new HashMap<String,Object>();
+      Map<String,Object> elementKeyValueMap = new HashMap<>();
       elementKeyValueMap.put(MY_KEY1, MY_KEY1_VALUE);
 
       String url = FormsProviderUtils
@@ -230,7 +228,7 @@ public class FormProviderUtilsTest {
 
    @Test
    public void testSurveyUriTableIdFormIdScreenPath()
-       throws UnsupportedEncodingException, JsonProcessingException {
+       throws UnsupportedEncodingException {
 
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, FORM_ID, null, SCREEN_PATH, null);
@@ -249,7 +247,7 @@ public class FormProviderUtilsTest {
 
    @Test
    public void testSurveyUriTableIdFormIdInstanceId()
-       throws UnsupportedEncodingException, JsonProcessingException {
+       throws UnsupportedEncodingException {
 
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, FORM_ID, INSTANCE_ID_SPECIAL, null, null);
@@ -268,9 +266,9 @@ public class FormProviderUtilsTest {
 
    @Test
    public void testSurveyUriTableIdFormIdInstanceIdEmptyKVMap()
-       throws UnsupportedEncodingException, JsonProcessingException {
+       throws UnsupportedEncodingException {
 
-      Map<String,Object> elementKeyValueMap = new HashMap<String,Object>();
+      Map<String,Object> elementKeyValueMap = new HashMap<>();
 
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, FORM_ID, INSTANCE_ID_SPECIAL, null, elementKeyValueMap);
@@ -291,7 +289,7 @@ public class FormProviderUtilsTest {
    public void testSurveyUriTableIdFormIdInstanceIdNonEmptyKVMap()
        throws UnsupportedEncodingException, JsonProcessingException {
 
-      Map<String,Object> elementKeyValueMap = new HashMap<String,Object>();
+      Map<String,Object> elementKeyValueMap = new HashMap<>();
       elementKeyValueMap.put(MY_KEY1, MY_KEY1_VALUE);
 
       String url = FormsProviderUtils
@@ -314,7 +312,7 @@ public class FormProviderUtilsTest {
 
    @Test
    public void testSurveyUriTableIdFormIdInstanceIdScreenPath()
-       throws UnsupportedEncodingException, JsonProcessingException {
+       throws UnsupportedEncodingException {
 
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, FORM_ID, INSTANCE_ID_SPECIAL, SCREEN_PATH, null);
@@ -335,9 +333,9 @@ public class FormProviderUtilsTest {
 
    @Test
    public void testSurveyUriTableIdFormIdInstanceIdScreenPathEmptyKVMap()
-       throws UnsupportedEncodingException, JsonProcessingException {
+       throws UnsupportedEncodingException {
 
-      Map<String,Object> elementKeyValueMap = new HashMap<String,Object>();
+      Map<String,Object> elementKeyValueMap = new HashMap<>();
 
       String url = FormsProviderUtils
           .constructSurveyUri(APPNAME, TABLE_ID, FORM_ID, INSTANCE_ID_SPECIAL, SCREEN_PATH, elementKeyValueMap);
@@ -360,7 +358,7 @@ public class FormProviderUtilsTest {
    public void testSurveyUriTableIdFormIdInstanceIdScreenPathNonEmptyKVMap()
        throws UnsupportedEncodingException, JsonProcessingException {
 
-      Map<String,Object> elementKeyValueMap = new HashMap<String,Object>();
+      Map<String,Object> elementKeyValueMap = new HashMap<>();
       elementKeyValueMap.put(MY_KEY1, MY_KEY1_VALUE);
 
       String url = FormsProviderUtils
