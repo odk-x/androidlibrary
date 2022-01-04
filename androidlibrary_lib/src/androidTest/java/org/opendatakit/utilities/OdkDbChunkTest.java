@@ -62,7 +62,6 @@ public class OdkDbChunkTest {
       assertNull(DbChunkUtil.convertToChunks(nullData, largeChunkSize));
     } catch (IOException e) {
       fail("Should not throw exception on null input");
-      return;
     }
   }
 
@@ -72,12 +71,8 @@ public class OdkDbChunkTest {
 
     try {
       assertNull(DbChunkUtil.rebuildFromChunks(nullList, String[].class));
-    } catch (IOException e) {
+    } catch (IOException | ClassNotFoundException e) {
       fail("Should not throw exception on null");
-      return;
-    } catch (ClassNotFoundException e) {
-      fail("Should not throw exception on null");
-      return;
     }
   }
 
