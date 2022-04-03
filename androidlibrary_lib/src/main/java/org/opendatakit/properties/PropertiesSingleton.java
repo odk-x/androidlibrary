@@ -488,6 +488,7 @@ public final class PropertiesSingleton {
     // and update them from the mDeviceDefaults map.
     for (Map.Entry<String, String> entry : mDeviceDefaults.entrySet()) {
       if (!mDeviceProps.containsKey(entry.getKey())) {
+        if(entry.getKey() != null && entry.getValue() != null)
         mDeviceProps.setProperty(entry.getKey(), entry.getValue());
         updatedDeviceProps = true;
       }
