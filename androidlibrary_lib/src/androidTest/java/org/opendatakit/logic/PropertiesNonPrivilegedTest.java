@@ -18,7 +18,8 @@ package org.opendatakit.logic;
 import android.Manifest;
 import android.content.Context;
 
-import androidx.test.InstrumentationRegistry;
+
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.GrantPermissionRule;
 
 import org.junit.Before;
@@ -64,7 +65,7 @@ public class PropertiesNonPrivilegedTest {
     @Test
     public void testSimpleProperties() {
 
-        Context context = InstrumentationRegistry.getContext();
+        Context context = InstrumentationRegistry.getInstrumentation().getContext();
 
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
         Map<String,String> properties = new HashMap<String,String>();
@@ -87,7 +88,7 @@ public class PropertiesNonPrivilegedTest {
     public void testSecureSetProperties() {
 
         StaticStateManipulator.get().reset();
-        Context context = InstrumentationRegistry.getContext();
+        Context context = InstrumentationRegistry.getInstrumentation().getContext();
 
         TreeMap<String,String> secureProperties = new TreeMap<String,String>();
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
@@ -125,7 +126,7 @@ public class PropertiesNonPrivilegedTest {
     public void testSecureGetProperties() {
 
         StaticStateManipulator.get().reset();
-        Context context = InstrumentationRegistry.getContext();
+        Context context = InstrumentationRegistry.getInstrumentation().getContext();
 
         TreeMap<String,String> secureProperties = new TreeMap<String,String>();
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
