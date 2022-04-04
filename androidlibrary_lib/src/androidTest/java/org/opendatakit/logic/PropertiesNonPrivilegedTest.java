@@ -15,11 +15,13 @@
  */
 package org.opendatakit.logic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import android.Manifest;
 import android.content.Context;
 
-
-import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.rule.GrantPermissionRule;
 
 import org.junit.Before;
@@ -36,9 +38,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author mitchellsundt@gmail.com
@@ -65,7 +64,7 @@ public class PropertiesNonPrivilegedTest {
     @Test
     public void testSimpleProperties() {
 
-        Context context = InstrumentationRegistry.getInstrumentation().getContext();
+        Context context = ApplicationProvider.getApplicationContext();
 
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
         Map<String,String> properties = new HashMap<String,String>();
@@ -88,7 +87,7 @@ public class PropertiesNonPrivilegedTest {
     public void testSecureSetProperties() {
 
         StaticStateManipulator.get().reset();
-        Context context = InstrumentationRegistry.getInstrumentation().getContext();
+        Context context = ApplicationProvider.getApplicationContext();
 
         TreeMap<String,String> secureProperties = new TreeMap<String,String>();
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
@@ -126,7 +125,7 @@ public class PropertiesNonPrivilegedTest {
     public void testSecureGetProperties() {
 
         StaticStateManipulator.get().reset();
-        Context context = InstrumentationRegistry.getInstrumentation().getContext();
+        Context context = ApplicationProvider.getApplicationContext();
 
         TreeMap<String,String> secureProperties = new TreeMap<String,String>();
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
