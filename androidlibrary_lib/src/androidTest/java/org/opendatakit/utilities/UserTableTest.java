@@ -61,7 +61,7 @@ public class UserTableTest {
   private static final List<String> EXPORT_COLUMNS;
 
   static {
-    ArrayList<String> adminColumns = new ArrayList<String>();
+    ArrayList<String> adminColumns = new ArrayList<>();
     adminColumns.add(DataTableColumns.ID);
     adminColumns.add(DataTableColumns.ROW_ETAG);
     adminColumns.add(DataTableColumns.SYNC_STATE); // not exportable
@@ -79,7 +79,7 @@ public class UserTableTest {
     Collections.sort(adminColumns);
     ADMIN_COLUMNS = Collections.unmodifiableList(adminColumns);
 
-    ArrayList<String> exportColumns = new ArrayList<String>();
+    ArrayList<String> exportColumns = new ArrayList<>();
     exportColumns.add(DataTableColumns.ID);
     exportColumns.add(DataTableColumns.ROW_ETAG);
     exportColumns.add(DataTableColumns.DEFAULT_ACCESS);
@@ -113,7 +113,7 @@ public class UserTableTest {
   public static final String YOUR_ROW_FILE_COL = "Your_row_file_col";
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
@@ -121,12 +121,12 @@ public class UserTableTest {
   @Test
   public void testOrderedColumnsParcelation() throws IOException {
 
-    List<String> geopointCells = new ArrayList<String>();
+    List<String> geopointCells = new ArrayList<>();
     geopointCells.add(GEO_COL + "_" + "accuracy");
     geopointCells.add(GEO_COL + "_" + "altitude");
     geopointCells.add(GEO_COL + "_" + "latitude");
     geopointCells.add(GEO_COL + "_" + "longitude");
-    List<Column> columns = new ArrayList<Column>();
+    List<Column> columns = new ArrayList<>();
     columns.add(new Column(GEO_COL, GEO_COL, ElementType.GEOPOINT,
         ODKFileUtils.mapper.writeValueAsString(geopointCells)));
     for ( String name : geopointCells ) {
@@ -215,7 +215,7 @@ public class UserTableTest {
   @Test
   public void testOrderedColumnsParcelationNoGeoNoArray() throws IOException {
 
-    List<Column> columns = new ArrayList<Column>();
+    List<Column> columns = new ArrayList<>();
     columns.add(new Column(GROUP_COL, GROUP_COL, ElementDataType.integer.name(), null));
     columns.add(new Column(MY_COL, MY_COL, ElementDataType.integer.name(), null));
     columns.add(new Column(THEIR_COL, THEIR_COL, ElementDataType.integer.name(), null));
@@ -272,12 +272,12 @@ public class UserTableTest {
   @Test
   public void testUserTableParcelation() throws IOException {
 
-    List<String> geopointCells = new ArrayList<String>();
+    List<String> geopointCells = new ArrayList<>();
     geopointCells.add(GEO_COL + "_" + "accuracy");
     geopointCells.add(GEO_COL + "_" + "altitude");
     geopointCells.add(GEO_COL + "_" + "latitude");
     geopointCells.add(GEO_COL + "_" + "longitude");
-    List<Column> columns = new ArrayList<Column>();
+    List<Column> columns = new ArrayList<>();
     columns.add(new Column(GEO_COL, GEO_COL, ElementType.GEOPOINT,
         ODKFileUtils.mapper.writeValueAsString(geopointCells)));
     for ( String name : geopointCells ) {
@@ -298,7 +298,7 @@ public class UserTableTest {
     OrderedColumns orderedColumns = new OrderedColumns(APP_NAME, TABLE_ID_1, columns);
 
     List<String> retentionColumnNames = orderedColumns.getRetentionColumnNames();
-    HashMap<String, Integer> elementKeyToIndex = new HashMap<String, Integer>();
+    HashMap<String, Integer> elementKeyToIndex = new HashMap<>();
     String[] elementKeyForIndex = new String[retentionColumnNames.size()+ADMIN_COLUMNS.size()];
     String[] rowValues1 = new String[retentionColumnNames.size() + ADMIN_COLUMNS.size()];
     String[] rowValues2 = new String[retentionColumnNames.size() + ADMIN_COLUMNS.size()];
@@ -567,9 +567,9 @@ public class UserTableTest {
   }
 
   @Test
-  public void testUserTableParcelationNoGeoNoArray() throws IOException {
+  public void testUserTableParcelationNoGeoNoArray() {
 
-    List<Column> columns = new ArrayList<Column>();
+    List<Column> columns = new ArrayList<>();
     columns.add(new Column(GROUP_COL, GROUP_COL, ElementDataType.integer.name(), null));
     columns.add(new Column(MY_COL, MY_COL, ElementDataType.integer.name(), null));
     columns.add(new Column(THEIR_COL, THEIR_COL, ElementDataType.integer.name(), null));
@@ -577,7 +577,7 @@ public class UserTableTest {
     OrderedColumns orderedColumns = new OrderedColumns(APP_NAME, TABLE_ID_1, columns);
 
     List<String> retentionColumnNames = orderedColumns.getRetentionColumnNames();
-    HashMap<String, Integer> elementKeyToIndex = new HashMap<String, Integer>();
+    HashMap<String, Integer> elementKeyToIndex = new HashMap<>();
     String[] elementKeyForIndex = new String[retentionColumnNames.size()+ADMIN_COLUMNS.size()];
     String[] rowValues1 = new String[retentionColumnNames.size() + ADMIN_COLUMNS.size()];
     String[] rowValues2 = new String[retentionColumnNames.size() + ADMIN_COLUMNS.size()];
@@ -760,9 +760,9 @@ public class UserTableTest {
   }
 
   @Test
-  public void testUserTableSubsetNoGeoNoArray() throws IOException {
+  public void testUserTableSubsetNoGeoNoArray() {
 
-    List<Column> columns = new ArrayList<Column>();
+    List<Column> columns = new ArrayList<>();
     columns.add(new Column(GROUP_COL, GROUP_COL, ElementDataType.integer.name(), null));
     columns.add(new Column(MY_COL, MY_COL, ElementDataType.integer.name(), null));
     columns.add(new Column(THEIR_COL, THEIR_COL, ElementDataType.integer.name(), null));
@@ -770,7 +770,7 @@ public class UserTableTest {
     OrderedColumns orderedColumns = new OrderedColumns(APP_NAME, TABLE_ID_1, columns);
 
     List<String> retentionColumnNames = orderedColumns.getRetentionColumnNames();
-    HashMap<String, Integer> elementKeyToIndex = new HashMap<String, Integer>();
+    HashMap<String, Integer> elementKeyToIndex = new HashMap<>();
     String[] elementKeyForIndex = new String[retentionColumnNames.size()+ADMIN_COLUMNS.size()];
     String[] rowValues1 = new String[retentionColumnNames.size() + ADMIN_COLUMNS.size()];
     String[] rowValues2 = new String[retentionColumnNames.size() + ADMIN_COLUMNS.size()];
@@ -866,7 +866,7 @@ public class UserTableTest {
     row = new Row(rowValues2.clone(), table.getBaseTable());
     table.addRow(row);
 
-    List<Integer> idxs = new ArrayList<Integer>();
+    List<Integer> idxs = new ArrayList<>();
     idxs.add(0);
     idxs.add(1);
     UserTable t = new UserTable(table, idxs);

@@ -34,20 +34,22 @@ import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(JUnit4.class)
 public class ColumnDefinitionTest {
 
    @BeforeClass
-   public static void oneTimeSetUp() throws Exception {
+   public static void oneTimeSetUp() {
       StaticStateManipulator.get().reset();
       WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
    }
 
-   @Test(expected = IllegalArgumentException.class)
-   public void testBadBuildAppName1() {
-      List<Column> columns = new ArrayList<Column>();
+    @Test(expected = IllegalArgumentException.class)
+    public void testBadBuildAppName1() {
+        List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -91,7 +93,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildAppName2() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -135,7 +137,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildTableId1() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -180,7 +182,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildTableId2() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -224,7 +226,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildColumnList1() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -268,7 +270,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildColumnList2() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -313,7 +315,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildColumnList3() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -358,7 +360,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildColumnList4() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -403,7 +405,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildColumnList5() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -451,7 +453,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildColumnList6() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -490,7 +492,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildColumnList7() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -535,7 +537,7 @@ public class ColumnDefinitionTest {
 
    @Test(expected = IllegalArgumentException.class)
    public void testBadBuildColumnList8() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -582,7 +584,7 @@ public class ColumnDefinitionTest {
 
    @Test
    public void testBuildColumnList() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -628,7 +630,7 @@ public class ColumnDefinitionTest {
    @SuppressWarnings("unchecked")
    @Test
    public void testBuildExtendedJson() {
-      List<Column> columns = new ArrayList<Column>();
+      List<Column> columns = new ArrayList<>();
 
       // arbitrary type derived from integer
       columns.add(new Column("col0", "col0", "myothertype:integer", "[]"));
@@ -1206,7 +1208,7 @@ public class ColumnDefinitionTest {
          xlsxModel = ODKFileUtils.mapper.readValue
              (equivalentXLSXConverterDataTableModel, refType);
       } catch (IOException e) {
-         assertFalse("failed to parse XLSXConverter version", true);
+          fail("failed to parse XLSXConverter version");
          return;
       }
 
@@ -1214,8 +1216,9 @@ public class ColumnDefinitionTest {
          TreeMap<String,Object> value = (TreeMap<String, Object>) model.get(elementKey);
          assert(xlsxModel.containsKey(elementKey));
          Map<String,Object> xlsxValue = (Map<String,Object>) xlsxModel.get(elementKey);
-         List<String> ignoredKeys = new ArrayList<String>();
-         for ( String key : xlsxValue.keySet() ) {
+         List<String> ignoredKeys = new ArrayList<>();
+          assertNotNull(xlsxValue);
+          for ( String key : xlsxValue.keySet() ) {
             if ( key.startsWith("_") ) {
                ignoredKeys.add(key);
             }
@@ -1226,7 +1229,8 @@ public class ColumnDefinitionTest {
          for ( String key : ignoredKeys ) {
             xlsxValue.remove(key);
          }
-         assertEquals("Investigating: " + elementKey, value.size(), xlsxValue.size());
+          assertNotNull(value);
+          assertEquals("Investigating: " + elementKey, value.size(), xlsxValue.size());
          recursiveMatch(elementKey, value, xlsxValue);
 
          ColumnDefinition def = null;
@@ -1240,7 +1244,7 @@ public class ColumnDefinitionTest {
             assertEquals(value.get("elementKey"), elementKey);
             assertEquals(value.get("elementName"), elementKey);
             assertEquals(value.get("elementPath"), elementKey);
-            assertEquals(value.containsKey("notUnitOfRetention"), false);
+             assertFalse(value.containsKey("notUnitOfRetention"));
 
             if ( elementKey.equals(TableConstants.ID) ) {
                metaCount++;
@@ -1310,7 +1314,7 @@ public class ColumnDefinitionTest {
                assertEquals(value.get("notUnitOfRetention"), true);
             }
             // TODO: there are a lot more paths to verify here...
-            assertEquals(value.containsKey("isNotNullable"), false);
+             assertFalse(value.containsKey("isNotNullable"));
          }
       }
       assertEquals(metaCount, 14);
@@ -1326,8 +1330,9 @@ public class ColumnDefinitionTest {
          if ( ov instanceof Map ) {
             TreeMap<String,Object> rv = (TreeMap<String,Object>) ov;
             Map<String,Object> xlsrv = (Map<String,Object>) oxlsxv;
-            List<String> ignoredKeys = new ArrayList<String>();
-            for ( String rvkey : xlsrv.keySet() ) {
+            List<String> ignoredKeys = new ArrayList<>();
+             assertNotNull(xlsrv);
+             for ( String rvkey : xlsrv.keySet() ) {
                if ( rvkey.startsWith("_") ) {
                   ignoredKeys.add(rvkey);
                }
