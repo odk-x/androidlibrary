@@ -491,7 +491,7 @@ public final class PropertiesSingleton {
         if(entry.getKey() != null && entry.getValue() != null){
         mDeviceProps.setProperty(entry.getKey(), entry.getValue());
         updatedDeviceProps = true;
-		}
+        }
       }
     }
 
