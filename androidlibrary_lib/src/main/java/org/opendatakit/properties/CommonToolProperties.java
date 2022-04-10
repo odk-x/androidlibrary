@@ -221,6 +221,21 @@ public final class CommonToolProperties {
   // key used to store the sync type spinner's preference in SyncFragment
   public static final String KEY_SYNC_ATTACHMENT_STATE = "common.sync_attachment_state";
 
+  //Key used to store whether the Current Server URL has been verified or not
+  public static final String KEY_IS_SERVER_VERIFIED="common.is_server_verified";
+
+  //Key used to store whether Anonymous Sign In is used ever or not
+  public static final String KEY_IS_ANONYMOUS_SIGN_IN_USED="common.is_anonymous_sign_in_used";
+
+  //Key used to store whether the Server Supports Anonymous Sign In or not
+  public static final String KEY_IS_ANONYMOUS_ALLOWED="common.is_anonymous_allowed";
+
+  //Key used to store whether the current User Credentials are authenticated or not
+  public static final String KEY_IS_USER_AUTHENTICATED="common.is_user_authenticated";
+
+  //Key used to store the Current User State
+  public static final String KEY_CURRENT_USER_STATE="common.current_user_state";
+
   static {
     // register a state-reset manipulator for 'commonPropertiesSingletonFactory' field.
     StaticStateManipulator.get().register(new StaticStateManipulator.IStaticFieldManipulator() {
