@@ -272,8 +272,15 @@ public final class CommonToolProperties {
     if (deviceProperties != null) {
       deviceProperties.put(KEY_AUTHENTICATION_TYPE, "none");
       deviceProperties.put(KEY_USERNAME, "");
+
+      deviceProperties.put(KEY_IS_USER_AUTHENTICATED, Boolean.toString(true));
+      deviceProperties.put(KEY_CURRENT_USER_STATE, "LOGGED_OUT");
+      deviceProperties.put(KEY_LAST_SYNC_INFO, "");
+      deviceProperties.put(KEY_IS_SERVER_VERIFIED, Boolean.toString(false));
+      deviceProperties.put(KEY_IS_ANONYMOUS_SIGN_IN_USED, Boolean.toString(false));
+      deviceProperties.put(KEY_IS_ANONYMOUS_ALLOWED, Boolean.toString(false));
       deviceProperties.put(KEY_COMMON_INITIALIZATION, "");
-	  deviceProperties.put(KEY_FIRST_LAUNCH, "true");
+	    deviceProperties.put(KEY_FIRST_LAUNCH, "true");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("survey"), "");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("scan"), "");
       deviceProperties.put(PropertiesSingleton.toolVersionPropertyName("tables"), "");

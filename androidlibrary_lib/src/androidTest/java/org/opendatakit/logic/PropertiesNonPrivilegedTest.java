@@ -15,6 +15,9 @@
  */
 package org.opendatakit.logic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import android.Manifest;
 import android.content.Context;
 
@@ -35,9 +38,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author mitchellsundt@gmail.com
@@ -66,9 +66,9 @@ public class PropertiesNonPrivilegedTest {
 
         Context context = ApplicationProvider.getApplicationContext();
 
-
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
         Map<String,String> properties = new HashMap<>();
+
         // non-default value for font size
         properties.put(CommonToolProperties.KEY_FONT_SIZE, "29");
 
