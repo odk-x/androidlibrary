@@ -26,6 +26,6 @@ the License.
     <color name="solid_green">#f0f0</color>
     <color name="solid_yellow">#ffffff00</color>
 
-    <color name="background_txtButton">#fdfdfd</color>
+    <color name="background_txtButton">#1d1d1d</color>
 
 </resources>

@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- ActionBar style -->
     <style name="OdkActionBar"
         parent="Widget.AppCompat.Light.ActionBar.Solid">
         <item name="displayOptions">useLogo|showHome|showTitle</item>
-        <item name="background">@color/white</item>
+        <item name="background">@color/background_txtButton</item>
         <item name="logo">@drawable/app_logo</item>
     </style>
 
-    <style name="Opendatakit" parent="Theme.AppCompat.Light">
+    <style name="Opendatakit" parent="Theme.AppCompat.DayNight">
         <item name="android:scrollbarThumbHorizontal">@drawable/thumb</item>
         <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
         <item name="android:scrollbarSize">2.5mm</item>
         <item name="android:scrollbarAlwaysDrawVerticalTrack">true</item>
         <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
+        <item name="android:colorPrimary">@color/background_txtButton</item>
+        <item name="android:colorPrimaryDark">@color/background_txtButton</item>
+        <item name="android:windowLightStatusBar" tools:ignore="NewApi">true</item>
         <item name="actionBarStyle">@style/OdkActionBar</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
