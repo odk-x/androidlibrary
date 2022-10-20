@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Contains Dark Theme
+    -Can be modified and changes sync with all apps
+    -->
+
+    <!-- ActionBar style -->
+    <style name="OdkActionBar"
+        parent="Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="displayOptions">useLogo|showHome|showTitle</item>
+        <item name="background">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorOnPrimary</item>
+        <item name="logo">@drawable/app_logo</item>
+    </style>
+
+    <!-- Light Theme-->
+    <style name="Opendatakit" parent="Theme.AppCompat.DayNight">
+        <item name="android:scrollbarThumbHorizontal">@drawable/thumb</item>
+        <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
+        <item name="android:scrollbarSize">2.5mm</item>
+        <item name="android:scrollbarAlwaysDrawVerticalTrack">true</item>
+        <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:colorPrimary">@color/colorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
+        <item name="actionBarStyle">@style/OdkActionBar</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
+
+
+
+
+
+
+
+    <!-- AlertDialog Theme -->
+    <style name="OdkAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/blue</item>
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+
+
+
+
+</resources>
