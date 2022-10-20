@@ -22,6 +22,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -108,6 +109,7 @@ public class ProgressDialogFragment extends DialogFragment
 
    // Use this instance of the interface to deliver action events
    private ProgressDialogListener progressDialogListener;
+   private LinearProgressIndicator linearProgressIndicator;
 
    public boolean dismissWasCalled() {
       return dismissCalled;
@@ -248,10 +250,12 @@ public class ProgressDialogFragment extends DialogFragment
       tvMessage.setText(message);
       progressIndicator.setIndeterminate(true);
 
-      dialog.setCanceledOnTouchOutside(false);
+      //linear progress indicator color
 
+      dialog.setCanceledOnTouchOutside(false);
       if (positiveButtonText != null) {
          dialog.setButton(DialogInterface.BUTTON_POSITIVE, positiveButtonText, this);
+
       }
 
       if (negativeButtonText != null) {
