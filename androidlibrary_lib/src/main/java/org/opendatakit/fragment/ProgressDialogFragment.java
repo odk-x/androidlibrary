@@ -18,25 +18,16 @@ import android.app.Activity;
 import android.app.Dialog;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import android.content.DialogInterface;
-
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
@@ -48,7 +39,6 @@ import org.opendatakit.utilities.AppNameUtil;
  * Fragment-version of Progress dialog, used all over the place
  *
  * @author mitchellsundt@gmail.com
- * @author redeemgrimm@gmail.com
  */
 public class ProgressDialogFragment extends DialogFragment
     implements DialogInterface.OnClickListener {
@@ -232,10 +222,7 @@ public class ProgressDialogFragment extends DialogFragment
       }
    }
 
-
-   //Message, Hide/Show Sync Details, ProgressIndicator Params
    TextView tvMessage;
-   MaterialButton hideshowSyncDetailsBtn;
    LinearProgressIndicator progressIndicator;
 
    /**
@@ -246,11 +233,10 @@ public class ProgressDialogFragment extends DialogFragment
     */
    @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-      //progress indicator layout being inflated
       LayoutInflater inflater=getLayoutInflater();
       View view=inflater.inflate(R.layout.progress_indicator_layout,null);
 
-      AlertDialog dialog=new MaterialAlertDialogBuilder(getActivity(),R.style.OdkXAlertDialogStyle)
+      AlertDialog dialog=new MaterialAlertDialogBuilder(getActivity(),R.style.Theme_MaterialComponents_Light_Dialog_Alert)
               .setTitle(title)
               .setCancelable(false)
               .setView(view)
@@ -259,50 +245,8 @@ public class ProgressDialogFragment extends DialogFragment
       tvMessage=view.findViewById(R.id.tvMessage);
       progressIndicator=view.findViewById(R.id.progress_indicator);
 
-      //start by hiding sync details
-     tvMessage.setVisibility(View.GONE);
-
-      //hide details button
-      hideshowSyncDetailsBtn=view.findViewById(R.id.showMessage);
-
-      //hide and show sync info
-      String hide="HIDE SYNC DETAILS";
-      String show="SHOW SYNC DETAILS";
-      String hideSyncColor="#5594d7";
-     // String showSyncColor="#1d1d1d"; --> This color not needed since color remains blue in both states
-
       tvMessage.setText(message);
       progressIndicator.setIndeterminate(true);
-
-      //hide and show sync details when clicked boolean value set to true
-      final boolean[] clicked = {true};
-
-      //initializing click count to zero
-      int clickCount=0;
-
-      hideshowSyncDetailsBtn.setOnClickListener(v -> {
-         if(clicked[clickCount]) {
-            tvMessage.setVisibility(View.VISIBLE);
-            hideshowSyncDetailsBtn.setText(hide);
-            hideshowSyncDetailsBtn.setTextColor(Color.parseColor(hideSyncColor));
-            hideshowSyncDetailsBtn.setIcon(ContextCompat.getDrawable(getContext(),R.drawable.ic_hide_details));
-            hideshowSyncDetailsBtn.setIconSize(50);
-         }else{
-
-            //Change button name and color
-            tvMessage.setVisibility(View.GONE);
-            hideshowSyncDetailsBtn.setText(show);
-            hideshowSyncDetailsBtn.setTextColor(Color.parseColor(hideSyncColor));
-            hideshowSyncDetailsBtn.setIcon(ContextCompat.getDrawable(getContext(),R.drawable.ic_show_sync_details));
-            hideshowSyncDetailsBtn.setIconSize(50);
-
-
-         }
-         clicked[clickCount] =!clicked[clickCount];
-      });
-
-      //linear progress indicator color
-
 
       dialog.setCanceledOnTouchOutside(false);
 

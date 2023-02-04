@@ -62,5 +62,9 @@
     <color name="colorCardBackground">@color/colorPrimaryVariant</color>
     <color name="colorSecondaryBackground">@color/grey_100</color>
     <color name="colorBtnDisabled">@color/blue_100</color>
+<<<<<<< HEAD
 </resources>
 
+=======
+</resources>
+>>>>>>> 248aeac (@wbrunette @maprehensive The changes here work in sync with the PR at ODK-Services.)
