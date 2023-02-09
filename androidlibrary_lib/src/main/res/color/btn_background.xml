@@ -2,8 +2,4 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:color="@color/colorBtnDisabled" android:state_enabled="false" />
     <item android:color="@color/colorPrimaryBackground" android:state_enabled="true" />
-<<<<<<< HEAD
 </selector>
-=======
-</selector>
->>>>>>> 248aeac (@wbrunette @maprehensive The changes here work in sync with the PR at ODK-Services.)

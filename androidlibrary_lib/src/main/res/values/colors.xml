@@ -14,16 +14,68 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <resources>
-    <color name="red">#7f00</color>
-    <color name="white">#ffffffff</color>
-    <color name="black">#ff000000</color>
-    <color name="blue">#770000ff</color>
-    <color name="green">#7700ff00</color>
-    <color name="yellow">#77ffff00</color>
+
+    <!--Light Theme Mode Colors Here -->
+
+    <!-- Keep code commented for error reference.
+    <color name="red">#DB6262</color>
+    <color name="white">#FDFDFD</color>
+    <color name="black">#1d1d1d</color>
+    <color name="blue">#5594d7</color>
+    <color name="blue_light">#E7EEF6</color>
+    <color name="green">#13932C</color>
+    <color name="yellow">#DF961F</color>
+    -->
+
+    <color name="red_300">#DB6262</color>
+    <color name="red_100">#fcf4f4</color>
+    <color name="white"> #ffffff</color>
+    <color name="grey_500">#1d1d1d</color>
+    <color name="black">#1d1d1d</color>
+    <color name="grey_200">#c8c8c8</color>
+    <color name="grey_100">#fdfdfd</color>
+    <color name="grey_0">#ffffff</color>
+    <color name="blue_300">#5594d7</color>
+    <color name="blue_100">#f2f7fc</color>
+    <color name="green_300">#1ccb3d</color>
+    <color name="green_100">#f0fdf2</color>
+    <color name="yellow_300">#df961f</color>
+    <color name="yellow_100">#fcf8ea</color>
 
     <color name="solid_red">#f00</color>
     <color name="solid_blue">#0000ff</color>
     <color name="solid_green">#f0f0</color>
     <color name="solid_yellow">#ffffff00</color>
 
+    <!-- # Keep code commented for error reference.
+    <color name="colorPrimary">@color/blue</color>
+    <color name="colorPrimaryVariant">@color/blue_light</color>
+    <color name="colorSecondary">@color/green</color>
+    <color name="colorSecondaryVariant"></color>
+    <color name="colorPrimaryDark">@color/white</color>
+    <color name="colorOnPrimary">@color/black</color>
+    -->
+
+    <color name="colorPrimary">@color/blue_300</color>
+    <color name="colorPrimaryVariant">@color/blue_100</color>
+    <color name="colorSecondary">@color/green_300</color>
+    <color name="colorSecondaryVariant">@color/green_100</color>
+    <color name="colorPrimaryDark">@color/white</color>
+    <color name="colorSurface">@color/white</color>
+    <color name="colorError">@color/red_300</color>
+    <color name="colorBackground">@color/white</color>
+
+    <color name="colorOnPrimary">@color/white</color>
+    <color name="colorOnSecondary">@color/white</color>
+    <color name="colorOnSurface">@color/grey_500</color>
+    <color name="colorOnBackground">@color/grey_500</color>
+    <color name="colorOnError">@color/grey_200</color>
+
+    <!--ODK-X Services Colors -->
+    <color name="colorPrimaryText">@color/grey_500</color>
+    <color name="colorSecondaryText">@color/grey_200</color>
+    <color name="colorPrimaryBackground">@color/blue_300</color>
+    <color name="colorCardBackground">@color/colorPrimaryVariant</color>
+    <color name="colorSecondaryBackground">@color/grey_100</color>
+    <color name="colorBtnDisabled">@color/blue_100</color>
 </resources>
