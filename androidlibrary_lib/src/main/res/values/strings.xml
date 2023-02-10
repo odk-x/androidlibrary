@@ -75,5 +75,4 @@ name="updating_table_form_information">Updating form information for table %1$s 
 	<string name="showSyncDetails">Show sync details</string>
 	<string name="hideSyncDetailTextColor">#5594d7</string>
 	<string name="showSyncDetailsTextColor">#1d1d1d</string>
-
 </resources>

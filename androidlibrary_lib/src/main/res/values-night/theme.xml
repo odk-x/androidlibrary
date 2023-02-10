@@ -47,7 +47,7 @@
     </style>
 
     <!-- AlertDialog Theme -->
-    <style name="OdkAlertDialogStyle" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+    <style name="OdkXAlertDialogStyle" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
         <item name="colorAccent">@color/blue_300</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:background">@color/grey_500</item>
@@ -77,5 +77,4 @@
         <item name="android:textColor">@color/white</item>
         <item name="android:gravity">center_horizontal</item>
     </style>
-
 </resources>

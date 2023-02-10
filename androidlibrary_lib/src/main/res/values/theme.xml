@@ -56,7 +56,7 @@
 
 
    <!-- AlertDialog Theme -->
-   <style name="OdkAlertDialogStyle"  parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+   <style name="OdkXAlertDialogStyle"  parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
       <item name="colorAccent">@color/blue_300</item>
       <item name="android:textColorPrimary">@color/grey_500</item>
       <item name="colorSurface">@color/white</item>
@@ -251,5 +251,4 @@
       <item name="hintAnimationEnabled">true</item>
       <item name="strokeWidth">1dp</item>
    </style>
-
 </resources>
