@@ -15,7 +15,7 @@
     </style>
 
     <!-- Darkmode Theme-->
-    <style name="Opendatakit" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="ODKX" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:scrollbarThumbHorizontal">@drawable/thumb</item>
         <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
         <item name="android:scrollbarSize">2.5mm</item>

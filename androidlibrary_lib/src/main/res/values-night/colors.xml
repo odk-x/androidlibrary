@@ -3,16 +3,6 @@
 
     <!-- Dark Theme Mode Colors Here -->
 
-    <!-- # Keep code commented, For error reference.
-    <color name="red_300">#DB6262</color>
-    <color name="white">#FDFDFD</color>
-    <color name="grey_500">#1d1d1d</color>
-    <color name="black">#1d1d1d</color>
-    <color name="blue_300">#5594d7</color>
-    <color name="green_300">#13932C</color>
-    <color name="yellow_300">#DF961F</color>
-    -->
-
     <color name="red_300">#DB6262</color>
     <color name="red_100">#fcf4f4</color>
     <color name="white"> #ffffff</color>
@@ -33,15 +23,8 @@
     <color name="solid_green">#f0f0</color>
     <color name="solid_yellow">#ffffff00</color>
 
-    <!-- # Keep code commented for error reference.
     <color name="colorPrimary">@color/grey_500</color>
-    <color name="colorPrimaryDark">@color/grey_500</color>
-    <color name="colorOnPrimary">@color/white</color>
-    <color name="colorPrimaryBackground">@color/grey_500</color>
-    -->
-
-    <color name="colorPrimary">@color/grey_500</color>
-    <color name="colorPrimaryVariant">@color/blue_100</color>
+    <color name="colorPrimaryVariant">@color/grey_500</color>
     <color name="colorSecondary">@color/green_300</color>
     <color name="colorSecondaryVariant">@color/green_100</color>
     <color name="colorPrimaryDark">@color/black</color>
@@ -56,10 +39,10 @@
     <color name="colorOnError">@color/grey_200</color>
 
     <!--ODK-X Services Colors -->
-    <color name="colorPrimaryText">@color/grey_200</color>
-    <color name="colorSecondaryText">@color/green_100</color>
+    <color name="colorPrimaryText">@color/grey_500</color>
+    <color name="colorSecondaryText">@color/grey_100</color>
     <color name="colorPrimaryBackground">@color/blue_300</color>
-    <color name="colorCardBackground">@color/colorPrimaryVariant</color>
+    <color name="colorCardBackground">@color/blue_100</color>
     <color name="colorSecondaryBackground">@color/grey_100</color>
     <color name="colorBtnDisabled">@color/blue_100</color>
 </resources>
