@@ -3,25 +3,34 @@
 
     <!-- Dark Theme Mode Colors Here -->
 
+    <color name="red_500">#722a2a</color>
+    <color name="red_400">#a53030</color>
     <color name="red_300">#DB6262</color>
+    <color name="red_200">#f7d1d1</color>
     <color name="red_100">#fcf4f4</color>
     <color name="white"> #ffffff</color>
-    <color name="grey_500">#1d1d1d</color>
     <color name="black">#1d1d1d</color>
+    <color name="grey_500">#1d1d1d</color>
+    <color name="grey_400">#434343</color>
+    <color name="grey_300">#666666</color>
     <color name="grey_200">#c8c8c8</color>
     <color name="grey_100">#fdfdfd</color>
     <color name="grey_0">#ffffff</color>
+    <color name="blue_500">#2f4a79</color>
+    <color name="blue_400">#3b69ba</color>
     <color name="blue_300">#5594d7</color>
+    <color name="blue_200">#c9e1f4</color>
     <color name="blue_100">#f2f7fc</color>
+    <color name="green_500">#125521</color>
+    <color name="green_400">#13932c</color>
     <color name="green_300">#1ccb3d</color>
+    <color name="green_200">#b9f9c4</color>
     <color name="green_100">#f0fdf2</color>
+    <color name="yellow_500">#68341b</color>
+    <color name="yellow_400">#924e16</color>
     <color name="yellow_300">#df961f</color>
+    <color name="yellow_200">#f3db95</color>
     <color name="yellow_100">#fcf8ea</color>
-
-    <color name="solid_red">#f00</color>
-    <color name="solid_blue">#0000ff</color>
-    <color name="solid_green">#f0f0</color>
-    <color name="solid_yellow">#ffffff00</color>
 
     <color name="colorPrimary">@color/grey_500</color>
     <color name="colorPrimaryVariant">@color/grey_500</color>

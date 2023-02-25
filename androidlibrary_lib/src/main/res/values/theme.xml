@@ -250,8 +250,12 @@
 
    <!--DropdownMenuTheme-->
    <style name="DropdownMenuTheme" parent="Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
-      <item name="boxBackgroundColor">@color/white</item>
-      <item name="boxStrokeColor">@color/white</item>
+      <item name="boxBackgroundColor">@color/blue_200</item>
+      <item name="boxStrokeColor">@color/blue_100</item>
+      <item name="boxCornerRadiusTopStart">20dp</item>
+      <item name="boxCornerRadiusBottomEnd">20dp</item>
+      <item name="boxCornerRadiusBottomStart">20dp</item>
+      <item name="boxCornerRadiusTopEnd">20dp</item>
    </style>
 
    <!--TextInputTheme-->
