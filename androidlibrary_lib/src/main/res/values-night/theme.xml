@@ -15,18 +15,13 @@
     </style>
 
     <!-- Darkmode Theme-->
-    <style name="Opendatakit" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="ODKX" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:scrollbarThumbHorizontal">@drawable/thumb</item>
         <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
-        <item name="android:scrollbarSize">2.5mm</item>
+        <item name="android:scrollbarSize">2.5dp</item>
         <item name="android:scrollbarAlwaysDrawVerticalTrack">true</item>
         <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
         <item name="android:statusBarColor">@color/grey_500</item>
-
-        <!--# Keep code commented for error reference.
-        <item name="android:colorPrimary">@color/colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-        -->
 
         <item name="colorSurface">@color/grey_500</item>
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -40,12 +35,9 @@
         <item name="colorOnSecondary">@color/colorOnSecondary</item>
         <item name="colorOnSurface">@color/colorOnSurface</item>
         <item name="colorOnError">@color/colorOnError</item>
-
         <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
-        <!-- <item name="actionBarStyle">@style/OdkActionBar</item> # Not in use since we're dealing with custom app bar-->
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
-
 
     <!-- AlertDialog Theme -->
     <style name="OdkXAlertDialogStyle" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
@@ -78,5 +70,4 @@
         <item name="android:textColor">@color/white</item>
         <item name="android:gravity">center_horizontal</item>
     </style>
-
 </resources>

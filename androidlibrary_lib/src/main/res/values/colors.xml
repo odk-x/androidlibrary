@@ -17,16 +17,6 @@ the License.
 
     <!--Light Theme Mode Colors Here -->
 
-    <!-- Keep code commented for error reference.
-    <color name="red">#DB6262</color>
-    <color name="white">#FDFDFD</color>
-    <color name="black">#1d1d1d</color>
-    <color name="blue">#5594d7</color>
-    <color name="blue_light">#E7EEF6</color>
-    <color name="green">#13932C</color>
-    <color name="yellow">#DF961F</color>
-    -->
-
     <color name="red_300">#DB6262</color>
     <color name="red_100">#fcf4f4</color>
     <color name="white"> #ffffff</color>
@@ -47,15 +37,6 @@ the License.
     <color name="solid_green">#f0f0</color>
     <color name="solid_yellow">#ffffff00</color>
 
-    <!-- # Keep code commented for error reference.
-    <color name="colorPrimary">@color/blue</color>
-    <color name="colorPrimaryVariant">@color/blue_light</color>
-    <color name="colorSecondary">@color/green</color>
-    <color name="colorSecondaryVariant"></color>
-    <color name="colorPrimaryDark">@color/white</color>
-    <color name="colorOnPrimary">@color/black</color>
-    -->
-
     <color name="colorPrimary">@color/blue_300</color>
     <color name="colorPrimaryVariant">@color/blue_100</color>
     <color name="colorSecondary">@color/green_300</color>
@@ -75,7 +56,10 @@ the License.
     <color name="colorPrimaryText">@color/grey_500</color>
     <color name="colorSecondaryText">@color/grey_200</color>
     <color name="colorPrimaryBackground">@color/blue_300</color>
-    <color name="colorCardBackground">@color/colorPrimaryVariant</color>
+    <color name="colorCardBackground">@color/blue_100</color>
     <color name="colorSecondaryBackground">@color/grey_100</color>
     <color name="colorBtnDisabled">@color/blue_100</color>
+    <color name="headingTextOnCard">@color/grey_500</color>
+    <color name="subHeadingTextOnCard">@color/grey_500</color>
+
 </resources>

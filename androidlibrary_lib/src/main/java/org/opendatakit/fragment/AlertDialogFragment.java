@@ -175,7 +175,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       setTargetFragment(f, RequestCodes.ALERT_DIALOG.ordinal());
 
 
-      AlertDialog alertDialog = new MaterialAlertDialogBuilder(getActivity(), R.style.OdkAlertDialogStyle)
+      AlertDialog alertDialog = new MaterialAlertDialogBuilder(getActivity(), R.style.OdkXAlertDialogStyle)
 
               .setTitle(title)
               .setMessage(message)
@@ -222,9 +222,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
    /////////////////   STATIC HELPER FUNCTIONS TO AVOID DUPLICATE CODE   /////////////////
    ///////////////////////////////////////////////////////////////////////////////////////
 
-   public static AlertDialogFragment eitherReuseOrCreateNew(String alertDialogTag,
-                                                            AlertDialogFragment inputAlertDialogFragment, FragmentManager fragmentManager,
-                                                            boolean dismissActivity, int fragmentId, String title, String message) {
+   public static AlertDialogFragment eitherReuseOrCreateNew(String alertDialogTag, AlertDialogFragment inputAlertDialogFragment, FragmentManager fragmentManager, boolean dismissActivity, int fragmentId, String title, String message) {
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException(FRAGMENT_MANAGER_NULL_ERROR);
@@ -258,12 +256,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       } else {
          outputAlertDialogFragment.setTitle(title);
          outputAlertDialogFragment.setMessage(message);
-
-
-//Added return statement here
-         return outputAlertDialogFragment;
       }
-
 
       return outputAlertDialogFragment;
    }

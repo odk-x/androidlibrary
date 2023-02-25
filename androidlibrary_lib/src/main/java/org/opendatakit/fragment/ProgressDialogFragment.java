@@ -250,7 +250,7 @@ public class ProgressDialogFragment extends DialogFragment
       LayoutInflater inflater=getLayoutInflater();
       View view=inflater.inflate(R.layout.progress_indicator_layout,null);
 
-      AlertDialog dialog=new MaterialAlertDialogBuilder(getActivity(),R.style.OdkAlertDialogStyle)
+      AlertDialog dialog=new MaterialAlertDialogBuilder(getActivity(),R.style.OdkXAlertDialogStyle)
               .setTitle(title)
               .setCancelable(false)
               .setView(view)
