@@ -3,31 +3,23 @@
 
    <!-- Contains Light Theme -->
 
-   <style name="OdkActionBar"
+   <style name="OdkXActionBar"
        parent="Widget.MaterialComponents.Light.ActionBar.Solid">
       <item name="displayOptions">useLogo|showHome|showTitle</item>
       <item name="background">@color/colorPrimary</item>
       <item name="android:textColor">@color/colorOnPrimary</item>
       <item name="android:itemBackground">@color/colorOnPrimary</item>
-
       <item name="logo">@drawable/app_logo</item>
    </style>
 
    <!-- Light Theme-->
-   <style name="Opendatakit" parent="Theme.MaterialComponents.Light.NoActionBar">
+   <style name="ODKX" parent="Theme.MaterialComponents.Light.NoActionBar">
       <item name="android:scrollbarThumbHorizontal">@drawable/thumb</item>
       <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
-      <item name="android:scrollbarSize">2.5mm</item>
+      <item name="android:scrollbarSize">2.5dp</item>
       <item name="android:scrollbarAlwaysDrawVerticalTrack">true</item>
       <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
       <item name="android:statusBarColor">@color/white</item>
-
-
-      <!-- # Keep code commented for error reference.
-      <item name="android:colorPrimary">@color/colorPrimary</item>
-      <item name="colorSecondary">@color/colorSecondary</item>
-      <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-      -->
 
       <item name="android:colorPrimary">@color/colorPrimary</item>
       <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
@@ -42,18 +34,13 @@
       <item name="colorOnError">@color/colorOnError</item>
 
       <item name="android:windowLightStatusBar" tools:ignore="NewApi">true</item>
-
       <item name="colorAccent">@color/blue_300</item>
-      <!--  <item name="actionBarStyle">@style/OdkActionBar</item> # Not needed since we're dealing with custom app bar-->
       <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-
       <item name="buttonStyle">@style/ButtonStyle</item>
-
+      <item name="textInputStyle">@style/TextInputTheme</item>
    </style>
 
-
    <!--Individual Stylings For Different Components -->
-
 
    <!-- AlertDialog Theme -->
    <style name="OdkXAlertDialogStyle"  parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
@@ -90,7 +77,7 @@
 
 
    <!--CardTheme Style-->
-   <style name="CardTheme" parent="Opendatakit">
+   <style name="CardTheme" parent="ODKX">
       <item name="cardBackgroundColor">@color/colorCardBackground</item>
       <item name="cardCornerRadius">28dp</item>
       <item name="cardElevation">0dp</item>
@@ -100,15 +87,17 @@
    <style name="TextButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
       <item name="android:textAllCaps">true</item>
       <item name="fontFamily">@font/sourcesanspro_regular</item>
-      <item name="android:textColor">@color/colorPrimaryText</item>
+      <item name="android:textColor">@color/colorOnSurface</item>
       <item name="android:textSize">14sp</item>
       <item name="android:textStyle">bold</item>
    </style>
 
    <!--Primary button round-->
    <style name="ButtonStyle" parent="Widget.MaterialComponents.Button">
+      <item name="android:layout_height">40dp</item>
       <item name="android:textAllCaps">true</item>
       <item name="android:textSize">14sp</item>
+      <item name="elevation">0dp</item>
       <item name="fontFamily">@font/sourcesanspro_regular</item>
       <item name="android:textColor">@color/btn_text_color</item>
       <item name="backgroundTint">@color/btn_background</item>
@@ -140,8 +129,9 @@
       <item name="android:textAllCaps">true</item>
       <item name="android:textSize">14sp</item>
       <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="elevation">0dp</item>
       <item name="android:textColor">@color/colorPrimaryText</item>
-      <item name="backgroundTint">@color/colorSecondaryBackground</item>
+      <item name="backgroundTint">@color/colorPrimaryVariant</item>
       <item name="cornerRadius">100dp</item>
    </style>
 
@@ -161,16 +151,15 @@
       <item name="android:textSize">14sp</item>
    </style>
 
-
    <!--Appbar Style-->
    <style name="AppBarStyle">
-      <item name="android:background">@color/colorPrimary</item>
+      <item name="android:background">@color/colorPrimaryVariant</item>
    </style>
 
    <style name="AppBarLabelStyle">
       <item name="android:textSize">30sp</item>
       <item name="android:textStyle">bold</item>
-      <item name="android:textColor">@color/black</item>
+      <item name="android:textColor">@color/white</item>
    </style>
    <!-- End -->
 
@@ -181,8 +170,27 @@
       <item name="android:textStyle">bold</item>
       <item name="fontFamily">@font/montserrat</item>
       <item name="background">@color/colorPrimaryBackground</item>
-      <item name="android:textColor">@color/colorPrimaryText</item>
+      <item name="android:textColor">@color/colorOnBackground</item>
    </style>
+
+   <!-- Cardview Separate Text Styling-->
+   <style name="CardViewHeadingStyle">
+      <item name="android:textSize">18sp</item>
+      <item name="android:textStyle">bold</item>
+      <item name="fontFamily">@font/montserrat</item>
+      <item name="background">@color/colorPrimaryBackground</item>
+      <item name="android:textColor">@color/headingTextOnCard</item>
+   </style>
+
+   <style name="CardViewSubHeadingStyle">
+      <item name="android:textSize">16sp</item>
+      <item name="android:textStyle">normal</item>
+      <item name="fontFamily">@font/montserrat</item>
+      <item name="background">@color/colorPrimaryBackground</item>
+      <item name="android:textColor">@color/subHeadingTextOnCard</item>
+   </style>
+   <!-- End Here -->
+
 
    <!-- YellowHeadingStyle -->
    <style name="YellowHeadingStyle" parent="HeadingStyle">
@@ -191,7 +199,7 @@
    </style>
 
    <style name="SecondaryHeadingStyle" parent="HeadingStyle">
-      <item name="android:textColor">@color/colorSecondaryText</item>
+      <item name="android:textColor">@color/colorOnBackground</item>
    </style>
 
    <style name="SmallHeadingStyle" parent="HeadingStyle">
@@ -200,6 +208,7 @@
 
    <style name="LargeHeadingStyle" parent="HeadingStyle">
       <item name="android:textSize">32sp</item>
+      <item name="android:textColor">@color/colorOnBackground</item>
    </style>
 
    <!--End-->
@@ -214,7 +223,13 @@
    </style>
 
    <style name="SmallTextViewStyle" parent="TextViewStyle">
+      <item name="android:textSize">16sp</item>
+   </style>
+
+   <style name="InputFieldLabelStyle">
+      <item name="fontFamily">@font/montserrat</item>
       <item name="android:textSize">14sp</item>
+      <item name="android:textColor">@color/colorOnBackground</item>
    </style>
    <!--End-->
 
@@ -235,20 +250,33 @@
 
    <!--DropdownMenuTheme-->
    <style name="DropdownMenuTheme" parent="Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
-      <item name="boxBackgroundColor">@color/white</item>
-      <item name="boxStrokeColor">@color/white</item>
+      <item name="boxBackgroundColor">@color/blue_200</item>
+      <item name="boxStrokeColor">@color/blue_100</item>
+      <item name="boxCornerRadiusTopStart">20dp</item>
+      <item name="boxCornerRadiusBottomEnd">20dp</item>
+      <item name="boxCornerRadiusBottomStart">20dp</item>
+      <item name="boxCornerRadiusTopEnd">20dp</item>
    </style>
 
    <!--TextInputTheme-->
    <style name="TextInputTheme" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-      <item name="backgroundColor">@color/white</item>
+
+      <item name="background">@drawable/odkx_input_background</item>
+      <item name="android:layout_height">56dp</item>
+      <item name="android:layout_width">match_parent</item>
+      <item name="android:padding">16dp</item>
+      <item name="android:textSize">16sp</item>
+      <item name="android:textColor">@color/colorOnBackground</item>
+      <item name="errorEnabled">true</item>
+      <item name="errorTextColor">@color/colorError</item>
       <item name="colorOnSurface">@color/colorPrimaryBackground</item>
       <item name="boxStrokeColor">@color/colorPrimaryBackground</item>
       <item name="strokeColor">@color/btn_background</item>
       <item name="hintTextColor">@color/colorPrimaryBackground</item>
-      <item name="hintEnabled">true</item>
+      <item name="hintEnabled">false</item>
+      <item name="hintAnimationEnabled">false</item>
       <item name="android:textCursorDrawable">@null</item>
-      <item name="hintAnimationEnabled">true</item>
       <item name="strokeWidth">1dp</item>
+
    </style>
 </resources>
