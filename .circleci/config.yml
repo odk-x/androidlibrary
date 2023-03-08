@@ -46,10 +46,6 @@ jobs:
             ANDROID_SDK_ROOT: '/home/circleci/android-sdk'
           name: Prepare environment and compile beta
           no_output_timeout: 30m
-          command: |
-           export ANDROID_SDK_ROOT='/home/circleci/android-sdk'
-           export JAVA_HOME='/usr/lib/jvm/java-8-openjdk-amd64'
-
-
+          
       # Build
       - run: ./gradlew clean assemble
