@@ -25,28 +25,32 @@ jobs:
       TERM: dumb
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    
     steps:
-        - checkout
-        - restore_cache:
-            key: jars-{{ checksum "build.gradle" }}-{{ checksum "./build.gradle" }}
-        - run:
-            name: chmod permissions
-            command: chmod +x ./gradlew
-        - run:
-            name: Download Dependencies
-            command: ./gradlew androidDependencies
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "./build.gradle" }}
+      - run:
+          name: chmod permissions
+          command: chmod +x ./gradlew
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
 
-        - save_cache:
-            paths:
-              - ~/.gradle
-            key: jars-{{ checksum "build.gradle" }}-{{ checksum "./build.gradle" }}
+      - run:
+          environment:
+            ANDROID_SDK_ROOT: '/home/circleci/android-sdk'
+          name: Prepare environment and compile beta
+          no_output_timeout: 30m
+          command: |
+            export ANDROID_SDK_ROOT='/home/circleci/android-sdk'
+            export JAVA_HOME='/usr/lib/jvm/java-8-openjdk-amd64'
+            npm run build:android
 
-        - run:
-            name: 'Build Android App'
-            command: |            
-              export ANDROID_SDK_ROOT='/home/circleci/android-sdk'
-              export JAVA_HOME='/usr/lib/jvm/java-8-openjdk-amd64'
-              npm run build:android
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "./build.gradle" }}
 
-        # Build
-        - run: ./gradlew clean assemble
+      # Build
+      - run: ./gradlew clean assemble
