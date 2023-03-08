@@ -1,6 +1,6 @@
 # Java Gradle CircleCI 2.0 configuration file
 # See: https://circleci.com/docs/2.0/language-java/
-version: 2
+version: 2.1
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
@@ -46,6 +46,8 @@ jobs:
             ANDROID_SDK_ROOT: '/home/circleci/android-sdk'
           name: Prepare environment and compile beta
           no_output_timeout: 30m
-          
+          command: |
+           export ANDROID_SDK_ROOT $ANDROID_HOME
+
       # Build
       - run: ./gradlew clean assemble
