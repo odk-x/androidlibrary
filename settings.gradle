@@ -1,5 +1,7 @@
 gradle.ext.gradleConfigVersion = 155
 
+include ':app'
+
 if (!gradle.ext.has('workspacePath')) {
     logger.warn("rootDir: " + rootDir.getAbsolutePath());
     gradle.ext.workspacePath = rootDir.getParentFile().getAbsolutePath();
