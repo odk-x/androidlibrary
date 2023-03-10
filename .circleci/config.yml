@@ -23,10 +23,7 @@ jobs:
 
       # Download and cache dependencies
       - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.gradle" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "androidlibrary_lib/build.gradle" }}
 
       - run: 
           name: change the permission
@@ -39,7 +36,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "androidlibrary_lib/build.gradle" }}
 
       # build the androidlib
       - run: 
