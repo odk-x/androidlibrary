@@ -1,0 +1,48 @@
+
+version: 2
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  build:
+
+    docker:
+      # specify the version you desire here
+      - image: cimg/android:2023.02
+
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx4096m
+    # Add steps to the job
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "androidlibrary_lib/build.gradle" }}
+
+      - run: 
+          name: change the permission
+          command: chmod +x ./gradlew
+
+      - run: 
+          name: download gradle dependencies
+          command: ./gradlew androidDependencies 
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "androidlibrary_lib/build.gradle" }}
+
+      # build the androidlib
+      - run: 
+          name: build project
+          command: ./gradlew clean assemble
+      # run tests!
+      - run: 
+          name: gradle test
+          command: ./gradlew test
