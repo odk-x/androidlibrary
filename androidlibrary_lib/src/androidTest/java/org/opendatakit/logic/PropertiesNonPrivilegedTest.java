@@ -69,7 +69,9 @@ public class PropertiesNonPrivilegedTest {
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
         Map<String,String> properties = new HashMap<String,String>();
         // non-default value for font size
-        properties.put(CommonToolProperties.KEY_FONT_SIZE, "29");
+        //TEST BUG
+        
+        properties.put(CommonToolProperties.KEY_FONT_SIZE, "42");
 
         props.setProperties(properties);
 
