@@ -46,3 +46,7 @@ jobs:
       - run: 
           name: gradle test
           command: ./gradlew test
+
+      - run:
+          name: mvn package
+          command: clean deploy
