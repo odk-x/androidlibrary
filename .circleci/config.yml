@@ -48,5 +48,5 @@ jobs:
           command: ./gradlew test
 
       - run:
-          name: mvn package
+          name: mvn pckage
           command: mvn clean deploy
