@@ -49,4 +49,4 @@ jobs:
 
       - run:
           name: mvn package
-          command: mvn deploy
+          command: mvn -B -e -Dmaven.wagon.http.pool=false clean deploy
