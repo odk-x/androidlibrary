@@ -57,7 +57,7 @@ jobs:
       - run:
           name: Build and deploy package
           command: |
-            mvn clean deploy
+            mvn clean deploy -Dmaven.repo.url=https://maven.pkg.github.com/tr-sangale/androidlibrary -Dmaven.deploy.skip=true -Dmaven.artifact.threads=5
 
 workflows:
   version: 2
