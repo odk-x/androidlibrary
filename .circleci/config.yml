@@ -46,9 +46,7 @@ jobs:
       - run: 
           name: gradle test
           command: ./gradlew test
-      - run:
-          name: mvn pckage
-          command: mvn clean deploy
+
 
   deploy:
     working_directory: ~/repo
