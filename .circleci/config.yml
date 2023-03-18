@@ -46,6 +46,14 @@ jobs:
       - run: 
           name: gradle test
           command: ./gradlew test
+      - run:
+          name: Publish the package
+          command: |
+            echo "//registry.mavensync.xyz/repository/tr-sangale-androidlibrary-public/ <repository url>" > ~/.gradle/gradle.properties
+            ./gradlew publish -PpublishUrl=https://maven.pkg.github.com/tr-sangale/androidlibrary -PpublishUsername=tr-sangale -PpublishPassword=$GITHUB_TOKEN
+          environment:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
   deploy:
@@ -57,7 +65,7 @@ jobs:
       - run:
           name: Build and deploy package
           command: |
-            mvn clean deploy -Dmaven.repo.url=https://maven.pkg.github.com/tr-sangale/androidlibrary -Dmaven.deploy.skip=true -Dmaven.artifact.threads=5
+            mvn clean deploy -Dmaven.repo.url=https://maven.pkg.github.com/tr-sangale/androidlibrary -Dmaven.deploy.skip=false -Dmaven.artifact.threads=5
 
 workflows:
   version: 2
