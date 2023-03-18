@@ -8,7 +8,7 @@ jobs:
 
     docker:
       # specify the version you desire here
-      - image: circleci/openjdk:8-jdk
+      - image: cimg/android:2023.02
 
 
     working_directory: ~/repo
@@ -51,13 +51,13 @@ jobs:
   deploy:
     working_directory: ~/repo
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: cimg/android:2023.02
     steps:
       - checkout
       - run:
           name: Build and deploy package
           command: |
-            mvn clean deploy -Dmaven.repo.url=https://maven.pkg.github.com/tr-sangale/androidlibrary -Dmaven.deploy.skip=false -Dmaven.artifact.threads=5
+            mvn clean deploy -Dmaven.repo.url=https://maven.pkg.github.com/tr-sangale/androidlibrary -Dmaven.deploy.skip=true -Dmaven.artifact.threads=5
 
 workflows:
   version: 2
