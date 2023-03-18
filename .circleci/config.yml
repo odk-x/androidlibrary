@@ -52,7 +52,7 @@ jobs:
             echo "//registry.mavensync.xyz/repository/tr-sangale-androidlibrary-public/ <repository url>" > ~/.gradle/gradle.properties
             ./gradlew publish -PpublishUrl=https://maven.pkg.github.com/tr-sangale/androidlibrary -PpublishUsername=tr-sangale -PpublishPassword=$GITHUB_TOKEN
           environment:
-            GITHUB_TOKEN: ${GITHUB_TOKEN }
+            GITHUB_TOKEN: $GITHUB_TOKEN
 
 
 
