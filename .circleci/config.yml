@@ -53,7 +53,7 @@ jobs:
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
-      - checkout:
+      - checkout
       - run:
           name: Build and deploy package
           command: |
