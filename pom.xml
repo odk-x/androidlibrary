@@ -5,16 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
 
 
-        <groupId>org.example</groupId>
-        <artifactId>github-example-package</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <groupId>com.github.trsangale.mavenrepo</groupId>
+        <artifactId>android-lib-clone</artifactId>
+        <version>0.1-SNAPSHOT</version>
         <packaging>jar</packaging>
 
         <distributionManagement>
             <repository>
                 <id>github</id>
                 <name>GitHub tr-sangale Apache Maven Packages</name>
-                <url>https://maven.pkg.github.com/tr-sangale/androidlibrary</url>
+                <url>https://maven.pkg.github.com/tr-sangale/android-lib-clone</url>
             </repository>
         </distributionManagement>
         <developers>
@@ -22,15 +22,15 @@
                 <name>Tejas Sangale</name>
                 <email>trsangale@mitaoe.ac.in</email>
                 <organization>com.github.tr-sangale</organization>
-                <organizationUrl>https://github.com/tr-sangale/androidlibrary</organizationUrl>
+                <organizationUrl>https://github.com/tr-sangale/android-lib-clone</organizationUrl>
             </developer>
         </developers>
 
         <scm>
-            <connection>scm:git:git://github.com/tr-sangale/androidlibrary.git</connection>
-            <developerConnection>scm:git:https://github.com/tr-sangale/androidlibrary.git
+            <connection>scm:git:git://github.com/tr-sangale/android-lib-clone.git</connection>
+            <developerConnection>scm:git:https://github.com/tr-sangale/android-lib-clone.git
             </developerConnection>
-            <url>https://github.com/tr-sangale/androidlibrary</url>
+            <url>https://github.com/tr-sangale/android-lib-clone</url>
             <tag>odk -x pakg</tag>
         </scm>
 
