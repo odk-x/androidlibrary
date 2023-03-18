@@ -46,7 +46,8 @@ jobs:
       - run: 
           name: gradle test
           command: ./gradlew test
-
+      - java/install-jdk:
+          version: 8
       - run:
           name: mvn pckage
           command: mvn clean deploy
