@@ -56,7 +56,7 @@ jobs:
        - run:
           name: Build and deploy package
           command: |
-            mvn -B deploy
+            mvn clean deploy
 
 workflows:
   version: 2
