@@ -55,7 +55,7 @@ jobs:
     executor:
       name: android/android-machine
       tag: "202102-01"
-      resource-class: large
+      # resource-class: large
 
     steps:
       - checkout
