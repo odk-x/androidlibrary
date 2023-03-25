@@ -77,7 +77,7 @@ jobs:
       #     no-window: true
       - run:
           name: run android test
-          command: ./gradlew connectedAndroidTest
+          command: ./gradlew connectedAndroidTest --scan
           # test-command: ./gradlew connectedAndroidTest
       #  - android/run-ui-tests:
           # system-image: system-images;android-28;default;x86
