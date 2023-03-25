@@ -10,7 +10,7 @@ jobs:
       # specify the version you desire here
       # - image: cimg/android:2023.02
       # - image: circleci/android:api-28
-      - image: circleci/openjdk:8
+      - image: circleci/openjdk:latest
 
 
     working_directory: ~/repo
