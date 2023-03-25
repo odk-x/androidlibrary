@@ -52,7 +52,7 @@ jobs:
       #     command: ./gradlew connectedAndroidTest
  
   android-test:
-    working_directory: ~/repo
+    # working_directory: ~/repo
     docker:
       - image: cimg/android:2023.02
       # resource-class: xlarge
@@ -87,6 +87,5 @@ workflows:
             - build
       - deploy:
           requires:
-            - build
             - android-test
 
