@@ -51,23 +51,23 @@ jobs:
           
 
 
-  deploy:
-    working_directory: ~/repo
-    docker:
-      - image: cimg/android:2023.02
-    steps:
-      - checkout
-      - run:
-          name: Build and deploy package
-          command: |
-            mvn clean deploy -Dmaven.repo.url=https://maven.pkg.github.com/tr-sangale/androidlibrary -Dmaven.deploy.skip=true -Dmaven.artifact.threads=5
+#   deploy:
+#     working_directory: ~/repo
+#     docker:
+#       - image: cimg/android:2023.02
+#     steps:
+#       - checkout
+#       - run:
+#           name: Build and deploy package
+#           command: |
+#             mvn clean deploy -Dmaven.repo.url=https://maven.pkg.github.com/tr-sangale/androidlibrary -Dmaven.deploy.skip=true -Dmaven.artifact.threads=5
 
 
-workflows:
-  build-and-deploy:
-    jobs:
-      - build
-      - deploy:
-          requires:
-            - build
+# workflows:
+#   build-and-deploy:
+#     jobs:
+#       - build
+#       - deploy:
+#           requires:
+#             - build
 
