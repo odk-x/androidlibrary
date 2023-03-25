@@ -54,8 +54,8 @@ jobs:
   android-test:
     executor:
       name: android/android-machine
-      tag: "2023.02"
-      resource-class: medium
+      tag: "202102-01"
+      # resource-class: medium
 
     steps:
       - checkout
