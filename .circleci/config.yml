@@ -44,7 +44,13 @@ jobs:
           name: build project
           command: ./gradlew clean assemble
 
-      
+      - run:
+          name: Start emulator
+          command: |
+            echo "y" | android-sdk-linux/tools/bin/sdkmanager --install 'system-images;android-29;google_apis;x86_64'
+            echo "no" | android-sdk-linux/tools/bin/avdmanager create avd --force --name emulator --abi google_apis/x86_64 --package 'system-images;android-29;google_apis;x86_64'
+            android-sdk-linux/emulator/emulator -avd emulator -no-window -no-audio &
+            android-wait-for-emulator
       # run tests!
       - run: 
           name: gradle androidTest
