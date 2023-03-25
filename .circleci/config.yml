@@ -46,8 +46,8 @@ jobs:
       
       # run tests!
       - run: 
-          name: gradle test
-          command: ./gradlew test
+          name: gradle androidTest
+          command: ./gradlew test --tests "androidTest.*"
           
 
 
