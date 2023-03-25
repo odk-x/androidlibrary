@@ -59,10 +59,20 @@ jobs:
 
     steps:
       - checkout
-      - android/start-emulator-and-run-tests:
-          # avd-name: android
-          test-command: ./gradlew connectedAndroidTest
+      - android/create-avd:
+          avd-name: myavd
+          install: true
+          # test-command: ./gradlew connectedAndroidTest
           system-image: system-images;android-30;google_apis;x86 
+      -  android/start-emulator:
+          avd-name: myavd
+          no-window: true
+      - run:
+          name: run android test
+          command: ./gradlew connectedAndroidTest
+          # test-command: ./gradlew connectedAndroidTest
+      #  - android/run-ui-tests:
+          # system-image: system-images;android-28;default;x86
        
 # --exclude-task connectedDemoUitestDebugAndroidTest --exclude-task connectedMasterBasicDebugAndroidTest
 
