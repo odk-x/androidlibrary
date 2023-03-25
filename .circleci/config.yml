@@ -39,9 +39,9 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "androidlibrary_lib/build.gradle" }}
 
       # build the androidlib
-      - run: 
-          name: build project
-          command: ./gradlew clean assemble
+      # - run: 
+      #     name: build project
+      #     command: ./gradlew clean assemble
 
       
       # run tests!
