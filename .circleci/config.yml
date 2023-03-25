@@ -60,11 +60,11 @@ jobs:
     steps:
       - checkout
 
-      - android/create-avd:
-          avd-name: myavd
-          install: true
-      #     # test-command: ./gradlew connectedAndroidTest
-          system-image: system-images;android-30;google_apis;x86 
+      # - android/create-avd:
+      #     avd-name: myavd
+      #     install: true
+      # #     # test-command: ./gradlew connectedAndroidTest
+      #     system-image: system-images;android-30;google_apis;x86 
       # - android/start-emulator:
       #     avd-name: myavd
       # - android/start-emulator-and-run-tests:
@@ -75,13 +75,28 @@ jobs:
       # # -  android/start-emulator:
       #     avd-name: myavd
       #     no-window: true
-      - run:
-          name: run android test
-          command: ./gradlew connectedAndroidTest --scan
+      # - run:
+      #     name: run android test
+      #     command:  |
+      # #       ./gradlew connectedAndroidTest --scan
           # test-command: ./gradlew connectedAndroidTest
       #  - android/run-ui-tests:
           # system-image: system-images;android-28;default;x86
-       
+      - run:
+          name: run android test
+          command:  |
+            - sdkmanager "platform-tools" "platforms;android-29" "build-tools;30.0.0" "emulator"
+            - sdkmanager "system-images;android-29;google_apis;x86"
+            - echo no | avdmanager create avd -n test-emulator -k "system-images;android-29;google_apis;x86"
+            - emulator -avd test-emulator -noaudio -no-boot-anim -gpu off -no-window &
+            - adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+            - adb shell wm dismiss-keyguard
+            - sleep 1
+            - adb shell settings put global window_animation_scale 0
+            - adb shell settings put global transition_animation_scale 0
+            - adb shell settings put global animator_duration_scale 0
+            - ./gradlew connectedAndroidTest
+
 # --exclude-task connectedDemoUitestDebugAndroidTest --exclude-task connectedMasterBasicDebugAndroidTest
 
   deploy:
