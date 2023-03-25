@@ -47,9 +47,9 @@ jobs:
           command: ./gradlew clean assemble
 
       # run tests!
-      # - run: 
-      #     name: gradle androidTest
-      #     command: ./gradlew connectedAndroidTest
+      - run: 
+          name: gradle unit tests
+          command: ./gradlew test
  
   android-test:
     executor:
@@ -83,7 +83,7 @@ jobs:
       #  - android/run-ui-tests:
           # system-image: system-images;android-28;default;x86
       - run:
-          name: installing emulator and running instrumentation tests
+          name: installing emulator and Running Instrumentation tests
           command:  |
             sdkmanager "platform-tools" "platforms;android-29" "build-tools;30.0.0" "emulator"
             sdkmanager "system-images;android-29;google_apis;x86"
