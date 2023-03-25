@@ -46,11 +46,19 @@ jobs:
           command: ./gradlew clean assemble
 
       # run tests!
-      - run: 
-          name: gradle androidTest
-          command: ./gradlew androidlibrary_lib:androidTest
+      # - run: 
+      #     name: gradle androidTest
+      #     command: ./gradlew connectedAndroidTest
  
-          
+  android-test:
+    executor:
+      name: android/android-machine
+      resource-class: xlarge
+    steps:
+      - checkout
+      - android/start-emulator-and-run-tests:
+          test-command: ./gradlew connectedAndroidTest
+          system-image: system-images;android-30;google_apis;x86        
 # --exclude-task connectedDemoUitestDebugAndroidTest --exclude-task connectedMasterBasicDebugAndroidTest
 
   deploy:
