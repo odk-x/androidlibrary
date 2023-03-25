@@ -62,7 +62,7 @@ jobs:
       - android/start-emulator-and-run-tests:
           # avd-name: android
           test-command: ./gradlew connectedAndroidTest
-          system-image: system-images;android-30;google_apis;x86 
+          system-image: system-images;android-25;google_apis;x86 
        
 # --exclude-task connectedDemoUitestDebugAndroidTest --exclude-task connectedMasterBasicDebugAndroidTest
 
