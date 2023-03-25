@@ -54,7 +54,7 @@ jobs:
   android-test:
     executor:
       name: android/android-machine
-      tag: 2022.08
+      tag: "2023.02"
       # resource-class: large
 
     steps:
