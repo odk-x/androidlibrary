@@ -73,14 +73,14 @@ jobs:
             mvn clean deploy -Dmaven.repo.url=https://maven.pkg.github.com/tr-sangale/androidlibrary -Dmaven.deploy.skip=true -Dmaven.artifact.threads=5
 
 
-workflows:
-  build-and-deploy:
-    jobs:
-      - build
-      - android-test:
-          requires:
-            - build
-      - deploy:
-          requires:
-            - build
+# workflows:
+#   build-and-deploy:
+#     jobs:
+#       - build
+#       - android-test:
+#           requires:
+#             - build
+#       - deploy:
+#           requires:
+#             - build
 
