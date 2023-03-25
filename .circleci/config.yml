@@ -48,7 +48,7 @@ jobs:
       # run tests!
       - run: 
           name: gradle androidTest
-          command: ./gradlew androidlibrary_lib:connectedDebugAndroidTest
+          command: ./gradlew androidlibrary_lib:androidTest
  
           
 # --exclude-task connectedDemoUitestDebugAndroidTest --exclude-task connectedMasterBasicDebugAndroidTest
