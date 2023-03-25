@@ -1,7 +1,7 @@
 
 version: 2.1
 orbs:
-  android: circleci/android@2.2.0
+  android: circleci/android@2
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
@@ -52,17 +52,17 @@ jobs:
       #     command: ./gradlew connectedAndroidTest
  
   android-test:
-    # working_directory: ~/repo
-    docker:
-      - image: cimg/android:2023.02
-      # resource-class: xlarge
-      # tags: android
+    executor:
+      name: android/android-machine
+      tag: 2023.02.01
+      resource-class: xlarge
+
     steps:
       - checkout
       - android/start-emulator-and-run-tests:
           # avd-name: android
           test-command: ./gradlew connectedAndroidTest
-          system-image: system-images;android-25;google_apis;x86 
+          system-image: system-images;android-30;google_apis;x86 
        
 # --exclude-task connectedDemoUitestDebugAndroidTest --exclude-task connectedMasterBasicDebugAndroidTest
 
