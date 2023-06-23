@@ -1,4 +1,4 @@
-package org.opendatakit.fragment;
+package org.opendatakit.provider.fragment;
 
 
 import org.junit.Rule;
@@ -14,6 +14,8 @@ import static org.junit.Assert.assertEquals;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.test.core.app.ActivityScenario;
+
+import org.opendatakit.fragment.AlertNProgessMsgFragmentMger;
 import org.opendatakit.test_utils.TestActivity;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import org.opendatakit.fragment.AlertNProgessMsgFragmentMger.DialogState;

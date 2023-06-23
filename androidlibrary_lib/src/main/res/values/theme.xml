@@ -16,7 +16,7 @@
    <style name="ODKX" parent="Theme.MaterialComponents.Light.NoActionBar">
       <item name="android:scrollbarThumbHorizontal">@drawable/thumb</item>
       <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
-      <item name="android:scrollbarSize">2.5dp</item>
+      <item name="android:scrollbarSize">@dimen/scrollbar_size</item>
       <item name="android:scrollbarAlwaysDrawVerticalTrack">true</item>
       <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
       <item name="android:statusBarColor">@color/white</item>
@@ -38,6 +38,8 @@
       <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
       <item name="buttonStyle">@style/ButtonStyle</item>
       <item name="textInputStyle">@style/TextInputTheme</item>
+      <item name="materialAlertDialogTheme">@style/OdkXAlertDialogStyle</item>
+      <item name="alertDialogTheme">@style/OdkXAlertDialogStyle</item>
    </style>
 
    <!--Individual Stylings For Different Components -->
@@ -47,25 +49,28 @@
       <item name="colorAccent">@color/blue_300</item>
       <item name="android:textColorPrimary">@color/grey_500</item>
       <item name="colorSurface">@color/white</item>
-      <item name="android:background">@color/white</item>
+      <item name="android:background">@drawable/dialog_bg</item>
       <item name="shapeAppearanceOverlay">@style/DialogCorners</item>
+      <item name="dialogCornerRadius">@dimen/rounder_corners</item>
       <item name="materialAlertDialogTitleTextStyle">@style/titleStyle</item>
 
       <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
       <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
    </style>
 
-   <style name="NegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+   <style name="NegativeButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
       <item name="android:textColor">@color/red_300</item>
+      <item name="rippleColor">@color/blue_100</item>
    </style>
 
-   <style name="PositiveButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+   <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
       <item name="android:textColor">@color/blue_300</item>
+      <item name="rippleColor">@color/blue_100</item>
    </style>
 
    <style name="DialogCorners">
       <item name="cornerFamily">rounded</item>
-      <item name="cornerSize">28dp</item>
+      <item name="cornerSize">@dimen/rounder_corners</item>
    </style>
 
    <style name="titleStyle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
@@ -74,7 +79,32 @@
       <item name="android:gravity">center_horizontal</item>
    </style>
    <!--End-->
+   
+   <!-- NavDrawerCornerRadius -->
+   <style name="NavCorners">
+      <item name="cornerSizeTopRight">16dp</item>
+      <item name="cornerSizeBottomRight">16dp</item>
+   </style>
+   
+   <!--End-->
 
+   <!-- Navigation View General Theming -->
+   <style name="Widget.App.NavigationView" parent="Widget.MaterialComponents.NavigationRailView">
+      <item name="materialThemeOverlay">@style/ThemeOverlay.App.NavigationView</item>
+      <item name="itemIconTint">@color/navigation_item_color</item>
+      <item name="itemTextColor">@color/navigation_item_color</item>
+      <item name="itemShapeFillColor">@color/navigation_item_background_color</item>
+   </style>
+
+   <style name="ThemeOverlay.App.NavigationView" parent="">
+      <item name="colorSecondary">@color/colorSecondary</item>
+      <item name="colorOnSecondary">@color/colorOnSecondary</item>
+      <item name="colorSurface">@color/colorSurface</item>
+      <item name="colorOnSurface">@color/colorOnSurface</item>
+
+   </style>
+
+   <!-- End -->
 
    <!--CardTheme Style-->
    <style name="CardTheme" parent="ODKX">

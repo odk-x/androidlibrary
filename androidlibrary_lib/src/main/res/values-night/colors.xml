@@ -54,5 +54,6 @@
     <color name="colorCardBackground">@color/blue_100</color>
     <color name="colorSecondaryBackground">@color/grey_100</color>
     <color name="colorBtnDisabled">@color/blue_100</color>
+    <color name="navDrawerSurface">@color/grey_500</color>
 </resources>
 

@@ -4,4 +4,10 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <!-- Default dialog corner radius, per the Android Design guidelines. -->
+    <dimen name="rounder_corners">28dp</dimen>
+
+    <!-- scrollbar size -->
+    <dimen name="scrollbar_size">2.5dp</dimen>
+
 </resources>
