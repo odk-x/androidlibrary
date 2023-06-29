@@ -40,6 +40,7 @@
       <item name="textInputStyle">@style/TextInputTheme</item>
       <item name="materialAlertDialogTheme">@style/OdkXAlertDialogStyle</item>
       <item name="alertDialogTheme">@style/OdkXAlertDialogStyle</item>
+
    </style>
 
    <!--Individual Stylings For Different Components -->
