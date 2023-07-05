@@ -69,5 +69,6 @@ the License.
     <color name="colorBtnDisabled">@color/blue_100</color>
     <color name="headingTextOnCard">@color/grey_500</color>
     <color name="subHeadingTextOnCard">@color/grey_500</color>
+    <color name="navDrawerSurface">@color/blue_100</color>
 
 </resources>
