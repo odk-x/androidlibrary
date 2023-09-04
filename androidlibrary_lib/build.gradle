@@ -1,6 +1,13 @@
+import java.text.SimpleDateFormat
+
 /**************************************************************************************************
  GRADLE CONFIG
  *************************************************************************************************/
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'com.palantir.git-version' version '3.0.0'
+}
 
 if ((new File(gradle.local)).exists()) {
     apply from: gradle.local
@@ -12,9 +19,10 @@ libraryScripts.each {
     apply from: it
 }
 
-apply plugin: 'com.android.library'
-apply plugin: "com.jfrog.artifactory"
-apply plugin: "maven-publish"
+//Get project details using gitVersion plugin
+def projectDetails = versionDetails()
+def date = new SimpleDateFormat("yyyyMMddHHmmss")
+String formattedDate = date.format(new Date())
 
 group = groupId
 
@@ -102,36 +110,56 @@ allprojects {
 dependencies {
     api fileTree(include: '*.jar', dir: 'libs')
     implementation 'net.jcip:jcip-annotations:1.0'
-    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation 'androidx.annotation:annotation:1.3.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.fragment:fragment:1.3.6'
     implementation 'com.google.android.material:material:1.4.0'
     // Testing dependencies
-    testImplementation 'junit:junit:4.13.1'
-    testImplementation 'androidx.annotation:annotation:1.2.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'androidx.annotation:annotation:1.3.0'
     androidTestImplementation 'androidx.test:rules:1.4.0'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test:core:1.4.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test:core:1.4.0'
+
 }
 
 publishing {
-    publications {
-        aarRelease(MavenPublication) {}
-        aarDebug(MavenPublication) {}
+    repositories{
+        maven {
+            name = "GithubPackages"
+            url = "https://maven.pkg.github.com/${System.getenv('GITHUB_ACTOR')}/androidlibrary"
+            credentials {
+                username = System.getenv('GITHUB_ACTOR')
+                password = System.getenv('GITHUB_TOKEN')
+            }
+        }
     }
-    repositories {
-        ivy {
-            ivyPattern('[organisation]/[module]/[revision]/ivy-[revision].xml')
-            artifactPattern('[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]')
+    publications {
+        aarRelease(MavenPublication) {
+            groupId = "org.opendatakit"
+            artifactId = 'androidlibrary_lib'
+            version = "1.0.0-${formattedDate}-${projectDetails.gitHash}"
+            afterEvaluate{
+                artifact spawnSnapshotBasicArchives
+            }
+        }
+        aarDebug(MavenPublication) {
+            groupId = "org.opendatakit"
+            artifactId = 'androidlibrary_lib'
+            version = "1.0.0-debug-${formattedDate}-${projectDetails.gitHash}"
+            afterEvaluate{
+                artifact spawnSnapshotBasicArchives
+            }
+
         }
     }
 }
 
-
-task spawnSnapshotBasicArchives {
+task spawnSnapshotBasicArchives(type: Jar) {
     dependsOn('snapshotVersion')
     dependsOn('assembleSnapshotBasicDebug')
     dependsOn('assembleSnapshotBasicRelease')
@@ -144,9 +172,10 @@ task spawnSnapshotBasicArchives {
 
         project.getArtifacts().add("default", bundleSnapshotBasicDebugAar)
     }
+    archiveExtension = 'aar'
 }
 
-task spawnDemoBasicArchives {
+task spawnDemoBasicArchives(type: Jar) {
     dependsOn('snapshotVersion')
     dependsOn('assembleDemoBasicDebug')
     dependsOn('assembleDemoBasicRelease')
@@ -159,9 +188,6 @@ task spawnDemoBasicArchives {
 
         project.getArtifacts().add("default", bundleDemoBasicDebugAar)
     }
+    archiveExtension = 'aar'
 }
-
-artifactoryPublish.mustRunAfter('spawnSnapshotBasicArchives')
-artifactoryPublish.mustRunAfter('spawnDemoBasicArchives')
-artifactoryPublish.mustRunAfter('connectedSnapshotBasicDebugAndroidTest')
-artifactoryPublish.mustRunAfter('connectedDemoBasicDebugAndroidTest')
+publish.dependsOn(spawnSnapshotBasicArchives)
