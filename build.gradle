@@ -14,33 +14,19 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            name = "GithubPackages"
+            url = "https://maven.pkg.github.com/${System.getenv('GITHUB_ACTOR')}/androidlibrary"
+            //This should be replaced with odk-x/androidlibrary. Should be hardcoded or use gitversion?
+
+            credentials {
+                username = System.getenv('GITHUB_ACTOR')
+                password = System.getenv('GITHUB_TOKEN')
+            }
+        }
     }
 }
 
 configurations.all {
     transitive = true
-}
-
-apply plugin: "com.jfrog.artifactory"
-
-artifactoryPublish.skip=true
-
-artifactory {
-
-    publish {
-        contextUrl = 'http://cwe.cs.washington.edu:8082/artifactory'
-        //A closure defining publishing information
-        defaults {
-            //List of Gradle Publications (names or objects) from which to collect the list of artifacts to be deployed to Artifactory.
-            publishConfigs('default')
-            publishBuildInfo = true   //Publish build-info to Artifactory (true by default)
-            publishArtifacts = true   //Publish artifacts to Artifactory (true by default)
-            publishPom = false   //Publish generated POM files to Artifactory (true by default).
-            publishIvy = true   //Publish generated Ivy descriptor files to Artifactory (true by default).
-        }
-    }
-    // Redefine basic properties of the build info object
-    clientConfig.setIncludeEnvVars(true)
-    clientConfig.setEnvVarsExcludePatterns('*password*,*secret*')
-    clientConfig.setEnvVarsIncludePatterns('*not-secret*')
 }
