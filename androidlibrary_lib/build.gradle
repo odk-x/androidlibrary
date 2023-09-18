@@ -131,7 +131,7 @@ publishing {
     repositories{
         maven {
             name = "GithubPackages"
-            url = "https://maven.pkg.github.com/${System.getenv('GITHUB_ACTOR')}/androidlibrary"
+            url = "https://maven.pkg.github.com/odk-x/androidlibrary"
             credentials {
                 username = System.getenv('GITHUB_ACTOR')
                 password = System.getenv('GITHUB_TOKEN')
