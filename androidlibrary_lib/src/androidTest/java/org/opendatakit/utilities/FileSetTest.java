@@ -50,7 +50,7 @@ public class FileSetTest {
   public GrantPermissionRule readtimePermissionRule = GrantPermissionRule .grant(Manifest.permission.READ_EXTERNAL_STORAGE);
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }

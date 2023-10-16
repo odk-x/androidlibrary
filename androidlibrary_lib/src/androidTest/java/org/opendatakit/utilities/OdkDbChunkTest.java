@@ -49,7 +49,7 @@ public class OdkDbChunkTest {
   private String[] testData = { "Miscellaneous", "test", "data", "to", "parcel", "and", "unpack" };
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }

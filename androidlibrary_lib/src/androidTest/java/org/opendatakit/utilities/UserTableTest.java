@@ -567,7 +567,7 @@ public class UserTableTest {
   }
 
   @Test
-  public void testUserTableParcelationNoGeoNoArray() throws IOException {
+  public void testUserTableParcelationNoGeoNoArray() {
 
     List<Column> columns = new ArrayList<Column>();
     columns.add(new Column(GROUP_COL, GROUP_COL, ElementDataType.integer.name(), null));
@@ -760,7 +760,7 @@ public class UserTableTest {
   }
 
   @Test
-  public void testUserTableSubsetNoGeoNoArray() throws IOException {
+  public void testUserTableSubsetNoGeoNoArray() {
 
     List<Column> columns = new ArrayList<Column>();
     columns.add(new Column(GROUP_COL, GROUP_COL, ElementDataType.integer.name(), null));

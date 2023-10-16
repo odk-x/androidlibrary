@@ -53,7 +53,7 @@ public class PropertiesNonPrivilegedTest {
     public GrantPermissionRule readtimePermissionRule = GrantPermissionRule .grant(Manifest.permission.READ_EXTERNAL_STORAGE);
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ODKFileUtils.verifyExternalStorageAvailability();
         ODKFileUtils.assertDirectoryStructure(APPNAME);
 
