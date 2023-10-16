@@ -36,7 +36,7 @@ import static org.junit.Assert.assertNotNull;
 public class RowPathColumnTest {
 
   @BeforeClass
-  public static void oneTimeSetUp() throws Exception {
+  public static void oneTimeSetUp() {
      StaticStateManipulator.get().reset();
      WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }

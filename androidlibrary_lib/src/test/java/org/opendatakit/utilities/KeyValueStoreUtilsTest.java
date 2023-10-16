@@ -49,7 +49,7 @@ public class KeyValueStoreUtilsTest {
    public static final String DBL_VALUE = "9.39";
 
    @BeforeClass
-  public static void oneTimeSetUp() throws Exception {
+  public static void oneTimeSetUp() {
      StaticStateManipulator.get().reset();
      WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
@@ -255,7 +255,7 @@ public class KeyValueStoreUtilsTest {
    }
 
    @Test(expected = IllegalArgumentException.class)
-   public void testKeyValueStoreArrayBad2() throws IllegalArgumentException, JsonProcessingException {
+   public void testKeyValueStoreArrayBad2() throws IllegalArgumentException {
       ArrayList<String> values = new ArrayList<String>();
       values.add("First");
       values.add("Second");

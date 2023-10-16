@@ -35,7 +35,7 @@ public class LocalizationUtilsTest {
   String tableId = null;
 
   @BeforeClass
-  public static void oneTimeSetUp() throws Exception {
+  public static void oneTimeSetUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }

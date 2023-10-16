@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 public class UTMConverterTest {
 
   @BeforeClass
-  public static void oneTimeSetUp() throws Exception {
+  public static void oneTimeSetUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }

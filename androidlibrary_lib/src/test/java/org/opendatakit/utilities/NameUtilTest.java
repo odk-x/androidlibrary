@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 public class NameUtilTest {
 
   @BeforeClass
-  public static void oneTimeSetUp() throws Exception {
+  public static void oneTimeSetUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
