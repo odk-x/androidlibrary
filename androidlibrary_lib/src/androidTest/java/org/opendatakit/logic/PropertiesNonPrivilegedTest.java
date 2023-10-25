@@ -64,7 +64,7 @@ public class PropertiesNonPrivilegedTest {
     @Test
     public void testSimpleProperties() {
 
-        Context context = InstrumentationRegistry.getContext();
+        Context context = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
         Map<String,String> properties = new HashMap<String,String>();
@@ -87,7 +87,7 @@ public class PropertiesNonPrivilegedTest {
     public void testSecureSetProperties() {
 
         StaticStateManipulator.get().reset();
-        Context context = InstrumentationRegistry.getContext();
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         TreeMap<String,String> secureProperties = new TreeMap<String,String>();
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
@@ -125,7 +125,8 @@ public class PropertiesNonPrivilegedTest {
     public void testSecureGetProperties() {
 
         StaticStateManipulator.get().reset();
-        Context context = InstrumentationRegistry.getContext();
+//        Context context = InstrumentationRegistry.getContext();
+        Context context = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         TreeMap<String,String> secureProperties = new TreeMap<String,String>();
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
