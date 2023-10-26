@@ -43,10 +43,10 @@ public class OdkDbChunkTest {
   /**
    * Test Data
    **/
-  private static int largeChunkSize = 946176;
-  private static int smallChunkSize = 10;
+  private static final int largeChunkSize = 946176;
+  private static final int smallChunkSize = 10;
 
-  private String[] testData = { "Miscellaneous", "test", "data", "to", "parcel", "and", "unpack" };
+  private final String[] testData = { "Miscellaneous", "test", "data", "to", "parcel", "and", "unpack" };
 
   @Before
   public void setUp() throws Exception {
@@ -61,7 +61,6 @@ public class OdkDbChunkTest {
       assertNull(DbChunkUtil.convertToChunks(nullData, largeChunkSize));
     } catch (IOException e) {
       fail("Should not throw exception on null input");
-      return;
     }
   }
 
@@ -71,12 +70,8 @@ public class OdkDbChunkTest {
 
     try {
       assertNull(DbChunkUtil.rebuildFromChunks(nullList, String[].class));
-    } catch (IOException e) {
+    } catch (IOException | ClassNotFoundException e) {
       fail("Should not throw exception on null");
-      return;
-    } catch (ClassNotFoundException e) {
-      fail("Should not throw exception on null");
-      return;
     }
   }
 
@@ -91,7 +86,8 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertTrue("Unexpected number of chunks", chunks.size() == 1);
+    assert chunks != null;
+    assertEquals("Unexpected number of chunks", 1, chunks.size());
 
     DbChunk chunk = chunks.get(0);
     assertFalse("Single chunk shouldn't point to another", chunk.hasNextID());
@@ -107,6 +103,7 @@ public class OdkDbChunkTest {
       return;
     }
 
+    assert results != null;
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
@@ -125,6 +122,7 @@ public class OdkDbChunkTest {
       return;
     }
 
+    assert chunks != null;
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     // Test chunk list pointers
@@ -154,6 +152,7 @@ public class OdkDbChunkTest {
       return;
     }
 
+    assert results != null;
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
@@ -183,13 +182,15 @@ public class OdkDbChunkTest {
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, largeChunkSize);
 
-    assertTrue("Unexpected number of chunks", chunks.size() == 1);
+    assert chunks != null;
+    assertEquals("Unexpected number of chunks", 1, chunks.size());
 
     DbChunk chunk = chunks.get(0);
     assertFalse("Single chunk shouldn't point to another", chunk.hasNextID());
 
     Bundle results = DbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
 
+    assert results != null;
     assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
     assertTrue("Data unpack error", results.containsKey("testData"));
     String[] resultsTestData = results.getStringArray("testData");
@@ -207,6 +208,7 @@ public class OdkDbChunkTest {
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, smallChunkSize);
 
+    assert chunks != null;
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     // Test chunk list pointers
@@ -227,6 +229,7 @@ public class OdkDbChunkTest {
     // Test unpack
     Bundle results = DbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
 
+    assert results != null;
     assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
     assertTrue("Data unpack error", results.containsKey("testData"));
     String[] resultsTestData = results.getStringArray("testData");
@@ -247,7 +250,8 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assertTrue("Unexpected number of chunks", chunks.size() == 1);
+    assert chunks != null;
+    assertEquals("Unexpected number of chunks", 1, chunks.size());
 
     DbChunk chunk = chunks.get(0);
 
@@ -264,7 +268,7 @@ public class OdkDbChunkTest {
     p.setDataPosition(0);
 
     DbChunk result = DbChunk.CREATOR.createFromParcel(p);
-    List<DbChunk> resultChunks = new ArrayList<DbChunk>();
+    List<DbChunk> resultChunks = new ArrayList<>();
     resultChunks.add(result);
 
     String[] results;
@@ -278,6 +282,7 @@ public class OdkDbChunkTest {
       return;
     }
 
+    assert results != null;
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
@@ -296,17 +301,15 @@ public class OdkDbChunkTest {
       return;
     }
 
+    assert chunks != null;
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     /*
      * Marshall the test data
      */
-    List<byte[]> marshalledChunks = new LinkedList<byte[]>();
-    List<DbChunk> resultChunks = new LinkedList<DbChunk>();
-    ListIterator<DbChunk> iterator = chunks.listIterator();
-    while (iterator.hasNext()) {
-      DbChunk chunk = iterator.next();
-
+    List<byte[]> marshalledChunks = new LinkedList<>();
+    List<DbChunk> resultChunks = new LinkedList<>();
+    for (DbChunk chunk : chunks) {
       Parcel p = Parcel.obtain();
       chunk.writeToParcel(p, 0);
       byte[] bytes = p.marshall();
@@ -332,6 +335,7 @@ public class OdkDbChunkTest {
       return;
     }
 
+    assert results != null;
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
