@@ -34,9 +34,7 @@ import static org.junit.Assert.assertEquals;
 public class FileSetTest {
   private static final String APP_NAME = "fileSetTest";
   private static final String TABLE_ID_1 = "myTableId_1";
-  private static final String TABLE_ID_2 = "myTableId_2";
   private static final String INSTANCE_ID_1 = "myInstanceId_1";
-  private static final String INSTANCE_ID_2 = "myInstanceId_2";
   private static final String INSTANCE_FILENAME = "submission.xml";
   private static final String FILENAME_1 = "foo.jpg";
   private static final String FILENAME_2 = "bar.wav";
