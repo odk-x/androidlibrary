@@ -14,6 +14,9 @@
 
 package org.opendatakit.utilities;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import android.os.Parcel;
 
 import org.junit.Before;
@@ -22,11 +25,6 @@ import org.opendatakit.database.data.BaseTable;
 import org.opendatakit.database.data.Row;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
-
-import java.io.IOException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 public class OdkBaseTableTest {
 
@@ -62,13 +60,13 @@ public class OdkBaseTableTest {
   private static final String[] ORDERBYDIR = null;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
 
   @Test
-  public void testOdkTableParcelation() throws IOException {
+  public void testOdkTableParcelation() {
 
     /*
      * Create test data
@@ -167,7 +165,7 @@ public class OdkBaseTableTest {
   }
 
   @Test (expected = IllegalArgumentException.class)
-  public void testOdkTableCreationValidationTable() throws IOException {
+  public void testOdkTableCreationValidationTable() {
 
     String[] primaryKey = PRIMARY_KEY;
 

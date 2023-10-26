@@ -27,16 +27,14 @@ import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 
 public class FileSetTest {
   private static final String APP_NAME = "fileSetTest";
   private static final String TABLE_ID_1 = "myTableId_1";
-  private static final String TABLE_ID_2 = "myTableId_2";
   private static final String INSTANCE_ID_1 = "myInstanceId_1";
-  private static final String INSTANCE_ID_2 = "myInstanceId_2";
   private static final String INSTANCE_FILENAME = "submission.xml";
   private static final String FILENAME_1 = "foo.jpg";
   private static final String FILENAME_2 = "bar.wav";
@@ -50,7 +48,7 @@ public class FileSetTest {
   public GrantPermissionRule readtimePermissionRule = GrantPermissionRule .grant(Manifest.permission.READ_EXTERNAL_STORAGE);
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
@@ -70,7 +68,7 @@ public class FileSetTest {
 
     String value = fileSet.serializeUriFragmentList();
 
-    ByteArrayInputStream bis = new ByteArrayInputStream(value.getBytes(Charset.forName("UTF-8")));
+    ByteArrayInputStream bis = new ByteArrayInputStream(value.getBytes(StandardCharsets.UTF_8));
     FileSet outSet = FileSet.parse(APP_NAME, bis);
 
     assertEquals( fileSet.instanceFile, outSet.instanceFile);

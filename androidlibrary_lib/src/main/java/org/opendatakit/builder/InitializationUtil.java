@@ -247,6 +247,8 @@ public class InitializationUtil {
           }
         } else if (overwrite || !tempFile.exists()) {
           int bufferSize = 8192;
+          File parentDirs = tempFile.getParentFile();
+          if (parentDirs != null) parentDirs.mkdirs();
           OutputStream out = new BufferedOutputStream(new FileOutputStream(tempFile, false),
               bufferSize);
           byte buffer[] = new byte[bufferSize];
