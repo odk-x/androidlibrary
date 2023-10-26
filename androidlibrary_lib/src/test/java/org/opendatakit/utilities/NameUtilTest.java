@@ -22,24 +22,26 @@ import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class NameUtilTest {
 
   @BeforeClass
-  public static void oneTimeSetUp() throws Exception {
+  public static void oneTimeSetUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
 
-  @Test
-  public void testValidName() {
-    assertEquals(false, NameUtil.isValidUserDefinedDatabaseName("select"));
-    assertEquals(false, NameUtil.isValidUserDefinedDatabaseName("1select"));
-    assertEquals(false, NameUtil.isValidUserDefinedDatabaseName("1ss elect"));
-    assertEquals(true, NameUtil.isValidUserDefinedDatabaseName("ss_elect"));
-    assertEquals(true, NameUtil.isValidUserDefinedDatabaseName("ss_elect3"));
-  }
+    @Test
+    public void testValidName() {
+        assertFalse(NameUtil.isValidUserDefinedDatabaseName("select"));
+        assertFalse(NameUtil.isValidUserDefinedDatabaseName("1select"));
+        assertFalse(NameUtil.isValidUserDefinedDatabaseName("1ss elect"));
+        assertTrue(NameUtil.isValidUserDefinedDatabaseName("ss_elect"));
+        assertTrue(NameUtil.isValidUserDefinedDatabaseName("ss_elect3"));
+    }
 
   @Test
   public void testDisplayName() {
