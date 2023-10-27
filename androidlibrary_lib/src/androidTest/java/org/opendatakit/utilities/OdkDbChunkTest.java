@@ -86,7 +86,11 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assert chunks != null;
+    if (chunks == null) {
+      fail("Failed to convert serializable to chunks");
+      return;
+    }
+
     assertEquals("Unexpected number of chunks", 1, chunks.size());
 
     DbChunk chunk = chunks.get(0);
@@ -103,7 +107,11 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assert results != null;
+    if (results == null) {
+      fail("Failed to rebuild serializable from chunks");
+      return;
+    }
+
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
@@ -122,7 +130,11 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assert chunks != null;
+    if (chunks == null) {
+      fail("Failed to convert serializable to chunks");
+      return;
+    }
+
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     // Test chunk list pointers
@@ -152,7 +164,11 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assert results != null;
+    if (results == null) {
+      fail("Failed to rebuild serializable from chunks");
+      return;
+    }
+
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
@@ -182,7 +198,11 @@ public class OdkDbChunkTest {
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, largeChunkSize);
 
-    assert chunks != null;
+    if (chunks == null) {
+      fail("Failed to convert serializable to chunks");
+      return;
+    }
+
     assertEquals("Unexpected number of chunks", 1, chunks.size());
 
     DbChunk chunk = chunks.get(0);
@@ -190,7 +210,11 @@ public class OdkDbChunkTest {
 
     Bundle results = DbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
 
-    assert results != null;
+    if (results == null) {
+      fail("Failed to rebuild serializable from chunks");
+      return;
+    }
+
     assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
     assertTrue("Data unpack error", results.containsKey("testData"));
     String[] resultsTestData = results.getStringArray("testData");
@@ -208,7 +232,11 @@ public class OdkDbChunkTest {
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, smallChunkSize);
 
-    assert chunks != null;
+    if (chunks == null) {
+      fail("Failed to convert serializable to chunks");
+      return;
+    }
+
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     // Test chunk list pointers
@@ -229,7 +257,11 @@ public class OdkDbChunkTest {
     // Test unpack
     Bundle results = DbChunkUtil.rebuildFromChunks(chunks, Bundle.CREATOR);
 
-    assert results != null;
+    if (results == null) {
+      fail("Failed to rebuild serializable from chunks");
+      return;
+    }
+
     assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
     assertTrue("Data unpack error", results.containsKey("testData"));
     String[] resultsTestData = results.getStringArray("testData");
@@ -250,7 +282,11 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assert chunks != null;
+    if (chunks == null) {
+      fail("Failed to convert serializable to chunks");
+      return;
+    }
+
     assertEquals("Unexpected number of chunks", 1, chunks.size());
 
     DbChunk chunk = chunks.get(0);
@@ -282,7 +318,11 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assert results != null;
+    if (results == null) {
+      fail("Failed to rebuild serializable from chunks");
+      return;
+    }
+
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
