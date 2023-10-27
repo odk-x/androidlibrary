@@ -18,5 +18,6 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
         <item name="colorPrimary">@color/blue_300</item>
         <item name="colorPrimaryVariant">@color/blue_100</item>
+        <item name="android:statusBarColor">@color/blue_100</item>
     </style>
 </resources>
