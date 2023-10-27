@@ -6,11 +6,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;
 
-import java.util.Objects;
 import java.util.Random;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -62,10 +62,11 @@ public class AlertNProgessMsgFragmentMgerTest {
                 systemUnderTest.createAlertDialog(ALERT_DIALOG_TITLE, ALERT_DIALOG_MESSAGE, fragmentManager, fragmentId);
                 fragmentManager.executePendingTransactions();
 
-                MatcherAssert.assertThat(Objects.requireNonNull(fragmentManager.findFragmentByTag(ALERT_DIALOG_TAG)).isAdded(), is(true));
+                Fragment frag = fragmentManager.findFragmentByTag(ALERT_DIALOG_TAG);
+                assertNotNull(frag);
+                MatcherAssert.assertThat(frag.isAdded(), is(true));
                 assertEquals(DialogState.Alert, systemUnderTest.getDialogState());
                 MatcherAssert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(true));
-            }
         });
     }
 
@@ -79,10 +80,11 @@ public class AlertNProgessMsgFragmentMgerTest {
                 systemUnderTest.createProgressDialog(PROGRESS_DIALOG_TITLE, PROGRESS_DIALOG_MESSAGE, fragmentManager);
                 fragmentManager.executePendingTransactions();
 
-                MatcherAssert.assertThat(Objects.requireNonNull(fragmentManager.findFragmentByTag(PROGRESS_DIALOG_TAG)).isAdded(), is(true));
+                Fragment frag = fragmentManager.findFragmentByTag(PROGRESS_DIALOG_TAG);
+                assertNotNull(frag);
+                MatcherAssert.assertThat(frag.isAdded(), is(true));
                 assertEquals(DialogState.Progress, systemUnderTest.getDialogState());
                 MatcherAssert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(true));
-            }
         });
     }
 
