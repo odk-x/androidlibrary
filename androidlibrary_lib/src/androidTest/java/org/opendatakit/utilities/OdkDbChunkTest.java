@@ -301,7 +301,11 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assert chunks != null;
+    if (chunks == null) {
+      fail("Failed to convert serializable to chunks");
+      return;
+    }
+
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
 
     /*
@@ -335,7 +339,11 @@ public class OdkDbChunkTest {
       return;
     }
 
-    assert results != null;
+    if (results == null) {
+      fail("Failed to rebuild serializable from chunks");
+      return;
+    }
+
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
 
     for (int i = 0; i < testData.length; i++) {
