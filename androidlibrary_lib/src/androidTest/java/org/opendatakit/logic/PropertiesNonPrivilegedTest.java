@@ -48,9 +48,9 @@ public class PropertiesNonPrivilegedTest {
     private static final String APPNAME = "unittestProp";
 
     @Rule
-    public GrantPermissionRule writeRuntimePermissionRule = GrantPermissionRule .grant(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    public GrantPermissionRule writeRuntimePermissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE);
     @Rule
-    public GrantPermissionRule readtimePermissionRule = GrantPermissionRule .grant(Manifest.permission.READ_EXTERNAL_STORAGE);
+    public GrantPermissionRule readtimePermissionRule = GrantPermissionRule.grant(Manifest.permission.READ_EXTERNAL_STORAGE);
 
     @Before
     public void setUp() {
@@ -67,7 +67,7 @@ public class PropertiesNonPrivilegedTest {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
-        Map<String,String> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<String, String>();
 
         // non-default value for font size
         properties.put(CommonToolProperties.KEY_FONT_SIZE, "29");
@@ -87,14 +87,15 @@ public class PropertiesNonPrivilegedTest {
     @Test
     public void testSecureSetProperties() {
 
-        StaticStateManipulator.get().reset();
+        StaticStateManipulator.get().reset(); 
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-  
-        TreeMap<String,String> secureProperties = new TreeMap<>();
+
+        TreeMap<String, String> secureProperties = new TreeMap<String, String>();
+
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
 
-        for ( String secureKey : secureProperties.keySet() ) {
+        for (String secureKey : secureProperties.keySet()) {
             // this is stored in SharedPreferences
             boolean threwError = false;
             try {
@@ -126,13 +127,15 @@ public class PropertiesNonPrivilegedTest {
     public void testSecureGetProperties() {
 
         StaticStateManipulator.get().reset();
+      
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        TreeMap<String,String> secureProperties = new TreeMap<>();
+        TreeMap<String, String> secureProperties = new TreeMap<String, String>();
+ 
         CommonToolProperties.accumulateProperties(context, null, null, secureProperties);
         PropertiesSingleton props = CommonToolProperties.get(context, APPNAME);
 
-        for ( String secureKey : secureProperties.keySet() ) {
+        for (String secureKey : secureProperties.keySet()) {
             // this is stored in SharedPreferences
             // always throws an exception
             boolean threwError = false;
