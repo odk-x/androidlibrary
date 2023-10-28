@@ -4,7 +4,7 @@
     <style name="OdkActionBar"
         parent="Widget.AppCompat.Light.ActionBar.Solid">
         <item name="displayOptions">useLogo|showHome|showTitle</item>
-        <item name="background">@color/white</item>
+        <item name="background">@color/blue_300</item>
         <item name="logo">@drawable/app_logo</item>
     </style>
 
@@ -16,5 +16,8 @@
         <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
         <item name="actionBarStyle">@style/OdkActionBar</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+        <item name="colorPrimary">@color/blue_300</item>
+        <item name="colorPrimaryVariant">@color/blue_100</item>
+        <item name="android:statusBarColor">@color/blue_100</item>
     </style>
 </resources>
