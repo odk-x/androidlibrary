@@ -28,7 +28,7 @@ import org.opendatakit.utilities.StaticStateManipulator;
 public class ColorRuleTest {
 
    @BeforeClass
-   public static void oneTimeSetUp() throws Exception {
+   public static void oneTimeSetUp() {
       StaticStateManipulator.get().reset();
       WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
    }

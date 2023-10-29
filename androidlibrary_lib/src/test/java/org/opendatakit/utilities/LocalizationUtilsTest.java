@@ -35,7 +35,7 @@ public class LocalizationUtilsTest {
   String tableId = null;
 
   @BeforeClass
-  public static void oneTimeSetUp() throws Exception {
+  public static void oneTimeSetUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
@@ -56,13 +56,13 @@ public class LocalizationUtilsTest {
 
   @Test
   public void testNormalizeDisplayName() throws JsonProcessingException {
-    Map<String,Object> langMap = new TreeMap<String,Object>();
+    Map<String,Object> langMap = new TreeMap<>();
     langMap.put("en_US", "This is a test");
     langMap.put("en_GB", "Test is This");
     langMap.put("en", "Huh Test");
     langMap.put("fr", "Je suis");
     langMap.put("default", "No way!");
-    Map<String,Object> topMap = new TreeMap<String,Object>();
+    Map<String,Object> topMap = new TreeMap<>();
     topMap.put("text", langMap);
     String value = ODKFileUtils.mapper.writeValueAsString(topMap);
 
