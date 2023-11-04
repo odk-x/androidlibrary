@@ -141,7 +141,7 @@ publishing {
     publications {
         aarRelease(MavenPublication) {
             groupId = "org.opendatakit"
-            artifactId = 'androidlibrary_lib'
+            artifactId = 'androidlibrary'
             version = "1.0.0-${formattedDate}-${projectDetails.gitHash}"
             afterEvaluate{
                 artifact spawnSnapshotBasicArchives
@@ -149,7 +149,7 @@ publishing {
         }
         aarDebug(MavenPublication) {
             groupId = "org.opendatakit"
-            artifactId = 'androidlibrary_lib'
+            artifactId = 'androidlibrary'
             version = "1.0.0-debug-${formattedDate}-${projectDetails.gitHash}"
             afterEvaluate{
                 artifact spawnSnapshotBasicArchives
