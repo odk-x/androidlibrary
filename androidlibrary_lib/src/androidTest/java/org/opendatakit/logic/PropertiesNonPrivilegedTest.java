@@ -22,7 +22,6 @@ import android.Manifest;
 import android.content.Context;
 
 import androidx.test.platform.app.InstrumentationRegistry;
-
 import androidx.test.rule.GrantPermissionRule;
 
 import org.junit.Before;
@@ -127,7 +126,8 @@ public class PropertiesNonPrivilegedTest {
     @Test
     public void testSecureGetProperties() {
 
-        StaticStateManipulator.get().reset(); 
+        StaticStateManipulator.get().reset();
+      
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         TreeMap<String, String> secureProperties = new TreeMap<String, String>();
