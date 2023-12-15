@@ -380,4 +380,36 @@ public class FormProviderUtilsTest {
       assertEquals(MY_KEY1 + "=" +
           FormsProviderUtils.encodeFragmentObjectValue(MY_KEY1_VALUE), pf.auxillaryHash);
    }
+
+   @Test
+   public void testSurveyUriTableIdFormIdNullInstanceIdScreenPath() throws UnsupportedEncodingException {
+      String url = FormsProviderUtils
+              .constructSurveyUri(APPNAME, TABLE_ID, FORM_ID, null, SCREEN_PATH, null);
+
+      assertEquals(EXPECTED_TABLEID_FORMID_BASE +
+              FormsProviderUtils.URI_SURVEY_QUERY_PARAM_SCREEN_PATH + "=" +
+              FormsProviderUtils.encodeFragmentUnquotedStringValue(SCREEN_PATH), url);
+
+      Uri uri = Uri.parse(url);
+      FormsProviderUtils.ParsedFragment pf = FormsProviderUtils.parseUri(uri);
+
+      assertNull(pf.instanceId);
+      assertEquals(SCREEN_PATH, pf.screenPath);
+      assertNull(pf.auxillaryHash);
+   }
+
+   @Test
+   public void testSurveyUriTableIdFormIdEmptyInstanceIdNullScreenPath() throws UnsupportedEncodingException {
+      String url = FormsProviderUtils
+              .constructSurveyUri(APPNAME, TABLE_ID, FORM_ID, "", null, null);
+
+      assertEquals(EXPECTED_TABLEID_FORMID_BASE, url);
+
+      Uri uri = Uri.parse(url);
+      FormsProviderUtils.ParsedFragment pf = FormsProviderUtils.parseUri(uri);
+
+      assertNull(pf.instanceId);
+      assertNull(pf.screenPath);
+      assertNull(pf.auxillaryHash);
+   }
 }
