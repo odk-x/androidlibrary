@@ -113,4 +113,78 @@ public class ODKFileUtilsTest {
     frag = specialFile.getName();
     assertEquals("space name:[]@!$&'()*+,;=\\foo%2Fbar", frag);
   }
+
+  @Test
+  public void testSpecialCharactersInFolderName() {
+    // Test case with special characters in folder name
+    File specialFile = new File(appDir, "special@folder:name");
+    String frag = ODKFileUtils.asUriFragment(appName, specialFile);
+    assertEquals("special%40folder%3Aname", frag);
+  }
+
+  @Test
+  public void testEmptyFolderName() {
+    // Test case with an empty folder name
+    File specialFile = new File(appDir, "");
+    String frag = ODKFileUtils.asUriFragment(appName, specialFile);
+    assertEquals("", frag);
+  }
+
+  @Test
+  public void testSpecialCharactersInFileName() {
+    // Test case with special characters in file name
+    File specialFile = new File(appDir, "file@name.txt");
+    String frag = ODKFileUtils.asUriFragment(appName, specialFile);
+    assertEquals("file%40name.txt", frag);
+  }
+
+  @Test
+  public void testMultipleConsecutiveSlashesInPath() {
+    // Test case with multiple consecutive slashes in the file path
+    File specialFile = new File(appDir, "folder//subfolder//file.txt");
+    String frag = ODKFileUtils.asUriFragment(appName, specialFile);
+    assertEquals("folder/subfolder/file.txt", frag);
+  }
+
+  @Test
+  public void testSpecialCharactersInParentFolderName() {
+    // Test case with special characters in parent folder name
+    File specialFile = new File(appDir, "parent@folder");
+    File childFile = new File(specialFile, "childFolder");
+    String frag = ODKFileUtils.asUriFragment(appName, childFile);
+    assertEquals("parent%40folder/childFolder", frag);
+  }
+
+  @Test
+  public void testSpecialCharactersInExtension() {
+    // Test case with special characters in file extension
+    File specialFile = new File(appDir, "file@name.special.txt");
+    String frag = ODKFileUtils.asUriFragment(appName, specialFile);
+    assertEquals("file%40name.special.txt", frag);
+  }
+
+  @Test
+  public void testMixedCaseFolderName() {
+    // Test case with mixed case folder name
+    File specialFile = new File(appDir, "MiXeDCaSeFoLdEr");
+    String frag = ODKFileUtils.asUriFragment(appName, specialFile);
+    assertEquals("MiXeDCaSeFoLdEr", frag);
+  }
+
+  @Test
+  public void testSpecialCharactersInPath() {
+    // Test case with special characters in the file path
+    File specialFile = new File(appDir, "folder@subfolder/file.txt");
+    String frag = ODKFileUtils.asUriFragment(appName, specialFile);
+    assertEquals("folder%40subfolder/file.txt", frag);
+  }
+
+  @Test
+  public void testSpecialCharactersInParentFolderAndFileName() {
+    // Test case with special characters in parent folder name and file name
+    File specialFile = new File(appDir, "parent@folder");
+    File childFile = new File(specialFile, "file@name.txt");
+    String frag = ODKFileUtils.asUriFragment(appName, childFile);
+    assertEquals("parent%40folder/file%40name.txt", frag);
+  }
 }
