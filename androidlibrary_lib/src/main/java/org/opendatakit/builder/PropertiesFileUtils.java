@@ -79,8 +79,16 @@ public final class PropertiesFileUtils {
    * @throws ServicesAvailabilityException if the database is down
    */
   public static synchronized boolean writePropertiesIntoCsv(String appName, String tableId,
-      OrderedColumns orderedDefns, List<KeyValueStoreEntry> kvsEntries, File definitionCsv,
-      File propertiesCsv) throws ServicesAvailabilityException {
+                                                            OrderedColumns orderedDefns,
+                                                            List<KeyValueStoreEntry> kvsEntries,
+                                                            File definitionCsv,
+                                                            File propertiesCsv)
+        throws ServicesAvailabilityException {
+    // Ensure that both appName and tableId are not null
+    if (appName == null || tableId == null) {
+        return false;
+    }
+
     WebLogger.getLogger(appName).i(TAG, "writePropertiesIntoCsv: tableId: " + tableId);
 
     // writing metadata
@@ -238,7 +246,11 @@ public final class PropertiesFileUtils {
    * @throws IllegalStateException if the CSV file was improperly formatted
    */
   public static synchronized DataTableDefinition readPropertiesFromCsv(String appName,
-      String tableId) throws IOException {
+        String tableId) throws IOException {
+    // Ensure that both appName and tableId are not null
+    if (appName == null || tableId == null) {
+        throw new IllegalArgumentException("appName and tableId cannot be null");
+    }
 
     WebLogger.getLogger(appName).i(TAG, "readPropertiesFromCsv: tableId: " + tableId);
 
