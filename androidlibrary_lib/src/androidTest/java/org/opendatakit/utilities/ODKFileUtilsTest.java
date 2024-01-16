@@ -118,4 +118,79 @@ public class ODKFileUtilsTest {
     frag = specialFile.getName();
     assertEquals("space name:[]@!$&'()*+,;=\\foo%2Fbar", frag);
   }
+
+  @Test
+  public void testSpecialCharactersInFolderName() {
+    File specialFile = new File(appDir, "special@folder:name");
+    String uriFragment = ODKFileUtils.asUriFragment(appName, specialFile);
+    File reconstructedFile = ODKFileUtils.getAsFile(appName, uriFragment);
+    assertEquals(specialFile, reconstructedFile);
+  }
+
+  @Test
+  public void testEmptyFolderName() {
+    // Test case with an empty folder name
+    File specialFile = new File(appDir, "");
+    String frag = ODKFileUtils.asUriFragment(appName, specialFile);
+    assertEquals("", frag);
+  }
+
+
+  @Test
+  public void testSpecialCharactersInFileName() {
+    File specialFile = new File(appDir, "file@name.txt");
+    String uriFragment = ODKFileUtils.asUriFragment(appName, specialFile);
+    File reconstructedFile = ODKFileUtils.getAsFile(appName, uriFragment);
+    assertEquals(specialFile, reconstructedFile);
+  }
+
+  @Test
+  public void testMultipleConsecutiveSlashesInPath() {
+    File specialFile = new File(appDir, "folder//subfolder//file.txt");
+    String uriFragment = ODKFileUtils.asUriFragment(appName, specialFile);
+    File reconstructedFile = ODKFileUtils.getAsFile(appName, uriFragment);
+    assertEquals(specialFile, reconstructedFile);
+  }
+
+  @Test
+  public void testSpecialCharactersInParentFolderName() {
+    File specialFile = new File(appDir, "parent@folder");
+    File childFile = new File(specialFile, "childFolder");
+    String uriFragment = ODKFileUtils.asUriFragment(appName, childFile);
+    File reconstructedFile = ODKFileUtils.getAsFile(appName, uriFragment);
+    assertEquals(childFile, reconstructedFile);
+  }
+
+  @Test
+  public void testSpecialCharactersInExtension() {
+    File specialFile = new File(appDir, "file@name.special.txt");
+    String uriFragment = ODKFileUtils.asUriFragment(appName, specialFile);
+    File reconstructedFile = ODKFileUtils.getAsFile(appName, uriFragment);
+    assertEquals(specialFile, reconstructedFile);
+  }
+
+  @Test
+  public void testMixedCaseFolderName() {
+    File specialFile = new File(appDir, "MiXeDCaSeFoLdEr");
+    String uriFragment = ODKFileUtils.asUriFragment(appName, specialFile);
+    File reconstructedFile = ODKFileUtils.getAsFile(appName, uriFragment);
+    assertEquals(specialFile, reconstructedFile);
+  }
+
+  @Test
+  public void testSpecialCharactersInPath() {
+    File specialFile = new File(appDir, "folder@subfolder/file.txt");
+    String uriFragment = ODKFileUtils.asUriFragment(appName, specialFile);
+    File reconstructedFile = ODKFileUtils.getAsFile(appName, uriFragment);
+    assertEquals(specialFile, reconstructedFile);
+  }
+
+  @Test
+  public void testSpecialCharactersInParentFolderAndFileName() {
+    File specialFile = new File(appDir, "parent@folder");
+    File childFile = new File(specialFile, "file@name.txt");
+    String uriFragment = ODKFileUtils.asUriFragment(appName, childFile);
+    File reconstructedFile = ODKFileUtils.getAsFile(appName, uriFragment);
+    assertEquals(childFile, reconstructedFile);
+  }
 }
