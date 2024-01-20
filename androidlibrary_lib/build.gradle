@@ -13,16 +13,12 @@ libraryScripts.each {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: "com.jfrog.artifactory"
 apply plugin: "maven-publish"
 
-group = groupId
 
 android {
-
-    // The following are set in the common.gradle file
-    compileSdkVersion(compileVersion)
-    buildToolsVersion(buildTools)
+    namespace(groupId + libraryPackageName)
+    compileSdk(compileVersion)
     defaultConfig {
         minSdkVersion(minVersion)
         targetSdkVersion(targetVersion)
@@ -31,10 +27,12 @@ android {
         testInstrumentationRunner(instrumentationRunner)
     }
 
-    // set by command line arguments
-    defaultPublishConfig(gradle.ext.odkDefaultPublishConfig)
+    buildFeatures {
+        aidl true
+        buildConfig true
+    }
 
-    flavorDimensions "stage", "testing"
+    flavorDimensions.add("stage")
 
     productFlavors {
         demo {
@@ -49,14 +47,6 @@ android {
             dimension 'stage'
         }
 
-        basic {
-            dimension 'testing'
-        }
-
-        uitest {
-            minSdkVersion(uitestMinSDK)
-            dimension 'testing'
-        }
     }
 
     buildTypes {
@@ -67,14 +57,13 @@ android {
         }
         debug {
             debuggable(true)
-            testCoverageEnabled(testCoverage) // Allows AndroidTest JaCoCo reports to be generated
             matchingFallbacks = ['release']
         }
     }
 
-    packagingOptions { // Pick first occurrence of any files that cause conflicts, as defined in common.gradle
-        packageList.each {
-            pickFirst it
+    android{
+        packagingOptions {
+            exclude 'META-INF/*'
         }
     }
 
@@ -100,7 +89,19 @@ allprojects {
 
 
 dependencies {
-    api fileTree(include: '*.jar', dir: 'libs')
+    repositories {
+        maven {
+            name = "GithubPackages"
+            url = "https://maven.pkg.github.com/odk-x/sync-endpoint"
+            credentials {
+                username = githubMvnUser
+                password = githubMvnPass
+            }
+        }
+    }
+    implementation 'commons-io:commons-io:2.8.0'
+    implementation 'joda-time:joda-time:2.10.10'
+    implementation 'org.opendatakit:odkx-rest-interface:2.1.10-SNAPSHOT'
     implementation 'net.jcip:jcip-annotations:1.0'
     implementation 'androidx.annotation:annotation:1.3.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -108,9 +109,10 @@ dependencies {
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.fragment:fragment:1.3.6'
     implementation 'com.google.android.material:material:1.4.0'
+
     // Testing dependencies
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'androidx.annotation:annotation:1.7.0'
+    testImplementation 'androidx.annotation:annotation:1.7.1'
     androidTestImplementation 'androidx.test:rules:1.5.0'
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test:core:1.5.0'
@@ -118,50 +120,27 @@ dependencies {
 }
 
 publishing {
-    publications {
-        aarRelease(MavenPublication) {}
-        aarDebug(MavenPublication) {}
+
+    repositories{
+        maven {
+            name = "GithubPackages"
+            url = "https://maven.pkg.github.com/odk-x/androidlibrary"
+            credentials {
+                username = System.getenv('GITHUB_ACTOR')
+                password = System.getenv('GITHUB_TOKEN')
+            }
+        }
     }
-    repositories {
-        ivy {
-            ivyPattern('[organisation]/[module]/[revision]/ivy-[revision].xml')
-            artifactPattern('[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]')
+    publications {
+        aarRelease(MavenPublication) {
+            groupId = "org.opendatakit"
+            artifactId = 'androidlibrary'
+            version = "1.0.0-SNAPSHOT"
+        }
+        aarDebug(MavenPublication) {
+            groupId = "org.opendatakit"
+            artifactId = 'androidlibrary'
+            version = "1.0.0-debug-SNAPSHOT"
         }
     }
 }
-
-
-task spawnSnapshotBasicArchives {
-    dependsOn('snapshotVersion')
-    dependsOn('assembleSnapshotBasicDebug')
-    dependsOn('assembleSnapshotBasicRelease')
-    doLast {
-        bundleSnapshotBasicReleaseAar.classifier snapshotRelease
-        bundleSnapshotBasicDebugAar.classifier snapshotDebug
-
-        publishing.publications.aarRelease.artifact bundleSnapshotBasicReleaseAar
-        publishing.publications.aarDebug.artifact bundleSnapshotBasicDebugAar
-
-        project.getArtifacts().add("default", bundleSnapshotBasicDebugAar)
-    }
-}
-
-task spawnDemoBasicArchives {
-    dependsOn('snapshotVersion')
-    dependsOn('assembleDemoBasicDebug')
-    dependsOn('assembleDemoBasicRelease')
-    doLast {
-        bundleDemoBasicReleaseAar.classifier demoRelease
-        bundleDemoBasicDebugAar.classifier demoDebug
-
-        publishing.publications.aarRelease.artifact bundleDemoBasicReleaseAar
-        publishing.publications.aarDebug.artifact bundleDemoBasicDebugAar
-
-        project.getArtifacts().add("default", bundleDemoBasicDebugAar)
-    }
-}
-
-artifactoryPublish.mustRunAfter('spawnSnapshotBasicArchives')
-artifactoryPublish.mustRunAfter('spawnDemoBasicArchives')
-artifactoryPublish.mustRunAfter('connectedSnapshotBasicDebugAndroidTest')
-artifactoryPublish.mustRunAfter('connectedDemoBasicDebugAndroidTest')
