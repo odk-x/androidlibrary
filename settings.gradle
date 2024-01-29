@@ -1,8 +1,8 @@
-gradle.ext.gradleConfigVersion = 155
+gradle.ext.gradleConfigVersion = 158
 
 if (!gradle.ext.has('workspacePath')) {
-    logger.warn("rootDir: " + rootDir.getAbsolutePath());
-    gradle.ext.workspacePath = rootDir.getParentFile().getAbsolutePath();
+    logger.warn("rootDir: " + rootDir.getAbsolutePath())
+    gradle.ext.workspacePath = rootDir.getParentFile().getAbsolutePath()
 }
 
 logger.warn('androidlibrary/settings.gradle -- gradle.ext.workspacePath: ' + gradle.ext.workspacePath)
@@ -24,8 +24,5 @@ settingsScripts.each {
 
 include(libraryProjectChild)
 
-if(gradle.ext.odkPublishConfig) {
-    project(libraryProjectChild).name = gradle.ext.odkLibraryArchiveName
-}
 
 

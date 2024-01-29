@@ -17,13 +17,11 @@ apply plugin: "maven-publish"
 
 
 android {
-    namespace(groupId + libraryPackageName)
+    namespace(libraryNamespace)
     compileSdk(compileVersion)
     defaultConfig {
         minSdkVersion(minVersion)
         targetSdkVersion(targetVersion)
-        versionCode(releaseVersionCode)
-        versionName(versionCodeName)
         testInstrumentationRunner(instrumentationRunner)
     }
 
@@ -35,18 +33,17 @@ android {
     flavorDimensions.add("stage")
 
     productFlavors {
-        demo {
+        primary {
             dimension 'stage'
-        }
-
-        master {
-            dimension 'stage'
+            versionCode(primaryVersionCode)
+            versionName(primaryVersion)
         }
 
         snapshot {
             dimension 'stage'
+            versionCode(snapshotVersionCode)
+            versionName(snapshotVersion)
         }
-
     }
 
     buildTypes {
@@ -61,15 +58,19 @@ android {
         }
     }
 
-    android{
-        packagingOptions {
-            exclude 'META-INF/*'
-        }
+
+    packagingOptions {
+        exclude 'META-INF/*'
     }
 
     compileOptions {
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
+    }
+
+    publishing {
+        singleVariant("snapshotDebug")
+        singleVariant("primaryRelease")
     }
 }
 
@@ -89,26 +90,16 @@ allprojects {
 
 
 dependencies {
-    repositories {
-        maven {
-            name = "GithubPackages"
-            url = "https://maven.pkg.github.com/odk-x/sync-endpoint"
-            credentials {
-                username = githubMvnUser
-                password = githubMvnPass
-            }
-        }
-    }
     implementation 'commons-io:commons-io:2.8.0'
     implementation 'joda-time:joda-time:2.10.10'
-    implementation 'org.opendatakit:odkx-rest-interface:2.1.10-SNAPSHOT'
+    implementation 'org.opendatakit:odkx-rest-interface:2.2.0-SNAPSHOT'
     implementation 'net.jcip:jcip-annotations:1.0'
-    implementation 'androidx.annotation:annotation:1.3.0'
+    implementation 'androidx.annotation:annotation:1.7.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.preference:preference:1.1.1'
-    implementation 'androidx.fragment:fragment:1.3.6'
-    implementation 'com.google.android.material:material:1.5.0-alpha02'
+    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.fragment:fragment:1.5.7'
 
     // Testing dependencies
     testImplementation 'junit:junit:4.13.2'
@@ -119,28 +110,31 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
 }
 
-publishing {
-
-    repositories{
-        maven {
-            name = "GithubPackages"
-            url = "https://maven.pkg.github.com/odk-x/androidlibrary"
-            credentials {
-                username = System.getenv('GITHUB_ACTOR')
-                password = System.getenv('GITHUB_TOKEN')
+afterEvaluate {
+    publishing {
+        repositories {
+            maven {
+                name = "ODKXAndroidLibary"
+                url = "https://maven.pkg.github.com/odk-x/androidlibrary"
+                credentials {
+                    username = System.getenv('GITHUB_ACTOR')
+                    password = System.getenv('GITHUB_TOKEN')
+                }
             }
         }
-    }
-    publications {
-        aarRelease(MavenPublication) {
-            groupId = "org.opendatakit"
-            artifactId = 'androidlibrary'
-            version = "1.0.0-SNAPSHOT"
-        }
-        aarDebug(MavenPublication) {
-            groupId = "org.opendatakit"
-            artifactId = 'androidlibrary'
-            version = "1.0.0-debug-SNAPSHOT"
+        publications {
+            snapshotDebug(MavenPublication) {
+                from components.snapshotDebug
+                groupId = odkxGroupId
+                artifactId = libraryPackageName
+                version = snapshotVersion
+            }
+            primaryRelease(MavenPublication) {
+                from components.primaryRelease
+                groupId = odkxGroupId
+                artifactId = libraryPackageName
+                version = primaryVersion
+            }
         }
     }
 }

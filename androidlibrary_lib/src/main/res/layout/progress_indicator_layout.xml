@@ -29,7 +29,7 @@
                 app:indicatorColor="@color/blue_300"
                 app:trackColor="@color/blue_100" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvMessage"
                 android:layout_width="wrap_content"
                 android:layout_gravity="start"
