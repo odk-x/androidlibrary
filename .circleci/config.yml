@@ -1,0 +1,115 @@
+version: 2.1
+
+orbs:
+  android: circleci/android@2.4.0
+jobs:
+  test:
+    description: Runs unit tests and instrumented tests on the Android Library
+    executor:
+      name: android/android-machine
+      resource-class: large
+      tag: 2024.01.1
+
+    steps:
+      - checkout
+      - run:
+          name: Chmod Permissions
+          command: sudo chmod +x gradlew
+
+      - android/create-avd:
+          avd-name: avd
+          install: true
+          system-image: system-images;android-29;default;x86
+      - android/start-emulator:
+          avd-name: avd
+          no-window: true
+          restore-gradle-cache-prefix: v2
+          post-emulator-launch-assemble-command: ./gradlew assemble
+#      - android/run-tests:
+#          test-command: ./gradlew test
+      - android/run-tests:
+          test-command: ./gradlew connectedAndroidTest
+      - android/save-gradle-cache:
+          cache-prefix: v1
+      - store_artifacts:
+          name: Store Test Results
+          path: androidlibrary_lib/build/outputs/androidTest-results
+      - store_artifacts:
+          name: Store Test Reports
+          path: androidlibrary_lib/build/reports
+
+  build:
+    docker:
+      - image: cimg/android:2024.01
+    steps:
+      - checkout
+      - run:
+          name: Chmod Permissions
+          command: sudo chmod +x gradlew
+      - android/restore-gradle-cache:
+          cache-prefix: v1
+
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - android/save-gradle-cache:
+          cache-prefix: v1
+      - run:
+          name: Build Library
+          command: ./gradlew assemble
+
+  deploy:
+    executor:
+      name: android/android-docker
+      tag: 2023.06.1
+    steps:
+      - checkout
+      - run:
+          name: Chmod Permissions
+          command: sudo chmod +x gradlew
+      - android/restore-gradle-cache:
+          cache-prefix: v1
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - android/save-gradle-cache:
+          cache-prefix: v1
+      - run:
+          name: Publish library
+          command: ./gradlew publish
+
+
+  trigger-children:
+    docker:
+      - image: cimg/base:2024.01
+    resource_class: small
+    steps:
+      - run:
+          name: Trigger AndroidCommon
+          command: |
+            curl --location --request POST "https://circleci.com/api/v2/project/github/$CIRCLE_USERNAME/androidcommon/pipeline" \
+              --header 'Content-Type: application/json' \
+              -u "${API_TOKEN}:" \
+              --data "{\"branch\":\"$CIRCLE_BRANCH\"}" \
+      - run:
+          name: Trigger Services pipeline
+          command: |
+            curl --location --request POST "https://circleci.com/api/v2/project/github/$CIRCLE_USERNAME/services/pipeline" \
+              --header 'Content-Type: application/json' \
+              -u "${API_TOKEN}:" \
+              --data "{\"branch\":\"$CIRCLE_BRANCH\"}" \
+
+
+
+workflows:
+  build-test-deploy-trigger-workflow:
+    jobs:
+      - build
+      - test
+      - deploy:
+          requires:
+            - build
+            - test
+      - trigger-children:
+          requires:
+            - deploy
