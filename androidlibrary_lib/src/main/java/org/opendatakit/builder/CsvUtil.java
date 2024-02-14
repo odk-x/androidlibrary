@@ -16,6 +16,9 @@
 package org.opendatakit.builder;
 
 import android.content.ContentValues;
+
+import androidx.documentfile.provider.DocumentFile;
+
 import org.opendatakit.aggregate.odktables.rest.ConflictType;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
@@ -302,8 +305,8 @@ public class CsvUtil {
     }
 
     return PropertiesFileUtils
-        .writePropertiesIntoCsv(appName, tableId, orderedDefns, kvsEntries, definitionCsv,
-            propertiesCsv);
+        .writePropertiesIntoCsv(appName, tableId, orderedDefns, kvsEntries, DocumentFile.fromFile(definitionCsv),
+                DocumentFile.fromFile(propertiesCsv));
   }
 
   /**
