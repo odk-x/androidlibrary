@@ -15,6 +15,8 @@
  */
 package org.opendatakit.builder;
 
+import androidx.documentfile.provider.DocumentFile;
+
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvWriter;
@@ -79,8 +81,8 @@ public final class PropertiesFileUtils {
    * @throws ServicesAvailabilityException if the database is down
    */
   public static synchronized boolean writePropertiesIntoCsv(String appName, String tableId,
-      OrderedColumns orderedDefns, List<KeyValueStoreEntry> kvsEntries, File definitionCsv,
-      File propertiesCsv) throws ServicesAvailabilityException {
+                                                            OrderedColumns orderedDefns, List<KeyValueStoreEntry> kvsEntries, DocumentFile definitionCsv,
+                                                            DocumentFile propertiesCsv) throws ServicesAvailabilityException {
     WebLogger.getLogger(appName).i(TAG, "writePropertiesIntoCsv: tableId: " + tableId);
 
     // writing metadata
@@ -89,7 +91,7 @@ public final class PropertiesFileUtils {
     OutputStreamWriter output = null;
     try {
       // emit definition.csv table...
-      out = new FileOutputStream(definitionCsv);
+      out = new FileOutputStream(String.valueOf(definitionCsv));
       output = new OutputStreamWriter(out, StandardCharsets.UTF_8);
       cw = new RFC4180CsvWriter(output);
 
@@ -119,7 +121,7 @@ public final class PropertiesFileUtils {
       cw.close();
 
       // emit properties.csv...
-      out = new FileOutputStream(propertiesCsv);
+      out = new FileOutputStream(String.valueOf(propertiesCsv));
       output = new OutputStreamWriter(out, StandardCharsets.UTF_8);
       cw = new RFC4180CsvWriter(output);
 
