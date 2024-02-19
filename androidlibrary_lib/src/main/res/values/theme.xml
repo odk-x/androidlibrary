@@ -133,6 +133,18 @@
       <item name="cornerRadius">100dp</item>
    </style>
 
+   <!--Primary button style for Anonymous-->
+   <style name="ButtonStyleAnonymous" parent="Widget.MaterialComponents.Button">
+      <item name="android:layout_height">40dp</item>
+      <item name="android:textAllCaps">true</item>
+      <item name="android:textSize">14sp</item>
+      <item name="elevation">0dp</item>
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="android:textColor">@color/btn_text_color</item>
+      <item name="backgroundTint">@color/yellow_300</item>
+      <item name="cornerRadius">100dp</item>
+   </style>
+
    <!--delete button round-->
    <style name="ButtonStyleDelete" parent="Widget.MaterialComponents.Button">
       <item name="android:textAllCaps">true</item>
