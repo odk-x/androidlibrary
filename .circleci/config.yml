@@ -22,6 +22,7 @@ jobs:
       - android/start-emulator:
           avd-name: avd
           no-window: true
+          post-emulator-launch-assemble-command: ./gradlew assembleSnapshotDebug
       - android/run-tests:
           test-command: ./gradlew testSnapshotDebugUnitTest
       - android/run-tests:
@@ -85,10 +86,11 @@ workflows:
   build-test-deploy-trigger-workflow:
     jobs:
       - build
-      - test
+      - test:
+          requires:
+          - build
       - deploy:
           requires:
-            - build
             - test
       - trigger-children:
           requires:
