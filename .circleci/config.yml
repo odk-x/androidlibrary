@@ -15,7 +15,6 @@ jobs:
       - run:
           name: Chmod Permissions
           command: sudo chmod +x gradlew
-
       - android/create-avd:
           avd-name: avd
           install: true
@@ -23,14 +22,10 @@ jobs:
       - android/start-emulator:
           avd-name: avd
           no-window: true
-          restore-gradle-cache-prefix: v2
-          post-emulator-launch-assemble-command: ./gradlew assemble
-#      - android/run-tests:
-#          test-command: ./gradlew test
-      - android/run-tests:
-          test-command: ./gradlew connectedAndroidTest
-      - android/save-gradle-cache:
-          cache-prefix: v1
+      - android/run-unit-tests:
+          test-command: ./gradlew testSnapshotDebugUnitTest
+      - android/run-connected-tests:
+          test-command: ./gradlew connectedSnapshotDebugAndroidTest
       - store_artifacts:
           name: Store Test Results
           path: androidlibrary_lib/build/outputs/androidTest-results
@@ -46,17 +41,9 @@ jobs:
       - run:
           name: Chmod Permissions
           command: sudo chmod +x gradlew
-      - android/restore-gradle-cache:
-          cache-prefix: v1
-
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
-      - android/save-gradle-cache:
-          cache-prefix: v1
       - run:
           name: Build Library
-          command: ./gradlew assemble
+          command: ./gradlew assembleSnapshotDebug
 
   deploy:
     executor:
@@ -67,16 +54,9 @@ jobs:
       - run:
           name: Chmod Permissions
           command: sudo chmod +x gradlew
-      - android/restore-gradle-cache:
-          cache-prefix: v1
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
-      - android/save-gradle-cache:
-          cache-prefix: v1
       - run:
           name: Publish library
-          command: ./gradlew publish
+          command: ./gradlew publishSnapshotDebugPublicationToODKXAndroidLibaryRepository
 
 
   trigger-children:
