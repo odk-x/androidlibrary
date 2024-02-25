@@ -22,9 +22,9 @@ jobs:
       - android/start-emulator:
           avd-name: avd
           no-window: true
-      - android/run-unit-tests:
+      - android/run-tests:
           test-command: ./gradlew testSnapshotDebugUnitTest
-      - android/run-connected-tests:
+      - android/run-tests:
           test-command: ./gradlew connectedSnapshotDebugAndroidTest
       - store_artifacts:
           name: Store Test Results
