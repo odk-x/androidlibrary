@@ -25,5 +25,10 @@ the License.
     <color name="solid_blue">#0000ff</color>
     <color name="solid_green">#f0f0</color>
     <color name="solid_yellow">#ffffff00</color>
+    <color name="dark_blue">#5f000040</color>
+
+    <color name="colorPrimary">@color/white</color>
+    <color name="colorPrimaryDark">@color/white</color>
+    <color name="colorOnPrimary">@color/black</color>
 
 </resources>
