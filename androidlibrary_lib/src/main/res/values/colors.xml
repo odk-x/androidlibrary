@@ -45,6 +45,8 @@ the License.
     <color name="yellow_200">#f3db95</color>
     <color name="yellow_100">#fcf8ea</color>
 
+    <color name="toolbar_transparent">#00000000</color>
+
     <color name="colorPrimary">@color/blue_300</color>
     <color name="colorPrimaryVariant">@color/blue_100</color>
     <color name="colorSecondary">@color/green_300</color>
