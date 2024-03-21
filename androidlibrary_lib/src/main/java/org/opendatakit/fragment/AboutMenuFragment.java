@@ -15,7 +15,6 @@
 package org.opendatakit.fragment;
 
 import androidx.fragment.app.Fragment;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
@@ -33,6 +32,8 @@ import org.opendatakit.listener.LicenseReaderListener;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.task.LicenseReaderTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Used in ConflictResolutionActivity, CheckpointResolutionActivity,
@@ -53,9 +54,10 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
    * The license reader task. Once this completes, we never re-run it.
    */
   private static LicenseReaderTask licenseReaderTask = null;
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   private TextView mTextView;
-  
+
   /**
    * retained value...
    */
@@ -86,28 +88,28 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
       int logLevel = WebLogger.getLogger(appAwareActivity.getAppName()).getMinimumSystemLogLevel();
       String suppressLevel;
       switch (logLevel) {
-      case WebLoggerIf.ASSERT:
-      case WebLoggerIf.TIP:
-        suppressLevel = getString(R.string.log_threshold_assert);
-        break;
-      case WebLoggerIf.ERROR:
-      case WebLoggerIf.SUCCESS:
-        suppressLevel = getString(R.string.log_threshold_error);
-        break;
-      case WebLoggerIf.WARN:
-        suppressLevel = getString(R.string.log_threshold_warn);
-        break;
-      case WebLoggerIf.INFO:
-        suppressLevel = getString(R.string.log_threshold_info);
-        break;
-      case WebLoggerIf.DEBUG:
-        suppressLevel = getString(R.string.log_threshold_debug);
-        break;
-      case WebLoggerIf.VERBOSE:
-        suppressLevel = getString(R.string.log_threshold_verbose);
-        break;
-      default:
-        throw new IllegalStateException("Unexpected log level filter value");
+        case WebLoggerIf.ASSERT:
+        case WebLoggerIf.TIP:
+          suppressLevel = getString(R.string.log_threshold_assert);
+          break;
+        case WebLoggerIf.ERROR:
+        case WebLoggerIf.SUCCESS:
+          suppressLevel = getString(R.string.log_threshold_error);
+          break;
+        case WebLoggerIf.WARN:
+          suppressLevel = getString(R.string.log_threshold_warn);
+          break;
+        case WebLoggerIf.INFO:
+          suppressLevel = getString(R.string.log_threshold_info);
+          break;
+        case WebLoggerIf.DEBUG:
+          suppressLevel = getString(R.string.log_threshold_debug);
+          break;
+        case WebLoggerIf.VERBOSE:
+          suppressLevel = getString(R.string.log_threshold_verbose);
+          break;
+        default:
+          throw new IllegalStateException("Unexpected log level filter value");
       }
       TextView logLevelBox = aboutMenuView.findViewById(R.id.logLevelText);
       logLevelBox.setText(suppressLevel);
@@ -155,7 +157,7 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     IAppAwareActivity activity = (IAppAwareActivity) getActivity();
     String appName = activity.getAppName();
 
-    if ( licenseReaderTask == null ) {
+    if (licenseReaderTask == null) {
       LicenseReaderTask lrt = new LicenseReaderTask();
       lrt.setApplication(getActivity().getApplication());
       lrt.setAppName(appName);
@@ -165,9 +167,10 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     } else {
       // update listener
       licenseReaderTask.setLicenseReaderListener(this);
-      if (licenseReaderTask.getStatus() != AsyncTask.Status.FINISHED) {
+      // Check if the task is done
+      if (!executorService.isShutdown()) {
         Toast.makeText(getActivity(), getString(R.string.still_reading_license_file), Toast.LENGTH_LONG)
-            .show();
+                .show();
       } else {
         // it is already done -- grab the result and display it.
         licenseReaderTask.setLicenseReaderListener(null);
@@ -176,10 +179,11 @@ public class AboutMenuFragment extends Fragment implements LicenseReaderListener
     }
   }
 
-  @Override public void onDestroy() {
-    if ( licenseReaderTask != null ) {
-      licenseReaderTask.clearLicenseReaderListener(null);
+    @Override
+    public void onDestroy () {
+      if (licenseReaderTask != null) {
+        licenseReaderTask.clearLicenseReaderListener(null);
+      }
+      super.onDestroy();
     }
-    super.onDestroy();
   }
-}
