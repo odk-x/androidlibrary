@@ -1,0 +1,97 @@
+version: 2.1
+
+orbs:
+  android: circleci/android@2.4.0
+jobs:
+  test:
+    description: Runs unit tests and instrumented tests on the Android Library
+    executor:
+      name: android/android-machine
+      resource-class: xlarge
+      tag: 2024.01.1
+
+    steps:
+      - checkout
+      - run:
+          name: Chmod Permissions
+          command: sudo chmod +x gradlew
+      - android/create-avd:
+          avd-name: avd
+          install: true
+          system-image: system-images;android-29;default;x86
+      - android/start-emulator:
+          avd-name: avd
+          no-window: true
+          post-emulator-launch-assemble-command: ./gradlew assembleSnapshotDebug
+      - android/run-tests:
+          test-command: ./gradlew testSnapshotDebugUnitTest
+      - android/run-tests:
+          test-command: ./gradlew connectedSnapshotDebugAndroidTest
+      - store_artifacts:
+          name: Store Test Results
+          path: androidlibrary_lib/build/outputs/androidTest-results
+      - store_artifacts:
+          name: Store Test Reports
+          path: androidlibrary_lib/build/reports
+
+  build:
+    docker:
+      - image: cimg/android:2024.01
+    steps:
+      - checkout
+      - run:
+          name: Chmod Permissions
+          command: sudo chmod +x gradlew
+      - run:
+          name: Build Library
+          command: ./gradlew assembleSnapshotDebug
+
+  deploy:
+    executor:
+      name: android/android-docker
+      tag: 2023.06.1
+    steps:
+      - checkout
+      - run:
+          name: Chmod Permissions
+          command: sudo chmod +x gradlew
+      - run:
+          name: Publish library
+          command: ./gradlew publishSnapshotDebugPublicationToODKXAndroidLibaryRepository
+
+
+  trigger-children:
+    docker:
+      - image: cimg/base:2024.01
+    resource_class: small
+    steps:
+      - run:
+          name: Trigger AndroidCommon
+          command: |
+            curl --location --request POST "https://circleci.com/api/v2/project/github/$CIRCLE_USERNAME/androidcommon/pipeline" \
+              --header 'Content-Type: application/json' \
+              -u "${API_TOKEN}:" \
+              --data "{\"branch\":\"$CIRCLE_BRANCH\"}" \
+      - run:
+          name: Trigger Services pipeline
+          command: |
+            curl --location --request POST "https://circleci.com/api/v2/project/github/$CIRCLE_USERNAME/services/pipeline" \
+              --header 'Content-Type: application/json' \
+              -u "${API_TOKEN}:" \
+              --data "{\"branch\":\"$CIRCLE_BRANCH\"}" \
+
+
+
+workflows:
+  build-test-deploy-trigger-workflow:
+    jobs:
+      - build
+      - test:
+          requires:
+          - build
+      - deploy:
+          requires:
+            - test
+      - trigger-children:
+          requires:
+            - deploy

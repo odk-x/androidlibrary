@@ -33,6 +33,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -49,7 +50,7 @@ public class OdkDbChunkTest {
   private final String[] testData = { "Miscellaneous", "test", "data", "to", "parcel", "and", "unpack" };
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     StaticStateManipulator.get().reset();
     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
   }
@@ -83,12 +84,10 @@ public class OdkDbChunkTest {
       chunks = DbChunkUtil.convertToChunks(testData, largeChunkSize);
     } catch (IOException e) {
       fail("Failed to convert serializable to chunks: " + e.getMessage());
-      return;
     }
 
     if (chunks == null) {
       fail("Failed to convert serializable to chunks");
-      return;
     }
 
     assertEquals("Unexpected number of chunks", 1, chunks.size());
@@ -101,15 +100,12 @@ public class OdkDbChunkTest {
       results = DbChunkUtil.rebuildFromChunks(chunks, String[].class);
     } catch (IOException e) {
       fail("Failed to rebuild serializable from chunks: " + e.getMessage());
-      return;
     } catch (ClassNotFoundException e) {
       fail("Failed to correctly handle generics: " + e.getMessage());
-      return;
     }
 
     if (results == null) {
       fail("Failed to rebuild serializable from chunks");
-      return;
     }
 
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
@@ -127,12 +123,10 @@ public class OdkDbChunkTest {
       chunks = DbChunkUtil.convertToChunks(testData, smallChunkSize);
     } catch (IOException e) {
       fail("Failed to convert serializable to chunks: " + e.getMessage());
-      return;
     }
 
     if (chunks == null) {
       fail("Failed to convert serializable to chunks");
-      return;
     }
 
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
@@ -158,15 +152,12 @@ public class OdkDbChunkTest {
       results = DbChunkUtil.rebuildFromChunks(chunks, String[].class);
     } catch (IOException e) {
       fail("Failed to rebuild serializable from chunks: " + e.getMessage());
-      return;
     } catch (ClassNotFoundException e) {
       fail("Failed to correctly handle generics: " + e.getMessage());
-      return;
     }
 
     if (results == null) {
       fail("Failed to rebuild serializable from chunks");
-      return;
     }
 
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
@@ -198,9 +189,9 @@ public class OdkDbChunkTest {
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, largeChunkSize);
 
+
     if (chunks == null) {
       fail("Failed to convert serializable to chunks");
-      return;
     }
 
     assertEquals("Unexpected number of chunks", 1, chunks.size());
@@ -212,7 +203,6 @@ public class OdkDbChunkTest {
 
     if (results == null) {
       fail("Failed to rebuild serializable from chunks");
-      return;
     }
 
     assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
@@ -232,9 +222,9 @@ public class OdkDbChunkTest {
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, smallChunkSize);
 
+
     if (chunks == null) {
       fail("Failed to convert serializable to chunks");
-      return;
     }
 
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
@@ -259,13 +249,12 @@ public class OdkDbChunkTest {
 
     if (results == null) {
       fail("Failed to rebuild serializable from chunks");
-      return;
     }
 
     assertEquals("Unexpected unpacked bundle size", results.size(), parcelableTestData.size());
     assertTrue("Data unpack error", results.containsKey("testData"));
+    
     String[] resultsTestData = results.getStringArray("testData");
-
     for (int i = 0; i < testData.length; i++) {
       assertEquals("Data unpack mismatch", testData[i], resultsTestData[i]);
     }
@@ -279,12 +268,10 @@ public class OdkDbChunkTest {
       chunks = DbChunkUtil.convertToChunks(testData, largeChunkSize);
     } catch (IOException e) {
       fail("Failed to convert serializable to chunks: " + e.getMessage());
-      return;
     }
 
     if (chunks == null) {
       fail("Failed to convert serializable to chunks");
-      return;
     }
 
     assertEquals("Unexpected number of chunks", 1, chunks.size());
@@ -312,15 +299,12 @@ public class OdkDbChunkTest {
       results = DbChunkUtil.rebuildFromChunks(resultChunks, String[].class);
     } catch (IOException e) {
       fail("Failed to rebuild serializable from chunks: " + e.getMessage());
-      return;
     } catch (ClassNotFoundException e) {
       fail("Failed to correctly handle generics: " + e.getMessage());
-      return;
     }
 
     if (results == null) {
       fail("Failed to rebuild serializable from chunks");
-      return;
     }
 
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);
@@ -338,12 +322,11 @@ public class OdkDbChunkTest {
       chunks = DbChunkUtil.convertToChunks(testData, smallChunkSize);
     } catch (IOException e) {
       fail("Failed to convert serializable to chunks: " + e.getMessage());
-      return;
     }
+
 
     if (chunks == null) {
       fail("Failed to convert serializable to chunks");
-      return;
     }
 
     assertTrue("Unexpected number of chunks", chunks.size() > 1);
@@ -359,7 +342,6 @@ public class OdkDbChunkTest {
       byte[] bytes = p.marshall();
       marshalledChunks.add(bytes);
       p.recycle();
-
       p = Parcel.obtain();
       p.unmarshall(bytes, 0, bytes.length);
       p.setDataPosition(0);
@@ -373,15 +355,12 @@ public class OdkDbChunkTest {
       results = DbChunkUtil.rebuildFromChunks(chunks, String[].class);
     } catch (IOException e) {
       fail("Failed to rebuild serializable from chunks: " + e.getMessage());
-      return;
     } catch (ClassNotFoundException e) {
       fail("Failed to correctly handle generics: " + e.getMessage());
-      return;
     }
 
     if (results == null) {
       fail("Failed to rebuild serializable from chunks");
-      return;
     }
 
     assertEquals("Unexpected unpacked string array length", results.length, testData.length);

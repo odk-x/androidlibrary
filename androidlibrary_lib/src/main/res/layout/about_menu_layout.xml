@@ -3,7 +3,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical" >
-  <TextView
+  <androidx.appcompat.widget.AppCompatTextView
   	android:id="@+id/versionText"
   	android:layout_width="fill_parent"
   	android:layout_height="wrap_content"
@@ -11,7 +11,7 @@
   	android:paddingRight="20dp"
   	android:textColor="@color/black"
   	android:textSize="21sp"/>
-  <TextView
+  <androidx.appcompat.widget.AppCompatTextView
 	android:id="@+id/logLevelText"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
 	android:paddingRight="20dp"
 	android:textColor="@color/black"
 	android:textSize="16sp"/>
-  <TextView
+  <androidx.appcompat.widget.AppCompatTextView
   	android:id="@+id/text1"
   	android:layout_width="fill_parent"
   	android:layout_height="fill_parent"

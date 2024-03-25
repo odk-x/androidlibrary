@@ -1,20 +1,323 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- ActionBar style -->
-    <style name="OdkActionBar"
-        parent="Widget.AppCompat.Light.ActionBar.Solid">
-        <item name="displayOptions">useLogo|showHome|showTitle</item>
-        <item name="background">@color/white</item>
-        <item name="logo">@drawable/app_logo</item>
-    </style>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Opendatakit" parent="Theme.AppCompat.Light">
-        <item name="android:scrollbarThumbHorizontal">@drawable/thumb</item>
-        <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
-        <item name="android:scrollbarSize">2.5mm</item>
-        <item name="android:scrollbarAlwaysDrawVerticalTrack">true</item>
-        <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
-        <item name="actionBarStyle">@style/OdkActionBar</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-    </style>
+   <!-- Contains Light Theme -->
+
+   <style name="OdkXActionBar"
+       parent="Widget.MaterialComponents.Light.ActionBar.Solid">
+      <item name="displayOptions">useLogo|showHome|showTitle</item>
+      <item name="background">@color/colorPrimary</item>
+      <item name="android:textColor">@color/colorOnPrimary</item>
+      <item name="android:itemBackground">@color/colorOnPrimary</item>
+      <item name="logo">@drawable/app_logo</item>
+   </style>
+
+   <!-- Light Theme-->
+   <style name="ODKX" parent="Theme.MaterialComponents.Light.NoActionBar">
+      <item name="android:scrollbarThumbHorizontal">@drawable/thumb</item>
+      <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
+      <item name="android:scrollbarSize">@dimen/scrollbar_size</item>
+      <item name="android:scrollbarAlwaysDrawVerticalTrack">true</item>
+      <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
+      <item name="android:statusBarColor">@color/white</item>
+
+      <item name="android:colorPrimary">@color/colorPrimary</item>
+      <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+      <item name="colorSecondary">@color/colorSecondary</item>
+      <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
+      <item name="android:colorBackground">@color/colorBackground</item>
+      <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+
+      <item name="colorOnPrimary">@color/colorOnPrimary</item>
+      <item name="colorOnSecondary">@color/colorOnSecondary</item>
+      <item name="colorOnSurface">@color/colorOnSurface</item>
+      <item name="colorOnError">@color/colorOnError</item>
+
+      <item name="android:windowLightStatusBar" tools:ignore="NewApi">true</item>
+      <item name="colorAccent">@color/blue_300</item>
+      <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+      <item name="buttonStyle">@style/ButtonStyle</item>
+      <item name="textInputStyle">@style/TextInputTheme</item>
+      <item name="materialAlertDialogTheme">@style/OdkXAlertDialogStyle</item>
+      <item name="alertDialogTheme">@style/OdkXAlertDialogStyle</item>
+
+   </style>
+
+   <!--Individual Stylings For Different Components -->
+
+   <!-- AlertDialog Theme -->
+   <style name="OdkXAlertDialogStyle"  parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+      <item name="colorAccent">@color/blue_300</item>
+      <item name="android:textColorPrimary">@color/grey_500</item>
+      <item name="colorSurface">@color/white</item>
+      <item name="shapeAppearanceOverlay">@style/DialogCorners</item>
+      <item name="dialogCornerRadius">@dimen/rounder_corners</item>
+      <item name="materialAlertDialogTitleTextStyle">@style/titleStyle</item>
+      <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+      <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+   </style>
+
+   <style name="NegativeButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+      <item name="android:textColor">@color/red_300</item>
+      <item name="rippleColor">@color/blue_100</item>
+   </style>
+
+   <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+      <item name="android:textColor">@color/blue_300</item>
+      <item name="rippleColor">@color/blue_100</item>
+   </style>
+
+   <style name="DialogCorners">
+      <item name="cornerFamily">rounded</item>
+      <item name="cornerSize">@dimen/rounder_corners</item>
+   </style>
+
+   <style name="titleStyle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="android:textColor">@color/grey_500</item>
+      <item name="android:gravity">center_horizontal</item>
+   </style>
+   <!--End-->
+   
+   <!-- NavDrawerCornerRadius -->
+   <style name="NavCorners">
+      <item name="cornerSizeTopRight">16dp</item>
+      <item name="cornerSizeBottomRight">16dp</item>
+   </style>
+   
+   <!--End-->
+
+   <!-- Navigation View General Theming -->
+   <style name="Widget.App.NavigationView" parent="Widget.MaterialComponents.NavigationRailView">
+      <item name="materialThemeOverlay">@style/ThemeOverlay.App.NavigationView</item>
+      <item name="itemIconTint">@color/navigation_item_color</item>
+      <item name="itemTextColor">@color/navigation_item_color</item>
+      <item name="itemShapeFillColor">@color/navigation_item_background_color</item>
+   </style>
+
+   <style name="ThemeOverlay.App.NavigationView" parent="">
+      <item name="colorSecondary">@color/colorSecondary</item>
+      <item name="colorOnSecondary">@color/colorOnSecondary</item>
+      <item name="colorSurface">@color/colorSurface</item>
+      <item name="colorOnSurface">@color/colorOnSurface</item>
+
+   </style>
+
+   <!-- End -->
+
+   <!--CardTheme Style-->
+   <style name="CardTheme" parent="ODKX">
+      <item name="cardBackgroundColor">@color/colorCardBackground</item>
+      <item name="cardCornerRadius">28dp</item>
+      <item name="cardElevation">0dp</item>
+   </style>
+
+   <!--TextButtonStyle-->
+   <style name="TextButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+      <item name="android:textAllCaps">true</item>
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="android:textColor">@color/colorOnSurface</item>
+      <item name="android:textSize">14sp</item>
+      <item name="android:textStyle">bold</item>
+   </style>
+
+   <!--Primary button round-->
+   <style name="ButtonStyle" parent="Widget.MaterialComponents.Button">
+      <item name="android:layout_height">40dp</item>
+      <item name="android:textAllCaps">true</item>
+      <item name="android:textSize">14sp</item>
+      <item name="elevation">0dp</item>
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="android:textColor">@color/btn_text_color</item>
+      <item name="backgroundTint">@color/btn_background</item>
+      <item name="cornerRadius">100dp</item>
+   </style>
+
+   <!--Primary button style for Anonymous-->
+   <style name="ButtonStyleAnonymous" parent="Widget.MaterialComponents.Button">
+      <item name="android:layout_height">40dp</item>
+      <item name="android:textAllCaps">true</item>
+      <item name="android:textSize">14sp</item>
+      <item name="elevation">0dp</item>
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="android:textColor">@color/btn_text_color</item>
+      <item name="backgroundTint">@color/yellow_300</item>
+      <item name="cornerRadius">100dp</item>
+   </style>
+
+   <!--delete button round-->
+   <style name="ButtonStyleDelete" parent="Widget.MaterialComponents.Button">
+      <item name="android:textAllCaps">true</item>
+      <item name="android:textSize">14sp</item>
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="android:textColor">@color/btn_text_color</item>
+      <item name="backgroundTint">@color/red_300</item>
+      <item name="cornerRadius">100dp</item>
+   </style>
+
+   <!--Primary button square -->
+   <style name="ButtonStyleSquare" parent="Widget.MaterialComponents.Button">
+      <item name="android:textAllCaps">true</item>
+      <item name="android:textSize">14sp</item>
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="android:textColor">@color/btn_text_color</item>
+      <item name="backgroundTint">@color/btn_background</item>
+      <item name="cornerRadius">50dp</item>
+   </style>
+
+   <!--Secondary button round -->
+   <style name="ButtonStyleSecondary" parent="Widget.MaterialComponents.Button">
+      <item name="android:textAllCaps">true</item>
+      <item name="android:textSize">14sp</item>
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="elevation">0dp</item>
+      <item name="android:textColor">@color/colorPrimaryText</item>
+      <item name="backgroundTint">@color/colorPrimaryVariant</item>
+      <item name="cornerRadius">100dp</item>
+   </style>
+
+   <!--OutlinedButtonStyle-->
+   <style name="OutlinedButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+      <item name="android:textAllCaps">true</item>
+      <item name="android:textSize">14sp</item>
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="android:textColor">@color/colorPrimaryText</item>
+      <item name="strokeColor">@color/btn_background</item>
+      <item name="cornerRadius">100dp</item>
+   </style>
+
+   <!--SmallButtonStyle-->
+   <style name="SmallButtonStyle" parent="ButtonStyle">
+      <item name="fontFamily">@font/sourcesanspro_regular</item>
+      <item name="android:textSize">14sp</item>
+   </style>
+
+   <!--Appbar Style-->
+   <style name="AppBarStyle">
+      <item name="android:background">@color/colorPrimaryVariant</item>
+   </style>
+
+   <style name="AppBarLabelStyle">
+      <item name="android:textSize">30sp</item>
+      <item name="android:textStyle">bold</item>
+      <item name="android:textColor">@color/white</item>
+   </style>
+   <!-- End -->
+
+
+   <!--HeadingStyles-->
+   <style name="HeadingStyle">
+      <item name="android:textSize">18sp</item>
+      <item name="android:textStyle">bold</item>
+      <item name="fontFamily">@font/montserrat</item>
+      <item name="background">@color/colorPrimaryBackground</item>
+      <item name="android:textColor">@color/colorOnBackground</item>
+   </style>
+
+   <!-- Cardview Separate Text Styling-->
+   <style name="CardViewHeadingStyle">
+      <item name="android:textSize">18sp</item>
+      <item name="android:textStyle">bold</item>
+      <item name="fontFamily">@font/montserrat</item>
+      <item name="background">@color/colorPrimaryBackground</item>
+      <item name="android:textColor">@color/headingTextOnCard</item>
+   </style>
+
+   <style name="CardViewSubHeadingStyle">
+      <item name="android:textSize">16sp</item>
+      <item name="android:textStyle">normal</item>
+      <item name="fontFamily">@font/montserrat</item>
+      <item name="background">@color/colorPrimaryBackground</item>
+      <item name="android:textColor">@color/subHeadingTextOnCard</item>
+   </style>
+   <!-- End Here -->
+
+
+   <!-- YellowHeadingStyle -->
+   <style name="YellowHeadingStyle" parent="HeadingStyle">
+      <item name="android:textColor">@color/yellow_300</item>
+      <item name="font">@font/montserrat_semibold</item>
+   </style>
+
+   <style name="SecondaryHeadingStyle" parent="HeadingStyle">
+      <item name="android:textColor">@color/colorOnBackground</item>
+   </style>
+
+   <style name="SmallHeadingStyle" parent="HeadingStyle">
+      <item name="android:textSize">14sp</item>
+   </style>
+
+   <style name="LargeHeadingStyle" parent="HeadingStyle">
+      <item name="android:textSize">32sp</item>
+      <item name="android:textColor">@color/colorOnBackground</item>
+   </style>
+
+   <!--End-->
+
+   <!--TextViewStyles-->
+   <style name="TextViewStyle" parent="HeadingStyle">
+      <item name="android:textStyle">normal</item>
+   </style>
+
+   <style name="TextServerUrlStyle" parent="TextViewStyle">
+      <item name="android:textColor">@color/colorPrimaryBackground</item>
+   </style>
+
+   <style name="SmallTextViewStyle" parent="TextViewStyle">
+      <item name="android:textSize">16sp</item>
+   </style>
+
+   <style name="InputFieldLabelStyle">
+      <item name="fontFamily">@font/montserrat</item>
+      <item name="android:textSize">14sp</item>
+      <item name="android:textColor">@color/colorOnBackground</item>
+   </style>
+   <!--End-->
+
+   <!-- LinkStyle -->
+   <style name="LinkStyle">
+      <item name="android:textColor">@color/colorPrimaryBackground</item>
+
+   </style>
+   <!-- End -->
+
+
+   <!-- ParagraphStyle-->
+   <style name="ParagraphStyle">
+
+   </style>
+   <!-- End -->
+
+
+   <!--DropdownMenuTheme-->
+   <style name="DropdownMenuTheme" parent="Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
+      <item name="boxBackgroundColor">@color/blue_200</item>
+      <item name="boxStrokeColor">@color/blue_100</item>
+      <item name="boxCornerRadiusTopStart">20dp</item>
+      <item name="boxCornerRadiusBottomEnd">20dp</item>
+      <item name="boxCornerRadiusBottomStart">20dp</item>
+      <item name="boxCornerRadiusTopEnd">20dp</item>
+   </style>
+
+   <!--TextInputTheme-->
+   <style name="TextInputTheme" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+      <item name="background">@drawable/odkx_input_background</item>
+      <item name="android:layout_height">56dp</item>
+      <item name="android:layout_width">match_parent</item>
+      <item name="android:padding">16dp</item>
+      <item name="android:textSize">16sp</item>
+      <item name="android:textColor">@color/colorOnBackground</item>
+      <item name="errorEnabled">true</item>
+      <item name="errorTextColor">@color/colorError</item>
+      <item name="colorOnSurface">@color/colorPrimaryBackground</item>
+      <item name="boxStrokeColor">@color/colorPrimaryBackground</item>
+      <item name="strokeColor">@color/btn_background</item>
+      <item name="hintTextColor">@color/colorPrimaryBackground</item>
+      <item name="hintEnabled">false</item>
+      <item name="hintAnimationEnabled">false</item>
+      <item name="android:textCursorDrawable">@null</item>
+      <item name="strokeWidth">1dp</item>
+
+   </style>
 </resources>

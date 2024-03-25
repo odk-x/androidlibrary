@@ -1,16 +1,21 @@
 package org.opendatakit.fragment;
 
 
+import org.hamcrest.MatcherAssert;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.Assert;
 import org.junit.Before;
+
 import java.util.Random;
-import static org.junit.Assert.assertThat;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.test.core.app.ActivityScenario;
+
 import org.opendatakit.test_utils.TestActivity;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import org.opendatakit.fragment.AlertNProgessMsgFragmentMger.DialogState;
@@ -51,19 +56,18 @@ public class AlertNProgessMsgFragmentMgerTest {
     public void testAlertDialogIsCreated() {
         ActivityScenario<TestActivity> scenario = rule.getScenario();
 
-        scenario.onActivity(new ActivityScenario.ActivityAction<TestActivity>() {
-            @Override
-            public void perform(TestActivity activity) {
-                int fragmentId = new Random().nextInt();
-                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+        scenario.onActivity(activity -> {
+            int fragmentId = new Random().nextInt();
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
 
                 systemUnderTest.createAlertDialog(ALERT_DIALOG_TITLE, ALERT_DIALOG_MESSAGE, fragmentManager, fragmentId);
                 fragmentManager.executePendingTransactions();
 
-                assertThat(fragmentManager.findFragmentByTag(ALERT_DIALOG_TAG).isAdded(), is(true));
+                Fragment frag = fragmentManager.findFragmentByTag(ALERT_DIALOG_TAG);
+                assertNotNull(frag);
+                MatcherAssert.assertThat(frag.isAdded(), is(true));
                 assertEquals(DialogState.Alert, systemUnderTest.getDialogState());
-                Assert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(true));
-            }
+                MatcherAssert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(true));
         });
     }
 
@@ -71,23 +75,71 @@ public class AlertNProgessMsgFragmentMgerTest {
     public void testProgressDialogIsCreated() {
         ActivityScenario<TestActivity> scenario = rule.getScenario();
 
-        scenario.onActivity(new ActivityScenario.ActivityAction<TestActivity>() {
-            @Override
-            public void perform(TestActivity activity) {
-                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+        scenario.onActivity(activity -> {
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
 
                 systemUnderTest.createProgressDialog(PROGRESS_DIALOG_TITLE, PROGRESS_DIALOG_MESSAGE, fragmentManager);
                 fragmentManager.executePendingTransactions();
 
-                assertThat(fragmentManager.findFragmentByTag(PROGRESS_DIALOG_TAG).isAdded(), is(true));
+                Fragment frag = fragmentManager.findFragmentByTag(PROGRESS_DIALOG_TAG);
+                assertNotNull(frag);
+                MatcherAssert.assertThat(frag.isAdded(), is(true));
                 assertEquals(DialogState.Progress, systemUnderTest.getDialogState());
-                Assert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(true));
-            }
+                MatcherAssert.assertThat(systemUnderTest.hasDialogBeenCreated(), is(true));
         });
     }
 
     @Test
     public void testProgressDialogIsDismissed() {
+        ActivityScenario<TestActivity> scenario = rule.getScenario();
+
+        scenario.onActivity(activity -> {
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+                systemUnderTest.createProgressDialog(PROGRESS_DIALOG_TITLE, PROGRESS_DIALOG_MESSAGE, fragmentManager);
+                fragmentManager.executePendingTransactions();
+                systemUnderTest.dismissProgressDialog(fragmentManager);
+
+                assertEquals(DialogState.None, systemUnderTest.getDialogState());
+        });
+    }
+
+    @Test
+    public void testAlertDialogIsDismissed() {
+        ActivityScenario<TestActivity> scenario = rule.getScenario();
+
+        scenario.onActivity(activity -> {
+            int fragmentId = new Random().nextInt();
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+            systemUnderTest.createAlertDialog(ALERT_DIALOG_TITLE, ALERT_DIALOG_MESSAGE, fragmentManager, fragmentId);
+            fragmentManager.executePendingTransactions();
+            systemUnderTest.dismissAlertDialog(fragmentManager);
+
+            assertEquals(DialogState.None, systemUnderTest.getDialogState());
+        });
+    }
+
+    @Test
+    public void testDismissNonExistentDialog() {
+        ActivityScenario<TestActivity> scenario = rule.getScenario();
+
+        scenario.onActivity(new ActivityScenario.ActivityAction<TestActivity>() {
+            @Override
+            public void perform(TestActivity activity) {
+                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+                systemUnderTest.dismissProgressDialog(fragmentManager);
+
+                systemUnderTest.dismissAlertDialog(fragmentManager);
+
+                assertEquals(DialogState.None, systemUnderTest.getDialogState());
+            }
+        });
+    }
+
+    @Test
+    public void testCreateAndDismissDialogs() {
         ActivityScenario<TestActivity> scenario = rule.getScenario();
 
         scenario.onActivity(new ActivityScenario.ActivityAction<TestActivity>() {
@@ -99,27 +151,106 @@ public class AlertNProgessMsgFragmentMgerTest {
                 fragmentManager.executePendingTransactions();
                 systemUnderTest.dismissProgressDialog(fragmentManager);
 
+                systemUnderTest.createAlertDialog(ALERT_DIALOG_TITLE, ALERT_DIALOG_MESSAGE, fragmentManager, new Random().nextInt());
+                fragmentManager.executePendingTransactions();
+                systemUnderTest.dismissAlertDialog(fragmentManager);
+
                 assertEquals(DialogState.None, systemUnderTest.getDialogState());
             }
         });
     }
 
     @Test
-    public void testAlertDialogIsDismissed() {
+    public void testCreateAndDismissAlertDialog() {
         ActivityScenario<TestActivity> scenario = rule.getScenario();
 
-        scenario.onActivity(new ActivityScenario.ActivityAction<TestActivity>() {
-            @Override
-            public void perform(TestActivity activity) {
-                int fragmentId = new Random().nextInt();
-                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+        scenario.onActivity(activity -> {
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
 
-                systemUnderTest.createAlertDialog(ALERT_DIALOG_TITLE, ALERT_DIALOG_MESSAGE, fragmentManager, fragmentId);
-                fragmentManager.executePendingTransactions();
-                systemUnderTest.dismissAlertDialog(fragmentManager);
+            systemUnderTest.createAlertDialog(ALERT_DIALOG_TITLE, ALERT_DIALOG_MESSAGE, fragmentManager, new Random().nextInt());
+            fragmentManager.executePendingTransactions();
+            systemUnderTest.dismissAlertDialog(fragmentManager);
 
-                assertEquals(DialogState.None, systemUnderTest.getDialogState());
-            }
+            assertEquals(DialogState.None, systemUnderTest.getDialogState());
+        });
+    }
+
+    @Test
+    public void testCreateAndDismissProgressDialog() {
+        ActivityScenario<TestActivity> scenario = rule.getScenario();
+
+        scenario.onActivity(activity -> {
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+            systemUnderTest.createProgressDialog(PROGRESS_DIALOG_TITLE, PROGRESS_DIALOG_MESSAGE, fragmentManager);
+            fragmentManager.executePendingTransactions();
+            systemUnderTest.dismissProgressDialog(fragmentManager);
+
+            assertEquals(DialogState.None, systemUnderTest.getDialogState());
+        });
+    }
+
+    @Test
+    public void testCreateAndDismissMultipleDialogs() {
+        ActivityScenario<TestActivity> scenario = rule.getScenario();
+
+        scenario.onActivity(activity -> {
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+            systemUnderTest.createProgressDialog(PROGRESS_DIALOG_TITLE, PROGRESS_DIALOG_MESSAGE, fragmentManager);
+            fragmentManager.executePendingTransactions();
+            systemUnderTest.dismissProgressDialog(fragmentManager);
+
+            systemUnderTest.createAlertDialog(ALERT_DIALOG_TITLE, ALERT_DIALOG_MESSAGE, fragmentManager, new Random().nextInt());
+            fragmentManager.executePendingTransactions();
+            systemUnderTest.dismissAlertDialog(fragmentManager);
+
+            systemUnderTest.createProgressDialog("Another Progress", "Another Progress Message", fragmentManager);
+            fragmentManager.executePendingTransactions();
+            systemUnderTest.dismissProgressDialog(fragmentManager);
+
+            assertEquals(DialogState.None, systemUnderTest.getDialogState());
+        });
+    }
+
+    @Test
+    public void testDismissDialogsWithoutCreating() {
+        ActivityScenario<TestActivity> scenario = rule.getScenario();
+
+        scenario.onActivity(activity -> {
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+            systemUnderTest.dismissProgressDialog(fragmentManager);
+
+            systemUnderTest.dismissAlertDialog(fragmentManager);
+
+            assertEquals(DialogState.None, systemUnderTest.getDialogState());
+        });
+    }
+
+    @Test
+    public void testDismissProgressDialogWithoutCreating() {
+        ActivityScenario<TestActivity> scenario = rule.getScenario();
+
+        scenario.onActivity(activity -> {
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+            systemUnderTest.dismissProgressDialog(fragmentManager);
+
+            assertEquals(DialogState.None, systemUnderTest.getDialogState());
+        });
+    }
+
+    @Test
+    public void testDismissAlertDialogWithoutCreating() {
+        ActivityScenario<TestActivity> scenario = rule.getScenario();
+
+        scenario.onActivity(activity -> {
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+            systemUnderTest.dismissAlertDialog(fragmentManager);
+
+            assertEquals(DialogState.None, systemUnderTest.getDialogState());
         });
     }
 }

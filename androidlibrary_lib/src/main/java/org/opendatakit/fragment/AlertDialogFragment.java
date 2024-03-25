@@ -71,8 +71,9 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
    private boolean dismissActivity;
    private String title;
    private String message;
-   
-   @Override public void onCreate(Bundle savedInstanceState) {
+
+   @Override
+   public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
       dismissCalled = false;
@@ -86,12 +87,13 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       initState(savedInstanceState);
    }
 
-   @Override public void onActivityCreated (Bundle savedInstanceState) {
+   @Override
+   public void onActivityCreated(Bundle savedInstanceState) {
       super.onActivityCreated(savedInstanceState);
 
       Activity activity = getActivity();
 
-      if(appName == null) {
+      if (appName == null) {
          appName = AppNameUtil.getAppNameFromActivity(activity);
       }
 
@@ -117,7 +119,8 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       }
    }
 
-   @Override public void onSaveInstanceState(Bundle outState) {
+   @Override
+   public void onSaveInstanceState(Bundle outState) {
       dismissCalled = true;
       outState.putInt(FRAGMENT_ID_KEY, fragmentId);
       outState.putBoolean(DISMISS_ACTIVITY_KEY, dismissActivity);
@@ -131,7 +134,9 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       return dismissCalled;
    }
 
-   public boolean createDialogCalled() { return createDialogCalled; }
+   public boolean createDialogCalled() {
+      return createDialogCalled;
+   }
 
    private AlertDialog getAlertDialog() {
       Dialog dialog = getDialog();
@@ -139,7 +144,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
          return (AlertDialog) dialog;
       } else {
          throw new IllegalStateException("Somehow an AlertDialogFrament does not have an "
-             + "AlertDialog");
+                 + "AlertDialog");
       }
    }
 
@@ -158,7 +163,8 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       getAlertDialog().setMessage(title);
    }
 
-   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+   @Override
+   public Dialog onCreateDialog(Bundle savedInstanceState) {
       String title = getArguments().getString(TITLE_KEY);
       String message = getArguments().getString(MESSAGE_KEY);
 
@@ -168,7 +174,9 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       Fragment f = mgr.findFragmentById(fragmentId);
       setTargetFragment(f, RequestCodes.ALERT_DIALOG.ordinal());
 
-      AlertDialog alertDialog=new MaterialAlertDialogBuilder(getActivity(), R.style.Theme_MaterialComponents_Light_Dialog_Alert)
+
+      AlertDialog alertDialog = new MaterialAlertDialogBuilder(getActivity(), R.style.OdkXAlertDialogStyle)
+
               .setTitle(title)
               .setMessage(message)
               .setCancelable(false)
@@ -181,27 +189,29 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       return alertDialog;
    }
 
-   @Override public void onClick(DialogInterface dialog, int i) {
+   @Override
+   public void onClick(DialogInterface dialog, int i) {
       ok_invoked = true;
       switch (i) {
-      case DialogInterface.BUTTON_POSITIVE: // ok
-         FragmentManager mgr = getParentFragmentManager();
-         Fragment f = mgr.findFragmentById(fragmentId);
+         case DialogInterface.BUTTON_POSITIVE: // ok
+            FragmentManager mgr = getParentFragmentManager();
+            Fragment f = mgr.findFragmentById(fragmentId);
 
-         if (f instanceof ConfirmAlertDialog) {
-            ((ConfirmAlertDialog) f).okAlertDialog();
-         }
-         dialog.dismiss();
-         break;
+            if (f instanceof ConfirmAlertDialog) {
+               ((ConfirmAlertDialog) f).okAlertDialog();
+            }
+            dialog.dismiss();
+            break;
       }
    }
 
-   @Override public void onDismiss(DialogInterface dialog) {
+   @Override
+   public void onDismiss(DialogInterface dialog) {
       dismissCalled = true;
       super.onDismiss(dialog);
-      if ( !ok_invoked  && dismissActivity) {
+      if (!ok_invoked && dismissActivity) {
          Activity a = getActivity();
-         if ( a != null ) {
+         if (a != null) {
             a.setResult(Activity.RESULT_CANCELED);
             a.finish();
          }
@@ -212,9 +222,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
    /////////////////   STATIC HELPER FUNCTIONS TO AVOID DUPLICATE CODE   /////////////////
    ///////////////////////////////////////////////////////////////////////////////////////
 
-   public static AlertDialogFragment eitherReuseOrCreateNew(String alertDialogTag,
-       AlertDialogFragment inputAlertDialogFragment, FragmentManager fragmentManager,
-       boolean dismissActivity, int fragmentId, String title, String message) {
+   public static AlertDialogFragment eitherReuseOrCreateNew(String alertDialogTag, AlertDialogFragment inputAlertDialogFragment, FragmentManager fragmentManager, boolean dismissActivity, int fragmentId, String title, String message) {
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException(FRAGMENT_MANAGER_NULL_ERROR);
@@ -242,7 +250,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       // if no pre-existing fragment create one, else update the message
       if (outputAlertDialogFragment == null) {
          outputAlertDialogFragment = AlertDialogFragment.newInstance(fragmentId, dismissActivity, title, message);
-         if(!outputAlertDialogFragment.isAdded()) {
+         if (!outputAlertDialogFragment.isAdded()) {
             outputAlertDialogFragment.show(fragmentManager, alertDialogTag);
          }
       } else {
@@ -252,9 +260,8 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
 
       return outputAlertDialogFragment;
    }
-
-   public static void dismissDialogs(String alertDialogTag,
-       AlertDialogFragment inputAlertDialogFragment, FragmentManager fragmentManager) {
+   public static void dismissDialogs (String alertDialogTag, AlertDialogFragment
+           inputAlertDialogFragment, FragmentManager fragmentManager){
 
       if (fragmentManager == null) {
          throw new IllegalArgumentException(FRAGMENT_MANAGER_NULL_ERROR);
@@ -269,7 +276,7 @@ public class AlertDialogFragment extends DialogFragment implements DialogInterfa
       Fragment dialog = fragmentManager.findFragmentByTag(alertDialogTag);
       if (dialog != null && (dialog instanceof AlertDialogFragment)) {
          AlertDialogFragment tmp = (AlertDialogFragment) dialog;
-         if(!tmp.dismissWasCalled()) {
+         if (!tmp.dismissWasCalled()) {
             tmp.dismiss();
          }
       }

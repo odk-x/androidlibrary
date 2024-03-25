@@ -35,230 +35,230 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(JUnit4.class)
 public class RowPathColumnTest {
 
-  @BeforeClass
-  public static void oneTimeSetUp() throws Exception {
-     StaticStateManipulator.get().reset();
-     WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
-  }
+    @BeforeClass
+    public static void oneTimeSetUp() {
+        StaticStateManipulator.get().reset();
+        WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
+    }
 
-  @Test
-  public void testRowPathColumnExtractionOneRecord() throws IOException {
+    @Test
+    public void testRowPathColumnExtractionOneRecord() throws IOException {
 
-    List<Column> columns = new ArrayList<Column>();
-    columns.add(new Column("myField1", "myField1",
-        ElementDataType.string.name(), null));
-    columns.add(new Column("myField2", "myField2",
-        ElementDataType.integer.name(), null));
-    columns.add(new Column("myField3", "myField3",
-        ElementDataType.number.name(), null));
-    ArrayList<String> subElements = new ArrayList<String>();
-    subElements.add("myField4_uriFragment");
-    subElements.add("myField4_contentType");
-    columns.add(new Column("myField4", "myField4",
-        ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements)));
-    columns.add(new Column("myField4_uriFragment", "uriFragment",
-        ElementDataType.rowpath.name(), null));
-    columns.add(
-        new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
+        List<Column> columns = new ArrayList<>();
+        columns.add(new Column("myField1", "myField1",
+                ElementDataType.string.name(), null));
+        columns.add(new Column("myField2", "myField2",
+                ElementDataType.integer.name(), null));
+        columns.add(new Column("myField3", "myField3",
+                ElementDataType.number.name(), null));
+        ArrayList<String> subElements = new ArrayList<>();
+        subElements.add("myField4_uriFragment");
+        subElements.add("myField4_contentType");
+        columns.add(new Column("myField4", "myField4",
+                ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements)));
+        columns.add(new Column("myField4_uriFragment", "uriFragment",
+                ElementDataType.rowpath.name(), null));
+        columns.add(
+                new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
 
-    OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
+        OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
 
-    List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(orderedColumns);
+        List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(orderedColumns);
 
-    assertNotNull(cols);
-    int size = cols.size();
-    assertEquals(size, 1);
-    ColumnDefinition defn = cols.get(0);
-    assertEquals(defn.getElementKey(), "myField4");
-  }
+        assertNotNull(cols);
+        int size = cols.size();
+        assertEquals(size, 1);
+        ColumnDefinition defn = cols.get(0);
+        assertEquals(defn.getElementKey(), "myField4");
+    }
 
 
-  @Test
-  public void testRowPathColumnExtractionTwoRecords() throws IOException {
+    @Test
+    public void testRowPathColumnExtractionTwoRecords() throws IOException {
 
-    List<Column> columns = new ArrayList<Column>();
-    columns.add(new Column("myField1", "myField1",
-        ElementDataType.string.name(), null));
-    columns.add(new Column("myField2", "myField2",
-        ElementDataType.integer.name(), null));
-    columns.add(new Column("myField3", "myField3",
-        ElementDataType.number.name(), null));
-    ArrayList<String> subElements1 = new ArrayList<String>();
-    subElements1.add("myField4_uriFragment");
-    subElements1.add("myField4_contentType");
-    columns.add(new Column("myField4", "myField4",
-        ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements1)));
-    columns.add(new Column("myField4_uriFragment", "uriFragment",
-        ElementDataType.rowpath.name(), null));
-    columns.add(
-        new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
-    ArrayList<String> subElements2 = new ArrayList<String>();
-    subElements2.add("myField5_uriFragment");
-    subElements2.add("myField5_contentType");
-    columns.add(new Column("myField5", "myField5",
-        ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements2)));
-    columns.add(new Column("myField5_uriFragment", "uriFragment",
-        ElementDataType.rowpath.name(), null));
-    columns.add(
-        new Column("myField5_contentType", "contentType", ElementDataType.string.name(), null));
+        List<Column> columns = new ArrayList<>();
+        columns.add(new Column("myField1", "myField1",
+                ElementDataType.string.name(), null));
+        columns.add(new Column("myField2", "myField2",
+                ElementDataType.integer.name(), null));
+        columns.add(new Column("myField3", "myField3",
+                ElementDataType.number.name(), null));
+        ArrayList<String> subElements1 = new ArrayList<>();
+        subElements1.add("myField4_uriFragment");
+        subElements1.add("myField4_contentType");
+        columns.add(new Column("myField4", "myField4",
+                ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements1)));
+        columns.add(new Column("myField4_uriFragment", "uriFragment",
+                ElementDataType.rowpath.name(), null));
+        columns.add(
+                new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
+        ArrayList<String> subElements2 = new ArrayList<>();
+        subElements2.add("myField5_uriFragment");
+        subElements2.add("myField5_contentType");
+        columns.add(new Column("myField5", "myField5",
+                ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements2)));
+        columns.add(new Column("myField5_uriFragment", "uriFragment",
+                ElementDataType.rowpath.name(), null));
+        columns.add(
+                new Column("myField5_contentType", "contentType", ElementDataType.string.name(), null));
 
-    OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
+        OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
 
-    List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(
-        orderedColumns);
+        List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(
+                orderedColumns);
 
-    assertNotNull(cols);
-    int size = cols.size();
-    assertEquals(size, 2);
-    ColumnDefinition defn1 = cols.get(0);
-    assertEquals(defn1.getElementKey(), "myField4");
-    ColumnDefinition defn2 = cols.get(1);
-    assertEquals(defn2.getElementKey(), "myField5");
-  }
+        assertNotNull(cols);
+        int size = cols.size();
+        assertEquals(size, 2);
+        ColumnDefinition defn1 = cols.get(0);
+        assertEquals(defn1.getElementKey(), "myField4");
+        ColumnDefinition defn2 = cols.get(1);
+        assertEquals(defn2.getElementKey(), "myField5");
+    }
 
-   @Test
-   public void testRowPathColumnExtractionSecondRecordWrongFragType() throws IOException {
+    @Test
+    public void testRowPathColumnExtractionSecondRecordWrongFragType() throws IOException {
 
-      List<Column> columns = new ArrayList<Column>();
-      columns.add(new Column("myField1", "myField1",
-          ElementDataType.string.name(), null));
-      columns.add(new Column("myField2", "myField2",
-          ElementDataType.integer.name(), null));
-      columns.add(new Column("myField3", "myField3",
-          ElementDataType.number.name(), null));
-      ArrayList<String> subElements1 = new ArrayList<String>();
-      subElements1.add("myField4_uriFragment");
-      subElements1.add("myField4_contentType");
-      columns.add(new Column("myField4", "myField4",
-          ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements1)));
-      columns.add(new Column("myField4_uriFragment", "uriFragment",
-          ElementDataType.rowpath.name(), null));
-      columns.add(
-          new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
-      ArrayList<String> subElements2 = new ArrayList<String>();
-      subElements2.add("myField5_uriFragment");
-      subElements2.add("myField5_contentType");
-      columns.add(new Column("myField5", "myField5",
-          ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements2)));
-      columns.add(new Column("myField5_uriFragment", "uriFragment",
-          ElementDataType.string.name(), null));
-      columns.add(
-          new Column("myField5_contentType", "contentType", ElementDataType.string.name(), null));
+        List<Column> columns = new ArrayList<>();
+        columns.add(new Column("myField1", "myField1",
+                ElementDataType.string.name(), null));
+        columns.add(new Column("myField2", "myField2",
+                ElementDataType.integer.name(), null));
+        columns.add(new Column("myField3", "myField3",
+                ElementDataType.number.name(), null));
+        ArrayList<String> subElements1 = new ArrayList<>();
+        subElements1.add("myField4_uriFragment");
+        subElements1.add("myField4_contentType");
+        columns.add(new Column("myField4", "myField4",
+                ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements1)));
+        columns.add(new Column("myField4_uriFragment", "uriFragment",
+                ElementDataType.rowpath.name(), null));
+        columns.add(
+                new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
+        ArrayList<String> subElements2 = new ArrayList<>();
+        subElements2.add("myField5_uriFragment");
+        subElements2.add("myField5_contentType");
+        columns.add(new Column("myField5", "myField5",
+                ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements2)));
+        columns.add(new Column("myField5_uriFragment", "uriFragment",
+                ElementDataType.string.name(), null));
+        columns.add(
+                new Column("myField5_contentType", "contentType", ElementDataType.string.name(), null));
 
-      OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
+        OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
 
-      List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(orderedColumns);
+        List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(orderedColumns);
 
-      assertNotNull(cols);
-      int size = cols.size();
-      assertEquals(size, 1);
-      ColumnDefinition defn1 = cols.get(0);
-      assertEquals(defn1.getElementKey(), "myField4");
-   }
+        assertNotNull(cols);
+        int size = cols.size();
+        assertEquals(size, 1);
+        ColumnDefinition defn1 = cols.get(0);
+        assertEquals(defn1.getElementKey(), "myField4");
+    }
 
-   @Test
-   public void testRowPathColumnExtractionSecondRecordWrongContentType() throws IOException {
+    @Test
+    public void testRowPathColumnExtractionSecondRecordWrongContentType() throws IOException {
 
-      List<Column> columns = new ArrayList<Column>();
-      columns.add(new Column("myField1", "myField1",
-          ElementDataType.string.name(), null));
-      columns.add(new Column("myField2", "myField2",
-          ElementDataType.integer.name(), null));
-      columns.add(new Column("myField3", "myField3",
-          ElementDataType.number.name(), null));
-      ArrayList<String> subElements1 = new ArrayList<String>();
-      subElements1.add("myField4_uriFragment");
-      subElements1.add("myField4_contentType");
-      columns.add(new Column("myField4", "myField4",
-          ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements1)));
-      columns.add(new Column("myField4_uriFragment", "uriFragment",
-          ElementDataType.rowpath.name(), null));
-      columns.add(
-          new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
-      ArrayList<String> subElements2 = new ArrayList<String>();
-      subElements2.add("myField5_uriFragment");
-      subElements2.add("myField5_contentType");
-      columns.add(new Column("myField5", "myField5",
-          ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements2)));
-      columns.add(new Column("myField5_uriFragment", "uriFragment",
-          ElementDataType.rowpath.name(), null));
-      columns.add(
-          new Column("myField5_contentType", "contentType", ElementDataType.integer.name(), null));
+        List<Column> columns = new ArrayList<>();
+        columns.add(new Column("myField1", "myField1",
+                ElementDataType.string.name(), null));
+        columns.add(new Column("myField2", "myField2",
+                ElementDataType.integer.name(), null));
+        columns.add(new Column("myField3", "myField3",
+                ElementDataType.number.name(), null));
+        ArrayList<String> subElements1 = new ArrayList<>();
+        subElements1.add("myField4_uriFragment");
+        subElements1.add("myField4_contentType");
+        columns.add(new Column("myField4", "myField4",
+                ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements1)));
+        columns.add(new Column("myField4_uriFragment", "uriFragment",
+                ElementDataType.rowpath.name(), null));
+        columns.add(
+                new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
+        ArrayList<String> subElements2 = new ArrayList<>();
+        subElements2.add("myField5_uriFragment");
+        subElements2.add("myField5_contentType");
+        columns.add(new Column("myField5", "myField5",
+                ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements2)));
+        columns.add(new Column("myField5_uriFragment", "uriFragment",
+                ElementDataType.rowpath.name(), null));
+        columns.add(
+                new Column("myField5_contentType", "contentType", ElementDataType.integer.name(), null));
 
-      OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
+        OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
 
-      List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(orderedColumns);
+        List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(orderedColumns);
 
-      assertNotNull(cols);
-      int size = cols.size();
-      assertEquals(size, 1);
-      ColumnDefinition defn1 = cols.get(0);
-      assertEquals(defn1.getElementKey(), "myField4");
-   }
+        assertNotNull(cols);
+        int size = cols.size();
+        assertEquals(size, 1);
+        ColumnDefinition defn1 = cols.get(0);
+        assertEquals(defn1.getElementKey(), "myField4");
+    }
 
-  @Test
-  public void testRowPathColumnExtractionNoParentSharedNamesWrongTypes() throws IOException {
+    @Test
+    public void testRowPathColumnExtractionNoParentSharedNamesWrongTypes() throws IOException {
 
-    List<Column> columns = new ArrayList<Column>();
-    columns.add(new Column("uriFragment", "uriFragment",
-        ElementDataType.string.name(), null));
-    columns.add(new Column("contentType", "contentType",
-        ElementDataType.integer.name(), null));
-    columns.add(new Column("myField3", "myField3",
-        ElementDataType.number.name(), null));
-    ArrayList<String> subElements = new ArrayList<String>();
-    subElements.add("myField4_uriFragment");
-    subElements.add("myField4_contentType");
-    columns.add(new Column("myField4", "myField4",
-        ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements)));
-    columns.add(new Column("myField4_uriFragment", "uriFragment",
-        ElementDataType.rowpath.name(), null));
-    columns.add(
-        new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
+        List<Column> columns = new ArrayList<>();
+        columns.add(new Column("uriFragment", "uriFragment",
+                ElementDataType.string.name(), null));
+        columns.add(new Column("contentType", "contentType",
+                ElementDataType.integer.name(), null));
+        columns.add(new Column("myField3", "myField3",
+                ElementDataType.number.name(), null));
+        ArrayList<String> subElements = new ArrayList<>();
+        subElements.add("myField4_uriFragment");
+        subElements.add("myField4_contentType");
+        columns.add(new Column("myField4", "myField4",
+                ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements)));
+        columns.add(new Column("myField4_uriFragment", "uriFragment",
+                ElementDataType.rowpath.name(), null));
+        columns.add(
+                new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
 
-    OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
+        OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
 
-    List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(
-        orderedColumns);
+        List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(
+                orderedColumns);
 
-    assertNotNull(cols);
-    int size = cols.size();
-    assertEquals(size, 1);
-    ColumnDefinition defn = cols.get(0);
-    assertEquals(defn.getElementKey(), "myField4");
-  }
+        assertNotNull(cols);
+        int size = cols.size();
+        assertEquals(size, 1);
+        ColumnDefinition defn = cols.get(0);
+        assertEquals(defn.getElementKey(), "myField4");
+    }
 
-  @Test
-  public void testRowPathColumnExtractionNoParentSharedNamesRightTypes() throws IOException {
+    @Test
+    public void testRowPathColumnExtractionNoParentSharedNamesRightTypes() throws IOException {
 
-    List<Column> columns = new ArrayList<Column>();
-    columns.add(new Column("contentType", "contentType",
-        ElementDataType.string.name(), null));
-    columns.add(new Column("uriFragment", "uriFragment",
-        ElementDataType.rowpath.name(), null));
-    columns.add(new Column("myField2", "myField2",
-        ElementDataType.integer.name(), null));
-    columns.add(new Column("myField3", "myField3",
-        ElementDataType.number.name(), null));
-    ArrayList<String> subElements = new ArrayList<String>();
-    subElements.add("myField4_uriFragment");
-    subElements.add("myField4_contentType");
-    columns.add(new Column("myField4", "myField4",
-        ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements)));
-    columns.add(new Column("myField4_uriFragment", "uriFragment",
-        ElementDataType.rowpath.name(), null));
-    columns.add(
-        new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
+        List<Column> columns = new ArrayList<>();
+        columns.add(new Column("contentType", "contentType",
+                ElementDataType.string.name(), null));
+        columns.add(new Column("uriFragment", "uriFragment",
+                ElementDataType.rowpath.name(), null));
+        columns.add(new Column("myField2", "myField2",
+                ElementDataType.integer.name(), null));
+        columns.add(new Column("myField3", "myField3",
+                ElementDataType.number.name(), null));
+        ArrayList<String> subElements = new ArrayList<>();
+        subElements.add("myField4_uriFragment");
+        subElements.add("myField4_contentType");
+        columns.add(new Column("myField4", "myField4",
+                ElementDataType.object.name(), ODKFileUtils.mapper.writeValueAsString(subElements)));
+        columns.add(new Column("myField4_uriFragment", "uriFragment",
+                ElementDataType.rowpath.name(), null));
+        columns.add(
+                new Column("myField4_contentType", "contentType", ElementDataType.string.name(), null));
 
-    OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
+        OrderedColumns orderedColumns = new OrderedColumns("myApp", "mytable", columns);
 
-    List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(
-        orderedColumns);
+        List<ColumnDefinition> cols = RowPathColumnUtil.get().getUriColumnDefinitions(
+                orderedColumns);
 
-    assertNotNull(cols);
-    int size = cols.size();
-    assertEquals(size, 1);
-    ColumnDefinition defn = cols.get(0);
-    assertEquals(defn.getElementKey(), "myField4");
-  }
+        assertNotNull(cols);
+        int size = cols.size();
+        assertEquals(size, 1);
+        ColumnDefinition defn = cols.get(0);
+        assertEquals(defn.getElementKey(), "myField4");
+    }
 }
