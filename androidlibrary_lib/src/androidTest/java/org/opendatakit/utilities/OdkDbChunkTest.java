@@ -33,7 +33,6 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -78,7 +77,7 @@ public class OdkDbChunkTest {
 
   @Test
   public void testConvertSerializableToAndFromChunk() {
-    List<DbChunk> chunks;
+    List<DbChunk> chunks = null;
 
     try {
       chunks = DbChunkUtil.convertToChunks(testData, largeChunkSize);
@@ -95,7 +94,7 @@ public class OdkDbChunkTest {
     DbChunk chunk = chunks.get(0);
     assertFalse("Single chunk shouldn't point to another", chunk.hasNextID());
 
-    String[] results;
+    String[] results = null;
     try {
       results = DbChunkUtil.rebuildFromChunks(chunks, String[].class);
     } catch (IOException e) {
@@ -117,7 +116,7 @@ public class OdkDbChunkTest {
 
   @Test
   public void testConvertSerializableToAndFromChunks() {
-    List<DbChunk> chunks;
+    List<DbChunk> chunks = null;
 
     try {
       chunks = DbChunkUtil.convertToChunks(testData, smallChunkSize);
@@ -147,7 +146,7 @@ public class OdkDbChunkTest {
     }
 
     // Test unpack
-    String[] results;
+    String[] results = null;
     try {
       results = DbChunkUtil.rebuildFromChunks(chunks, String[].class);
     } catch (IOException e) {
@@ -262,7 +261,7 @@ public class OdkDbChunkTest {
 
   @Test
   public void testChunkParcelation() {
-    List<DbChunk> chunks;
+    List<DbChunk> chunks = null;
 
     try {
       chunks = DbChunkUtil.convertToChunks(testData, largeChunkSize);
@@ -294,7 +293,7 @@ public class OdkDbChunkTest {
     List<DbChunk> resultChunks = new ArrayList<>();
     resultChunks.add(result);
 
-    String[] results;
+    String[] results = null;
     try {
       results = DbChunkUtil.rebuildFromChunks(resultChunks, String[].class);
     } catch (IOException e) {
@@ -316,7 +315,7 @@ public class OdkDbChunkTest {
 
   @Test
   public void testChunksParcelation() {
-    List<DbChunk> chunks;
+    List<DbChunk> chunks = null;
 
     try {
       chunks = DbChunkUtil.convertToChunks(testData, smallChunkSize);
@@ -350,7 +349,7 @@ public class OdkDbChunkTest {
     }
 
     // Test unpack
-    String[] results;
+    String[] results = null;
     try {
       results = DbChunkUtil.rebuildFromChunks(chunks, String[].class);
     } catch (IOException e) {
