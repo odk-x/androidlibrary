@@ -27,6 +27,7 @@ import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
@@ -79,5 +80,73 @@ public class FileSetTest {
     assertEquals( fileSet.attachmentFiles.get(1).contentType,
         outSet.attachmentFiles.get(1).contentType);
     assertEquals( fileSet.attachmentFiles.get(1).file, outSet.attachmentFiles.get(1).file);
+  }
+
+  @Test
+  public void testAddAttachmentFile() throws IOException {
+    FileSet fileSet = new FileSet("fileSetTest");
+
+    String firstDir = ODKFileUtils.getInstanceFolder(APP_NAME, TABLE_ID_1, INSTANCE_ID_1);
+    File attachment1 = new File(firstDir, FILENAME_1);
+    fileSet.addAttachmentFile(attachment1, MIME_1);
+
+    assertEquals(1, fileSet.attachmentFiles.size());
+    assertEquals(MIME_1, fileSet.attachmentFiles.get(0).contentType);
+    assertEquals(attachment1, fileSet.attachmentFiles.get(0).file);
+  }
+
+  @Test
+  public void testAddMultipleAttachmentFiles() throws IOException {
+    FileSet fileSet = new FileSet("fileSetTest");
+
+    String firstDir = ODKFileUtils.getInstanceFolder(APP_NAME, TABLE_ID_1, INSTANCE_ID_1);
+    File attachment1 = new File(firstDir, FILENAME_1);
+    File attachment2 = new File(firstDir, FILENAME_2);
+
+    fileSet.addAttachmentFile(attachment1, MIME_1);
+    fileSet.addAttachmentFile(attachment2, MIME_2);
+
+    assertEquals(2, fileSet.attachmentFiles.size());
+    assertEquals(MIME_1, fileSet.attachmentFiles.get(0).contentType);
+    assertEquals(attachment1, fileSet.attachmentFiles.get(0).file);
+    assertEquals(MIME_2, fileSet.attachmentFiles.get(1).contentType);
+    assertEquals(attachment2, fileSet.attachmentFiles.get(1).file);
+  }
+
+  @Test
+  public void testFileSetSerializationWithNoAttachmentFiles() throws IOException {
+    FileSet fileSet = new FileSet("fileSetTest");
+
+    String firstDir = ODKFileUtils.getInstanceFolder(APP_NAME, TABLE_ID_1, INSTANCE_ID_1);
+    File instanceFilename = new File(firstDir, INSTANCE_FILENAME);
+
+    fileSet.instanceFile = instanceFilename;
+
+    String value = fileSet.serializeUriFragmentList();
+
+    ByteArrayInputStream bis = new ByteArrayInputStream(value.getBytes(StandardCharsets.UTF_8));
+    FileSet outSet = FileSet.parse(APP_NAME, bis);
+
+    assertEquals(fileSet.instanceFile, outSet.instanceFile);
+    assertEquals(0, outSet.attachmentFiles.size());
+  }
+
+  @Test
+  public void testFileSetSerializationWithEmptyAttachmentFiles() throws IOException {
+    FileSet fileSet = new FileSet("fileSetTest");
+
+    String firstDir = ODKFileUtils.getInstanceFolder(APP_NAME, TABLE_ID_1, INSTANCE_ID_1);
+    File instanceFilename = new File(firstDir, INSTANCE_FILENAME);
+    fileSet.instanceFile = instanceFilename;
+
+    // Don't add any attachment files
+
+    String value = fileSet.serializeUriFragmentList();
+
+    ByteArrayInputStream bis = new ByteArrayInputStream(value.getBytes(StandardCharsets.UTF_8));
+    FileSet outSet = FileSet.parse(APP_NAME, bis);
+
+    assertEquals(fileSet.instanceFile, outSet.instanceFile);
+    assertEquals(0, outSet.attachmentFiles.size());
   }
 }

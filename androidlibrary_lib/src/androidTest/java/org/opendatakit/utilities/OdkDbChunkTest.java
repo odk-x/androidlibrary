@@ -188,7 +188,6 @@ public class OdkDbChunkTest {
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, largeChunkSize);
 
-
     if (chunks == null) {
       fail("Failed to convert serializable to chunks");
     }
@@ -220,7 +219,6 @@ public class OdkDbChunkTest {
     parcelableTestData.putStringArray("testData", testData);
 
     chunks = DbChunkUtil.convertToChunks(parcelableTestData, smallChunkSize);
-
 
     if (chunks == null) {
       fail("Failed to convert serializable to chunks");
@@ -322,7 +320,6 @@ public class OdkDbChunkTest {
     } catch (IOException e) {
       fail("Failed to convert serializable to chunks: " + e.getMessage());
     }
-
 
     if (chunks == null) {
       fail("Failed to convert serializable to chunks");
