@@ -16,7 +16,7 @@
         <item name="android:scrollbarAlwaysDrawHorizontalTrack">true</item>
         <item name="android:colorPrimary">@color/background_txtButton</item>
         <item name="android:colorPrimaryDark">@color/background_txtButton</item>
-        <item name="android:windowLightStatusBar" tools:ignore="NewApi">true</item>
+<!--        <item name="android:windowLightStatusBar" tools:ignore="NewApi">true</item>-->
         <item name="actionBarStyle">@style/OdkActionBar</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
