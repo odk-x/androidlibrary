@@ -86,7 +86,8 @@ Pull requests are welcome, though please submit them against the development bra
 - Ensure you have a successful Build.
 - For Unit Test: Run coverage with `./gradlew createSnapshotDebugUnitTestCoverageReport`.
 - For Android Test: Run coverage with `./gradlew createSnapshotDebugAndroidTestCoverageReport`.
-- To view the report, open the file at ( .../androidlibrary_lib/build/reports/coverage/test/snapshot/debug/index.html) in browser.
+- To view unit test report, open the file at ( .../androidlibrary_lib/build/reports/coverage/test/snapshot/debug/index.html) in browser.
+- To view android test report, open the file at ( .../androidlibrary_lib/build/reports/androidTests/connected/debug/flavors/snapshot/index.html) in browser.
 
 ## Links for users
 This document is aimed at helping developers and technical contributors. For information on how to get started as a user of ODK-X, see our [online documentation](https://docs.odk-x.org), or to learn more about the Open Data Kit project, visit [https://odk-x.org](https://odk-x.org).
