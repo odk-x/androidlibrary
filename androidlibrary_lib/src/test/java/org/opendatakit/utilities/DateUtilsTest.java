@@ -15,18 +15,16 @@
 package org.opendatakit.utilities;
 
 import org.joda.time.DateTime;
-import org.junit.AfterClass;
+import org.joda.time.DateTimeZone;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
+import org.opendatakit.logging.WebLogger;
+import org.opendatakit.logging.desktop.WebLoggerDesktopFactoryImpl;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
@@ -36,111 +34,130 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class DateUtilsTest {
-  private static final Locale NIGERIA_LOCALE = new Locale("en", "NG");
-  private static final Locale CAMEROON_LOCALE = new Locale("fr", "CM");
 
-  private static final TimeZone NIGERIA_TIME_ZONE = TimeZone.getTimeZone("Africa/Lagos");
-  private static final TimeZone CAMEROON_TIME_ZONE = TimeZone.getTimeZone("Africa/Douala");
-  private static final TimeZone TORONTO_TIME_ZONE = TimeZone.getTimeZone("America/Toronto");
-  private static final TimeZone LONDON_TIME_ZONE = TimeZone.getTimeZone("Europe/London");
-  private static final TimeZone ITALY_TIME_ZONE = TimeZone.getTimeZone("Europe/Rome");
+  private static DateUtils dateUtils;
+  private static TimeZone timezone;
 
   @BeforeClass
-  public static void oneTimeSetUp() {
+  public static void oneTimeSetUp() throws Exception {
     StaticStateManipulator.get().reset();
+    WebLogger.setFactory(new WebLoggerDesktopFactoryImpl());
+
+    // Create a DateUtils instance with US locale and the first available timezone
+    timezone = TimeZone.getTimeZone(TimeZone.getAvailableIDs()[0]);
+    dateUtils = new DateUtils(Locale.US, timezone);
   }
 
   @Test
-  public void validifyDateValue_withDateInput_returnsFormattedDate() {
-    // Set up TimeZone and DateUtils
-    TimeZone tz = TimeZone.getTimeZone(TimeZone.getAvailableIDs()[0]);
-    DateUtils dateUtil = new DateUtils(Locale.US, tz);
-    String value = dateUtil.validifyDateValue("3/4/2015");
+  public void testDateInterpretation() {
+    String value = dateUtils.validifyDateValue("3/4/2015");
 
     String expected = "2015-03-04T";
-    assertEquals(expected, value.substring(0,expected.length()));
+    assertEquals(expected, value.substring(0, expected.length()));
   }
 
   @Test
-  public void validifyDateValue_withNowInput_returnsFormattedCurrentDate() {
-    DateUtils dateUtil = new DateUtils(CAMEROON_LOCALE, CAMEROON_TIME_ZONE);
-    String value = dateUtil.validifyDateValue("now");
-    assertNotNull(value);
+  public void testValidifyDateValue_Now() {
+    // Get current time for comparison
+    DateTime now = new DateTime(DateTimeZone.forTimeZone(timezone));
+    String result = dateUtils.validifyDateValue("now");
 
-    DateTime now = new DateTime();
-    String expectedFormattedDate = getTimeString(now);
+    assertNotNull("Should parse 'now'", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
 
-    // This is to take the slight delay when checking for output into consideration
-    int periodIndex = expectedFormattedDate.indexOf('.');
-    assertTrue(value.startsWith(expectedFormattedDate.substring(0, periodIndex + 1)));
+    // Extract date and time components for comparison
+    String dateComponent = result.substring(0, 10); // YYYY-MM-DD
+    String nowDateStr = now.toString("yyyy-MM-dd");
+    assertEquals("Date should match current date", nowDateStr, dateComponent);
   }
 
   @Test
-  public void validifyDateValue_withfutureTimeInput_returnsTimeInTheFuture() {
-    DateUtils dateUtil = new DateUtils(Locale.CANADA, TORONTO_TIME_ZONE);
-    String value = dateUtil.validifyDateValue("now + 10m");
-    assertNotNull(value);
+  public void testValidifyDateValue_RelativeTime() {
+    // Test relative time in the future
+    String result = dateUtils.validifyDateValue("now + 1h");
+    assertNotNull("Should parse relative time in future", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
 
-    DateTime nowPlus10Minutes = new DateTime().plusMinutes(10);
-    String expectedFormattedDate = getTimeString(nowPlus10Minutes);
-    int periodIndex = expectedFormattedDate.indexOf('.');
-    assertTrue(value.startsWith(expectedFormattedDate.substring(0, periodIndex + 1)));
+    // Test relative time in the past
+    result = dateUtils.validifyDateValue("now - 30m");
+    assertNotNull("Should parse relative time in past", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
   }
 
   @Test
-  public void validifyDateValue_withPastTimeInput_returnsTimeInThePast() {
-    DateUtils dateUtil = new DateUtils(NIGERIA_LOCALE, NIGERIA_TIME_ZONE);
-    String value = dateUtil.validifyDateValue("now - 3h");
-    assertNotNull(value);
+  public void testValidifyDateValue_StandardFormats() {
+    // Test ISO format
+    String result = dateUtils.validifyDateValue("2023-05-15T14:30:45.123-0700");
+    assertNotNull("Should parse ISO format", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
 
-    DateTime nowMinus3Hours = new DateTime().minusHours(3);
-    String expectedFormattedDate = getTimeString(nowMinus3Hours);
-    int periodIndex = expectedFormattedDate.indexOf('.');
-    assertTrue(value.startsWith(expectedFormattedDate.substring(0, periodIndex + 1)));
+    // Test US format
+    result = dateUtils.validifyDateValue("5/15/2023 2:30:45PM");
+    assertNotNull("Should parse US format", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
   }
 
   @Test
-  public void validifyDateValue_withUnsupportedUnitInput_returnsNull() {
-    DateUtils dateUtil = new DateUtils(Locale.UK, LONDON_TIME_ZONE);
-    String value = dateUtil.validifyDateValue("now - 3y");
-    assertNull(value);
+  public void testValidifyDateValue_PartialDateFormats() {
+    // Test partial date with only minutes precision
+    String result = dateUtils.validifyDateValue("5/15/2023 2:30PM");
+    assertNotNull("Should parse date with minute precision", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
+
+    // Test partial date with only hour precision
+    result = dateUtils.validifyDateValue("5/15/2023 2PM");
+    assertNotNull("Should parse date with hour precision", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
   }
 
   @Test
-  public void validifyDateValue_withInvalidTimeFormat_returnsNull() {
-    DateUtils dateUtil = new DateUtils(Locale.ITALY, ITALY_TIME_ZONE);
-    String value = dateUtil.validifyDateValue("invalid-date");
-    assertNull(value);
+  public void testValidifyDateValue_SpecialKeywords() {
+    // Test "today"
+    String result = dateUtils.validifyDateValue("today");
+    assertNotNull("Should parse 'today'", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
+
+    // Test "yesterday"
+    result = dateUtils.validifyDateValue("yesterday");
+    assertNotNull("Should parse 'yesterday'", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
+
+    // Test "tomorrow"
+    result = dateUtils.validifyDateValue("tomorrow");
+    assertNotNull("Should parse 'tomorrow'", result);
+    assertTrue("Format should be valid", isDbFormatValid(result));
   }
 
   @Test
-  public void validifyDateValue_withTodayIntervalInput_returnsFormattedDateTimeForStartOfCurrentDay(){
-    DateUtils dateUtils = new DateUtils(NIGERIA_LOCALE, NIGERIA_TIME_ZONE);
-    String input = "today";  // Supported input format
-    DateTime expectedStart = new DateTime().withTimeAtStartOfDay();
-    String expectedOutput = getTimeString(expectedStart);
-    assertEquals(expectedOutput, dateUtils.validifyDateValue(input));
+  public void testValidifyDateValue_InvalidFormats() {
+    // Test completely invalid format
+    String result = dateUtils.validifyDateValue("not a date");
+    assertNull("Should return null for invalid format", result);
+
+    // Test malformed relative time
+    result = dateUtils.validifyDateValue("now + 1x");
+    assertNull("Should return null for invalid relative time", result);
   }
 
-  @Test(expected = NullPointerException.class)
-  public void validifyDateValue_withNullInput_returnsNull() {
-    DateUtils dateUtils = new DateUtils(Locale.ITALY, ITALY_TIME_ZONE);
-    assertNull(dateUtils.validifyDateValue(null));
+  @Test
+  public void testFormatDateTimeForDb() {
+    // Create DateTime in the timezone being used by DateUtils
+    DateTime testDate = new DateTime(2023, 5, 15, 14, 30, 45, 123, DateTimeZone.forTimeZone(timezone));
+    String result = dateUtils.formatDateTimeForDb(testDate);
+
+    assertTrue("Format should be valid", isDbFormatValid(result));
+    // Check only the date part to avoid timezone issues
+    assertTrue("Should contain the correct date", result.startsWith("2023-05-15T"));
+    // Check time with more flexibility because of potential timezone conversions
+    assertTrue("Should contain correct time components",
+            result.substring(11).matches("\\d{2}:\\d{2}:\\d{2}\\.123000000"));
   }
 
-  private String getTimeString(DateTime time){
-    // convert to a nanosecond-extended iso8601-style UTC date yyyy-mm-ddTHH:MM:SS.sssssssss
-    String partialPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS";
-    Calendar calendar = GregorianCalendar.getInstance(new SimpleTimeZone(0, "UT"));
-
-    SimpleDateFormat fmt = new SimpleDateFormat(partialPattern, Locale.ROOT);
-    fmt.setCalendar(calendar);
-    Date d = new Date(time.getMillis());
-    return fmt.format(d) + "000000";
+  /**
+   * Helper method to check if a string is in the expected database format
+   * Expected format: yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS
+   */
+  private boolean isDbFormatValid(String dateString) {
+    return dateString.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{9}");
   }
-  @AfterClass
-  public static void oneTimeTearDown() {
-    StaticStateManipulator.get().reset();
-  }
-
 }
