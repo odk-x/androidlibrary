@@ -13,11 +13,6 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 import java.util.UUID;
 
-/**
- * Instrumented tests for DbChunk that require Android framework
- * These tests should be run on an Android device or emulator,
- * following the Acceptance Test-Driven Development (ATDD) approach.
- */
 @RunWith(AndroidJUnit4.class)
 public class DbChunkTest {
     // Constants for test data

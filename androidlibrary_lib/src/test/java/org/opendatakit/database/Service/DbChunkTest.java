@@ -12,10 +12,7 @@ import android.os.Parcel;
 import java.util.Arrays;
 import java.util.UUID;
 
-/**
- * Acceptance Test-Driven Development tests for the DbChunk class,
- * following the Given-When-Then format.
- */
+
 @RunWith(JUnit4.class)
 public class DbChunkTest {
     // Constants for test data
