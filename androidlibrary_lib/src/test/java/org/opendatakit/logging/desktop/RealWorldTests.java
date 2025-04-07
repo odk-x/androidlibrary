@@ -6,6 +6,10 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import static org.junit.Assert.*;
 
+/**
+ * Tests focused on real-world usage patterns that would be applicable
+ * across different logger implementations.
+ */
 public class RealWorldTests extends BaseLoggerTest {
 
     @Test

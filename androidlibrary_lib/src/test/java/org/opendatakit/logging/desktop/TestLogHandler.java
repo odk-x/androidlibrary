@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
+/**
+ * Custom log handler for capturing log records during testing.
+ */
 public class TestLogHandler extends Handler {
     private List<LogRecord> logRecords = new ArrayList<>();
 

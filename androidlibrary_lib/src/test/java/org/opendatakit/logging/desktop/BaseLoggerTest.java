@@ -8,6 +8,9 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Base class for logger tests that handles setup and teardown of the testing environment.
+ */
 public abstract class BaseLoggerTest {
     protected WebLoggerDesktopFactoryImpl factory;
     protected WebLoggerIf logger;
