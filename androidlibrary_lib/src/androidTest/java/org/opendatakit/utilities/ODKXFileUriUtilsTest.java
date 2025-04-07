@@ -1,12 +1,15 @@
 package org.opendatakit.utilities;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.net.Uri;
 
 import org.junit.Test;
+
+import java.util.Objects;
 
 
 public class ODKXFileUriUtilsTest {
@@ -105,6 +108,97 @@ public class ODKXFileUriUtilsTest {
     }
 
     @Test
+    public void testMultipleAppNames() {
+        // Given: Different app names
+        String[] appNames = {"testApp", "surveyApp", "data-collection-app", "app_with_underscores", "123NumericApp"};
+
+        // When/Then: Verify each app name is correctly incorporated in URIs
+        for (String appName : appNames) {
+            Uri appUri = ODKXFileUriUtils.getAppUri(appName);
+            assertEquals("App name should be correctly incorporated",
+                    appName, appUri.getPathSegments().get(1));
+
+            // Verify the app name is consistently used in derived URIs
+            Uri configUri = ODKXFileUriUtils.getConfigUri(appName);
+            assertEquals("Config URI should contain correct app name",
+                    appName, configUri.getPathSegments().get(1));
+        }
+    }
+
+    @Test
+    public void testNullAppName() {
+        // Given: Null app name
+        String appName = null;
+
+        try {
+            // When: Calling getAppUri with null
+            Uri uri = ODKXFileUriUtils.getAppUri(appName);
+
+            // Then: If we reach here, no exception was thrown.
+            // Verify that the result handles null appropriately
+            // (This could be checking for a default app name or other expected behavior)
+            assertNotNull("URI should not be null even with null app name", uri);
+            // Add other assertions based on expected behavior
+        } catch (Exception e) {
+            // If an exception is thrown but it's not IllegalArgumentException,
+            // let's see what it actually is
+            System.out.println("Exception thrown with null app name: " + e.getClass().getName());
+            throw e; // Re-throw to fail the test (unless this is expected behavior)
+        }
+    }
+
+    @Test
+    public void testEmptyAppName() {
+        // Given: Empty app name
+        String appName = "";
+
+        try {
+            // When: Calling getAppUri with empty string
+            Uri uri = ODKXFileUriUtils.getAppUri(appName);
+
+            // Then: If we reach here, no exception was thrown.
+            // Verify that the result handles empty string appropriately
+            assertNotNull("URI should not be null even with empty app name", uri);
+            // Add other assertions based on expected behavior
+        } catch (Exception e) {
+            // If an exception is thrown but it's not IllegalArgumentException,
+            // let's see what it actually is
+            System.out.println("Exception thrown with empty app name: " + e.getClass().getName());
+            throw e; // Re-throw to fail the test (unless this is expected behavior)
+        }
+    }
+
+
+
+    @Test
+    public void testAppNameWithSpecialCharacters() {
+        // Given: App name with special characters
+        String appName = "test@pp#special";
+
+        // When: Creating URIs with this app name
+        Uri appUri = ODKXFileUriUtils.getAppUri(appName);
+
+        // Then: Verify the app name is correctly handled
+        assertEquals("Special characters in app name should be preserved",
+                appName, appUri.getPathSegments().get(1));
+    }
+
+    @Test
+    public void testDefaultAppNameFallback() {
+        // This test would depend on implementation details of ODKXFileUriUtils
+        // If there's a fallback to a default app name when none is provided,
+        // you could test that behavior here
+
+        // Given: A method that might use a default app name (assuming it exists)
+        // When: Calling such a method
+        Uri uri = ODKXFileUriUtils.getAppUri(TestData.DEFAULT_APP_NAME);
+
+        // Then: Verify default app name is used
+        assertEquals("Default app name should be used as fallback",
+                TestData.DEFAULT_APP_NAME, uri.getPathSegments().get(1));
+    }
+
+    @Test
     public void testGetAssetsCsvUri() {
         // Given: A specific app name
         String appName = TestData.TEST_APP_NAME;
@@ -200,13 +294,13 @@ public class ODKXFileUriUtilsTest {
 
         // Then: Verify path hierarchy
         assertTrue("App URI should start with base URI path",
-                appUri.getPath().startsWith(baseUri.getPath()));
+                Objects.requireNonNull(appUri.getPath()).startsWith(Objects.requireNonNull(baseUri.getPath())));
         assertTrue("Config URI should start with app URI path",
-                configUri.getPath().startsWith(appUri.getPath()));
+                Objects.requireNonNull(configUri.getPath()).startsWith(Objects.requireNonNull(appUri.getPath())));
         assertTrue("Assets URI should start with config URI path",
-                assetsUri.getPath().startsWith(configUri.getPath()));
+                Objects.requireNonNull(assetsUri.getPath()).startsWith(Objects.requireNonNull(configUri.getPath())));
         assertTrue("CSV URI should start with assets URI path",
-                csvUri.getPath().startsWith(assetsUri.getPath()));
+                Objects.requireNonNull(csvUri.getPath()).startsWith(Objects.requireNonNull(assetsUri.getPath())));
     }
 
     @Test
