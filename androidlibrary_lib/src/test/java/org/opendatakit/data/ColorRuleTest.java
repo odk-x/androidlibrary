@@ -22,6 +22,8 @@ import static org.opendatakit.data.ColorRule.RuleType.getValues;
 
 import android.graphics.Color;
 
+import androidx.annotation.NonNull;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -30,6 +32,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import java.util.TreeMap;
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.database.data.BaseTable;
@@ -43,7 +46,6 @@ import org.opendatakit.utilities.StaticStateManipulator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.UUID;
 
 @RunWith(JUnit4.class)
@@ -84,7 +86,20 @@ public class ColorRuleTest {
    public void tearDownColorRule(){
       cr = null;
    }
-   
+
+   @Test
+   public void testGetJsonRepresentation() {
+      ColorRule cr = new ColorRule("myElement", ColorRule.RuleType.EQUAL, "5", 0, 0);
+      TreeMap<String, Object> jsonMap = cr.getJsonRepresentation();
+
+      Assert.assertEquals("5", jsonMap.get("mValue"));
+      Assert.assertEquals("myElement", jsonMap.get("mElementKey"));
+      Assert.assertEquals(ColorRule.RuleType.EQUAL.name(), jsonMap.get("mOperator"));
+      Assert.assertNotNull(jsonMap.get("mId"));
+      Assert.assertEquals(0, jsonMap.get("mForeground"));
+      Assert.assertEquals(0, jsonMap.get("mBackground"));
+   }
+
    @Test
    public void testColorRule() {
       ColorRule cr1 = new ColorRule(MY_ELEMENT, ColorRule.RuleType.EQUAL, "5", Color.BLUE, Color
@@ -301,6 +316,20 @@ public class ColorRuleTest {
 
    private TypedRow setupTableWithRowEntriesAndReturnTypedRow(String[] rowEntries){
       //Setup Color table
+      BaseTable table = getBaseTable();
+      //Define the table's column
+      List<Column> columns = new ArrayList<>();
+      columns.add(new Column(COLOR_COL, COLOR_COL, ElementDataType.integer.name(), null));
+      OrderedColumns orderedColumns = new OrderedColumns(APP_NAME, TABLE_ID_1, columns);
+      //Define the table's rows
+      Row row;
+      row= new Row(rowEntries, table);
+      table.addRow(row);
+      return new TypedRow(table.getRowAtIndex(0),orderedColumns);
+   }
+
+   @NonNull
+   private static BaseTable getBaseTable() {
       String[] primaryKey = {"id"};
       String[] elementKeys = {
               MY_ELEMENT_1, MY_ELEMENT_2, MY_ELEMENT_3, MY_ELEMENT_4, MY_ELEMENT_5, MY_ELEMENT_6
@@ -312,17 +341,9 @@ public class ColorRuleTest {
       elementKeyToIndex.put(MY_ELEMENT_4,3);
       elementKeyToIndex.put(MY_ELEMENT_5,4);
       elementKeyToIndex.put(MY_ELEMENT_6,5);
-      BaseTable table = new BaseTable(primaryKey, elementKeys, elementKeyToIndex, 1);
-      //Define the table's column
-      List<Column> columns = new ArrayList<>();
-      columns.add(new Column(COLOR_COL, COLOR_COL, ElementDataType.integer.name(), null));
-      OrderedColumns orderedColumns = new OrderedColumns(APP_NAME, TABLE_ID_1, columns);
-      //Define the table's rows
-      Row row;
-      row= new Row(rowEntries, table);
-      table.addRow(row);
-      return new TypedRow(table.getRowAtIndex(0),orderedColumns);
+       return new BaseTable(primaryKey, elementKeys, elementKeyToIndex, 1);
    }
+
    private void updateColorRule(String colName, String value, ColorRule.RuleType operator){
       cr.setColumnElementKey(colName);
       cr.setVal(value);
